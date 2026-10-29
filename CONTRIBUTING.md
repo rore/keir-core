@@ -8,6 +8,8 @@ The [shared roadmap](roadmap/board.md) tracks both core and demo work. Keep feat
 
 For a semantic change, include the affected compiler and runtime behavior, shared fixtures, documentation and compatibility implications in one reviewable change. Both runtimes must execute the same artifact with equivalent observable outcomes. Passing expression tests alone does not establish full compiler or host safety.
 
+Follow the [testing guidelines and initial behavioral-contract plan](docs/testing.md). Default tests stay fast; investigate regressions in test duration, select slow checks explicitly and preserve the product obligations expressed by protected cases.
+
 Keep framework work here and task-application code in `keir-demo-app`. Link dependent issues or PRs across repositories when GitHub repositories exist; do not duplicate their status in several backlogs. Record consequential decisions in `docs/internal/decisions/`.
 
 Use project-local or isolated tooling. Build commands and CI checks will be documented when implemented. Do not install or change global tools as part of setup.

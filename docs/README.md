@@ -13,6 +13,8 @@ Keir lets a host expose hooks and approved capabilities that customers compose i
 
 ## For contributors
 
+Use the [testing guidelines](testing.md) for coverage, fast/slow suites and the initial behavioral-contract protection plan.
+
 The single [Minimap roadmap](../roadmap/board.md) and [milestone guidance](../roadmap/scope.md) live in `roadmap/`. There is no second roadmap under `docs/`.
 
 [Internal records](internal/README.md) contain design inputs, decisions and workflow/bootstrap notes. [Engineering team roles](../roles/README.md) govern our development agents and are distinct from the two product-facing agent personas.
