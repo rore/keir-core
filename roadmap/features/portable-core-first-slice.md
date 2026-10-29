@@ -39,7 +39,7 @@ Guards over native transactions, extension-owned writes, when/onError constructs
 
 First runnable increment. The [specification work](specify-language-and-domain-model.md) and [CEL work](bound-cel-execution.md) mature only the subset required here and expand alongside later scenarios. The [single-effect follow-up](single-effect-followup.md) carries the later guarded-write, business-rejection and uncertain-effect cases from the original broader first-core feature. Real pre-create guard semantics belong to [task integration](demo-task-integration.md). All samples initially use controlled fixtures/adapters; they do not certify real application guarantees.
 
-Core developer owns compiler, both runtimes, shared fixtures and Java/Node embedding samples. The architect resolves the minimal language/DCM/artifact/outcome contracts and reviews conformance; the manager owns acceptance and dependency sequencing. Confirm exact module/build choices and checkout ownership in the implementation assignment.
+The two core developers cover compiler, both runtimes, shared fixtures and Java/Node embedding samples through bounded manager assignments. Divide independent implementation and verification against agreed contracts; do not duplicate the artifact contract or force a permanent runtime split. The architect resolves the minimal language/DCM/artifact/outcome contracts and reviews conformance; the manager owns acceptance and dependency sequencing. Confirm exact module/build choices and checkout ownership in the implementation assignment.
 
 ### Before implementation
 

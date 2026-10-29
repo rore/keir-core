@@ -36,6 +36,6 @@ A second Java task app, scheduling, arbitrary tenant endpoints and customer-spec
 
 Implementation and tests live in `keir-demo-app`; status stays in this core roadmap. See the demo repository's `docs/scope.md` for product scope.
 
-Native app work can run beside the first core scenarios after an exact scope/checkout assignment. It need not wait for the full language or [expression enhancement](enrich-followup-expressions.md). Real adapter integration follows the corresponding packaged core contract, with database/atomic uniqueness, event admission/version pinning and lost-response behavior decided before claims of safe replay. A local package/tarball with a recorded version/digest is sufficient before registry publication; no sibling source dependency.
+Defer native app implementation until useful packaged core behavior is available to integrate, then assign the dedicated demo developer an exact scope/checkout. It need not wait for the full language or [expression enhancement](enrich-followup-expressions.md). Real adapter integration follows the corresponding packaged core contract, with database/atomic uniqueness, event admission/version pinning and lost-response behavior decided before claims of safe replay. A local package/tarball with a recorded version/digest is sufficient before registry publication; no sibling source dependency.
 
 The [host integration assistant](host-integration-assistant.md) follows the real host contracts; [customer authoring](conversational-authoring.md) then uses the published approved catalog.

@@ -40,7 +40,7 @@ Multiple mutating calls, collection macros/search/date calculations, automatic r
 
 Second runnable increment; depends on [the read-only path](portable-core-first-slice.md) and the additional measured profile/contract support it requires. It is deliberately smaller than the baseline invoice example. List macros, search and time arithmetic are introduced by their own later demonstration and evidence.
 
-The core developer owns the portable implementation and samples. The demo developer can build independent native task behavior against agreed adapter contracts; real persistence/authorization evidence belongs to [task integration](demo-task-integration.md). The architect owns any new effect/outcome contracts. No implementation is assigned by this plan alone.
+The two core developers cover the portable implementation and samples under bounded manager assignments. Demo development is deferred until useful packaged core behavior is available; real persistence/authorization evidence belongs to [task integration](demo-task-integration.md). The architect owns any new effect/outcome contracts. No implementation is assigned by this plan alone.
 
 ### Before implementation
 

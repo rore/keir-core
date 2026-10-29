@@ -26,8 +26,8 @@ Resolve the contracts needed for the current feature, implement them through all
 The architect has [reviewed the complete supplied design package](../docs/internal/development-plan-review.md) and maps its gaps to the runnable sequence. Before each implementation assignment, resolve that feature's blocking type, authority, artifact, outcome and resource contracts; publish the supported specification and examples. Revisit them when execution exposes a gap.
 
 - **Architect:** mature the current contracts, document decisions and review semantics/evidence. Broader proposals stay explicitly deferred.
-- **Core developer:** keep compiler and both runtimes moving through the same narrow scenario, with shared conformance and embedding samples. Add a second core developer only when interfaces and fixtures make parallel work independent.
-- **Demo developer:** independently build the agreed minimal native task path and adapter contracts. Integrate actual packaged core artifacts as each relevant contract becomes usable; do not wait for every planned language feature.
+- **Two core developers:** keep compiler and both runtimes moving through the same narrow scenario, with shared conformance and embedding samples. Divide independent work against agreed contracts and reserved files/checkouts. When boundaries are unsettled, use focused verification alongside implementation or sequence the dependent tasks; no permanent Java/Node split is implied.
+- **Demo developer, later:** build the actual task application once useful packaged core behavior is available to integrate. No native demo implementation is assigned now. Begin with the agreed minimal native path and real adapters at that point; the complete language need not be finished.
 - **Manager:** reserve checkouts, sequence dependencies, verify combined acceptance and update the owning feature. This plan does not itself start implementation or grant new environment permissions.
 
 Prefer a repository-local Maven wrapper for Java modules and npm/TypeScript for the Node runtime, pending a short implementation compatibility check and explicit dependency pins. Existing local JDK 21 and Node 24 can be evaluated without switching everyday tools. Local built packages with recorded version/digest support integration before registry publication; hosts must not import sibling source as their normal dependency model.
@@ -46,7 +46,7 @@ Specifications and agent-facing contracts are explicit deliverables. Review the 
 
 The host integration assistant proposes DCM/hooks/capability/adapter definitions and evidence for a host developer's review; it cannot certify or publish its own proposal. The customer extension assistant discovers only the approved scoped catalog and proposes programs/scenarios; it cannot widen capabilities or approve activation. Both reference the same public contracts. Live agent/provider choices and spend bounds are made before those integrations, not during the first core harness.
 
-Independent demo work can proceed alongside core work once its scope and contracts are agreed; the milestone order does not require every developer to wait for the preceding milestone to finish. Feature completion must still satisfy its declared dependencies and combined acceptance criteria.
+Use both core developers for the initial core work. Schedule the dedicated demo developer when the core offers a useful integration target; after that, independent demo and core enhancements may proceed together. Feature completion must still satisfy its declared dependencies and combined acceptance criteria.
 
 Agent Workflow is advisory and opt-in in core, with advisory CI on main pushes and PRs. The demo needs no second roadmap or Work Record process. Both GitHub repositories are initialized privately; license and build choices remain open.
 
