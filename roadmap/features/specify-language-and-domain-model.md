@@ -1,7 +1,7 @@
 ---
 id: specify-language-and-domain-model
 title: Specify the initial language and domain capability model
-status: active
+status: done
 priority: high
 commitment: committed
 milestone: Execute extensions in Java and Node

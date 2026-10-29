@@ -1,10 +1,10 @@
 # Core contract CI proposal
 
-Status: product CI workflow approved for installation on 2026-10-29; its first cloud run is pending. The behavioral-contract policy block remains a separate governance proposal. Add one product check, `keir-contract`, for compiler, both runtimes, shared expectations and packaged hosts. Test failures fail the job. Keep advisory governance, direct main pushes, optional Work Records and current branch settings.
+Status: product CI workflow approved and installed on 2026-10-29. The [first cloud run](https://github.com/rore/keir-core/actions/runs/40921421530) passed on `69d01b6` in 47 seconds. The behavioral-contract policy block remains a separate governance proposal. The product check, `keir-contract`, runs compiler, both runtimes, shared expectations and packaged hosts. Test failures fail the job. Advisory governance, direct main pushes, optional Work Records and current branch settings remain in place.
 
 ## Workflow
 
-Proposed `.github/workflows/keir-contract.yml`:
+Installed `.github/workflows/keir-contract.yml`:
 
 ```yaml
 name: Keir contract
