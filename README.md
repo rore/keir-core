@@ -26,6 +26,7 @@ Compile once, execute the same artifact in either runtime. Each runtime is separ
 - [Restricted CEL and resource decision](docs/decisions/0003-restricted-cel-resource-policy.md)
 - [Design baseline and its status](docs/README.md)
 - [Contribution workflow](CONTRIBUTING.md)
+- [Development team and role guides](roles/README.md)
 
 Build tools, package coordinates, runnable commands and CI will be added with the first executable slice. No dependencies need installing for this scaffold. The draft reports earlier CEL expression interoperability evidence; that harness has not yet been imported or independently verified here.
 

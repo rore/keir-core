@@ -1,5 +1,7 @@
 # Working in keir-core
 
+- This repository uses persistent agent roles. When starting work here, resuming, handing off, or beginning a new assignment, load the installed `persistent-agent-roles` skill, verify this session's current Pallium Relay name, and reload its guide from `roles/mapping.yaml` plus linked shared guidance. See [the team roles](roles/README.md). Role guidance does not itself assign work or change model settings.
+
 - Keep the framework domain-independent. Task services, real task adapters and AI authoring belong to `keir-demo-app`.
 - `roadmap/` is the single planning source for both repositories. Update the owning feature here when core or demo work changes its status or completion evidence. Updates confined to `roadmap/`, `docs/README.md`, or `docs/roadmap.md` do not need Agent Workflow or a Work Record. Agent Workflow is scoped to core work only; do not require its Work Records in the demo repo.
 - For roadmap work, use the repo-local Minimap skill at `.agents/skills/minimap-roadmap/SKILL.md` (Claude: `.claude/skills/minimap-roadmap/SKILL.md`). Agent Workflow is advisory and opt-in for now: use it when explicitly requested, but do not require a Work Record or PR for ordinary changes. The config makes records and Redline verdicts optional, and the Redline policy is in shadow mode. CI publishes advisory findings on main pushes and PRs; malformed policy or tool output fails CI. No hooks or required workflow checks are installed. Revisit enforcement when there is enough code and verification to support it.
