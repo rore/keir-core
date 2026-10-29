@@ -23,7 +23,7 @@ Load only your selected role and this guide at role entry. For assignments, read
 
 ## Privacy, cost and context
 
-- Never publish local absolute paths, private user/workplace identifiers, emails, session pointers or operational details in tracked content/PRs. Use relative references, public URLs or generic placeholders; inspect changes and commit identity before publishing. Remove current disclosures and report remote/public-history scope; no history rewrite without explicit authorization.
+- Both repos are intended to become public: treat tracked content and Git metadata as public regardless of current visibility. Exclude local absolute paths, private user/workplace identifiers, emails, session pointers and operational details. Use relative references, public URLs or generic placeholders; inspect changes and commit identity before publishing. Resolve historical disclosures before making a repo public; history rewrite requires explicit authorization.
 - Preserve user-selected models/effort; report mismatches. Use cheaper bounded helpers when briefing/review savings justify it; Luna low suits simple work. Keep consequential judgment at suitable capability; reuse reliable evidence.
 - Keep persistent guides short, imperative and deduplicated. Store durable rules here, temporary state in its owning record; link detailed references instead of copying them into startup context.
 - Follow `AGENTS.md` for environment protection and advisory, opt-in Agent Workflow. Direct main remains available; roles add no approval gate.
