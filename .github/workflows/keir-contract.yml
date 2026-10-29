@@ -1,0 +1,73 @@
+name: Keir contract
+on:
+  push:
+    branches: [main]
+    paths:
+      - compiler-java/**
+      - runtime-java/**
+      - runtime-node/**
+      - conformance/**
+      - examples/**
+      - docs/specs/**
+      - pom.xml
+      - .mvn/**
+      - mvnw
+      - mvnw.cmd
+      - .github/workflows/keir-contract.yml
+  pull_request:
+    paths:
+      - compiler-java/**
+      - runtime-java/**
+      - runtime-node/**
+      - conformance/**
+      - examples/**
+      - docs/specs/**
+      - pom.xml
+      - .mvn/**
+      - mvnw
+      - mvnw.cmd
+      - .github/workflows/keir-contract.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: keir-contract-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  keir-contract:
+    name: keir-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MAVEN_USER_HOME: ${{ github.workspace }}/.tools/maven
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/cache@v6
+        with:
+          path: |
+            .tools/maven
+            .tools/npm-cache
+          key: ${{ runner.os }}-keir-${{ hashFiles('pom.xml', 'compiler-java/pom.xml', 'runtime-java/pom.xml', 'examples/java-host/pom.xml', 'runtime-node/package-lock.json', 'examples/node-host/package-lock.json', '.mvn/wrapper/maven-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-keir-
+      - name: Java regression and coverage
+        run: ./mvnw -B -ntp -Dmaven.repo.local=.tools/maven/repository -Pcoverage verify
+      - name: Install pinned Node dependencies
+        run: npm ci --prefix runtime-node --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
+      - name: Node regression and coverage
+        run: npm run --prefix runtime-node test:coverage
+      - name: Pack and test the independent Node host
+        run: |
+          mkdir -p .tools/packages
+          npm pack ./runtime-node --pack-destination .tools/packages --cache .tools/npm-cache --ignore-scripts
+          npm ci --prefix examples/node-host --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
+          node --experimental-test-coverage --test-coverage-include=examples/node-host/run.mjs --test examples/node-host/test.mjs
+      - name: Compare artifacts, runtimes and packaged hosts
+        run: node conformance/read-and-decide/verify.mjs
