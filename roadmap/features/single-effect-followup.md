@@ -10,7 +10,7 @@ repo: keir-core
 
 ## Summary
 
-Extend the working guard demonstration's compiler/artifact/runtimes to handle an admitted post-commit task-completion event: read task facts, decide whether a follow-up is needed, and execute one approved follow-up creation. Simulate the exact artifact and display confirmed, skipped, rejected and uncertain outcomes.
+Extend the working read-and-decide demonstration's compiler/artifact/runtimes to handle an admitted post-commit task-completion event: read task facts, decide whether a follow-up is needed, and execute one approved follow-up creation. Simulate the exact artifact and display confirmed, skipped, rejected and uncertain outcomes.
 
 ## Why
 
@@ -34,7 +34,7 @@ Multiple mutating calls, collection macros/search/date calculations, automatic r
 - Both adapters receive the original typed host key unchanged; source cannot select or override it.
 - Business rejection, read failure, rejected write and lost-response cases produce the declared outcomes; an unknown write is not called harmless failure or success and no subsequent effect runs.
 - A pre-commit guard cannot call the mutating capability. Exceeded call/effect grants and invalid host-key contracts are rejected before dispatch.
-- The first read-only guard corpus still passes, and all demonstrated semantics are reflected in maintained specs and cross-runtime conformance.
+- The first advisory read-only corpus still passes, and all demonstrated semantics are reflected in maintained specs and cross-runtime conformance.
 
 ## Notes
 
