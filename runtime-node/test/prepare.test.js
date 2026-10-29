@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fromBinary, toBinary } from '@bufbuild/protobuf';
+import { fromBinary, fromJson, toBinary } from '@bufbuild/protobuf';
 import { FileDescriptorSetSchema } from '@bufbuild/protobuf/wkt';
 import { CheckedExprSchema } from '@bufbuild/cel-spec/cel/expr/checked_pb.js';
 import { prepare } from '../src/index.js';
@@ -37,6 +37,30 @@ test('prepares actual Java artifact without dispatch and exposes an immutable op
   assert.equal(Object.isFrozen(handle), true);
   assert.deepEqual(Reflect.ownKeys(handle), []);
   assert.equal(calls, 0);
+});
+
+test('rejects record-valued conditional branches even beneath a scalar field selection', () => {
+  const checked = fromJson(CheckedExprSchema, {
+    expr: { id: '5', selectExpr: {
+      operand: { id: '4', callExpr: { function: '_?_:_', args: [
+        { id: '1', constExpr: { boolValue: true } },
+        { id: '2', identExpr: { name: 'input' } },
+        { id: '3', identExpr: { name: 'input' } },
+      ] } }, field: 'taskId',
+    } },
+    sourceInfo: { location: 'keir-read/1' },
+    typeMap: {
+      1: { primitive: 'BOOL' }, 2: { messageType: 'keir.read.ClassifyInput' },
+      3: { messageType: 'keir.read.ClassifyInput' }, 4: { messageType: 'keir.read.ClassifyInput' },
+      5: { primitive: 'STRING' },
+    },
+    referenceMap: { 2: { name: 'input' }, 3: { name: 'input' }, 4: { overloadId: ['conditional'] } },
+  });
+  // Re-pin the complete altered fixture so rejection reaches the checked-profile gate.
+  const item = selected(value => { value.expressions.e0.checked = Buffer.from(toBinary(CheckedExprSchema, checked)).toString('base64'); });
+  const result = reject(item.bytes, item.policy);
+  assert.equal(result.code, 'ARTIFACT_INVALID');
+  assert.equal(result.path, '/artifact/expressions');
 });
 
 test('external digest and independent model/consumer/entrypoint/compiler/environment selectors are required', () => {
