@@ -49,6 +49,8 @@ Build checkpoint integrated as `4d7b925`: Maven wrapper 3.3.4 pins checksum-veri
 
 The bounded contract through `4f56279` enables strict source/DCM validation, nominal/enum overlay, real CEL compilation, deterministic artifacts and compiler tests. Java runtime implementation follows the compiler checkpoint. Qualification is integrated as `790ff35`, with final digest evidence `a19e9ad` and YAML clarification `7e49bf7`; Node replay passed. Node work covers artifact admission, scalar interpretation, adapter/authorization/deadline boundaries and the host example. Shared model/source/compiled fixtures must remain consistent. The same Java-compiled artifact and complete Java/Node acceptance matrix remain the exit condition; expression probe success does not close this feature.
 
+Node runtime implementation has started. Its next checkpoint depends on exact host API contracts for fresh grants, adapter version/mode registration, optional narrowing limits and authorization request shape, plus actual Java-emitted artifact fixtures. Resolve these within the current read profile using the smallest closed API; no new service, policy engine or extension authority is implied. Independent validation work continues while those contracts are finalized.
+
 ### Implementation prerequisites
 
 Resolve the DCM-to-CEL type mapping; absent/null and exact numeric handling for any admitted type; source/DCM canonicalization and covered digest bytes; complete portable argument/return/error bindings; separate execution/business/consumption outcomes; and an explicit trusted sample loader. Never assume a self-hash authenticates compiler output. Define diagnostic codes/paths and trace redaction.
