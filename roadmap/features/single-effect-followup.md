@@ -44,7 +44,7 @@ The two core developers cover the portable implementation and samples under boun
 
 ### Before implementation
 
-First accept the read-only scenario. Specify when, guarded-result availability and terminal business handlers; conservative counts over all possible writes; effect intent/confirmed/none/unknown records; and failure after an already confirmed effect. No guarded-result access is admitted without a supported presence proof.
+The read-only scenario is accepted with [local and CI evidence](portable-core-first-slice.md#current-execution). Before implementing this follow-up, specify when, guarded-result availability and terminal business handlers; conservative counts over all possible writes; effect intent/confirmed/none/unknown records; and failure after an already confirmed effect. No guarded-result access is admitted without a supported presence proof.
 
 Define the original host-key type/source, protected event/source binding, result/argument validation and the isolated simulation admission path. Pending fake guarantees must never be usable to admit real production adapters. Use one possible write and one binding; no mutual-exclusivity analysis or multi-key namespace design is needed.
 
