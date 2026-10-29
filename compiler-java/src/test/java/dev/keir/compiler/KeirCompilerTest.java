@@ -184,6 +184,26 @@ class KeirCompilerTest {
         denied(compiler.compile(larger,resource("dcm.json"),ENV),"BUDGET_EXCEEDED");
     }
 
+    @Test void canonicalModelByteCeilingIsEnforcedAfterCompactJsonDecoding() throws Exception {
+        for (int size : List.of(65_536, 65_537)) {
+            var d = modelWithCanonicalBytes(size); var s = source();
+            byte[] canonical = StrictData.canonical(d);
+            assertEquals(size, canonical.length);
+            byte[] compact = new String(canonical, StandardCharsets.UTF_8).replace("\\u000a", "\\n").getBytes(StandardCharsets.UTF_8);
+            assertTrue(compact.length < 65_536);
+            assertArrayEquals(canonical, StrictData.canonical(StrictData.parse(compact, "/dcm")));
+            String fingerprint = "sha256:" + HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(canonical));
+            assertNotEquals(map(s.get("domain")).get("fingerprint"), fingerprint);
+            map(s.get("domain")).put("fingerprint", fingerprint);
+            var result = compiler.compile(StrictData.canonical(s), compact, ENV);
+            if (size == 65_536) assertTrue(result.succeeded(), result.diagnostics().toString());
+            else {
+                denied(result, "BUDGET_EXCEEDED");
+                assertEquals("/dcm", result.diagnostics().getFirst().path());
+                assertEquals("A profile admission limit was exceeded.", result.diagnostics().getFirst().message());
+            }
+        }
+    }
     @Test void diagnosticsAreStableSafeAndPinsFailClosed() throws Exception {
         var s=source(); map(steps(s).get(1).get("let")).put("cel","SECRET_CREDENTIAL == true");
         var a=compile(s,model()); var b=compile(s,model()); assertEquals(a.diagnostics(),b.diagnostics());
@@ -284,6 +304,25 @@ class KeirCompilerTest {
         map(map(d.get("types")).get("ClassifyResult")).put("fields",output);
         s.put("steps",new ArrayList<>(List.of(new TreeMap<>(Map.of("id","flag","let",Map.of("literal",true))))));
         s.put("return",new TreeMap<>(Map.of("record",bindings)));return s;
+    }
+    private static Map<String,Object> modelWithCanonicalBytes(int size) throws Exception {
+        var d = model(); var values = new ArrayList<List<String>>();
+        for (int i = 0; i < 7; i++) {
+            var cases = new ArrayList<String>();
+            for (int j = 0; j < 16; j++) cases.add(Integer.toString(j));
+            map(d.get("types")).put("Extra" + i, Map.of("kind", "enum", "values", cases));
+            values.add(cases);
+        }
+        int remaining = size - StrictData.canonical(d).length;
+        for (var cases : values) for (int i = 0; i < cases.size(); i++) {
+            String prefix = cases.get(i);
+            int controls = Math.min(256 - prefix.length(), remaining / 6);
+            int ascii = Math.min(256 - prefix.length() - controls, remaining - controls * 6);
+            cases.set(i, prefix + "\n".repeat(controls) + "x".repeat(ascii));
+            remaining -= controls * 6 + ascii;
+        }
+        assertEquals(0, remaining);
+        return d;
     }
     private KeirCompiler.Compilation compile(Map<String,Object> source,Map<String,Object> dcm) {
         map(source.get("domain")).put("fingerprint",StrictData.digest(dcm));

@@ -1,6 +1,6 @@
 # Keir specifications
 
-The first maintained contract is **`keir-read/1`, an implementation candidate** for REQUEST/read/classify/display. No complete compiler/runtime implementation or released specification is claimed. Review and executable conformance must establish support in both Java and Node before the status changes.
+The first maintained contract is **`keir-read/1`, an implemented experimental checkpoint** for REQUEST/read/classify/display. The Java compiler and both runtimes pass the same local conformance corpus and packaged-host verification. [Testing evidence](../testing.md) records supported scope and limitations; product CI, production qualification and release remain open.
 
 The [language/DCM specification feature](../../roadmap/features/specify-language-and-domain-model.md) owns the initial supported contract. Specifications mature with feature implementation and conformance, without a whole-system design freeze.
 

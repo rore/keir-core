@@ -1,6 +1,6 @@
 # Read-and-decide compiler and artifact
 
-Status: implementation candidate; deterministic vectors and actual CEL bridge qualification are required before implementation acceptance. One Java compiler library/CLI emits one artifact consumed unchanged by both runtimes. This replaces the baseline's illustrative multi-file bundle for this profile only.
+Status: implemented experimental checkpoint; deterministic compiler output and local Java/Node execution pass [verification](../../conformance/read-and-decide/README.md#verify-both-runtimes-and-packaged-hosts). One Java compiler library/CLI emits one artifact consumed unchanged by both runtimes. This replaces the baseline's illustrative multi-file bundle for this profile only.
 
 ## Compiler boundary
 
@@ -32,6 +32,8 @@ Lowered binding is exactly `{literal:boolean|string,type:typeName}` or `{expr:ex
 Assign expression IDs in step order, visiting argument names in ASCII lexical order, then root return fields in that order. A BIND visits its one value. Literal bindings have no expression ID. Variables include all prior immutable bindings, but AST references must be to declared names. Runtime checks instruction/opcode/type/capability/version consistency with this envelope before preparation; trusted provenance does not excuse malformed format.
 
 ## Canonical bytes and digest rules
+
+The `keir-read/1` [byte ceilings](runtime.md#limits) apply separately to each raw source/DCM document and to the complete DCM object serialized with the canonical JSON rules below. Each ceiling is 65,536 bytes, inclusive; canonical escaping can expand a raw DCM that fits its input ceiling. After validating the DCM and before artifact emission, the compiler must reject canonical DCM overflow with `BUDGET_EXCEEDED` at `/dcm` and emit no artifact. Both runtimes enforce the same canonical embedded DCM ceiling during preparation at `/artifact/dcm`, with no prepared handle or adapter call on failure. The separate whole-artifact ceiling does not relax either DCM ceiling; do not truncate the model or discard unused definitions to make it fit.
 
 Canonical JSON is UTF-8, no BOM/trailing newline/whitespace, object keys sorted lexically by Unicode scalar value (schema keys and identifiers are ASCII), arrays retain order. Emit Boolean as `true`/`false`, integers as minimal unsigned decimal (metadata counts only), and strings with `"`/`\\` escaped, U+0000..U+001F encoded as lowercase `\u00xx`, all other valid Unicode scalars literally encoded in UTF-8. Do not normalize Unicode. Reject unpaired surrogates and numbers outside nonnegative safe integer metadata ranges; source binding numbers/null are unsupported. This recipe has no floats, negative zero or locale-dependent rendering.
 

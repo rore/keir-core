@@ -2,18 +2,21 @@
 
 Load for code/test/contract changes. Apply to core and demo; keep demo tests local and workflow management in core.
 
-Status: initial plan. [CEL qualification](../conformance/cel-profile/README.md) runs; complete product regression/coverage/contract CI remains implementation work.
+Status: read-profile regression, component coverage and combined local verification pass. Product CI and workflow-level contract protection are [proposed](internal/workflow/core-contract-ci-proposal.md), not installed.
 
-Current checkpoint commands and measured evidence, before Java runtime conformance:
+Current checkpoint commands and measured evidence:
 
 | Command from repository root | Result |
 | --- | --- |
-| `MAVEN_USER_HOME` set to `.tools/maven`; `./mvnw -o -Dmaven.repo.local=.tools/maven/repository -B -ntp clean verify` (Windows: `mvnw.cmd`) | 30 compiler tests; 20.61 seconds including first canonical compilation/packaging with populated isolated cache. Java runtime is still an empty scaffold. Compiler coverage baseline remains pending. |
-| `npm run --prefix runtime-node test:coverage` | Default module + shared-corpus regression: 152 tests in 1.68 seconds; runtime source coverage 100% lines, 95.51% branches, 100% functions. |
+| `MAVEN_USER_HOME` set to `.tools/maven`; `./mvnw -o -Dmaven.repo.local=.tools/maven/repository -B -ntp -Pcoverage clean verify` (Windows: `mvnw.cmd`) | 92 tests: 31 compiler, 56 Java runtime, 5 Java host; 35.40 seconds including clean compilation/packaging with populated isolated cache. |
+| `npm run --prefix runtime-node test:coverage` | Default module + shared-corpus regression: 154 tests in 3.80 seconds; runtime source coverage 100% lines, 95.75% branches, 100% functions. |
 | `node --experimental-test-coverage --test-coverage-include=conformance/read-and-decide/run-node.mjs --test conformance/read-and-decide/node.test.mjs` | 69 tests over 61 cases and harness regressions in 1.70 seconds; runner coverage 100% lines/branches/functions. |
-| `node --test examples/node-host/test.mjs` after the documented pack/install | 1 packaged-host test; 0.26–0.51 seconds warm, 9.54 seconds on first observed worker startup. Fresh Java CLI output also passed this test. |
+| `node --experimental-test-coverage --test-coverage-include=examples/node-host/run.mjs --test examples/node-host/test.mjs` after the documented pack/install | 1 packaged-host test in 0.38 seconds; 81.63% lines, 75% branches, 100% functions. The CLI is exercised separately by combined verification. |
+| `node conformance/read-and-decide/verify.mjs` | Identical fresh compiler bytes, complete Java/Node transport parity for 61 cases/52 invocations, both four-case packaged-host batches, installed Node source identity and Java compiler/parser exclusion passed. |
 
 Offline Maven requires a previously populated local cache; dependency/bootstrap time is separate. The package's LF checkout rules and host lockfile preserve tarball integrity across checkouts; never disable integrity checks to make the sample install.
+
+JaCoCo baselines: compiler 711/756 lines (94.05%), 501/607 branches (82.54%); Java runtime 697/704 lines (99.01%), 600/717 branches (83.68%); Java host 64/66 lines (96.97%), 52/52 branches (100%). Remaining misses include defensive invariant/CEL failure paths, the Java main wrapper and very long native timer rearming. Node host unit coverage excludes its CLI wrapper; the verifier exercises that wrapper without a coverage agent. No coverage floor or hard containment guarantee is inferred.
 
 ## Fast feedback
 
@@ -46,8 +49,8 @@ Protect these paths when their verification is live:
 
 - `docs/specs/**` and `conformance/read-and-decide/**`.
 - Compiler `StrictDataTest.java`, `DcmTest.java`, `KeirCompilerTest.java` in `compiler-java/src/test/java/dev/keir/compiler/`.
-- Node `canonical.test.js`, `cel.test.js`, `prepare.test.js`, `invoke.test.js` in `runtime-node/test/`.
-- Add exact Java runtime contract-test and selection/CI runner paths at implementation acceptance.
+- Node `canonical.test.js`, `cel.test.js`, `prepare.test.js`, `invoke.test.js`, `scalars.test.js`, `multi-call.test.js` and their actual Java-generated fixtures.
+- Java artifact/CEL/clock/invocation/data/shared/multi-call tests, both host tests and test-selection/parity runners. The [proposal](internal/workflow/core-contract-ci-proposal.md#behavioral-contract) lists exact paths.
 
 Do not blanket-protect helper tests or diagnostic benchmarks. Add later behavior only with accepted features; probe results do not certify full runtime guarantees.
 

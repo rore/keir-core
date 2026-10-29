@@ -1,6 +1,6 @@
 # Read-and-decide host contract and acceptance
 
-Status: implementation candidate. This increment is a local controlled REQUEST/read/classify/display example, not a full task application, transactional guard, activation system or live agent integration.
+Status: implemented local REQUEST/read/classify/display checkpoint. Both packaged hosts exercise completed/open/missing/wrong-resource cases. A full task application, transactional guard, activation system and live agent integration remain later work.
 
 ## Definition, invocation and consumption
 

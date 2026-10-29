@@ -42,6 +42,7 @@ public final class KeirCompiler {
             Object parsedDcm = StrictData.parse(trustedDcmBytes, "/dcm");
             Map<String, Object> source = sourceShape(parsedSource);
             Dcm dcm = Dcm.parse(parsedDcm);
+            if (StrictData.canonical(dcm.root()).length > StrictData.MAX_BYTES) fail("BUDGET_EXCEEDED", "/dcm");
             if (environment == null || !PROFILE.equals(environment.profile())
                     || !IDENTITY.equals(environment.compiler()) || !PACKAGES.equals(environment.packages()))
                 fail("PIN_MISMATCH", "/source");

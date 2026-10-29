@@ -1,6 +1,6 @@
 # Host integration assistant
 
-**Status:** initial workflow guidance; specifications and integration APIs remain under development. Read the [agent overview](README.md) and [specification status](../specs/README.md).
+**Status:** initial assistant guidance over the implemented read profile. Host-integrated discovery, approval and activation tools remain future host work. Read the [agent overview](README.md) and [specification status](../specs/README.md).
 
 ## Task and inputs
 
@@ -11,7 +11,7 @@ Help the host developer define domain types, hooks and result consumers, approve
 1. Clarify where customization is allowed and how the host invokes and consumes hook results.
 2. Draft DCM, capability and adapter definitions. Identify protected parameters, effects, limits, compatibility and unresolved guarantees.
 3. Propose host conformance cases and evidence for actual adapters, including rejection and failure paths.
-4. Incorporate model/compiler diagnostics as tools become available and revise proposals with the developer.
+4. Use the [compiler library/CLI](../../compiler-java/README.md) diagnostics and [controlled host verification](../../conformance/read-and-decide/README.md#verify-both-runtimes-and-packaged-hosts) to revise proposals with the developer. Connect host agent tools separately.
 5. Submit an exact proposed revision for host-owner approval and publication; identify outstanding certification obligations.
 
 ## Authority and tools

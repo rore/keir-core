@@ -30,7 +30,7 @@ The architect has [reviewed the complete supplied design package](../docs/intern
 - **Demo developer, later:** build the actual task application once useful packaged core behavior is available to integrate. No native demo implementation is assigned now. Begin with the agreed minimal native path and real adapters at that point; the complete language need not be finished.
 - **Manager:** reserve checkouts, sequence dependencies, verify combined acceptance and update the owning feature. This plan does not itself start implementation or grant new environment permissions.
 
-Prefer a repository-local Maven wrapper for Java modules and npm/TypeScript for the Node runtime, pending a short implementation compatibility check and explicit dependency pins. Existing local JDK 21 and Node 24 can be evaluated without switching everyday tools. Local built packages with recorded version/digest support integration before registry publication; hosts must not import sibling source as their normal dependency model.
+The initial implementation uses the pinned repository-local Maven wrapper, JDK 21 and a native ESM Node 24 package. Keep project tooling/caches isolated from everyday installations. Local built packages with recorded version/digest support integration before registry publication; hosts must not import sibling source as their normal dependency model.
 
 The initial sample uses a trusted compiler-output path and a host-held expected digest outside the mutable artifact. Self-hashing is not authentication. Real activation needs a separately specified approved-storage/signature policy; pending simulation guarantees can never authorize real adapters.
 
@@ -48,7 +48,7 @@ The host integration assistant proposes DCM/hooks/capability/adapter definitions
 
 Use both core developers for the initial core work. Schedule the dedicated demo developer when the core offers a useful integration target; after that, independent demo and core enhancements may proceed together. Feature completion must still satisfy its declared dependencies and combined acceptance criteria.
 
-Agent Workflow is advisory and opt-in in core, with advisory CI on main pushes and PRs. The demo needs no second roadmap or Work Record process. Both GitHub repositories are initialized privately; license and build choices remain open.
+Agent Workflow is advisory and opt-in in core, with advisory CI on main pushes and PRs. The demo needs no second roadmap or Work Record process. Both GitHub repositories are initialized privately; license and public release remain open. Product contract CI is approved for installation, with no new merge gate.
 
 The [internal design baseline](../docs/internal/design-baseline/README.md) contains the draft inputs. Current decisions cover [repository boundaries](../docs/internal/decisions/0001-repositories-and-runtimes.md), [product direction](../docs/internal/decisions/0002-product-proposition-and-evaluation.md) and [restricted CEL](../docs/internal/decisions/0003-restricted-cel-resource-policy.md). Public specifications, draft design approval and implementation evidence remain distinct.
 
