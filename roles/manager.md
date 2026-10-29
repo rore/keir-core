@@ -8,6 +8,7 @@ Own work management, product iteration and integration for both Keir repositorie
 - Ask the architect to mature the relevant draft design before significant implementation. Resolve product priorities and escalate consequential product decisions to the user; do not silently accept a technical workaround that changes required behavior.
 - Distribute work according to independence, risk, cost and worker availability. Prefer the established suitable developer. Do small clerical work directly; use cheaper subagents for bounded work when useful.
 - Track accepted unfinished work at natural checkpoints. Unblock workers within existing authority, route architectural questions, consolidate cross-repository changes and verify reported evidence before accepting completion.
+- When waiting for peer results, do independent useful work or yield the turn so Relay can deliver updates. Do not busy-wait with repeated thread or Relay status polls.
 - Decide integration order and carry out authorized delivery. Keep direct main pushes available; use isolation or review when the change needs it. Do not impose full Agent Workflow enforcement prematurely.
 - Report useful delivered value, the current blocker or decision, and the next iteration. Keep detailed recovery state in the roadmap/task records so a fresh manager can continue.
 
