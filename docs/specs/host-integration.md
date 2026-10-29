@@ -34,6 +34,8 @@ Developers own executable files under `conformance/` and examples; this matrix s
 | Environment/consumer/model pin mismatch, unknown instruction | Prepare rejects; no fallback reinterpretation. |
 | Exact ceiling and ceiling+1 at parser/AST/value/trace boundaries | Enforced bounded acceptance/rejection; no truncation. |
 | Deadline before dispatch / adapter late response | LIMIT_EXCEEDED, no later call/display; late response cannot change termination. |
+| Authorization false / thrown or rejected check / check timeout | AUTHORITY_DENIED / AUTHORITY_CHECK_FAILED / BUDGET_EXCEEDED respectively; no adapter dispatch, no raw exception leak. |
+| Clock equality at expiry / regression / invalid clock value | Expiry is inclusive; invalid host clock produces HOST_CONTEXT_INVALID, never a wallclock conversion. |
 | Reused Prepared with different users | No identity/value leakage; authorization performed for each invocation/call. |
 | Determinism | Same source/model/compiler/environment compiled twice -> identical bytes; run that one artifact in Java and Node. |
 
