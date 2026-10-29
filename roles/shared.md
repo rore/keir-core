@@ -8,6 +8,10 @@ The user accepts this product value from prior experience. Do not require a froz
 
 Read [current decisions](../docs/internal/README.md), the relevant [design baseline specifications](../docs/internal/design-baseline/README.md), and the owning [roadmap feature](../roadmap/board.md). The v0.4 baseline and later proposals are design inputs, not proof of implementation or host guarantees. Store additional supplied design specifications with the baseline in `docs/internal/design-baseline/public/` and update its index; do not introduce a separate draft-design folder. Existing accepted decisions prevail until explicitly revised. V0.7 revises v0.5's downstream-key rules; v0.5's Java-later wording does not supersede our two-runtime decision. Some roadmap items still retain the single-write restriction: resolve that scope with the manager before using the multi-effect proposal to expand an assignment.
 
+## Simplicity
+
+Choose the simplest architecture and implementation that fully satisfies the requirements. Prefer clear, direct solutions with few moving parts, using existing code and standard capabilities where they fit. Add abstractions, layers, dependencies or infrastructure only for a concrete current need; defer hypothetical future flexibility. When complexity is necessary, explain which requirement or observed constraint makes the simpler option insufficient. Simplify the solution without dropping required behavior, correctness, security, host guarantees or meaningful verification. Apply this principle to designs, code, documentation and the development process.
+
 ## Design and development loop
 
 1. The manager selects a bounded feature or iteration with observable value, identifies its owning roadmap item, and defines acceptance evidence and dependencies.
