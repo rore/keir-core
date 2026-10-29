@@ -1,0 +1,38 @@
+{
+  "inputs": [
+    {"name":"open","task":{"id":"t-1","projectId":"p-1","status":"OPEN","title":"review","enabled":true}},
+    {"name":"done","task":{"id":"t-2","projectId":"p-1","status":"DONE","title":"é😀","enabled":false}}
+  ],
+  "expressions": [
+    {"id":"field","source":"task.status","expected":["OPEN","DONE"]},
+    {"id":"status","source":"task.status == 'DONE'","expected":[false,true]},
+    {"id":"boolean","source":"task.enabled && task.status != 'DONE'","expected":[true,false]},
+    {"id":"not_or","source":"!task.enabled || task.status == 'OPEN'","expected":[true,true]},
+    {"id":"classify","source":"task.status == 'DONE' ? 'COMPLETED' : 'ACTIVE'","expected":["ACTIVE","COMPLETED"]},
+    {"id":"nominal_erasure","source":"task.projectId == 'p-1'","expected":[true,true],"requiresKeirOverlay":true},
+    {"id":"unicode","source":"task.title == 'é😀'","expected":[false,true]},
+    {"id":"short_circuit","source":"false && task.enabled","expected":[false,false]},
+{"id":"max_nodes","source":"(((((task.enabled && task.enabled) && (task.enabled && (task.enabled && task.enabled))) && ((task.enabled && task.enabled) && (task.enabled && (task.enabled && task.enabled)))) && (((task.enabled && task.enabled) && (task.enabled && (task.enabled && task.enabled))) && ((task.enabled && (task.enabled && task.enabled)) && (task.enabled && (task.enabled && task.enabled))))) == true)","expected":[true,false]},
+{"id":"max_depth","source":"((((((((((((((task.enabled == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true)","expected":[true,false]},
+{"id":"max_source","source":"true                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ","expected":[true,true]},
+{"id":"bounded_string","source":"task.title == 'éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé'","expected":[false,false]}
+  ],
+  "rejects": [
+    {"id":"unknown_field","source":"task.absent == 'x'"},
+    {"id":"type_mismatch","source":"task.enabled == 'true'"},
+    {"id":"int64","source":"9007199254740993 == 9007199254740993"},
+    {"id":"arithmetic","source":"1 + 2 == 3"},
+    {"id":"regex","source":"task.title.matches('.*')"},
+    {"id":"macro","source":"[true].all(x, x)"},
+    {"id":"map","source":"{'x': true}.x"},
+    {"id":"dyn","source":"dyn(task).status == 'OPEN'"},
+    {"id":"presence","source":"has(task.status)"},
+    {"id":"object_return","source":"task"},
+    {"id":"nonliteral_conditional","source":"task.enabled ? task.status : 'ACTIVE'"},
+    {"id":"invalid_classification","source":"task.enabled ? 'UNKNOWN' : 'ACTIVE'"},
+{"id":"too_many_nodes","source":"((((task.enabled && task.enabled) && (task.enabled && (task.enabled && task.enabled))) && ((task.enabled && (task.enabled && task.enabled)) && (task.enabled && (task.enabled && task.enabled)))) && (((task.enabled && task.enabled) && (task.enabled && (task.enabled && task.enabled))) && ((task.enabled && (task.enabled && task.enabled)) && (task.enabled && (task.enabled && task.enabled)))))"},
+{"id":"too_deep","source":"(((((((((((((((task.enabled == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true)"},
+{"id":"source_too_long","source":"true                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             "},
+{"id":"literal_too_long","source":"'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'"}
+  ]
+}

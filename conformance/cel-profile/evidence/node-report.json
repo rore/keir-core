@@ -1,0 +1,101 @@
+{
+  "node": "v24.14.1",
+  "packages": {
+    "cel": "0.6.1",
+    "celSpec": "0.6.1",
+    "protobuf": "2.6.2"
+  },
+  "bundleSha256": "2bd898abefa7b6baa16f7518779ee96c341a3142a1e27abf0671728d00a63e33",
+  "checks": 3285,
+  "expressions": 12,
+  "parityCases": 24,
+  "rejectedExpressions": 16,
+  "rejectedInputs": 17,
+  "limits": {
+    "sourceBytes": 512,
+    "checkedBytes": 16384,
+    "descriptorBytes": 65536,
+    "nodes": 64,
+    "depth": 16,
+    "stringBytes": 256,
+    "inputBytes": 8192
+  },
+  "astNodes": {
+    "field": 2,
+    "status": 4,
+    "boolean": 7,
+    "not_or": 8,
+    "classify": 7,
+    "nominal_erasure": 4,
+    "unicode": 4,
+    "short_circuit": 4,
+    "max_nodes": 64,
+    "max_depth": 30,
+    "max_source": 1,
+    "bounded_string": 4
+  },
+  "observedOverloads": [
+    "conditional",
+    "equals",
+    "logical_and",
+    "logical_not",
+    "logical_or",
+    "not_equals"
+  ],
+  "prepareMs": 5.252499999999998,
+  "inProcessMs": {
+    "p50": 0.0012000000000114142,
+    "p95": 0.003299999999995862,
+    "p99": 0.008000000000009777,
+    "max": 0.09710000000001173
+  },
+  "maxAstInProcessMs": {
+    "p50": 0.011400000000008959,
+    "p95": 0.01290000000000191,
+    "p99": 0.023099999999999454,
+    "max": 0.5242000000000075
+  },
+  "maxStringInProcessMs": {
+    "p50": 0.0009000000000014552,
+    "p95": 0.0013999999999896318,
+    "p99": 0.0016999999999995907,
+    "max": 0.021700000000009823
+  },
+  "workerStartupMs": 242.3943,
+  "workerRoundTripMs": {
+    "p50": 0.07670000000001664,
+    "p95": 0.17500000000001137,
+    "p99": 0.2629000000000019,
+    "max": 1.3032999999999788
+  },
+  "termination": {
+    "supervisorWaitMs": 28.7029,
+    "stopMs": 4.573900000000037,
+    "exitCode": 1,
+    "batchCompleted": false
+  },
+  "memory": {
+    "before": {
+      "rss": 68673536,
+      "heapTotal": 18345984,
+      "heapUsed": 12452192,
+      "external": 2362811,
+      "arrayBuffers": 38171
+    },
+    "after": {
+      "rss": 93487104,
+      "heapTotal": 20443136,
+      "heapUsed": 14854840,
+      "external": 2385951,
+      "arrayBuffers": 31368
+    },
+    "worker": {
+      "rss": 98562048,
+      "heapTotal": 20705280,
+      "heapUsed": 12028712,
+      "external": 2972708,
+      "arrayBuffers": 18579
+    }
+  },
+  "caveat": "Single local qualification run. Worker termination used a batch of real scalar CEL evaluations, not one hostile CEL expression. Limits are probe gates, not proven production CPU/memory/deadline guarantees."
+}

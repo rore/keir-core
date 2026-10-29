@@ -1,0 +1,211 @@
+{
+  "descriptorBase64" : "CqIBCg9rZWlyX3JlYWQucHJvdG8SCWtlaXIucmVhZCJ8CgRUYXNrEhgKB2VuYWJsZWQYASABKAhSB2VuYWJsZWQSDgoCaWQYAiABKAlSAmlkEhwKCXByb2plY3RJZBgDIAEoCVIJcHJvamVjdElkEhYKBnN0YXR1cxgEIAEoCVIGc3RhdHVzEhQKBXRpdGxlGAUgASgJUgV0aXRsZWIGcHJvdG8z",
+  "expressions" : [ {
+    "checkedBase64" : "EgoIARIGCgR0YXNrGhQIARIQSg5rZWlyLnJlYWQuVGFzaxoGCAISAhgFIhgQAioUCgoQASIGCgR0YXNrEgZzdGF0dXMqGBIHPGlucHV0PhoBDCIECAEQACIECAIQBA==",
+    "id" : "field",
+    "javaOutputType" : "string",
+    "source" : "task.status"
+  }, {
+    "checkedBase64" : "EgoIARIGCgR0YXNrEgwIAxIIGgZlcXVhbHMaFAgBEhBKDmtlaXIucmVhZC5UYXNrGgYIAhICGAUaBggDEgIYARoGCAQSAhgFIjAQAzIsEgRfPT1fGhgQAioUCgoQASIGCgR0YXNrEgZzdGF0dXMaChAEGgYyBERPTkUqJBIHPGlucHV0PhoBFiIECAEQACIECAIQBCIECAMQDCIECAQQDw==",
+    "id" : "status",
+    "javaOutputType" : "bool",
+    "source" : "task.status == 'DONE'"
+  }, {
+    "checkedBase64" : "EgoIARIGCgR0YXNrEhEIAxINGgtsb2dpY2FsX2FuZBIKCAQSBgoEdGFzaxIQCAYSDBoKbm90X2VxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYARoGCAMSAhgBGhQIBBIQSg5rZWlyLnJlYWQuVGFzaxoGCAUSAhgFGgYIBhICGAEaBggHEgIYBSJXEAMyUxIEXyYmXxoZEAIqFQoKEAEiBgoEdGFzaxIHZW5hYmxlZBowEAYyLBIEXyE9XxoYEAUqFAoKEAQiBgoEdGFzaxIGc3RhdHVzGgoQBxoGMgRET05FKjYSBzxpbnB1dD4aASYiBAgBEAAiBAgCEAQiBAgDEA0iBAgEEBAiBAgFEBQiBAgGEBwiBAgHEB8=",
+    "id" : "boolean",
+    "javaOutputType" : "bool",
+    "source" : "task.enabled && task.status != 'DONE'"
+  }, {
+    "checkedBase64" : "EhEIARINGgtsb2dpY2FsX25vdBIKCAISBgoEdGFzaxIQCAQSDBoKbG9naWNhbF9vchIKCAUSBgoEdGFzaxIMCAcSCBoGZXF1YWxzGgYIARICGAEaFAgCEhBKDmtlaXIucmVhZC5UYXNrGgYIAxICGAEaBggEEgIYARoUCAUSEEoOa2Vpci5yZWFkLlRhc2saBggGEgIYBRoGCAcSAhgBGgYICBICGAUiYRAEMl0SBF98fF8aIxABMh8SAiFfGhkQAyoVCgoQAiIGCgR0YXNrEgdlbmFibGVkGjAQBzIsEgRfPT1fGhgQBioUCgoQBSIGCgR0YXNrEgZzdGF0dXMaChAIGgYyBE9QRU4qPBIHPGlucHV0PhoBJyIECAEQACIECAIQASIECAMQBSIECAQQDiIECAUQESIECAYQFSIECAcQHSIECAgQIA==",
+    "id" : "not_or",
+    "javaOutputType" : "bool",
+    "source" : "!task.enabled || task.status == 'OPEN'"
+  }, {
+    "checkedBase64" : "EgoIARIGCgR0YXNrEgwIAxIIGgZlcXVhbHMSEQgFEg0aC2NvbmRpdGlvbmFsGhQIARIQSg5rZWlyLnJlYWQuVGFzaxoGCAISAhgFGgYIAxICGAEaBggEEgIYBRoGCAUSAhgFGgYIBhICGAUaBggHEgIYBSJcEAUyWBIFXz9fOl8aMBADMiwSBF89PV8aGBACKhQKChABIgYKBHRhc2sSBnN0YXR1cxoKEAQaBjIERE9ORRoPEAYaCzIJQ09NUExFVEVEGgwQBxoIMgZBQ1RJVkUqNhIHPGlucHV0PhoBLyIECAEQACIECAIQBCIECAMQDCIECAQQDyIECAUQFiIECAYQGCIECAcQJg==",
+    "id" : "classify",
+    "javaOutputType" : "string",
+    "source" : "task.status == 'DONE' ? 'COMPLETED' : 'ACTIVE'"
+  }, {
+    "checkedBase64" : "EgoIARIGCgR0YXNrEgwIAxIIGgZlcXVhbHMaFAgBEhBKDmtlaXIucmVhZC5UYXNrGgYIAhICGAUaBggDEgIYARoGCAQSAhgFIjIQAzIuEgRfPT1fGhsQAioXCgoQASIGCgR0YXNrEglwcm9qZWN0SWQaCRAEGgUyA3AtMSokEgc8aW5wdXQ+GgEYIgQIARAAIgQIAhAEIgQIAxAPIgQIBBAS",
+    "id" : "nominal_erasure",
+    "javaOutputType" : "bool",
+    "source" : "task.projectId == 'p-1'"
+  }, {
+    "checkedBase64" : "EgoIARIGCgR0YXNrEgwIAxIIGgZlcXVhbHMaFAgBEhBKDmtlaXIucmVhZC5UYXNrGgYIAhICGAUaBggDEgIYARoGCAQSAhgFIjEQAzItEgRfPT1fGhcQAioTCgoQASIGCgR0YXNrEgV0aXRsZRoMEAQaCDIGw6nwn5iAKiQSBzxpbnB1dD4aARMiBAgBEAAiBAgCEAQiBAgDEAsiBAgEEA4=",
+    "id" : "unicode",
+    "javaOutputType" : "bool",
+    "source" : "task.title == 'é😀'"
+  }, {
+    "checkedBase64" : "EhEIAhINGgtsb2dpY2FsX2FuZBIKCAMSBgoEdGFzaxoGCAESAhgBGgYIAhICGAEaFAgDEhBKDmtlaXIucmVhZC5UYXNrGgYIBBICGAEiLRACMikSBF8mJl8aBhABGgIQABoZEAQqFQoKEAMiBgoEdGFzaxIHZW5hYmxlZCokEgc8aW5wdXQ+GgEWIgQIARAAIgQIAhAGIgQIAxAJIgQIBBAN",
+    "id" : "short_circuit",
+    "javaOutputType" : "bool",
+    "source" : "false && task.enabled"
+  }, {
+    "checkedBase64" : "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",
+    "id" : "max_nodes",
+    "javaOutputType" : "bool",
+    "source" : "(((((task.enabled && task.enabled) && (task.enabled && (task.enabled && task.enabled))) && ((task.enabled && task.enabled) && (task.enabled && (task.enabled && task.enabled)))) && (((task.enabled && task.enabled) && (task.enabled && (task.enabled && task.enabled))) && ((task.enabled && (task.enabled && task.enabled)) && (task.enabled && (task.enabled && task.enabled))))) == true)"
+  }, {
+    "checkedBase64" : "EgoIARIGCgR0YXNrEgwIAxIIGgZlcXVhbHMSDAgFEggaBmVxdWFscxIMCAcSCBoGZXF1YWxzEgwICRIIGgZlcXVhbHMSDAgLEggaBmVxdWFscxIMCA0SCBoGZXF1YWxzEgwIDxIIGgZlcXVhbHMSDAgREggaBmVxdWFscxIMCBMSCBoGZXF1YWxzEgwIFRIIGgZlcXVhbHMSDAgXEggaBmVxdWFscxIMCBkSCBoGZXF1YWxzEgwIGxIIGgZlcXVhbHMSDAgdEggaBmVxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYARoGCAMSAhgBGgYIBBICGAEaBggFEgIYARoGCAYSAhgBGgYIBxICGAEaBggIEgIYARoGCAkSAhgBGgYIChICGAEaBggLEgIYARoGCAwSAhgBGgYIDRICGAEaBggOEgIYARoGCA8SAhgBGgYIEBICGAEaBggREgIYARoGCBISAhgBGgYIExICGAEaBggUEgIYARoGCBUSAhgBGgYIFhICGAEaBggXEgIYARoGCBgSAhgBGgYIGRICGAEaBggaEgIYARoGCBsSAhgBGgYIHBICGAEaBggdEgIYARoGCB4SAhgBIsICEB0yvQISBF89PV8arAIQGzKnAhIEXz09XxqWAhAZMpECEgRfPT1fGoACEBcy+wESBF89PV8a6gEQFTLlARIEXz09XxrUARATMs8BEgRfPT1fGr4BEBEyuQESBF89PV8aqAEQDzKjARIEXz09XxqSARANMo0BEgRfPT1fGn0QCzJ5EgRfPT1fGmkQCTJlEgRfPT1fGlUQBzJREgRfPT1fGkEQBTI9EgRfPT1fGi0QAzIpEgRfPT1fGhkQAioVCgoQASIGCgR0YXNrEgdlbmFibGVkGgYQBBoCEAEaBhAGGgIQARoGEAgaAhABGgYQChoCEAEaBhAMGgIQARoGEA4aAhABGgYQEBoCEAEaBhASGgIQARoGEBQaAhABGgYQFhoCEAEaBhAYGgIQARoGEBoaAhABGgYQHBoCEAEaBhAeGgIQASrGARIHPGlucHV0PhoCmQEiBAgBEA4iBAgCEBIiBAgDEBsiBAgEEB4iBAgFECQiBAgGECciBAgHEC0iBAgIEDAiBAgJEDYiBAgKEDkiBAgLED8iBAgMEEIiBAgNEEgiBAgOEEsiBAgPEFEiBAgQEFQiBAgREFoiBAgSEF0iBAgTEGMiBAgUEGYiBAgVEGwiBAgWEG8iBAgXEHUiBAgYEHgiBAgZEH4iBQgaEIEBIgUIGxCHASIFCBwQigEiBQgdEJABIgUIHhCTAQ==",
+    "id" : "max_depth",
+    "javaOutputType" : "bool",
+    "source" : "((((((((((((((task.enabled == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true) == true)"
+  }, {
+    "checkedBase64" : "GgYIARICGAEiBhABGgIQASoTEgc8aW5wdXQ+GgKBBCIECAEQAA==",
+    "id" : "max_source",
+    "javaOutputType" : "bool",
+    "source" : "true                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "
+  }, {
+    "checkedBase64" : "EgoIARIGCgR0YXNrEgwIAxIIGgZlcXVhbHMaFAgBEhBKDmtlaXIucmVhZC5UYXNrGgYIAhICGAUaBggDEgIYARoGCAQSAhgFIq8CEAMyqgISBF89PV8aFxACKhMKChABIgYKBHRhc2sSBXRpdGxlGogCEAQagwIygALDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpKiUSBzxpbnB1dD4aApEBIgQIARAAIgQIAhAEIgQIAxALIgQIBBAO",
+    "id" : "bounded_string",
+    "javaOutputType" : "bool",
+    "source" : "task.title == 'éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé'"
+  } ],
+  "javaProjectionRejects" : 17,
+  "javaResults" : [ {
+    "id" : "field",
+    "input" : "open",
+    "value" : "OPEN"
+  }, {
+    "id" : "field",
+    "input" : "done",
+    "value" : "DONE"
+  }, {
+    "id" : "status",
+    "input" : "open",
+    "value" : false
+  }, {
+    "id" : "status",
+    "input" : "done",
+    "value" : true
+  }, {
+    "id" : "boolean",
+    "input" : "open",
+    "value" : true
+  }, {
+    "id" : "boolean",
+    "input" : "done",
+    "value" : false
+  }, {
+    "id" : "not_or",
+    "input" : "open",
+    "value" : true
+  }, {
+    "id" : "not_or",
+    "input" : "done",
+    "value" : true
+  }, {
+    "id" : "classify",
+    "input" : "open",
+    "value" : "ACTIVE"
+  }, {
+    "id" : "classify",
+    "input" : "done",
+    "value" : "COMPLETED"
+  }, {
+    "id" : "nominal_erasure",
+    "input" : "open",
+    "value" : true
+  }, {
+    "id" : "nominal_erasure",
+    "input" : "done",
+    "value" : true
+  }, {
+    "id" : "unicode",
+    "input" : "open",
+    "value" : false
+  }, {
+    "id" : "unicode",
+    "input" : "done",
+    "value" : true
+  }, {
+    "id" : "short_circuit",
+    "input" : "open",
+    "value" : false
+  }, {
+    "id" : "short_circuit",
+    "input" : "done",
+    "value" : false
+  }, {
+    "id" : "max_nodes",
+    "input" : "open",
+    "value" : true
+  }, {
+    "id" : "max_nodes",
+    "input" : "done",
+    "value" : false
+  }, {
+    "id" : "max_depth",
+    "input" : "open",
+    "value" : true
+  }, {
+    "id" : "max_depth",
+    "input" : "done",
+    "value" : false
+  }, {
+    "id" : "max_source",
+    "input" : "open",
+    "value" : true
+  }, {
+    "id" : "max_source",
+    "input" : "done",
+    "value" : true
+  }, {
+    "id" : "bounded_string",
+    "input" : "open",
+    "value" : false
+  }, {
+    "id" : "bounded_string",
+    "input" : "done",
+    "value" : false
+  } ],
+  "rejects" : [ {
+    "id" : "unknown_field",
+    "message" : "CEL compilation failed: ERROR: <input>:1:5: undefined field 'absent'\n | task.absent == 'x'\n | ....^"
+  }, {
+    "id" : "type_mismatch",
+    "message" : "CEL compilation failed: ERROR: <input>:1:14: found no matching overload for '_==_' applied to '(bool, string)' (candidates: (%A0, %A0))\n | task.enabled == 'true'\n | .............^"
+  }, {
+    "id" : "int64",
+    "message" : "Only bool and bounded string constants are supported"
+  }, {
+    "id" : "arithmetic",
+    "message" : "Call not approved: _+_"
+  }, {
+    "id" : "regex",
+    "message" : "Call not approved: matches"
+  }, {
+    "id" : "macro",
+    "message" : "CEL compilation failed: ERROR: <input>:1:11: undeclared reference to 'all' (in container '')\n | [true].all(x, x)\n | ..........^\nERROR: <input>:1:12: undeclared reference to 'x' (in container '')\n | [true].all(x, x)\n | ...........^\nERROR: <input>:1:15: undeclared reference to 'x' (in container '')\n | [true].all(x, x)\n | ..............^"
+  }, {
+    "id" : "map",
+    "message" : "Only direct known task fields are supported"
+  }, {
+    "id" : "dyn",
+    "message" : "Only direct known task fields are supported"
+  }, {
+    "id" : "presence",
+    "message" : "CEL compilation failed: ERROR: <input>:1:4: undeclared reference to 'has' (in container '')\n | has(task.status)\n | ...^"
+  }, {
+    "id" : "object_return",
+    "message" : "Root type must be bool or string"
+  }, {
+    "id" : "nonliteral_conditional",
+    "message" : "Conditional branches must be ACTIVE or COMPLETED literals"
+  }, {
+    "id" : "invalid_classification",
+    "message" : "Conditional branches must be ACTIVE or COMPLETED literals"
+  }, {
+    "id" : "too_many_nodes",
+    "message" : "AST budget exceeded"
+  }, {
+    "id" : "too_deep",
+    "message" : "AST budget exceeded"
+  }, {
+    "id" : "source_too_long",
+    "message" : "Source exceeds 512 UTF-8 bytes"
+  }, {
+    "id" : "literal_too_long",
+    "message" : "Only bool and bounded string constants are supported"
+  } ]
+}
