@@ -6,6 +6,8 @@ Status: implementation candidate; deterministic vectors and actual CEL bridge qu
 
 Conceptual API: `compile(sourceBytes, trustedDcmBytes, trustedEnvironment) -> ArtifactBytes | Diagnostics`. The environment selects profile `keir-read/1` and exact compiler/CEL/protobuf package identities. CLI transport must preserve these arguments without shell interpolation, bound subprocess input/output/time/concurrency and emit no artifact on failure. Runtime execution never requires the compiler.
 
+Source may select any declared entrypoint within the trusted DCM, subject to that entrypoint's grants. The compiler environment has no separate expected-entrypoint selector. The embedding host independently selects the expected entrypoint/consumer during runtime admission; successful compilation alone does not authorize that selection.
+
 Validate [source and CEL](language.md), [DCM](domain-model.md) and aggregate bounds, then lower in source order. No source interpretation at runtime. The compiler emits a JSON object with exactly these fields:
 
 | Field | Exact content |
