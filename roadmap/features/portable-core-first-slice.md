@@ -1,7 +1,7 @@
 ---
 id: portable-core-first-slice
 title: Run a read-and-decide extension in Java and Node
-status: queued
+status: active
 priority: high
 commitment: committed
 milestone: Execute extensions in Java and Node
@@ -41,7 +41,11 @@ First runnable increment. The [specification work](specify-language-and-domain-m
 
 The two core developers cover compiler, both runtimes, shared fixtures and Java/Node embedding samples through bounded manager assignments. Divide independent implementation and verification against agreed contracts; do not duplicate the artifact contract or force a permanent runtime split. The architect resolves the minimal language/DCM/artifact/outcome contracts and reviews conformance; the manager owns acceptance and dependency sequencing. Confirm exact module/build choices and checkout ownership in the implementation assignment.
 
-### Before implementation
+### Current execution
+
+Started with user approval on 2026-10-29. The manager owns integration and the canonical roadmap at `C:/Dev/rore/KEIR/keir-core`. Architect contract work is accepted under [the specification feature](specify-language-and-domain-model.md). Developer 1 has a pending build-tooling offer in `C:/Users/I347041/.codex/worktrees/keir-java-core/keir-core`; developer 2 has a pending [CEL qualification offer](bound-cel-execution.md) in `C:/Users/I347041/.codex/worktrees/keir-cel-node/keir-core`. Relay stored both offers without confirmed receipt; authorized chat fallbacks carry the same assignments, preserving session settings. Acceptance, build evidence and the reviewed contract precede compiler/runtime implementation. Workers commit isolated changes; the manager reviews and integrates them. No demo work is assigned.
+
+### Implementation prerequisites
 
 Resolve the DCM-to-CEL type mapping; absent/null and exact numeric handling for any admitted type; source/DCM canonicalization and covered digest bytes; complete portable argument/return/error bindings; separate execution/business/consumption outcomes; and an explicit trusted sample loader. Never assume a self-hash authenticates compiler output. Define diagnostic codes/paths and trace redaction.
 
