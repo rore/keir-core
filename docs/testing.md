@@ -4,6 +4,16 @@ Load for code/test/contract changes. Apply to core and demo; keep demo tests loc
 
 Status: initial plan. [CEL qualification](../conformance/cel-profile/README.md) runs; complete product regression/coverage/contract CI remains implementation work.
 
+Current checkpoint commands and measured evidence, before Java runtime conformance:
+
+| Command from repository root | Result |
+| --- | --- |
+| `MAVEN_USER_HOME` set to `.tools/maven`; `./mvnw -o -Dmaven.repo.local=.tools/maven/repository -B -ntp clean verify` (Windows: `mvnw.cmd`) | 30 compiler tests; 20.61 seconds including first canonical compilation/packaging with populated isolated cache. Java runtime is still an empty scaffold. Compiler coverage baseline remains pending. |
+| `npm run --prefix runtime-node test:coverage` | 82 tests; 0.78 seconds in worker, 2.43 seconds in canonical checkout; source coverage 100% lines, 95.42% branches, 100% functions. |
+| `node --test examples/node-host/test.mjs` after the documented pack/install | 1 packaged-host test; 0.27–0.46 seconds warm, 9.54 seconds on first observed worker startup. Fresh Java CLI output also passed this test. |
+
+Offline Maven requires a previously populated local cache; dependency/bootstrap time is separate. The package's LF checkout rules and host lockfile preserve tarball integrity across checkouts; never disable integrity checks to make the sample install.
+
 ## Fast feedback
 
 - During development run affected tests; before integrating semantic changes run the complete fast regression suite.
