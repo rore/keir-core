@@ -4,7 +4,7 @@ title: Build the task app and connect the first real extension
 status: queued
 priority: high
 commitment: committed
-milestone: demo
+milestone: Customize a real task application
 repo: keir-demo-app
 ---
 

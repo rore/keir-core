@@ -4,7 +4,7 @@ title: Test capability catalog value with realistic customizations
 status: active
 priority: high
 commitment: committed
-milestone: discovery
+milestone: Execute extensions in Java and Node
 repo: keir-core
 ---
 

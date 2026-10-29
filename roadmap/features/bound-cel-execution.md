@@ -4,7 +4,7 @@ title: Measure a restricted CEL profile in both runtimes
 status: queued
 priority: high
 commitment: committed
-milestone: executable-core
+milestone: Execute extensions in Java and Node
 repo: keir-core
 ---
 

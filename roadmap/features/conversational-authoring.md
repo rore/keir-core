@@ -4,7 +4,7 @@ title: Add customer-facing extension authoring and approval
 status: queued
 priority: medium
 commitment: committed
-milestone: demo
+milestone: Author and activate customizations through AI
 repo: keir-demo-app
 ---
 

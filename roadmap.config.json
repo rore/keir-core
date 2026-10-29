@@ -1,0 +1,18 @@
+{
+  "roadmapPath": "roadmap",
+  "defaultLens": "milestone",
+  "lenses": {
+    "fields": {
+      "milestone": {
+        "order": [
+          "Execute extensions in Java and Node",
+          "Customize a real task application",
+          "Author and activate customizations through AI"
+        ]
+      }
+    }
+  },
+  "filters": {
+    "fields": ["repo"]
+  }
+}
