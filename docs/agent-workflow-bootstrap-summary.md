@@ -4,6 +4,8 @@ Date: 2026-10-29
 
 This is the approved advisory subset for `keir-core`. Agent Workflow is opt-in for ordinary work. Updates confined to `roadmap/`, `docs/README.md`, or `docs/roadmap.md` need no Work Record. The `keir-demo-app` repository has no Agent Workflow process.
 
+Follow-up on 2026-10-29: the user approved [advisory CI](agent-workflow-ci-proposal.md) for main pushes and PRs. The findings below describe the original local bootstrap; the CI follow-up adds reporting without required workflow checks.
+
 ## Installed
 
 - The previously copied Agent Workflow and Minimap skills remain in `.agents/skills/` and `.claude/skills/`.

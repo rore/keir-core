@@ -1,0 +1,172 @@
+name: agent-workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-workflow-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  redline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pyyaml jsonschema
+
+      - name: Validate both policies
+        run: |
+          python - <<'PY'
+          import json, pathlib, yaml, jsonschema
+          for policy, schema in (
+              ('agent-workflow.yaml', '.agents/skills/agent-workflow/assets/schema/agent-workflow.schema.json'),
+              ('agent-redline-policy.yaml', '.agent-redline/agent-policy.schema.json'),
+          ):
+              jsonschema.validate(yaml.safe_load(pathlib.Path(policy).read_text()), json.loads(pathlib.Path(schema).read_text()))
+              print(f'{policy}: valid')
+          PY
+
+      - name: Collect complete change evidence
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          mkdir -p build
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA")
+          elif [[ -n "$BASE_SHA" && ! "$BASE_SHA" =~ ^0+$ ]]; then
+            BASE="$BASE_SHA"
+          elif [[ "$BASE_SHA" =~ ^0+$ ]]; then
+            BASE=$(git hash-object -w -t tree /dev/null)
+          elif git rev-parse --verify "$HEAD_SHA^" >/dev/null 2>&1; then
+            BASE=$(git rev-parse "$HEAD_SHA^")
+          else
+            BASE=$(git hash-object -w -t tree /dev/null)
+          fi
+          printf '%s\n' "$BASE" > build/base-ref.txt
+          git diff --name-only -z --no-renames "$BASE" "$HEAD_SHA" > build/changed-files.z
+          git diff --numstat -z --no-renames "$BASE" "$HEAD_SHA" > build/lines-per-file.z
+          git diff --no-ext-diff --no-textconv --unified=0 --no-renames "$BASE" "$HEAD_SHA" > build/diff-unified.patch
+          : > build/base-CODEOWNERS
+          for path in .github/CODEOWNERS CODEOWNERS docs/CODEOWNERS; do
+            if git cat-file -e "$BASE:$path" 2>/dev/null; then
+              git show "$BASE:$path" > build/base-CODEOWNERS
+              break
+            fi
+          done
+
+      - name: Report Redline findings
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          LABELS_JSON: ${{ toJSON(github.event.pull_request.labels) }}
+        run: |
+          FLOW=push
+          [[ "$EVENT_NAME" != pull_request ]] || FLOW=pr
+          LABELS=$(python -c 'import json,os; print(",".join(x["name"] for x in (json.loads(os.environ["LABELS_JSON"]) or [])))')
+          set +e
+          python scripts/agent-redline-report.py \
+            --policy agent-redline-policy.yaml \
+            --changed-files-z build/changed-files.z \
+            --lines-per-file-z build/lines-per-file.z \
+            --diff-unified build/diff-unified.patch \
+            --head-ref "$HEAD_SHA" \
+            --codeowners-file build/base-CODEOWNERS \
+            --flow-mode "$FLOW" --pr-labels "$LABELS" \
+            --json-out build/redline-verdict.json
+          EXIT=$?
+          set -e
+          # Findings are advisory; malformed or missing tool output is a CI error.
+          python - "$EXIT" <<'PY'
+          import json, os, pathlib, sys
+          verdict = json.loads(pathlib.Path('build/redline-verdict.json').read_text())
+          code = int(sys.argv[1])
+          assert code in (0, 1, 2) and verdict['exitCode'] == code, 'Invalid reporter result'
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('## Redline (advisory)\n\n```json\n' + json.dumps(verdict, indent=2) + '\n```\n')
+          if code:
+              print('::warning::Redline findings are available in the job summary; enforcement is disabled.')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: redline-evidence
+          path: |
+            build/redline-verdict.json
+            build/changed-files.z
+            build/lines-per-file.z
+            build/diff-unified.patch
+            build/base-ref.txt
+          if-no-files-found: error
+
+  agent-workflow:
+    needs: [redline]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pyyaml jsonschema
+      - uses: actions/download-artifact@v4
+        with:
+          name: redline-evidence
+          path: build
+
+      - name: Report workflow findings
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          SLUG="$HEAD_BRANCH"
+          for prefix in slice/ feat/ feature/ fix/ bug/ chore/ demo/; do
+            if [[ "$SLUG" == "$prefix"* ]]; then
+              SLUG="${SLUG#"$prefix"}"
+              break
+            fi
+          done
+          SLUG="${SLUG//\//-}"
+          set +e
+          python scripts/agent-workflow-check.py --repo-root . \
+            --changed-files-z build/changed-files.z --slug "$SLUG" \
+            --base-ref "$(cat build/base-ref.txt)" --head-ref "$HEAD_SHA" \
+            --redline-verdict build/redline-verdict.json > build/workflow-verdict.json
+          EXIT=$?
+          set -e
+          python - "$EXIT" <<'PY'
+          import json, os, pathlib, sys
+          verdict = json.loads(pathlib.Path('build/workflow-verdict.json').read_text())
+          code = int(sys.argv[1])
+          assert code in (0, 1, 2) and verdict['exit_code'] == code, 'Invalid checker result'
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('## Agent Workflow (advisory)\n\n```json\n' + json.dumps(verdict, indent=2) + '\n```\n')
+          if code:
+              print('::warning::Workflow findings are available in the job summary; enforcement is disabled.')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workflow-verdict
+          path: build/workflow-verdict.json
+          if-no-files-found: error
