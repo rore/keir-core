@@ -1,16 +1,20 @@
 # Keir specifications
 
-This is the public home for maintained Keir contracts. **No released, implementation-verified specification exists yet.** Supplied documents remain inputs in the internal baseline; moving files or adding this index does not resolve their design questions.
+The first maintained contract is **`keir-read/1`, an implementation candidate** for REQUEST/read/classify/display. No complete compiler/runtime implementation or released specification is claimed. Review and executable conformance must establish support in both Java and Node before the status changes.
 
 The [language/DCM specification feature](../../roadmap/features/specify-language-and-domain-model.md) owns the initial supported contract. Specifications mature with feature implementation and conformance, without a whole-system design freeze.
 
 | Contract | What it must define | Current input |
 | --- | --- | --- |
-| Language and CEL profile | YAML/JSON syntax, types, scope/dataflow, evaluation order, allowed expressions, errors and rejection rules | [Language draft](../internal/design-baseline/public/keir-language-v0.md) |
-| Domain capability model (DCM) | Domain types, hooks, capabilities, protected bindings, grants, effects, guarantees and compatibility | [DCM draft](../internal/design-baseline/public/domain-model-v0.md) |
-| Compiler and artifact | Validation, structured diagnostics, portable artifact contents and admission | [Compiler/artifact draft](../internal/design-baseline/public/compiler-artifact-and-runners-v0.md) |
-| Runtime | Java/Node observable semantics, dispatch, resource limits, typed outcomes and uncertainty | [Runner draft](../internal/design-baseline/public/compiler-artifact-and-runners-v0.md), [multi-effect proposal](../internal/design-baseline/public/host-owned-idempotency-and-multi-effect-contracts-v0.7.md) |
-| Host integration and authoring | Invocation, result consumption, discovery, approval/activation, simulation scenarios and traces | [Hook contracts](../internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md), [simulation draft](../internal/design-baseline/public/simulation-and-authoring-v0.md) |
+| [Language and CEL profile](language.md) | Strict source, scalar CEL, nominal/enum overlay and diagnostics | [Language draft](../internal/design-baseline/public/keir-language-v0.md) |
+| [Domain capability model](domain-model.md) | Exact small DCM schema and complete sample | [DCM draft](../internal/design-baseline/public/domain-model-v0.md) |
+| [Compiler and artifact](compiler-artifact.md) | Deterministic descriptor/plan format, digest bytes and external trust anchor | [Compiler/artifact draft](../internal/design-baseline/public/compiler-artifact-and-runners-v0.md) |
+| [Runtime](runtime.md) | Prepare/invoke, protected parameters, outcomes, redacted trace and provisional limits | [Runner draft](../internal/design-baseline/public/compiler-artifact-and-runners-v0.md) |
+| [Host integration](host-integration.md) | Result consumption, two assistant boundaries and acceptance fixtures | [Hook contracts](../internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md), [simulation draft](../internal/design-baseline/public/simulation-and-authoring-v0.md) |
+
+The profile intentionally excludes writes, `when`, `onError`, optional values, collections, numbers and time. `keir/v0` is the source family, not a promise to accept every baseline construct. The sample DCM/artifact have explicit profile-specific formats. Unsupported shapes fail closed; no automatic migration or hidden coercion. [Design rationale and handoff](../internal/read-and-decide-design.md) records pending qualification rather than asserting untested guarantees.
+
+These contracts narrow baseline language/DCM/compiler/simulation drafts for this increment, override Java-later wording under decision 0001 and retain decision 0003's evidence boundary. Developers own executable fixtures under `conformance/`; the [acceptance matrix](host-integration.md#acceptance-fixtures) describes required tests, not passing results. The owning feature remains open.
 
 ## Maintaining a contract
 
