@@ -1,7 +1,7 @@
 ---
 id: portable-core-first-slice
 title: Run a read-and-decide extension in Java and Node
-status: active
+status: done
 priority: high
 commitment: committed
 milestone: Execute extensions in Java and Node
@@ -50,7 +50,7 @@ Canonical verification passed 92 Java tests (31 compiler, 56 runtime, 5 host) in
 
 Review corrected consumer-ID validation, scalar-only conditional admission, canonical DCM overflow and cross-invocation timeout scheduling. The architect clarified independent raw/canonical DCM ceilings without widening the profile. Runtime-local artifact helpers keep compiler/source parsing out of runtime dependencies; no shared module or worker framework was added. Hard synchronous deadlines, complete process-memory isolation and real adapter guarantees remain unqualified.
 
-Product CI is approved for installation and actual cloud verification. The [CI proposal](../../docs/internal/workflow/core-contract-ci-proposal.md) records the job and a separate proposed workflow-level test-contract block. The feature remains active until the real product check passes; no branch protection, required PR or mandatory Work Record is added. Broader language/effect/demo/agent work stays deferred.
+The installed [`keir-contract` CI check](https://github.com/rore/keir-core/actions/runs/40921421530) passed on `69d01b6` in 47 seconds on 2026-10-29, including regression/coverage, deterministic compilation, full transport parity and both packaged hosts. This completes the read-and-decide feature. The [CI record](../../docs/internal/workflow/core-contract-ci-proposal.md) retains a separate proposed workflow-level test-contract block; no branch protection, required PR or mandatory Work Record is added. Broader language/effect/demo/agent work stays deferred; the next runnable feature is one guarded effect.
 
 ### Acceptance and stop condition
 

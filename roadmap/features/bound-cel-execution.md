@@ -1,7 +1,7 @@
 ---
 id: bound-cel-execution
 title: Measure a restricted CEL profile in both runtimes
-status: active
+status: done
 priority: high
 commitment: committed
 milestone: Execute extensions in Java and Node
@@ -43,4 +43,4 @@ The first scalar qualification checkpoint is complete and accepted, integrated a
 
 Evidence: 12 Java-compiled expressions, 24 Java/Node primitive comparisons, 16 rejected expressions and 17 invalid inputs rejected in each projection gate; exact AST 64/65, depth 16/17, source 512/513 UTF-8 bytes and string 256/oversize boundaries. The manager reviewed the source and independently replayed the committed Java fixture in the canonical checkout: 3,285 assertions passed and SHA-256 matched `2bd898abefa7b6baa16f7518779ee96c341a3142a1e27abf0671728d00a63e33`. The manager did not rebuild the Java probe. The implemented read profile now adds nominal/enum overlay, multiple variables, complete artifact admission, parser/aggregate limits and complete local Java/Node execution conformance. Java hard synchronous deadlines and production containment remain unproven; collection/time or richer profiles require their own qualification.
 
-The [portable-core feature](portable-core-first-slice.md) records current local verification and approved product CI installation. No demo, collection, time or effect work is added.
+The [portable-core feature](portable-core-first-slice.md) records accepted local and product CI verification of the initial profile. No demo, collection, time or effect work is added.

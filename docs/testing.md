@@ -2,7 +2,7 @@
 
 Load for code/test/contract changes. Apply to core and demo; keep demo tests local and workflow management in core.
 
-Status: read-profile regression, component coverage and combined local verification pass. Product CI and workflow-level contract protection are [proposed](internal/workflow/core-contract-ci-proposal.md), not installed.
+Status: read-profile regression, component coverage and combined local verification pass. The installed [`keir-contract` CI check](https://github.com/rore/keir-core/actions/runs/40921421530) passed on `69d01b6` in 47 seconds on 2026-10-29: 92 Java tests, 154 Node tests, the packaged Node host test and complete cross-runtime/host verification. Workflow-level contract-policy protection remains [proposed](internal/workflow/core-contract-ci-proposal.md#behavioral-contract).
 
 Current checkpoint commands and measured evidence:
 
@@ -68,6 +68,6 @@ behaviorContracts:
   verification: keir-contract
 ```
 
-Activate after the actual proposed `keir-contract` PR check executes selected tests and the combined harness is qualified. Never register a nonexistent check. First-increment acceptance includes this wiring. Keep workflow protection advisory: no new branch protection, CODEOWNERS, required PRs or mandatory Work Records; it is not merge enforcement.
+The installed `keir-contract` job runs selected tests and the qualified combined harness on relevant main pushes and PRs. Its first main-push run passed; no PR run has been exercised. First-increment acceptance includes this CI wiring. Activating the separate policy block requires governance approval; do not register a nonexistent check. Keep workflow protection advisory: no new branch protection, CODEOWNERS, required PRs or mandatory Work Records; it is not merge enforcement.
 
 Classify protected edits as equivalent, coverage-only or requirement-change. Weakening/removing/skipping/deferring/redefining an obligation needs explicit user approval for exact before/after behavior. Record evidence through Agent Workflow when used. Never weaken a contract to accommodate incomplete implementation.

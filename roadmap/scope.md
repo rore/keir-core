@@ -48,7 +48,7 @@ The host integration assistant proposes DCM/hooks/capability/adapter definitions
 
 Use both core developers for the initial core work. Schedule the dedicated demo developer when the core offers a useful integration target; after that, independent demo and core enhancements may proceed together. Feature completion must still satisfy its declared dependencies and combined acceptance criteria.
 
-Agent Workflow is advisory and opt-in in core, with advisory CI on main pushes and PRs. The demo needs no second roadmap or Work Record process. Both GitHub repositories are initialized privately; license and public release remain open. Product contract CI is approved for installation, with no new merge gate.
+Agent Workflow is advisory and opt-in in core, with advisory CI on main pushes and PRs. The demo needs no second roadmap or Work Record process. Both GitHub repositories are initialized privately; license and public release remain open. Product contract CI is installed and passed the first implemented checkpoint, with no new merge gate.
 
 The [internal design baseline](../docs/internal/design-baseline/README.md) contains the draft inputs. Current decisions cover [repository boundaries](../docs/internal/decisions/0001-repositories-and-runtimes.md), [product direction](../docs/internal/decisions/0002-product-proposition-and-evaluation.md) and [restricted CEL](../docs/internal/decisions/0003-restricted-cel-resource-policy.md). Public specifications, draft design approval and implementation evidence remain distinct.
 
