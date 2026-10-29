@@ -1,0 +1,16 @@
+language: keir/v0
+domain: {id: sample.tasks, version: '1', fingerprint: 'sha256:02f1586fb84d4cd168948d63f2989224bfb9b0298b700ae72f92a790d146947d'}
+entrypoint: ClassifyTask
+name: classify-after-two-reads
+steps:
+  - id: first
+    call: tasks.get
+    args:
+      taskId: {cel: input.taskId}
+  - id: second
+    call: tasks.get
+    args:
+      taskId: {cel: input.taskId}
+return:
+  record:
+    classification: {cel: 'second.status == "COMPLETED" ? "DONE" : "PENDING"'}

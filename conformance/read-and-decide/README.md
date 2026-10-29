@@ -2,7 +2,7 @@
 
 `source.yaml` and its trusted `dcm.json` describe the controlled read/classify sample. The Java compiler emits `artifact.json`; both runtimes must consume these same bytes. `artifact.sha256` contains the separately held `sha256:` digest for this curated test fixture. It does not authenticate arbitrary customer output or certify a real adapter.
 
-The artifact uses candidate profile `keir-read/1` and compiler identity `keir-compiler-java/0.1.0-SNAPSHOT`. This fixture is not a completed runtime-conformance claim. See the [compiler commands](../../compiler-java/README.md) and [acceptance contract](../../docs/specs/host-integration.md#acceptance-fixtures).
+The artifact uses experimental profile `keir-read/1` and compiler identity `keir-compiler-java/0.1.0-SNAPSHOT`. Local Java/Node conformance passes for this checkpoint. See the [compiler commands](../../compiler-java/README.md), [acceptance contract](../../docs/specs/host-integration.md#acceptance-fixtures) and [testing evidence](../../docs/testing.md).
 
 Compiler tests read this directory and require byte-for-byte agreement with the golden artifact. Regenerate through the Java compiler after an intentional reviewed source/model/environment change, independently verify the resulting digest, and update all four files together. Do not recompile separately for Java and Node.
 
@@ -46,7 +46,7 @@ Expectations are hand-authored from the contract, not approved snapshots of runn
 | --- | --- |
 | Completed/open, declared missing/inaccessible task, transient/exception/malformed adapter response | Shared `done`, `pending`, `task_not_found`, `access_denied`, `transient`, `adapter-*` cases. |
 | Typed input/protected binding, no customer actor override | Shared `input-*`, `binding-*` cases; compiler forbidden host-argument tests and Node `prepare.test.js` cover authored overrides. |
-| Fresh/admission grant omission, invalid counts, widening | Shared `fresh-grant-*`, `admission-grant-*`. Multi-call exhaustion is not exercised by this one-read corpus and requires an expanded-artifact module fixture. |
+| Fresh/admission grant omission, invalid counts, widening and multi-call exhaustion | Shared `fresh-grant-*`, `admission-grant-*`; the separately Java-compiled [two-read fixture](multi-call/README.md) verifies exhaustion before second-call authorization, counter/identity reset and first-read failure in both module suites on identical bytes. |
 | Invocation/capability denial, thrown/nonboolean checks | Shared `invocation-auth-*`, `call-auth-*`; native authorization timeout is checked in Node `invoke.test.js`; Java equivalent required. |
 | Exact trace, reservation before dispatch, minimum/exact/one-short quotas | Shared `trace-2`, `trace-4`, `trace-7`, `trace-8`; malformed/widened/lowered quotas also have preparation cases. |
 | Inclusive expiry, post-check/post-adapter expiry, negative/regressing clock, valid advance and exact remaining budget | Shared `deadline-*`, `expiry-*`, `clock-regression`, `clock-advance`; fractional/NaN/throwing Node clocks, finite native waits and late settlement stay in `runtime-node/test/invoke.test.js`. |
@@ -59,4 +59,21 @@ Expectations are hand-authored from the contract, not approved snapshots of runn
 
 The Java test driver should read this same file, prepare once per case and emit the same ordered array of `{id,prepare,runs}` objects. Each normalized run is `{outcome,calls,authorizations,consumption}`. Preparation diagnostics compare `code`/`path`; human message text is excluded. Callback requests and logical time follow the table above; exception text and wall timestamps are never compared. Java driver code belongs to `runtime-java`, and the embedding example remains separate.
 
-Node passing this corpus is a Node checkpoint. Java execution, whole-module coverage, packaged host checks and an actual comparison against these same expectations remain required before combined parity is claimed. See the complete [acceptance matrix](../../docs/specs/host-integration.md#acceptance-fixtures) and [testing guidance](../../docs/testing.md).
+Both runtimes pass this corpus and the combined verifier compares their entire normalized outputs. Component coverage and independent packaged hosts are checked locally. Product CI/cloud execution and production qualification remain open. See the complete [acceptance matrix](../../docs/specs/host-integration.md#acceptance-fixtures) and [testing guidance](../../docs/testing.md).
+
+## Verify both runtimes and packaged hosts
+
+With JDK 21 and Node 24 available, build the Java modules and install pinned Node packages using project-local caches. In PowerShell, from the repository root:
+
+```powershell
+$env:MAVEN_USER_HOME = "$PWD/.tools/maven"
+.\mvnw.cmd "-Dmaven.repo.local=.tools/maven/repository" -Pcoverage verify
+npm.cmd ci --prefix runtime-node --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
+npm.cmd test --prefix runtime-node
+New-Item -ItemType Directory -Path .tools/packages -Force | Out-Null
+npm.cmd pack ./runtime-node --pack-destination .tools/packages --cache .tools/npm-cache --ignore-scripts
+npm.cmd ci --prefix examples/node-host --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
+node conformance/read-and-decide/verify.mjs
+```
+
+After setup, the final command compiles source twice, requires identical golden bytes and independently held digest, compares all shared Java/Node outputs, and runs both packaged hosts with those fresh bytes. Completed/open inputs display DONE/PENDING; missing/wrong-resource inputs are not displayed. Java uses the shaded host runtime plus test-only scenario classes, with compiler/parser classes excluded. Installed Node source must match reviewed package source. Subprocesses/output are bounded; the verifier accepts no configuration arguments and writes generated bytes only under ignored `.tools/contract-verification/`.

@@ -1,6 +1,6 @@
 # Read-and-decide DCM contract
 
-Status: implementation candidate. This is the explicit small model format `keir-dcm/read-1`, not compatibility with every field of baseline `modelVersion: 0.1.0`. A host selects the authoritative model; source may reference it but never supply replacement authority. See [language](language.md).
+Status: implemented experimental checkpoint. This is the explicit small model format `keir-dcm/read-1`, not compatibility with every field of baseline `modelVersion: 0.1.0`. A host selects the authoritative model; source may reference it but never supply replacement authority. See [language](language.md).
 
 ## Closed schema
 

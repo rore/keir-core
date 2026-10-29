@@ -1,6 +1,6 @@
 # Read-and-decide runtime
 
-Status: implementation candidate. Java and Node share this behavior and [artifact contract](compiler-artifact.md). APIs below define data/ownership semantics; idiomatic Java futures and Node promises may implement the same asynchronous adapter boundary.
+Status: implemented experimental checkpoint with local shared conformance. Java and Node share this behavior and [artifact contract](compiler-artifact.md). APIs below define data/ownership semantics; Java futures and Node promises implement the same asynchronous adapter boundary. Production containment qualification remains open.
 
 ## Prepare and invoke
 
@@ -40,7 +40,8 @@ These are conservative **candidate admission ceilings**, not measured performanc
 
 | Quantity | Candidate ceiling |
 | --- | ---: |
-| Raw source / DCM bytes, each | 65,536 |
+| Raw source / DCM document bytes, each | 65,536 |
+| Canonical embedded DCM UTF-8 bytes | 65,536 |
 | Artifact bytes | 1,048,576 |
 | JSON/YAML structural nesting depth | 16 |
 | DCM named types / capabilities / entrypoints | 16 / 8 / 4 |

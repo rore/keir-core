@@ -1,6 +1,6 @@
 # Customer extension assistant
 
-**Status:** initial workflow guidance; no authoring tools are implemented yet. Read the [agent overview](README.md) and [specification status](../specs/README.md).
+**Status:** initial assistant guidance. The read-profile compiler and simulated runtimes are implemented; host-integrated customer authoring and activation tools remain future work. Read the [agent overview](README.md) and [specification status](../specs/README.md).
 
 ## Task and inputs
 
@@ -10,7 +10,7 @@ Help a customer clarify application behavior, author a constrained extension and
 
 1. Clarify the requirement, expected outcomes, missing-data behavior and error cases.
 2. Discover permitted hooks and capabilities. Explain unsupported requests rather than widening the catalog.
-3. Author source against the approved contract; use structured compiler diagnostics for bounded repair when tools become available.
+3. Author source against the approved contract; use structured [compiler library/CLI diagnostics](../../compiler-java/README.md) for bounded repair. Connect customer-facing tools through host policy.
 4. Propose scenarios and expected outcomes, including denial, adapter failure and uncertainty. Run the approved simulation path and explain both program and host-consumption outcomes.
 5. Have the authorized user/domain owner review intended outcomes, then request activation of the exact reviewed revision through host policy. Changes require the applicable renewed review.
 

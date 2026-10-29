@@ -1,0 +1,27 @@
+{
+  "format":"keir-dcm/read-1",
+  "domain":{"id":"sample.tasks","version":"1"},
+  "types":{
+    "TaskId":{"kind":"nominal","base":"String"},
+    "UserId":{"kind":"nominal","base":"String"},
+    "TaskStatus":{"kind":"enum","values":["OPEN","COMPLETED"]},
+    "Classification":{"kind":"enum","values":["DONE","PENDING"]},
+    "ClassifyInput":{"kind":"record","fields":{"taskId":"TaskId"}},
+    "Task":{"kind":"record","fields":{"id":"TaskId","status":"TaskStatus"}},
+    "ClassifyResult":{"kind":"record","fields":{"classification":"Classification"}}
+  },
+  "capabilities":{
+    "tasks.get":{
+      "version":"1",
+      "parameters":{"taskId":{"type":"TaskId","binding":"agent"},"actorId":{"type":"UserId","binding":"host"}},
+      "result":"Task","effect":"READ","errors":["TASK_NOT_FOUND","ACCESS_DENIED"]
+    }
+  },
+  "entrypoints":{
+    "ClassifyTask":{
+      "input":"ClassifyInput","output":"ClassifyResult","trigger":"REQUEST",
+      "consumer":{"id":"sample.classification","version":"1","kind":"DISPLAY"},
+      "grants":{"tasks.get":2}
+    }
+  }
+}

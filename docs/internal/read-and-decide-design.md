@@ -1,6 +1,6 @@
 # Read-and-decide implementation rationale
 
-Status: accepted implementation candidate for `portable-core-first-slice`; full compiler/runtime conformance remains open. Normative behavior lives in [the specifications](../specs/README.md).
+Status: implemented local checkpoint for `portable-core-first-slice`; compiler, both runtimes, shared expectations and independent packaged hosts pass verification. Product CI/protected-contract installation and production qualification remain open. Normative behavior lives in [the specifications](../specs/README.md).
 
 ## Decisions
 
@@ -17,7 +17,7 @@ Inputs: relevant [baseline documents](design-baseline/README.md), accepted decis
 
 The [artifact specification](../specs/compiler-artifact.md) pins the qualified CEL/protobuf environment, including Java's required heterogeneous-comparison runtime option while numeric ASTs remain banned. Missing proto3 fields become defaults without validation; CEL-ES ignores erased checked maps. Neither behavior removes Keir's own validation duties.
 
-Raw nominal-string equality in the probe is explicitly unapproved without the Keir overlay. Literal enum branches are qualified; multiple variables, general branch provenance, full semantic overlay, artifact admission, parser/aggregate limits and complete execution conformance remain implementation gates. Worker batch termination is supervision evidence only. Java hard deadlines, complete memory isolation and production containment remain unproven.
+Raw nominal-string equality in the probe remains unapproved without the implemented Keir overlay. Both runtimes now execute the full read-profile corpus and supplemental scalar/two-call artifacts, including variable/branch provenance, admission and bounded failure behavior. The [combined verifier](../../conformance/read-and-decide/README.md#verify-both-runtimes-and-packaged-hosts) checks deterministic compiler bytes, complete shared results and packaged hosts. Review added consumer-ID, record-conditional, canonical-DCM overflow and isolated expiry-clock regressions. Runtime-local artifact helpers preserve separate source/runtime boundaries; no shared module was needed. Worker batch termination remains supervision evidence only. Hard synchronous deadlines, complete memory isolation and production containment remain unproven.
 
 ## Implementation boundaries
 
