@@ -27,7 +27,7 @@
 
 **Material assumptions:** The user wants an advisory configuration before an enforced PR workflow. Disproved by a request for immediate hooks or CI; then revise the proposal before installing those integrations.
 
-**Plan:** Confirm the Phase 1 inspection with the developer, then review and adapt `docs/agent-workflow-advisory-proposal.md`. After policy sign-off, write only the approved local files, validate schemas and run bounded local checks.
+**Plan:** Confirm the Phase 1 inspection with the developer, then review and adapt `docs/internal/workflow/agent-workflow-advisory-proposal.md`. After policy sign-off, write only the approved local files, validate schemas and run bounded local checks.
 
 **Verification plan:**
 - Approved policy fidelity -> compare parsed configs with signed-off YAML blocks and validate both schemas.
@@ -35,7 +35,7 @@
 - Local tool reachability -> resolve the bootstrap Work Record and run Redline reporter on representative changed-path lists.
 - Honest limits -> record that no HEAD, remote or full Git-diff probe is available.
 
-**Plan review:** Agent technical review: Codex subagent /root/bootstrap_review (2026-10-29, retrospective read-only review). Phase 1 inspection and Phase 2 documentation scope were confirmed by the developer. The adapted Phase 3 policies in `docs/agent-workflow-advisory-proposal.md` received explicit sign-off on 2026-10-29. The earlier draft was presented before the required Phase 1 checkpoint and superseded. The clean-context review occurred after initial installation; no pre-implementation review is claimed.
+**Plan review:** Agent technical review: Codex subagent /root/bootstrap_review (2026-10-29, retrospective read-only review). Phase 1 inspection and Phase 2 documentation scope were confirmed by the developer. The adapted Phase 3 policies in `docs/internal/workflow/agent-workflow-advisory-proposal.md` received explicit sign-off on 2026-10-29. The earlier draft was presented before the required Phase 1 checkpoint and superseded. The clean-context review occurred after initial installation; no pre-implementation review is claimed.
 
 **Approvals:** Not required at this risk level; developer explicitly signed off on the adapted Phase 3 policies on 2026-10-29.
 
@@ -50,7 +50,7 @@ Installed the signed-off YAML policies, copied the local checker, Redline report
 
 Git HEAD was unavailable because the repository has no commits. The developer confirmed the Phase 1 inspection, temporary lightweight flow and final Phase 3 policies. No policy or runtime hook was activated before sign-off.
 
-- `docs/agent-workflow-bootstrap-summary.md` records installed files, deferred controls and probe results.
+- `docs/internal/workflow/agent-workflow-bootstrap-summary.md` records installed files, deferred controls and probe results.
 - Both active policies matched the approved YAML draft by parsed content and passed schema validation.
 - Copied scripts and schema matched source SHA-256; the checker resolved this Work Record.
 - The checker had no blocking predicate failures. It returned advisory exit code 1 because no Redline verdict was supplied.

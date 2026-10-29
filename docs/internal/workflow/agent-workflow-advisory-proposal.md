@@ -1,5 +1,7 @@
 # Agent Workflow advisory bootstrap proposal
 
+Historical record: paths and approved configuration below describe the original bootstrap. Decisions and supplied design sources now live under `docs/internal/`; workflow records are in `docs/internal/workflow/`. `docs/roadmap.md` was removed in favor of `roadmap/board.md`. The active root policies contain the current paths; their navigation updates do not retroactively change this approval evidence.
+
 Date: 2026-10-29
 
 Status: Phase 3 draft approved and installed as an advisory subset on 2026-10-29. No hooks or CI installed.

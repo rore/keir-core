@@ -33,4 +33,4 @@ Treating 64 items or 120 nodes as certified limits, or claiming containment from
 
 ## Notes
 
-See the [restricted CEL decision](../../docs/decisions/0003-restricted-cel-resource-policy.md).
+See the [restricted CEL decision](../../docs/internal/decisions/0003-restricted-cel-resource-policy.md).

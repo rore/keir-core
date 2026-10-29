@@ -1,5 +1,7 @@
 # Agent Workflow advisory bootstrap summary
 
+Historical record: paths and approved configuration below describe the original bootstrap. Decisions and supplied design sources now live under `docs/internal/`; workflow records are in `docs/internal/workflow/`. `docs/roadmap.md` was removed in favor of `roadmap/board.md`. The active root policies contain the current paths; their navigation updates do not retroactively change this approval evidence.
+
 Date: 2026-10-29
 
 This is the approved advisory subset for `keir-core`. Agent Workflow is opt-in for ordinary work. Updates confined to `roadmap/`, `docs/README.md`, or `docs/roadmap.md` need no Work Record. The `keir-demo-app` repository has no Agent Workflow process.

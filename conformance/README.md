@@ -4,4 +4,4 @@ This directory will hold shared source inputs, compiled artifacts, scenarios and
 
 Compare typed values, exact call order and arguments, guard decisions, effects and termination classes. Keep compiler rejection tests, expression interoperability, runner conformance and real host adapter guarantees distinct.
 
-The initial design fixtures remain in [the baseline](../docs/design-baseline/public/examples/). They are illustrative and have pending host certifications; they are not passing executable tests. Import maintained fixtures here when the first harness exists, with explicit provenance and acceptance checks.
+The initial design fixtures remain in [the baseline](../docs/internal/design-baseline/public/examples/). They are illustrative and have pending host certifications; they are not passing executable tests. Import maintained fixtures here when the first harness exists, with explicit provenance and acceptance checks.

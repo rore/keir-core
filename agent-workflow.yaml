@@ -13,6 +13,5 @@ applicability:
     paths:
       - roadmap/
       - docs/README.md
-      - docs/roadmap.md
     workflowRequired: false
     directDefaultBranchAllowed: false
