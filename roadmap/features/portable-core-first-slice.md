@@ -54,7 +54,7 @@ Compiler and Node checkpoints passed integration review against the closed host 
 
 The Node suite was independently replayed: 82 tests passed in 0.78 seconds, with 100% source line and 95.42% branch coverage; the combined checkout replay also passed in 2.43 seconds. The packaged Node host passed in 0.27–0.46 seconds warm (9.54 seconds on its first observed worker startup). Review found and corrected a compiler/runtime consumer-ID mismatch with a red/green compiler regression, and fixed Windows tarball integrity drift with scoped LF checkout rules and a regenerated exact host lock pin. Runtime execution preserves the documented synchronous-CEL containment limits.
 
-Next work is the Java runtime and host, shared executable scenarios and comparison, compiler coverage measurement, and real contract CI. The shared-conformance offer is pending acceptance. Packaged Java/Node demonstration and complete parity remain open; the compiler-to-Node path does not close this feature. See [fast regression commands and baselines](../../docs/testing.md).
+Java runtime and host implementation is accepted and in progress, including required build/coverage wiring and measured compiler/runtime coverage. The shared-conformance offer remains pending acceptance; agree its test-only scenario/result interface before Java scenario transport work. Shared executable comparison and real contract CI follow. Packaged Java/Node demonstration and complete parity remain open; the compiler-to-Node path does not close this feature. See [fast regression commands and baselines](../../docs/testing.md).
 
 ### Implementation prerequisites
 
