@@ -69,6 +69,7 @@ export function prepareExpressions(artifact, contexts) {
     ok(dcm.types[left.type]?.kind === 'enum' && right.literals && assignable(right, left.type) || dcm.types[right.type]?.kind === 'enum' && left.literals && assignable(left, right.type), p);
   }
   function joinBranches(left, right) {
+    ok(scalar(left.type) && scalar(right.type), p);
     if (left.literals && right.literals) return { type: 'String', literals: [...left.literals, ...right.literals] };
     if (left.type === right.type) return { type: left.type };
     if (assignable(left, right.type)) return { type: right.type };
