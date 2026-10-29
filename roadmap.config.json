@@ -1,6 +1,14 @@
 {
   "roadmapPath": "roadmap",
   "defaultLens": "milestone",
+  "appearance": {
+    "tagColors": {
+      "repo": {
+        "keir-core": "blue",
+        "keir-demo-app": "purple"
+      }
+    }
+  },
   "lenses": {
     "fields": {
       "milestone": {

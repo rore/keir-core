@@ -21,9 +21,9 @@ node <path-to-this-skill>/scripts/start-server.cjs
 
 The launcher prints one line: `Minimap running at http://localhost:<port>` (just started) or `Minimap already running at http://localhost:<port>` (reused). Capture the port — default 4312, but the launcher falls forward if busy.
 
-For status / stop / restart, see [references/server.md](references/server.md).
+For status / stop / restart and optional Windows/Linux persistent service installation, see [references/server.md](references/server.md). If a managed installation exists, these commands use it. Opening a board never authorizes installing or updating a service; keep using standalone mode otherwise.
 
-Compatible APIs can reuse different releases. A refused start/restart is not permission to stop the shared server: inspect running/source identity and coordinate before explicitly replacing it with `restart-server.mjs --replace-runtime`.
+Compatible APIs can reuse different releases. A refused start/restart is not permission to stop the shared server: inspect running/source identity and coordinate first. Standalone replacement uses `restart-server.mjs --replace-runtime`; managed installations require the explicit `service.mjs update` operation.
 
 ### 2a. Showing the roadmap
 
@@ -45,6 +45,8 @@ The active repo is the directory the user is working in. Always pass an absolute
 When completed work affects a roadmap item, reconcile its state using [Completion Reconciliation](references/roadmap-contract.md#completion-reconciliation).
 
 For metadata-first roadmaps, keep classification in item metadata and the single shared traversal order in `board.md`. A membership move changes only metadata; moving to Unassigned removes that field rather than writing a placeholder; a metadata reorder uses visible before/after neighbors, preserves filtered-out items, and cannot silently cross freeform board groups. Configure group order with `lenses.fields.<field>.order` and optionally set the top-level `defaultLens`. An explicit board-view URL, including `lens=board`, overrides a remembered repository/mode view; a remembered grouping overrides `defaultLens`. Unknown URL or configured groupings fall back with a warning; removed remembered groupings fall back quietly. Do not perform automatic migration: check the installed skill version and follow the manual migration steps in [references/roadmap-contract.md](references/roadmap-contract.md).
+
+Optional card badge and color configuration lives under `appearance` in the opened board's `roadmap.config.json`; it is not item data or a UI setting and applies across layouts and worktree views. `colorTags` defaults to `true` and disables custom badge/detail tag colors only when false; `cardColorBy` remains independent. Follow the exact field, palette, status, and fallback rules in the [roadmap contract](references/roadmap-contract.md#board-appearance); remove `appearance` and Refresh to reset it.
 
 For ownership rules, item shape, board rules, and edit constraints, read [references/roadmap-contract.md](references/roadmap-contract.md).
 
