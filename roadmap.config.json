@@ -9,10 +9,21 @@
           "Customize a real task application",
           "Author and activate customizations through AI"
         ]
+      },
+      "status": {
+        "order": [
+          "queued",
+          "active",
+          "in-progress",
+          "blocked",
+          "done"
+        ]
       }
     }
   },
   "filters": {
-    "fields": ["repo"]
+    "fields": [
+      "repo"
+    ]
   }
 }
