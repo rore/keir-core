@@ -1,0 +1,42 @@
+# Illustrative agent-authored v0 extension. DCM contracts are pending certification.
+language: keir/v0
+domain:
+  id: demo.tasks
+  version: '0.1.0'
+  fingerprint: sha256:a48d02c0070212a5186f2a06f59c625462a8e24991b16cdcc0dfc0f64ab63caf
+entrypoint: TaskCompleted
+name: invoice-payment-followup
+steps:
+  - id: source
+    call: tasks.get
+    args:
+      taskId: {cel: 'input.taskId'}
+    onError:
+      TASK_NOT_FOUND:
+        record:
+          status: {literal: SOURCE_MISSING}
+  - id: existing
+    call: tasks.search
+    args:
+      projectId: {cel: 'source.projectId'}
+      originSourceTaskId: {cel: 'source.id'}
+      originKind: {literal: payment-followup}
+      maxResults: {literal: 5}
+  - id: eligible
+    let:
+      cel: 'source.status == "COMPLETED" && source.tags.exists(t, t == "invoice-sent") && size(existing.items) == 0'
+  - id: created
+    when: eligible
+    call: tasks.create
+    args:
+      projectId: {cel: 'source.projectId'}
+      originKind: {literal: payment-followup}
+      title: {literal: 'Follow up on payment'}
+      dueAt: {cel: 'input.completedAt + duration("168h")'}
+    onError:
+      FOLLOWUP_ALREADY_EXISTS:
+        record:
+          status: {literal: NO_OP}
+return:
+  record:
+    status: {cel: 'eligible ? "CREATED" : "NO_OP"'}

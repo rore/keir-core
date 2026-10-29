@@ -1,0 +1,12 @@
+{
+  "name": "minimap-package",
+  "version": "0.3.6",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "minimap": "./cli.js"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

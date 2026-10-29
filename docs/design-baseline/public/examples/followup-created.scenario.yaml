@@ -1,0 +1,52 @@
+# Example oracle. No runtime has yet executed the full compiled extension.
+scenarioVersion: '0.1.0'
+id: payment-followup-created
+program: followup-extension.yaml
+entrypoint: TaskCompleted
+given:
+  input: {taskId: task_invoice, completedAt: '2026-10-28T09:00:00Z'}
+  clock: '2026-10-28T09:00:00Z'
+  hostContext: {tenantId: tenant_demo, actorId: user_demo, invocationId: event_001}
+stubs:
+  - step: source
+    capability: tasks.get
+    ordinal: 1
+    outcome: SUCCESS
+    value:
+      id: task_invoice
+      projectId: project_sales
+      status: COMPLETED
+      title: Send invoice
+      tags: [invoice-sent]
+      version: 3
+  - step: existing
+    capability: tasks.search
+    ordinal: 1
+    outcome: SUCCESS
+    value: {items: []}
+  - step: created
+    capability: tasks.create
+    ordinal: 1
+    outcome: SUCCESS
+    effectState: CONFIRMED
+    value:
+      id: task_followup_001
+      projectId: project_sales
+      status: OPEN
+      title: Follow up on payment
+      tags: []
+      version: 1
+      dueAt: '2026-11-04T09:00:00Z'
+expect:
+  termination: SUCCESS
+  result: {status: CREATED}
+  calls:
+    - {step: source, capability: tasks.get, args: {taskId: task_invoice}}
+    - {step: existing, capability: tasks.search, args: {projectId: project_sales, originSourceTaskId: task_invoice, originKind: payment-followup, maxResults: 5}}
+    - {step: created, capability: tasks.create, args: {projectId: project_sales, originKind: payment-followup, title: Follow up on payment, dueAt: '2026-11-04T09:00:00Z'}}
+  trustedHostBindings:
+    created: {sourceTaskId: task_invoice}
+  effects:
+    - {step: created, kind: task.create, state: CONFIRMED}
+  branches: {created: true}
+review: {state: proposed, reviewer: '', notes: 'Expected outcome requires independent human review.'}

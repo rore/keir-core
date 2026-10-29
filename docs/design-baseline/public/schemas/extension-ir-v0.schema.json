@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/keir/schema/extension-ir-v0.json",
+  "title": "Keir Extension IR v0 (structural validation only)",
+  "description": "Enforces the closed syntax. It does NOT validate CEL, DCM references, nominal/unit types, grants, effects, trust or host guarantees.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["language", "domain", "entrypoint", "name", "steps", "return"],
+  "properties": {
+    "language": {"const": "keir/v0"},
+    "domain": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "version", "fingerprint"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "version": {"type": "string", "minLength": 1, "maxLength": 40},
+        "fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    },
+    "entrypoint": {"$ref": "#/$defs/name"},
+    "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"},
+    "steps": {"type": "array", "minItems": 1, "maxItems": 16, "items": {"oneOf": [{"$ref": "#/$defs/letStep"},{"$ref": "#/$defs/callStep"}]}},
+    "return": {"$ref": "#/$defs/typedReturn"}
+  },
+  "$defs": {
+    "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9.]*$", "maxLength": 100},
+    "stepId": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$", "maxLength": 64},
+    "binding": {
+      "oneOf": [
+        {"type": "object", "required": ["cel"], "additionalProperties": false,
+          "properties": {"cel": {"type": "string", "minLength": 1, "maxLength": 4096}}},
+        {"type": "object", "required": ["literal"], "additionalProperties": false,
+          "properties": {"literal": {}}}
+      ]
+    },
+    "typedReturn": {
+      "type": "object", "additionalProperties": false, "required": ["record"],
+      "properties": {
+        "record": {"type": "object", "minProperties": 1, "maxProperties": 64,
+          "propertyNames": {"$ref": "#/$defs/name"},
+          "additionalProperties": {"$ref": "#/$defs/binding"}}
+      }
+    },
+    "letStep": {
+      "type": "object", "additionalProperties": false, "required": ["id", "let"],
+      "properties": {"id": {"$ref": "#/$defs/stepId"}, "let": {"$ref": "#/$defs/binding"}}
+    },
+    "callStep": {
+      "type": "object", "additionalProperties": false, "required": ["id", "call", "args"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stepId"},
+        "call": {"$ref": "#/$defs/name"},
+        "args": {"type": "object", "maxProperties": 64,
+          "propertyNames": {"$ref": "#/$defs/name"},
+          "additionalProperties": {"$ref": "#/$defs/binding"}},
+        "when": {"$ref": "#/$defs/stepId"},
+        "onError": {
+          "type": "object", "minProperties": 1, "maxProperties": 32,
+          "propertyNames": {"pattern": "^[A-Z][A-Z0-9_]*$"},
+          "additionalProperties": {"$ref": "#/$defs/typedReturn"}
+        }
+      }
+    }
+  }
+}

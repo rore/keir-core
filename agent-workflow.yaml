@@ -1,0 +1,18 @@
+version: 1
+project:
+  name: keir-core
+workRecord:
+  backend: local
+  local:
+    taskPath: ".agent-workflow/tasks/{slug}.md"
+  requiredForBranchChanges: false
+redline: optional
+redlineVerdictPath: build/redline-verdict.json
+applicability:
+  documentationOnly:
+    paths:
+      - roadmap/
+      - docs/README.md
+      - docs/roadmap.md
+    workflowRequired: false
+    directDefaultBranchAllowed: false

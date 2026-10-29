@@ -1,0 +1,30 @@
+version: 1
+project:
+  name: keir-core
+zones:
+  red:
+    - path: agent-workflow.yaml
+      reason: workflow policy changes
+      checkpoint: architecture-review
+    - path: agent-redline-policy.yaml
+      reason: risk policy changes
+      checkpoint: architecture-review
+    - path: docs/decisions/**
+      reason: architecture and product decisions
+      checkpoint: architecture-review
+  blue:
+    - path: roadmap/**
+      reason: shared planning updates
+    - path: docs/README.md
+      reason: documentation navigation
+    - path: docs/roadmap.md
+      reason: roadmap navigation
+checkpoints:
+  architecture-review:
+    description: Review structural policy or decision changes
+    satisfiedBy:
+      - label: architecture-reviewed
+modes:
+  default: shadow
+excludes:
+  - ".agent-workflow/**"

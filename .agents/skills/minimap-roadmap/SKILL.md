@@ -1,0 +1,79 @@
+---
+name: minimap-roadmap
+description: Use when showing or updating roadmap state, or picking up, resuming, investigating, testing, reviewing, or completing assigned roadmap work in a repo with the minimap roadmap convention (board.md, scope.md, features/, ideas/). Not for arbitrary spec review.
+---
+
+# Minimap Roadmap
+
+Roadmap files are the source of truth. The UI is a lens; agents and humans operate on the same files.
+
+## Quick Workflow
+
+For assigned roadmap work, follow [Agent Handoffs](#agent-handoffs) on pickup, resume, pause, handoff, and completion. Assigned implementation, investigation, testing, and substantive review qualify for optional [Pallium participation](references/pallium-participants.md) when its MCP work-reference tools are available; passive browsing and clerical edits do not. Assignment alone does not require starting the server.
+
+When the user asks to **see** the roadmap, give them a URL. When they ask to **edit** roadmap state, edit the files directly. Both paths share step 1.
+
+### 1. Make sure the server is running
+
+```bash
+node <path-to-this-skill>/scripts/start-server.cjs
+```
+
+The launcher prints one line: `Minimap running at http://localhost:<port>` (just started) or `Minimap already running at http://localhost:<port>` (reused). Capture the port — default 4312, but the launcher falls forward if busy.
+
+For status / stop / restart, see [references/server.md](references/server.md).
+
+Compatible APIs can reuse different releases. A refused start/restart is not permission to stop the shared server: inspect running/source identity and coordinate before explicitly replacing it with `restart-server.mjs --replace-runtime`.
+
+### 2a. Showing the roadmap
+
+Build the URL with the active repo's absolute path and reply with it:
+
+```text
+http://localhost:<port>/#repo=<absolute-path-to-active-repo>&view=board
+```
+
+The active repo is the directory the user is working in. Always pass an absolute path — the same server can serve any repo, switching is just a URL change.
+
+### 2b. Editing roadmap state
+
+1. Find the roadmap root from `roadmap.config.json`, or use `roadmap/`.
+2. Read the files that own the truth before editing.
+3. Edit the smallest owning file set.
+4. Preserve unknown frontmatter and sections.
+
+When completed work affects a roadmap item, reconcile its state using [Completion Reconciliation](references/roadmap-contract.md#completion-reconciliation).
+
+For metadata-first roadmaps, keep classification in item metadata and the single shared traversal order in `board.md`. A membership move changes only metadata; moving to Unassigned removes that field rather than writing a placeholder; a metadata reorder uses visible before/after neighbors, preserves filtered-out items, and cannot silently cross freeform board groups. Configure group order with `lenses.fields.<field>.order` and optionally set the top-level `defaultLens`. An explicit board-view URL, including `lens=board`, overrides a remembered repository/mode view; a remembered grouping overrides `defaultLens`. Unknown URL or configured groupings fall back with a warning; removed remembered groupings fall back quietly. Do not perform automatic migration: check the installed skill version and follow the manual migration steps in [references/roadmap-contract.md](references/roadmap-contract.md).
+
+For ownership rules, item shape, board rules, and edit constraints, read [references/roadmap-contract.md](references/roadmap-contract.md).
+
+Pallium is optional: never install it, use shell/HTTP substitutes, or block ordinary Minimap work when its MCP work-reference tools are absent or unavailable.
+
+## Agent Handoffs
+
+For assigned roadmap work, use the manager-designated shared checkout and make roadmap edits there; do not automatically sync changes across worktrees. On pickup or resume, confirm the canonical item id and read its current file and relevant roadmap state. On pause or handoff, report the exact item id, repository-relative item path, [feature reference](#feature-references-in-handoffs) when available, changed files, and current worktree state, including any uncommitted work. When Pallium participation applies, follow [Pallium participation](references/pallium-participants.md) on pickup, resume and leaving an assignment; assignment completion can require cleanup even while the feature remains unfinished. On completion, reconcile the owning roadmap item under [Completion Reconciliation](references/roadmap-contract.md#completion-reconciliation) and report the resulting state and changed files. These notes do not transfer roadmap file ownership or imply an Agent Workflow requirement.
+
+### Feature references in handoffs
+
+When an assigned feature is named but its exact reference was not supplied, read its canonical roadmap item and resolve the tuple with Minimap's existing CLI:
+
+```bash
+node <skill>/runtime/cli.js roadmap item-ref <item-id> --repo <absolute-repo-path> --json
+```
+
+The result supplies `scope_ref` and `local_ref`; carry `provider: minimap` and those exact returned values in the manager handoff. Do not reconstruct them from a title, branch, path, or item id. If repository or item identity cannot be resolved, say the source reference is unverified; do not report an empty source list or guess a tuple. When a supported Agent Workflow relationship capture procedure is available, pass the exact tuple to its Work Record capture/save/readback procedure at creation or transition. Agent Workflow owns the stored relationship and verification; this skill does not write a backlink or replace that procedure. Otherwise, continue ordinary roadmap work and the handoff without claiming a stored Work Record relationship. Pallium participation remains separately optional.
+
+## Composing With Spec Review
+
+A roadmap item is just a markdown file. To open a review thread on one item (anchored comments, suggestions), attach the item file via the `minimap-spec-review` skill if it is installed alongside this one. Spec sessions never auto-mutate the file, so the layers compose safely.
+
+If only this skill is installed, the user can still drive the conversation through any other client (the running minimap server serves both modes).
+
+## Guardrails
+
+- Do not create parallel roadmap trackers.
+- Do not treat chat as the source of truth when roadmap files exist.
+- Always pass the absolute repo path in the URL hash; do not assume the running server is rooted in your repo.
+- Do not curl the server, send signals, or edit `$MINIMAP_HOME/server.json` or its participant preference by hand. Use the bundled scripts only.
+- If Minimap's documentation, CLI, HTTP API, server, UI, or lifecycle scripts fail or contradict documented behavior, load [`references/upstream-feedback.md`](references/upstream-feedback.md); otherwise do not load it.

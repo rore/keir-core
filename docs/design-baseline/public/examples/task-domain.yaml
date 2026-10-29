@@ -1,0 +1,140 @@
+# Fictional DCM example only. Host guarantees have NOT been certified.
+# Do not use this sample to activate customer code in production.
+modelVersion: '0.1.0'
+domain:
+  id: demo.tasks
+  version: '0.1.0'
+sources:
+  - kind: internal
+    artifact: task-service-v0
+    digest: 'sha256:1111111111111111111111111111111111111111111111111111111111111111'
+types:
+  TaskId: {kind: nominal, base: string}
+  ProjectId: {kind: nominal, base: string}
+  UserId: {kind: nominal, base: string}
+  OriginKind:
+    kind: enum
+    values: [payment-followup, weekly-review]
+  TaskStatus:
+    kind: enum
+    values: [OPEN, COMPLETED]
+  FollowupStatus:
+    kind: enum
+    values: [CREATED, NO_OP, SOURCE_MISSING]
+  TaskTags:
+    kind: list
+    element: String
+    maxItems: 16
+  Task:
+    kind: record
+    fields:
+      id: {type: TaskId, required: true}
+      projectId: {type: ProjectId, required: true}
+      status: {type: TaskStatus, required: true}
+      title: {type: String, required: true, maxLength: 160}
+      tags: {type: TaskTags, required: true}
+      version: {type: Int64, required: true}
+      dueAt: {type: Instant, required: false}
+  TaskSearchResult:
+    kind: record
+    fields:
+      items: {type: TaskSearchItems, required: true}
+  TaskSearchItems:
+    kind: list
+    element: Task
+    maxItems: 5
+  TaskCompletedInput:
+    kind: record
+    fields:
+      taskId: {type: TaskId, required: true}
+      completedAt: {type: Instant, required: true}
+  FollowupResult:
+    kind: record
+    fields:
+      status: {type: FollowupStatus, required: true}
+contracts:
+  scope-to-actor:
+    kind: scope
+    enforcedBy: trusted-host
+    certification: pending
+  complete-origin-query:
+    kind: boundedResult
+    enforcedBy: trusted-host
+    certification: pending
+    description: Empty filtered result must mean no matching task exists; never silently truncate.
+  atomic-origin-unique:
+    kind: atomicUnique
+    enforcedBy: trusted-host
+    certification: pending
+    description: Enforce uniqueness for tenant, host-bound sourceTaskId and originKind atomically.
+  operation-replay:
+    kind: hostReplay
+    enforcedBy: trusted-host
+    certification: pending
+    description: Stable operation identity bound to event, extension revision and step; no arbitrary agent key.
+capabilities:
+  tasks.get:
+    version: '1.0.0'
+    origin: {source: task-service-v0, operationId: getTask}
+    parameters:
+      taskId: {type: TaskId, binding: agent, required: true}
+      actorId: {type: UserId, binding: host, required: true}
+    result: Task
+    effects: [task.read]
+    guarantees: [scope-to-actor]
+    errors:
+      TASK_NOT_FOUND: {kind: business, handling: return}
+    replay: {mode: read-only, maxAttempts: 1}
+  tasks.search:
+    version: '1.0.0'
+    origin: {source: task-service-v0, operationId: searchTasks}
+    parameters:
+      projectId: {type: ProjectId, binding: agent, required: false}
+      originSourceTaskId: {type: TaskId, binding: agent, required: false}
+      originKind: {type: OriginKind, binding: agent, required: false}
+      status: {type: TaskStatus, binding: agent, required: false}
+      maxResults: {type: Int64, binding: agent, required: true, maxValue: 5}
+      actorId: {type: UserId, binding: host, required: true}
+    result: TaskSearchResult
+    maxResponseItems: 5
+    effects: [task.read]
+    guarantees: [scope-to-actor, complete-origin-query]
+    errors: {}
+    replay: {mode: read-only, maxAttempts: 1}
+  tasks.create:
+    version: '1.0.0'
+    origin: {source: task-service-v0, operationId: createTask}
+    parameters:
+      projectId: {type: ProjectId, binding: agent, required: true}
+      title: {type: String, binding: agent, required: true, maxLength: 160}
+      sourceTaskId: {type: TaskId, binding: host, required: true, source: entrypoint.taskId}
+      originKind: {type: OriginKind, binding: agent, required: true}
+      dueAt: {type: Instant, binding: agent, required: true}
+      actorId: {type: UserId, binding: host, required: true}
+      tenantId: {type: String, binding: host, required: true}
+      operationKey: {type: String, binding: host, required: true}
+    result: Task
+    effects: [task.create]
+    guarantees: [scope-to-actor, atomic-origin-unique, operation-replay]
+    errors:
+      FOLLOWUP_ALREADY_EXISTS: {kind: business, handling: return}
+      CREATE_UNAVAILABLE: {kind: transient, handling: abort}
+      UNKNOWN_COMMIT: {kind: uncertain, handling: host-only}
+    replay: {mode: host-idempotency, maxAttempts: 1, unknownCommit: stop}
+entrypoints:
+  TaskCompleted:
+    input: TaskCompletedInput
+    output: FollowupResult
+    grants:
+      tasks.get: 1
+      tasks.search: 1
+      tasks.create: 1
+    allowedEffects: [task.read, task.create]
+    requiredContracts: [scope-to-actor, complete-origin-query, atomic-origin-unique, operation-replay]
+    limits:
+      maxSteps: 6
+      maxCalls: 3
+      maxWrites: 1
+      maxOutputItems: 3
+      maxCELCost: 10000  # design target; enforcement is not proven
+      maxElapsedMs: 200   # design target; enforcement is not proven
