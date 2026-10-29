@@ -1,7 +1,7 @@
 ---
 id: bound-cel-execution
 title: Measure a restricted CEL profile in both runtimes
-status: queued
+status: active
 priority: high
 commitment: committed
 milestone: Execute extensions in Java and Node
@@ -37,6 +37,6 @@ See the [restricted CEL decision](../../docs/internal/decisions/0003-restricted-
 
 Scope evidence incrementally around the runnable examples: field access/equality/Boolean logic first, the scalar guarded-effect predicate next, and collections/time only for [their explicit enhancement](enrich-followup-expressions.md). Recover the prior harness when useful, but unavailable archive packaging must not block writing equivalent focused tests. Unsupported nodes/overloads are rejected; a smaller supported profile does not excuse unverified bounds for expressions actually admitted. This work proceeds with the compiler/runtimes rather than as a complete standalone research phase before any program runs.
 
-### Current offer
+### Current assignment
 
-Offered to `@keir-dev2` on 2026-10-29 for the first scalar scenario only. Isolated checkout: `C:/Users/WORK_ID/.codex/worktrees/keir-cel-node/keir-core`, starting at `4eadecb`. Own `conformance/cel-profile/**` and the minimal Node package scaffold required for real CEL qualification. Coordinate Java build tooling with developer 1; do not duplicate root build files, architecture review or roadmap state. Deliver pinned versions, reproducible actual-evaluator tests, measured limits and explicit containment gaps in an isolated commit. Relay receipt is unconfirmed; the authorized chat fallback carries the same offer. Acceptance is still pending, and no passing runtime evidence is claimed.
+Accepted by `@keir-dev2` on 2026-10-29 for the first scalar scenario only; exact Minimap participation attachment succeeded. Isolated checkout: `C:/Users/WORK_ID/.codex/worktrees/keir-cel-node/keir-core`, starting at `4eadecb`. Own `conformance/cel-profile/**` and the minimal Node package scaffold required for real CEL qualification. Coordinate Java build tooling with developer 1; do not duplicate root build files, architecture review or roadmap state. Deliver pinned versions, reproducible actual-evaluator tests, measured limits and explicit containment gaps in an isolated commit. The authorized chat fallback started the same offer after Relay receipt remained unconfirmed. No passing runtime evidence is claimed yet.
