@@ -35,3 +35,5 @@ Claiming production readiness from document review alone, implementing every pro
 ## Notes
 
 Original inputs remain in [the internal baseline](../../docs/internal/design-baseline/README.md). The [specification index](../../docs/specs/README.md) records contract status. This is engineering specification work, not proof of product value.
+
+The architect completed a full source review in [the planning review](../../docs/internal/development-plan-review.md); that is a planning contribution, not completion of these specifications. Start with the contracts needed by [the read-only demonstration](portable-core-first-slice.md), then extend them for [one guarded effect](single-effect-followup.md). Do not require the full proposed language/DCM to be specified before starting the first runnable implementation. Later features update the same maintained contracts rather than copying them.

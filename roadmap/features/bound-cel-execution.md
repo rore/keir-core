@@ -34,3 +34,5 @@ Treating 64 items or 120 nodes as certified limits, or claiming containment from
 ## Notes
 
 See the [restricted CEL decision](../../docs/internal/decisions/0003-restricted-cel-resource-policy.md).
+
+Scope evidence incrementally around the runnable examples: field access/equality/Boolean logic first, the scalar guarded-effect predicate next, and collections/time only for [their explicit enhancement](enrich-followup-expressions.md). Recover the prior harness when useful, but unavailable archive packaging must not block writing equivalent focused tests. Unsupported nodes/overloads are rejected; a smaller supported profile does not excuse unverified bounds for expressions actually admitted. This work proceeds with the compiler/runtimes rather than as a complete standalone research phase before any program runs.

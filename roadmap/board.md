@@ -2,5 +2,8 @@
 - specify-language-and-domain-model
 - bound-cel-execution
 - portable-core-first-slice
+- single-effect-followup
 - demo-task-integration
+- enrich-followup-expressions
+- host-integration-assistant
 - conversational-authoring

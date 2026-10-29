@@ -18,7 +18,7 @@ The demo tests the integration boundary and real host guarantees. Fake-adapter s
 
 ## In Scope
 
-Task CRUD, projects, completion, tags, priority, due dates and search; `TaskCompleted` entrypoint; scoped reads; one protected create capability; exact-artifact simulation, review and activation; real adapter tests. Add representative hook and composition examples as implementation needs them; no frozen-catalog evaluation is required first.
+Grow native task create/list/complete behavior first, then the remaining planned CRUD, projects, tags, priority, due dates and search. Connect packaged core execution after the minimal native path exists, using the read-only contracts and then the scalar follow-up. Add scoped reads, one protected create capability, exact-artifact simulation/review/activation and real adapter tests. Add a pre-create guard consumer with native revalidation so DENY prevents persistence without replacing native authorization. No frozen-catalog evaluation is required.
 
 ## Out of Scope
 
@@ -30,7 +30,12 @@ A second Java task app, scheduling, arbitrary tenant endpoints and customer-spec
 - An approved artifact runs with the Node runtime and real adapters; simulation uses the same artifact and runner.
 - Concurrent uniqueness, replay and authorization pass real persistence tests; unknown commit is not called success.
 - Integration examples exercise declared hook/capability contracts and verify the host consumes their results correctly.
+- A denied pre-create request leaves no task persisted. CONTINUE still passes native authentication, authorization, validation and required consistency checks; no independent extension write occurs before native commit.
 
 ## Notes
 
 Implementation and tests live in `keir-demo-app`; status stays in this core roadmap. See the demo repository's `docs/scope.md` for product scope.
+
+Native app work can run beside the first core scenarios after an exact scope/checkout assignment. It need not wait for the full language or [expression enhancement](enrich-followup-expressions.md). Real adapter integration follows the corresponding packaged core contract, with database/atomic uniqueness, event admission/version pinning and lost-response behavior decided before claims of safe replay. A local package/tarball with a recorded version/digest is sufficient before registry publication; no sibling source dependency.
+
+The [host integration assistant](host-integration-assistant.md) follows the real host contracts; [customer authoring](conversational-authoring.md) then uses the published approved catalog.
