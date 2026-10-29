@@ -4,11 +4,13 @@ This is the single roadmap for `keir-core` and `keir-demo-app`, organized as mil
 
 ## Milestones
 
-1. **Execute extensions in Java and Node.** Validate the catalog's composition value, establish the admitted CEL profile and resource evidence, then compile once and execute the same artifact in both runtimes with shared conformance.
+1. **Execute extensions in Java and Node.** Establish the admitted CEL profile and resource evidence, then compile once and execute the same artifact in both runtimes with shared conformance.
 2. **Customize a real task application.** Deliver a useful native task app and demonstrate approved Keir behavior with real host adapters, result consumption, simulation and activation.
 3. **Author and activate customizations through AI.** Let a business user describe behavior, inspect simulations and approve an exact revision for activation, with disable and rollback.
 
 ## How we manage work
+
+The value of composing approved capabilities at host-defined hooks is an accepted product premise based on the user's prior product experience. A frozen-catalog exercise, comparative extensibility benchmark or separate proof of product value is not a prerequisite for implementation. Evolve the catalog with real implementation needs while verifying its technical contracts and compatibility.
 
 Minimap opens grouped by each feature's `milestone` metadata; `roadmap.config.json` defines milestone order. `board.md` keeps one shared feature ordering under a neutral Features heading. It does not duplicate milestone membership. Use the repo and status filters to inspect where work belongs and what is active. Feature order expresses priority within each milestone.
 
@@ -18,4 +20,4 @@ Independent demo work can proceed alongside core work once its scope and contrac
 
 Agent Workflow is advisory and opt-in in core, with advisory CI on main pushes and PRs. The demo needs no second roadmap or Work Record process. Both GitHub repositories are initialized privately; license and build choices remain open.
 
-The [design baseline](../docs/design-baseline/README.md) contains the draft specifications. Current decisions cover [repository boundaries](../docs/decisions/0001-repositories-and-runtimes.md), [product value](../docs/decisions/0002-product-proposition-and-evaluation.md) and [restricted CEL](../docs/decisions/0003-restricted-cel-resource-policy.md). Reorganizing this roadmap changes no feature's acceptance criteria or design approval status.
+The [design baseline](../docs/design-baseline/README.md) contains the draft specifications. Current decisions cover [repository boundaries](../docs/decisions/0001-repositories-and-runtimes.md), [product direction](../docs/decisions/0002-product-proposition-and-evaluation.md) and [restricted CEL](../docs/decisions/0003-restricted-cel-resource-policy.md). Draft design approval and implementation evidence remain separate.

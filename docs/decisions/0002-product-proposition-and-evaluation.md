@@ -4,6 +4,8 @@ Date: 2026-10-28
 
 Status: accepted framing in project discussion.
 
+Updated 2026-10-29: the user confirmed the product value from prior product experience and removed the separate frozen-catalog/value-validation exercise from the implementation plan. This cancels that research prerequisite; it does not claim the proposed experiment was completed.
+
 ## Proposition
 
 Keir enables SaaS applications to offer safe, AI-assisted customization to business users. The host defines extension points and exposes approved capabilities once. Customers compose those capabilities into new behavior without customer-specific vendor code or execution of arbitrary generated code.
@@ -20,14 +22,10 @@ The agent integration belongs to the host, not Keir's core library. Manual autho
 
 CEL evaluates expressions inside Keir. It may also be used inside another extension architecture. The comparison is between ways of providing extensibility, not between Keir and CEL.
 
-## Evaluation
+## Implementation direction
 
-Test three questions:
+Proceed with a small working core and real host integration. Composing approved capabilities at defined extension points is an accepted product premise. A frozen catalog, competitor comparison or proof of market/economic value is not required before implementation.
 
-1. Can one approved catalog express realistic, materially different customer requests?
-2. What does it cost the host to publish useful hooks, capabilities, types and contracts, and how much of that cost is reused?
-3. Do existing extension mechanisms, including vendor-prewired hooks, rules or workflow builders, and scripting or webhook hooks, meet the same needs with less total effort?
+The catalog may evolve with implementation needs. Versioned catalog/artifact compatibility, host authority, expression limits, result consumption and failure semantics still require technical verification. This is distinct from freezing one catalog to validate the product proposition.
 
-Track marginal host code and added host operations per customization, plus catalog reuse rate and one-time catalog cost. Keep comparisons on the same customer requests and host data. A working compiler alone does not establish economic value.
-
-The task demo should include behaviors with different operation or dependency shapes. A second condition on the same `get → search → create` sequence does not by itself prove the composition thesis. CEL portability and resource limits remain technical release gates regardless of product differentiation.
+Use representative customizations to exercise the implementation and make embedding understandable. Do not turn those examples into a mandatory business-value study. CEL portability, Java/Node conformance and resource limits remain technical release gates. No adoption, ROI or production-safety claim is established by accepting the product direction.

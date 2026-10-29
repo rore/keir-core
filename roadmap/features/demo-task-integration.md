@@ -18,7 +18,7 @@ The demo tests the integration boundary and real host guarantees. Fake-adapter s
 
 ## In Scope
 
-Task CRUD, projects, completion, tags, priority, due dates and search; `TaskCompleted` entrypoint; scoped reads; one protected create capability; exact-artifact simulation, review and activation; real adapter tests. Demonstrate a second behavior with a different composition after the catalog exercise.
+Task CRUD, projects, completion, tags, priority, due dates and search; `TaskCompleted` entrypoint; scoped reads; one protected create capability; exact-artifact simulation, review and activation; real adapter tests. Add representative hook and composition examples as implementation needs them; no frozen-catalog evaluation is required first.
 
 ## Out of Scope
 
@@ -29,7 +29,7 @@ A second Java task app, scheduling, arbitrary tenant endpoints and customer-spec
 - Basic task management works with extensions disabled.
 - An approved artifact runs with the Node runtime and real adapters; simulation uses the same artifact and runner.
 - Concurrent uniqueness, replay and authorization pass real persistence tests; unknown commit is not called success.
-- Additional behavior records catalog reuse and marginal host code.
+- Integration examples exercise declared hook/capability contracts and verify the host consumes their results correctly.
 
 ## Notes
 

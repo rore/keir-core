@@ -1,7 +1,7 @@
 # Documentation
 
 - [Roadmap](roadmap.md): active milestone, acceptance criteria and proposed sequencing.
-- [Repository and runtime decision](decisions/0001-repositories-and-runtimes.md) and [product evaluation decision](decisions/0002-product-proposition-and-evaluation.md): accepted changes to the baseline.
+- [Repository and runtime decision](decisions/0001-repositories-and-runtimes.md) and [product direction decision](decisions/0002-product-proposition-and-evaluation.md): accepted changes to the baseline.
 - [Restricted CEL and resource containment](decisions/0003-restricted-cel-resource-policy.md): selected POC direction, provisional profile and evidence gates.
 - [Design baseline](design-baseline/README.md): the v0.4 design package and subsequent specifications, including host integration v0.5 and host-owned idempotency/multi-effect contracts v0.7, with precedence and reconciliation notes.
 - [Design review](design-baseline/grill-findings.md): unresolved review findings, not automatically accepted design changes.
