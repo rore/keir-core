@@ -9,8 +9,9 @@ Current checkpoint commands and measured evidence, before Java runtime conforman
 | Command from repository root | Result |
 | --- | --- |
 | `MAVEN_USER_HOME` set to `.tools/maven`; `./mvnw -o -Dmaven.repo.local=.tools/maven/repository -B -ntp clean verify` (Windows: `mvnw.cmd`) | 30 compiler tests; 20.61 seconds including first canonical compilation/packaging with populated isolated cache. Java runtime is still an empty scaffold. Compiler coverage baseline remains pending. |
-| `npm run --prefix runtime-node test:coverage` | 83 tests after the record-conditional regression; 0.61 seconds in worker, 4.56 seconds in canonical checkout alongside isolated package installation; source coverage 100% lines, 95.43% branches, 100% functions. |
-| `node --test examples/node-host/test.mjs` after the documented pack/install | 1 packaged-host test; 0.27–0.46 seconds warm, 9.54 seconds on first observed worker startup. Fresh Java CLI output also passed this test. |
+| `npm run --prefix runtime-node test:coverage` | Default module + shared-corpus regression: 152 tests in 1.68 seconds; runtime source coverage 100% lines, 95.51% branches, 100% functions. |
+| `node --experimental-test-coverage --test-coverage-include=conformance/read-and-decide/run-node.mjs --test conformance/read-and-decide/node.test.mjs` | 69 tests over 61 cases and harness regressions in 1.70 seconds; runner coverage 100% lines/branches/functions. |
+| `node --test examples/node-host/test.mjs` after the documented pack/install | 1 packaged-host test; 0.26–0.51 seconds warm, 9.54 seconds on first observed worker startup. Fresh Java CLI output also passed this test. |
 
 Offline Maven requires a previously populated local cache; dependency/bootstrap time is separate. The package's LF checkout rules and host lockfile preserve tarball integrity across checkouts; never disable integrity checks to make the sample install.
 

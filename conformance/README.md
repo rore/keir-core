@@ -1,6 +1,6 @@
 # Shared conformance
 
-The [read-and-decide fixtures](read-and-decide/README.md) contain maintained source, DCM and deterministic Java compiler output. The [CEL qualification](cel-profile/README.md) records the actual expression bridge. Shared runtime scenarios and complete Java/Node comparisons are still in progress. Both runtimes must execute the same artifact bytes; compiling a different artifact for each runtime does not prove portability.
+The [read-and-decide fixtures](read-and-decide/README.md) contain maintained source, DCM, deterministic Java compiler output and a 61-case shared corpus with a Node runner. The [CEL qualification](cel-profile/README.md) records the actual expression bridge. Java execution and complete Java/Node comparisons are still in progress. Both runtimes must execute the same artifact bytes; compiling a different artifact for each runtime does not prove portability.
 
 Compare typed values, exact call order and arguments, guard decisions, effects and termination classes. Keep compiler rejection tests, expression interoperability, runner conformance and real host adapter guarantees distinct.
 
