@@ -33,7 +33,7 @@ Read all files currently supplied under `docs/internal/design-baseline/`, includ
 
 Also read accepted decisions `0001`, `0002`, `0003`; `docs/specs/README.md`; `docs/agents/README.md` and both persona guides; core/root and all component/example READMEs; `roadmap/scope.md` and all five feature cards; current architect/shared guidance; demo `README.md`, `docs/scope.md`, and component READMEs for `src/`, `keir/`, `tests/`. Current components report scaffolds, not runnable implementations. Historical CI results were read as reported evidence, not rerun or independently verified.
 
-Review baseline HEAD observed: `2445cd70e1835c97acae2860eee9ebf754d86cac`. The shared checkout may advance under the manager. Existing dirty `roadmap.config.json` was not edited by this review.
+Reviewed baseline revision: `2445cd70e1835c97acae2860eee9ebf754d86cac`.
 
 ## Components, ownership and dependencies
 
@@ -189,6 +189,6 @@ No estimates are asserted before the first executable integration reveals toolin
 
 Manager disposition (2026-10-29): reviewed the source-coverage and gap analysis, accepted REQUEST read/classify/consume followed by the reduced scalar effect as the first two runnable outcomes, and retained the original three milestones. Detailed acceptance and ownership are recorded in the existing portable-core card and the new single-effect card; baseline collection/time behavior is an explicit later enhancement. Host design-time agent integration is a distinct feature from customer authoring. The manager reconciled demo scope and recorded repository-local build recommendations; exact dependency versions and implementation contracts remain feature work. This is an initial development plan, not acceptance of unimplemented runtime or production guarantees.
 
-This contribution belongs to `roadmap/features/specify-language-and-domain-model.md` (`id: specify-language-and-domain-model`). Supplied provider reference: `minimap`, scope `roadmap:v1:git:github.com/rore/keir-core#roadmap`, local `item:v1:specify-language-and-domain-model`. No fresh Pallium scope/self identity was available, so no participation association or Relay role verification is claimed; no recovery was attempted. The manager retains roadmap reconciliation and final plan ownership. This review does not complete the feature.
+This review contributes to [the language/DCM feature](../../roadmap/features/specify-language-and-domain-model.md); it does not complete that feature. The manager owns final plan acceptance and roadmap reconciliation.
 
 Only this review document was authored. No runtime implementation, dependency installation, tests, external benchmarking, commits, pushes or environment changes were performed. Drafts and reported historical evidence were inspected, not certified. Production safety, host correctness and the exact runnable scope remain subject to the stated implementation and evidence gates.

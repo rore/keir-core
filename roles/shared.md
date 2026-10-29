@@ -1,48 +1,29 @@
-# Shared working guidance
+# Shared agent guidance
 
-## Project authority
-
-The product enables hosts to expose hooks and approved capabilities once so customers can compose new behavior without customer-specific host code. CEL is the expression evaluator inside Keir. AI authoring belongs to the host. Both Java and Node runtimes are initial scope and share one artifact and conformance contract.
-
-The user accepts this product value from prior experience. Do not require a frozen-catalog exercise, competitive bakeoff or separate value-validation stage before development. Let the catalog evolve through implementation; continue to verify actual host contracts, compatibility, authority, runtime bounds and cross-runtime behavior.
-
-Read [current decisions](../docs/internal/README.md), the relevant [design baseline specifications](../docs/internal/design-baseline/README.md), and the owning [roadmap feature](../roadmap/board.md). The v0.4 baseline and later proposals are design inputs, not proof of implementation or host guarantees. Store additional supplied design specifications with the baseline in `docs/internal/design-baseline/public/` and update its index; do not introduce a separate draft-design folder. Existing accepted decisions prevail until explicitly revised. V0.7 revises v0.5's downstream-key rules; v0.5's Java-later wording does not supersede our two-runtime decision. Some roadmap items still retain the single-write restriction: resolve that scope with the manager before using the multi-effect proposal to expand an assignment.
+Load only your selected role and this guide at role entry. For assignments, read the owning feature, relevant contracts and affected code; load other guides, baseline sections and skill references on demand.
 
 ## Simplicity
 
-Choose the simplest architecture and implementation that fully satisfies the requirements. Prefer clear, direct solutions with few moving parts, using existing code and standard capabilities where they fit. Add abstractions, layers, dependencies or infrastructure only for a concrete current need; defer hypothetical future flexibility. When complexity is necessary, explain which requirement or observed constraint makes the simpler option insufficient. Simplify the solution without dropping required behavior, correctness, security, host guarantees or meaningful verification. Apply this principle to designs, code, documentation and the development process.
+- Choose the simplest architecture, code and process satisfying current requirements. Reuse existing/standard capabilities. Justify extra layers, abstractions, dependencies or infrastructure with a concrete need.
+- Find opportunities to remove complexity and improve architecture/testability while developing. Make small relevant refactors with behavior checks. Report larger opportunities with target, proposed change and testing benefit; do not silently expand scope. Manager records them in the owning feature or roadmap idea and schedules follow-up. Chat-only notes are insufficient.
+- Preserve required behavior, correctness, security, host guarantees and meaningful verification.
 
-## Design and development loop
+## Contracts and evidence
 
-1. The manager selects a bounded feature or iteration with observable value, identifies its owning roadmap item, and defines acceptance evidence and dependencies.
-2. The architect examines the applicable draft design against that feature, challenges assumptions and failure paths, and produces a maintained implementation design or a focused revision. Keep rationale/internal design under `docs/internal/`, normative contracts under `docs/specs/`, and the two product agent guides under `docs/agents/`. Identify source sections, decisions retained or revised, alternatives, unresolved questions and conformance evidence needed.
-3. The manager aligns product scope and sequence. Surface consequential product changes, weakened guarantees and unresolved human decisions to the user. The architect owns the technical recommendation; authoring a recommendation does not grant authority to expand scope.
-4. Developers implement the agreed slice and verify observable behavior. They can consult the architect directly when implementation exposes an ambiguity. Pause only the affected portion; continue independent work. Record the conclusion in the maintained design or decision record and notify the manager of scope or sequencing effects.
-5. The manager reviews delivered revisions and evidence, obtains independent review where the risk warrants it, reconciles the combined result across repositories, and updates the owning roadmap item. Close only the delivered scope; an unfinished feature remains unfinished.
+- Mature only the next runnable increment: architect resolves gaps, developers implement/test, manager accepts combined evidence. Consult on ambiguities; continue unaffected work.
+- Normative contracts: `docs/specs/`; product assistant guides: `docs/agents/`; rationale: `docs/internal/`. New supplied drafts go in `docs/internal/design-baseline/public/` with index updates; never a separate draft-design folder. Current decisions/feature scope govern historical drafts.
+- Core stays domain-independent; host adapters/AI belong to the host/demo. CEL is internal to Keir. Java and Node share one artifact. Product value is accepted; no frozen-catalog/competitor gate. Proposals, mocks and partial tests do not certify real guarantees.
 
-Use the smallest complete iteration. A design need not settle every future capability before an executable slice. Separate what must be decided before coding from what a bounded experiment should answer. Keep pending questions visible without making each routine edit a ceremony.
+## Coordination
 
-## Coordination and checkout ownership
+- Manager alone writes the canonical core roadmap for both repos. Public features own scope/status/evidence; private checkout/routing details stay in ignored local notes. Specify repo, checkout, file ownership and acceptance. Isolate concurrent edits; reserve shared writes and preserve others' work.
+- Use collection-coordination for assignments/handoffs and optional participation. Obtain acceptance, not just delivery. Use exact verified work references; tool gaps do not block ordinary work.
+- Prefer Relay for team coordination; use authorized fallback when needed, preserving settings. Do useful independent work or yield for peer results; no busy polling or ACK loops.
+- Before assigning a new Relay name, publish its unique mapping to a readable guide inside `roles/`. Verify identity with persistent-agent-roles; never guess/take over a name. Role adoption grants no task or settings authority.
 
-Before introducing or assigning a new team Relay name, the manager must add its exact `@name` entry to `roles/mapping.yaml`, create or select its guide, and validate that the mapping has unique keys and resolves to readable Markdown within `roles/`. Publish the guidance before starting the new session. The receiver verifies its current name and reloads the mapped guide; naming alone does not complete role setup.
+## Privacy, cost and context
 
-Use Pallium Relay for independent sessions when available. The user authorizes manager/developer/architect assignment and consultation messages within this Keir team. Use the collection-coordination skill for offers, acceptance, dependencies and handoffs. Delivery is not acceptance. Respect existing assignments; obtain availability rather than inferring it from an idle label. Consultations do not silently transfer ownership.
-
-The manager is the only writer of the canonical core roadmap checkout during team work. Workers report exact item references, status changes, revisions, checks and blockers to the manager. Use isolated checkouts for concurrent edits; core and demo assignments need explicit repository paths and conflict boundaries. Do not alter or clean another worker's checkout. A single bounded task can use the shared checkout only when the manager has reserved it against concurrent writes.
-
-Use verified task/feature references from the owning tools and Pallium participation when available; do not invent references or make tool availability a blocker. Keep temporary assignments in the existing roadmap/task records. No parallel task registry or copied demo roadmap.
-
-## Budget and context
-
-- Keep the architect on Astra medium and developers on Sol 6.1 high as requested. Preserve the manager's selected model. These are role settings, not a reason to send every small task to an expensive session.
-- Delegate bounded mechanical edits, inventory, focused research and routine verification to a cheaper capable subagent when the expected savings exceed briefing and review costs. Start with Luna low for simple work; use a stronger model or effort when uncertainty or risk warrants it. Native subagents handle these tasks; independent team sessions communicate through Relay.
-- Architecture judgments, security/effect guarantees and consequential review stay with a capable reviewer. Never omit required validation or independent review to save tokens.
-- Brief workers with the exact files, decisions, scope, expected evidence and stop condition. Send sufficient relevant context rather than whole transcripts. Reuse trustworthy results and avoid duplicate research, repeated broad tests or status ping-pong.
-- Do small tasks directly when delegation costs more. Do not start idle sessions, polling loops or background work without a useful assignment. State why a more expensive investigation is needed and bound it before expanding.
-- At natural task boundaries, refresh sessions when stale or crowded context impairs work. Follow collection-coordination's handoff procedure with the exact roster; do not replace a live owner or hand off from a generic recap.
-
-## Lightweight workflow and environment
-
-Agent Workflow remains opt-in, its CI findings advisory, and direct-to-main development available under repository rules. Roadmap and the named ordinary-documentation updates need no Work Record. Team roles add no mandatory PR or approval gate. Match review and verification to the actual risk.
-
-Keep experiments and tools isolated. Changes to the user's installed tools, applications, global settings or services need the explicit environment approval required by `AGENTS.md`. Ordinary repository edits and isolated tests are authorized within the assignment.
+- Never publish local absolute paths, private user/workplace identifiers, emails, session pointers or operational details in tracked content/PRs. Use relative references, public URLs or generic placeholders; inspect changes and commit identity before publishing. Remove current disclosures and report remote/public-history scope; no history rewrite without explicit authorization.
+- Preserve user-selected models/effort; report mismatches. Use cheaper bounded helpers when briefing/review savings justify it; Luna low suits simple work. Keep consequential judgment at suitable capability; reuse reliable evidence.
+- Keep persistent guides short, imperative and deduplicated. Store durable rules here, temporary state in its owning record; link detailed references instead of copying them into startup context.
+- Follow `AGENTS.md` for environment protection and advisory, opt-in Agent Workflow. Direct main remains available; roles add no approval gate.

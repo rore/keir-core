@@ -1,13 +1,13 @@
 # Scalar CEL qualification
 
-This standalone probe qualifies the first read-and-decide expression bridge. It is not a Keir compiler, artifact loader, runtime, DCM semantic checker or host adapter. The owning feature is `bound-cel-execution`; the manager owns its roadmap state.
+This standalone probe qualifies the first read-and-decide expression bridge. It is not a Keir compiler, artifact loader, runtime, DCM semantic checker or host adapter. See the [owning roadmap feature](../../roadmap/features/bound-cel-execution.md) for remaining scope.
 
 The measured bridge works: Java dynamically constructs a proto3 record descriptor, checks expressions, serializes deterministic `dev.cel.expr.CheckedExpr` bytes and evaluates them. Node consumes those same descriptor/expression bytes using real CEL-ES. No Node source parser or substitute evaluator is used.
 
 | Component | Tested pin |
 | --- | --- |
-| JDK / Node | SapMachine 21.0.12 / 24.14.1 |
-| Maven / wrapper provided by developer 1 | 3.10.0 / 3.3.4 |
+| JDK / Node | OpenJDK 21.0.12 / 24.14.1 |
+| Maven / wrapper | 3.10.0 / 3.3.4 |
 | CEL-Java, including its protobuf bridge | `dev.cel:cel:0.14.0` |
 | Java protobuf | `com.google.protobuf:protobuf-java:4.35.1` |
 | Node CEL / CEL schemas | `@bufbuild/cel:0.6.1` / `@bufbuild/cel-spec:0.6.1` |
@@ -16,7 +16,7 @@ The measured bridge works: Java dynamically constructs a proto3 record descripto
 
 Node dependencies have a committed npm lockfile. Java dependency versions come from the pinned POMs; protobuf is also pinned directly. Build plugin versions are explicit. These are qualification pins, without a production support or dependency security claim.
 
-Run from the repository root with the already provisioned repository-local Maven wrapper, existing JDK and Node. In this isolated worktree the wrapper was supplied by developer 1's separate checkout at commit `157427164826638e67ee02ad462c3737b58b2e57`; its existing Maven distribution ran this standalone POM with `-f`. No wrapper/bootstrap is duplicated here. Substitute its wrapper path if the current checkout does not contain `mvnw.cmd` yet.
+Run from the repository root with the repository-local Maven wrapper, JDK and Node versions listed above. The probe has a standalone POM selected with `-f`. If the wrapper is unavailable, use an already provisioned Maven of the tested version; no global installation is required.
 
 ```powershell
 # MAVEN_USER_HOME applies only to this build process; do not persist it.

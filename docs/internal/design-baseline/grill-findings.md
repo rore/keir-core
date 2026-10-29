@@ -1,6 +1,6 @@
 # Keir design review — handoff brief
 
-**Artifact under review:** `C:\Dev\rore\KEIR\draft design\` — an 8-document design package (v0.4) for **Keir**, a "Controlled Extension IR." Start at `README.md`; architecture spine is `public/keir-architecture.md`.
+**Artifact under review:** the [design baseline](README.md), an 8-document package (v0.4) for **Keir**, a "Controlled Extension IR." Architecture spine: [public/keir-architecture.md](public/keir-architecture.md). Local source provenance was removed for publication privacy; technical findings are retained.
 
 **What Keir is (one paragraph):** A closed, host-defined way for untrusted authors (including AI agents) to write SaaS extensions without writing real code. Authors compose a small YAML step language (`let`/`call`/`when`/`onError`/`return`) plus restricted CEL expressions. A single **Java compiler** (used as a CLI by Node hosts, or as a library by Java hosts) checks it against a host-curated **Domain Capability Model (DCM)** and emits a portable compiled artifact. A **runner in the host's own language** (Node first, Java later — one language per host, not mixed) executes that artifact against real or fake adapters. An optional AI layer lets business users author in plain English. The first demo is a Node task-manager POC. The docs are honest and already list their unproven gaps.
 
