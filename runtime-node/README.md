@@ -49,6 +49,6 @@ npm.cmd test --prefix runtime-node
 npm.cmd run --prefix runtime-node test:coverage
 ```
 
-Tests use `conformance/read-and-decide/artifact.json`, plus supplemental [Java-generated scalar fixtures](test/fixtures/README.md). They cover canonical bytes, closed admission, typed boundaries, exact traces, fresh grants/users, failed authorization/adapters, async expiry/late responses, reserved field names and source-condition changes. An interim Java compiler output can be selected with process-local `KEIR_ARTIFACT_FILE`; no local path belongs in tracked evidence. Tests do not independently compile CEL in Node or establish Java-runtime parity.
+Default tests include the shared [scenario corpus and harness checks](../conformance/read-and-decide/README.md), alongside module tests using `conformance/read-and-decide/artifact.json` and supplemental [Java-generated scalar fixtures](test/fixtures/README.md). They cover canonical bytes, closed admission, typed boundaries, exact traces, fresh grants/users, failed authorization/adapters, async expiry/late responses, reserved field names and source-condition changes. An interim Java compiler output can be selected with process-local `KEIR_ARTIFACT_FILE`; no local path belongs in tracked evidence. Tests do not independently compile CEL in Node or establish Java-runtime parity.
 
 Build a local tarball and run the separately packaged [host example](../examples/node-host/README.md). The package exports only `prepare`, `invoke` and the fixed qualified `ENVIRONMENT`; validation and qualification helpers are internal.

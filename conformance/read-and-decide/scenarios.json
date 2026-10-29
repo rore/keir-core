@@ -1,0 +1,5173 @@
+{
+  "format": "keir-read-scenarios/1",
+  "cases": [
+    {
+      "id": "done",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "COMPLETED"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "DONE"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "DONE"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pending",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "OPEN"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "PENDING"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "PENDING"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "task_not_found",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "BUSINESS_REJECTION",
+                "code": "TASK_NOT_FOUND"
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "BUSINESS_REJECTION",
+              "error": {
+                "code": "TASK_NOT_FOUND",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "TASK_NOT_FOUND"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "TASK_NOT_FOUND"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "access_denied",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "BUSINESS_REJECTION",
+                "code": "ACCESS_DENIED"
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "BUSINESS_REJECTION",
+              "error": {
+                "code": "ACCESS_DENIED",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "ACCESS_DENIED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "ACCESS_DENIED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "transient",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "TRANSIENT_FAILURE"
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "ADAPTER_TRANSIENT",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "ADAPTER_TRANSIENT"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "ADAPTER_TRANSIENT"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapter-throw",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "throw": true
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "ADAPTER_EXCEPTION",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "ADAPTER_EXCEPTION"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "ADAPTER_EXCEPTION"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapter-null",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "ADAPTER_INVALID",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "ADAPTER_INVALID"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "ADAPTER_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapter-unknown-kind",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "OTHER"
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "ADAPTER_INVALID",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "ADAPTER_INVALID"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "ADAPTER_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapter-extra-response",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "COMPLETED"
+                },
+                "extra": 1
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "ADAPTER_INVALID",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "ADAPTER_INVALID"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "ADAPTER_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapter-missing-result",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS"
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "ADAPTER_INVALID",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "ADAPTER_INVALID"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "ADAPTER_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapter-extra-result",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "OPEN",
+                  "extra": 1
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "ADAPTER_INVALID",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "ADAPTER_INVALID"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "ADAPTER_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapter-invalid-enum",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "CLOSED"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "ADAPTER_INVALID",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "ADAPTER_INVALID"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "ADAPTER_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "input-null",
+      "runs": [
+        {
+          "input": null,
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "INPUT_INVALID",
+                "path": "/input"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "INPUT_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "INPUT_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "input-wrong-type",
+      "runs": [
+        {
+          "input": "task-1",
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "INPUT_INVALID",
+                "path": "/input"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "INPUT_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "INPUT_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "input-extra",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1",
+            "x": 1
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "INPUT_INVALID",
+                "path": "/input"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "INPUT_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "INPUT_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "input-missing",
+      "runs": [
+        {
+          "input": {},
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "INPUT_INVALID",
+                "path": "/input"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "INPUT_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "INPUT_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "binding-null",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": null,
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "HOST_BINDING_INVALID",
+                "path": "/hostBindings"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "HOST_BINDING_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "HOST_BINDING_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "binding-extra",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1",
+            "x": 1
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "HOST_BINDING_INVALID",
+                "path": "/hostBindings"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "HOST_BINDING_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "HOST_BINDING_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "binding-missing",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {},
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "HOST_BINDING_INVALID",
+                "path": "/hostBindings"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "HOST_BINDING_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "HOST_BINDING_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "invocation-auth-deny",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "DENY"
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "AUTHORITY_DENIED",
+                "path": ""
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "AUTHORITY_DENIED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "AUTHORITY_DENIED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "invocation-auth-throw",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "THROW"
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "AUTHORITY_CHECK_FAILED",
+                "path": ""
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "AUTHORITY_CHECK_FAILED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "AUTHORITY_CHECK_FAILED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "invocation-auth-nonboolean",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "NON_BOOLEAN"
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "AUTHORITY_CHECK_FAILED",
+                "path": ""
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "AUTHORITY_CHECK_FAILED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "AUTHORITY_CHECK_FAILED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "fresh-grant-omitted",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {},
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "AUTHORITY_DENIED",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "TERMINATED",
+                  "code": "AUTHORITY_DENIED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "AUTHORITY_DENIED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "fresh-grant-zero",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 0
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "HOST_CONTEXT_INVALID",
+                "path": ""
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "HOST_CONTEXT_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "HOST_CONTEXT_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "fresh-grant-widened",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 2
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "HOST_CONTEXT_INVALID",
+                "path": ""
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "HOST_CONTEXT_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "HOST_CONTEXT_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "fresh-grant-unknown",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "other": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "HOST_CONTEXT_INVALID",
+                "path": ""
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "HOST_CONTEXT_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "HOST_CONTEXT_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "call-auth-deny",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "DENY"
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "AUTHORITY_DENIED",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "TERMINATED",
+                  "code": "AUTHORITY_DENIED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "AUTHORITY_DENIED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "call-auth-throw",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "THROW"
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "AUTHORITY_CHECK_FAILED",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "TERMINATED",
+                  "code": "AUTHORITY_CHECK_FAILED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "AUTHORITY_CHECK_FAILED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "call-auth-nonboolean",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "NON_BOOLEAN"
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "AUTHORITY_CHECK_FAILED",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "TERMINATED",
+                  "code": "AUTHORITY_CHECK_FAILED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "AUTHORITY_CHECK_FAILED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "admission-grant-omitted",
+      "prepare": {
+        "grants": {}
+      },
+      "runs": [],
+      "expected": {
+        "prepare": {
+          "status": "REJECTED",
+          "code": "AUTHORITY_DENIED",
+          "path": "/admission/grants"
+        },
+        "runs": []
+      }
+    },
+    {
+      "id": "admission-grant-zero",
+      "prepare": {
+        "grants": {
+          "tasks.get": 0
+        }
+      },
+      "runs": [],
+      "expected": {
+        "prepare": {
+          "status": "REJECTED",
+          "code": "ADMISSION_INVALID",
+          "path": "/admission/grants"
+        },
+        "runs": []
+      }
+    },
+    {
+      "id": "admission-grant-widened",
+      "prepare": {
+        "grants": {
+          "tasks.get": 2
+        }
+      },
+      "runs": [],
+      "expected": {
+        "prepare": {
+          "status": "REJECTED",
+          "code": "ADMISSION_INVALID",
+          "path": "/admission/grants"
+        },
+        "runs": []
+      }
+    },
+    {
+      "id": "admission-grant-unknown",
+      "prepare": {
+        "grants": {
+          "other": 1
+        }
+      },
+      "runs": [],
+      "expected": {
+        "prepare": {
+          "status": "REJECTED",
+          "code": "ADMISSION_INVALID",
+          "path": "/admission/grants"
+        },
+        "runs": []
+      }
+    },
+    {
+      "id": "steps-low",
+      "prepare": {
+        "limits": {
+          "steps": 1
+        }
+      },
+      "runs": [],
+      "expected": {
+        "prepare": {
+          "status": "REJECTED",
+          "code": "BUDGET_EXCEEDED",
+          "path": "/artifact/steps"
+        },
+        "runs": []
+      }
+    },
+    {
+      "id": "calls-low",
+      "prepare": {
+        "limits": {
+          "calls": 0
+        }
+      },
+      "runs": [],
+      "expected": {
+        "prepare": {
+          "status": "REJECTED",
+          "code": "BUDGET_EXCEEDED",
+          "path": "/artifact/steps"
+        },
+        "runs": []
+      }
+    },
+    {
+      "id": "ast-low",
+      "prepare": {
+        "limits": {
+          "totalAstNodes": 0
+        }
+      },
+      "runs": [],
+      "expected": {
+        "prepare": {
+          "status": "REJECTED",
+          "code": "BUDGET_EXCEEDED",
+          "path": "/artifact/expressions"
+        },
+        "runs": []
+      }
+    },
+    {
+      "id": "steps-wide",
+      "prepare": {
+        "limits": {
+          "steps": 9
+        }
+      },
+      "runs": [],
+      "expected": {
+        "prepare": {
+          "status": "REJECTED",
+          "code": "ADMISSION_INVALID",
+          "path": "/admission/limits"
+        },
+        "runs": []
+      }
+    },
+    {
+      "id": "trace-widened",
+      "prepare": {
+        "limits": {
+          "traceEvents": 65
+        }
+      },
+      "runs": [],
+      "expected": {
+        "prepare": {
+          "status": "REJECTED",
+          "code": "ADMISSION_INVALID",
+          "path": "/admission/limits"
+        },
+        "runs": []
+      }
+    },
+    {
+      "id": "trace-under-min",
+      "prepare": {
+        "limits": {
+          "traceEvents": 1
+        }
+      },
+      "runs": [],
+      "expected": {
+        "prepare": {
+          "status": "REJECTED",
+          "code": "ADMISSION_INVALID",
+          "path": "/admission/limits"
+        },
+        "runs": []
+      }
+    },
+    {
+      "id": "trace-2",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      },
+      "prepare": {
+        "limits": {
+          "traceEvents": 2
+        }
+      }
+    },
+    {
+      "id": "trace-4",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      },
+      "prepare": {
+        "limits": {
+          "traceEvents": 4
+        }
+      }
+    },
+    {
+      "id": "trace-7",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "COMPLETED"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": "/return"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      },
+      "prepare": {
+        "limits": {
+          "traceEvents": 7
+        }
+      }
+    },
+    {
+      "id": "trace-8",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "COMPLETED"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "DONE"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "DONE"
+              }
+            }
+          }
+        ]
+      },
+      "prepare": {
+        "limits": {
+          "traceEvents": 8
+        }
+      }
+    },
+    {
+      "id": "deadline-equality",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 10000,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": ""
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "deadline-negative-clock",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": -1,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "HOST_CONTEXT_INVALID",
+                "path": ""
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "HOST_CONTEXT_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "HOST_CONTEXT_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "expiry-after-invocation-auth",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW",
+              "atMs": 10000
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": ""
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "expiry-after-call-auth",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW",
+              "atMs": 10000
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "expiry-after-adapter",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "COMPLETED"
+                }
+              },
+              "atMs": 10000
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": "/steps/0"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "clock-regression",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 5,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW",
+              "atMs": 4
+            }
+          ],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "HOST_CONTEXT_INVALID",
+                "path": ""
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "HOST_CONTEXT_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "HOST_CONTEXT_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "input-bytes-256",
+      "runs": [
+        {
+          "input": {
+            "taskId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "status": "OPEN"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "PENDING"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "PENDING"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "input-bytes-257",
+      "runs": [
+        {
+          "input": {
+            "taskId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": "/input/taskId"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "binding-bytes-256",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "COMPLETED"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "DONE"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "DONE"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "binding-bytes-257",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": "/hostBindings"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "result-bytes-256",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
+                  "status": "OPEN"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "PENDING"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "PENDING"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "result-bytes-257",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
+                  "status": "OPEN"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": "/steps/0/id"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "empty-string",
+      "runs": [
+        {
+          "input": {
+            "taskId": ""
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": ""
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "",
+                  "status": "OPEN"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "PENDING"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": ""
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "PENDING"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "nonascii-control",
+      "runs": [
+        {
+          "input": {
+            "taskId": "é\n\t"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "é\n\t"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "é\n\t",
+                  "status": "COMPLETED"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "DONE"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "é\n\t"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "DONE"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "prepared-reuse",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-A"
+          },
+          "bindings": {
+            "actorId": "user-A"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-A"
+                },
+                "protectedArgs": {
+                  "actorId": "user-A"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-A",
+                  "status": "OPEN"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "input": {
+            "taskId": "task-B"
+          },
+          "bindings": {
+            "actorId": "user-B"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-B"
+                },
+                "protectedArgs": {
+                  "actorId": "user-B"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-B",
+                  "status": "COMPLETED"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "PENDING"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-A"
+                },
+                "protectedArgs": {
+                  "actorId": "user-A"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "PENDING"
+              }
+            }
+          },
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "DONE"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-B"
+                },
+                "protectedArgs": {
+                  "actorId": "user-B"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "DONE"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "clock-advance",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW",
+              "atMs": 100
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW",
+              "atMs": 250
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 9750
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "COMPLETED"
+                }
+              },
+              "atMs": 300
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "COMPLETED",
+              "result": {
+                "classification": "DONE"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "CALL_SUCCEEDED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 4,
+                  "event": "STEP_START",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 5,
+                  "event": "VALUE_BOUND",
+                  "step": "completed"
+                },
+                {
+                  "sequence": 6,
+                  "event": "RETURNED"
+                },
+                {
+                  "sequence": 7,
+                  "event": "TERMINATED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 9750
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "DISPLAYED",
+              "result": {
+                "classification": "DONE"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "binding-wrong-type",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": 3
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [],
+          "calls": []
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "FAILED",
+              "error": {
+                "code": "HOST_BINDING_INVALID",
+                "path": "/hostBindings"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "TERMINATED",
+                  "code": "HOST_BINDING_INVALID"
+                }
+              ]
+            },
+            "calls": [],
+            "authorizations": [],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "HOST_BINDING_INVALID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapter-enum-overflow",
+      "runs": [
+        {
+          "input": {
+            "taskId": "task-1"
+          },
+          "bindings": {
+            "actorId": "user-1"
+          },
+          "grants": {
+            "tasks.get": 1
+          },
+          "clock": {
+            "nowMs": 0,
+            "expiresAtMs": 10000
+          },
+          "authorizations": [
+            {
+              "request": {
+                "entrypoint": "ClassifyTask"
+              },
+              "action": "ALLOW"
+            },
+            {
+              "request": {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              },
+              "action": "ALLOW"
+            }
+          ],
+          "calls": [
+            {
+              "request": {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              },
+              "response": {
+                "kind": "SUCCESS",
+                "value": {
+                  "id": "task-1",
+                  "status": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "prepare": {
+          "status": "PREPARED"
+        },
+        "runs": [
+          {
+            "outcome": {
+              "classification": "LIMIT_EXCEEDED",
+              "error": {
+                "code": "BUDGET_EXCEEDED",
+                "path": "/steps/0/status"
+              },
+              "trace": [
+                {
+                  "sequence": 0,
+                  "event": "INVOCATION_START"
+                },
+                {
+                  "sequence": 1,
+                  "event": "STEP_START",
+                  "step": "source"
+                },
+                {
+                  "sequence": 2,
+                  "event": "CALL_DISPATCHED",
+                  "step": "source",
+                  "capability": "tasks.get"
+                },
+                {
+                  "sequence": 3,
+                  "event": "TERMINATED",
+                  "code": "BUDGET_EXCEEDED"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "capability": "tasks.get",
+                "version": "1",
+                "agentArgs": {
+                  "taskId": "task-1"
+                },
+                "protectedArgs": {
+                  "actorId": "user-1"
+                },
+                "remainingMs": 10000
+              }
+            ],
+            "authorizations": [
+              {
+                "entrypoint": "ClassifyTask"
+              },
+              {
+                "entrypoint": "ClassifyTask",
+                "capability": "tasks.get",
+                "version": "1"
+              }
+            ],
+            "consumption": {
+              "status": "NOT_DISPLAYED",
+              "code": "BUDGET_EXCEEDED"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
