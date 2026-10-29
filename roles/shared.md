@@ -18,6 +18,8 @@ Use the smallest complete iteration. A design need not settle every future capab
 
 ## Coordination and checkout ownership
 
+Before introducing or assigning a new team Relay name, the manager must add its exact `@name` entry to `roles/mapping.yaml`, create or select its guide, and validate that the mapping has unique keys and resolves to readable Markdown within `roles/`. Publish the guidance before starting the new session. The receiver verifies its current name and reloads the mapped guide; naming alone does not complete role setup.
+
 Use Pallium Relay for independent sessions when available. The user authorizes manager/developer/architect assignment and consultation messages within this Keir team. Use the collection-coordination skill for offers, acceptance, dependencies and handoffs. Delivery is not acceptance. Respect existing assignments; obtain availability rather than inferring it from an idle label. Consultations do not silently transfer ownership.
 
 The manager is the only writer of the canonical core roadmap checkout during team work. Workers report exact item references, status changes, revisions, checks and blockers to the manager. Use isolated checkouts for concurrent edits; core and demo assignments need explicit repository paths and conflict boundaries. Do not alter or clean another worker's checkout. A single bounded task can use the shared checkout only when the manager has reserved it against concurrent writes.
