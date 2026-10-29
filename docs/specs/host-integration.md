@@ -37,6 +37,9 @@ Developers own executable files under `conformance/` and examples; this matrix s
 | Authorization false / thrown or rejected check / check timeout | AUTHORITY_DENIED / AUTHORITY_CHECK_FAILED / BUDGET_EXCEEDED respectively; no adapter dispatch, no raw exception leak. |
 | Clock equality at expiry / regression / invalid clock value | Expiry is inclusive; invalid host clock produces HOST_CONTEXT_INVALID, never a wallclock conversion. |
 | Reused Prepared with different users | No identity/value leakage; authorization performed for each invocation/call. |
+| Admission/current grant omission, exhaustion or widening | Omission never inherits permission; exhaustion blocks dispatch; invalid or widened current grants fail as HOST_CONTEXT_INVALID. |
+| Adapter mode/version mismatch or mutated registration map | Prepare rejects incompatible bindings; later map mutation cannot change prepared bindings. |
+| Lower trace quota and malformed/larger host quotas | Trace exhaustion stops before an unrecordable dispatch and preserves termination; invalid/widening quota configuration fails preparation. |
 | Determinism | Same source/model/compiler/environment compiled twice -> identical bytes; run that one artifact in Java and Node. |
 
 Compare typed result, execution class/error path, ordered calls/arguments, redacted event order and separate consumption result. Do not compare wall timestamps or claim test fakes certify real host behavior. Qualifications must record actual runtime/library versions, descriptor and CheckedExpr evidence, admitted overloads, limit measurements and limitations. Production readiness and the broader language/DCM roadmap feature remain open even when this increment passes.
