@@ -4,7 +4,7 @@
 
 The product enables hosts to expose hooks and approved capabilities once so customers can compose new behavior without customer-specific host code. CEL is the expression evaluator inside Keir. AI authoring belongs to the host. Both Java and Node runtimes are initial scope and share one artifact and conformance contract.
 
-Read [current decisions](../docs/README.md), the relevant [draft proposals](../docs/draft-design/README.md), and the owning [roadmap feature](../roadmap/board.md). The v0.4 baseline and later proposals are design inputs, not proof of implementation or host guarantees. Existing accepted decisions prevail until explicitly revised. V0.7 revises v0.5's downstream-key rules; v0.5's Java-later wording does not supersede our two-runtime decision. Some roadmap items still retain the single-write restriction: resolve that scope with the manager before using the multi-effect proposal to expand an assignment.
+Read [current decisions](../docs/README.md), the relevant [design baseline specifications](../docs/design-baseline/README.md), and the owning [roadmap feature](../roadmap/board.md). The v0.4 baseline and later proposals are design inputs, not proof of implementation or host guarantees. Store additional supplied design specifications with the baseline in `docs/design-baseline/public/` and update its index; do not introduce a separate draft-design folder. Existing accepted decisions prevail until explicitly revised. V0.7 revises v0.5's downstream-key rules; v0.5's Java-later wording does not supersede our two-runtime decision. Some roadmap items still retain the single-write restriction: resolve that scope with the manager before using the multi-effect proposal to expand an assignment.
 
 ## Design and development loop
 
