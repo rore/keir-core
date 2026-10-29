@@ -34,6 +34,7 @@ Guards over native transactions, extension-owned writes, when/onError constructs
 - Unknown capability, forbidden write, host-field override, invalid source/type, oversized input, and incompatible or tampered artifact cases fail closed with no unauthorized adapter dispatch.
 - The admitted CEL profile, tested data/budget limits, artifact provenance boundary and remaining containment limitations are documented; no unverified production deadline guarantee is claimed.
 - No task-specific behavior enters the generic compiler or runtimes.
+- Fast default regression commands, component coverage baselines and relevant explicit slow checks are documented with timings. The [selected behavioral contract](../../docs/testing.md#initial-protected-contract) runs in a real CI check before workflow-level protection is activated; advisory governance does not make test failures advisory.
 
 ## Notes
 

@@ -11,5 +11,5 @@ Role mappings live in `roles/mapping.yaml`; see [the team roles](roles/README.md
 - Both Java and Node runtimes are initial scope. A semantic feature is complete only when the compiler and both runtimes pass shared conformance for the same artifact.
 - Update affected specifications, fixtures and compatibility rules together. Treat `docs/internal/design-baseline/` as historical input; current decisions and the roadmap take precedence over its deferred Java-runtime statements.
 - Fail closed on unsupported constructs. Preserve host-bound authority, explicit uncertainty and runtime resource enforcement.
-- Keep changes small and verify the behavior affected. Do not invent package versions, test results or implemented capabilities.
+- Keep changes small and verify affected behavior under the [testing guidelines](docs/testing.md): fast regression by default, explicit slow suites, preserved behavioral contracts. Do not invent versions, results or implemented capabilities.
 - Protect the user's environment: use isolated project tooling. Obtain explicit approval before changing installed tools, global configuration, PATH, persistent environment variables, integrations or user services. Ordinary repository edits and isolated tests are authorized by the task.
