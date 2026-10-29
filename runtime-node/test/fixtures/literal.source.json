@@ -1,0 +1,1 @@
+{"domain":{"fingerprint":"sha256:e43a2657dadad2fdd4826c42b4e5048c7d7f046e61f48043777f5945e9a9a58f","id":"sample.tasks","version":"1"},"entrypoint":"ClassifyTask","language":"keir/v0","name":"literal-values","return":{"record":{"classification":{"literal":"PENDING"}}},"steps":[{"id":"constant","let":{"literal":false}}]}

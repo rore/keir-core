@@ -1,0 +1,8 @@
+{
+  "name": "keir-node-host-example",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@keir/runtime-node": "file:../../.tools/packages/keir-runtime-node-0.0.0.tgz"
+  }
+}

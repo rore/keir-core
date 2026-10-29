@@ -1,0 +1,14 @@
+language: keir/v0
+domain: {id: sample.tasks, version: '1', fingerprint: 'sha256:e43a2657dadad2fdd4826c42b4e5048c7d7f046e61f48043777f5945e9a9a58f'}
+entrypoint: ClassifyTask
+name: classify-completed-task
+steps:
+  - id: source
+    call: tasks.get
+    args:
+      taskId: {cel: input.taskId}
+  - id: completed
+    let: {cel: 'source.status == "COMPLETED"'}
+return:
+  record:
+    classification: {cel: 'completed ? "DONE" : "PENDING"'}

@@ -1,0 +1,4 @@
+# Keep packed library bytes identical across Windows and POSIX checkouts.
+src/*.js text eol=lf
+package.json text eol=lf
+README.md text eol=lf

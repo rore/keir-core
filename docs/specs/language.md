@@ -1,6 +1,6 @@
 # Read-and-decide language contract
 
-Status: implementation candidate, not implemented/released support. Profile `keir-read/1` is selected by the trusted compiler configuration. It implements a strict subset of source `keir/v0`; unsupported baseline syntax is rejected. See [status](README.md), [DCM](domain-model.md) and [artifact](compiler-artifact.md).
+Status: implementation candidate with compiler and Node checkpoints; Java runtime and combined conformance remain open. Profile `keir-read/1` is selected by the trusted compiler configuration. It implements a strict subset of source `keir/v0`; unsupported baseline syntax is rejected. See [status](README.md), [DCM](domain-model.md) and [artifact](compiler-artifact.md).
 
 ## Source and example
 

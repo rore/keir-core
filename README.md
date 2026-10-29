@@ -4,7 +4,7 @@ Keir enables SaaS applications to offer safe, AI-assisted customization to busin
 
 The hosting application defines extension points and exposes approved capabilities. Keir provides a constrained programming language, compiler, simulation and runtimes that let customers compose those capabilities into new application behavior without executing arbitrary generated code. A host-integrated AI agent helps business users express requirements, clarify intended behavior, generate extensions, test scenarios and review results before activation. Keir's core remains usable without an agent.
 
-**Status: initial project structure. No working Keir compiler or runtime is included yet.** Both Java and Node runtimes are in the initial implementation scope.
+**Status: the bounded read-and-decide compiler and Node runtime are implemented; Java runtime and combined conformance are in progress.** Both runtimes remain initial scope. This checkpoint is not a production release or complete support for the baseline language.
 
 ## Components
 
@@ -29,6 +29,6 @@ Compile once, execute the same artifact in either runtime. Each runtime is separ
 - [Development team and role guides](roles/README.md)
 - [Internal design and decisions](docs/internal/README.md)
 
-Application build tools, package coordinates and runnable commands will be added with the first executable work. Advisory workflow CI is installed; no dependencies need installing to read this scaffold. The internal baseline reports earlier CEL expression interoperability evidence; that harness has not yet been imported or independently verified here.
+Start with the [Java compiler commands](compiler-java/README.md), [Node runtime tests](runtime-node/README.md) and [separately packaged Node host](examples/node-host/README.md). The host runs the committed Java-produced artifact with fake READ adapters and displays DONE/PENDING only after successful execution and result validation. The [shared fixtures](conformance/read-and-decide/README.md) and [CEL qualification](conformance/cel-profile/README.md) provide checkpoint evidence; full Java/Node runtime parity remains open. Advisory workflow CI is installed; product contract CI is pending.
 
-License selection and public release are pending. No open-source license grant is implied by this scaffold.
+License selection and public release are pending. No open-source license grant is implied.
