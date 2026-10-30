@@ -54,7 +54,9 @@ Use a separately versioned minimal sample DCM whose scalar task projection and c
 
 Started on 2026-10-30 after read-profile acceptance. Both core developers completed reviewed implementation-readiness checks. The [effect contract](../../docs/specs/single-effect.md) and [design/acceptance matrix](../../docs/internal/single-effect-followup-design.md) are accepted for implementation: separate effect profile, no guarded-result references, original native host-key forwarding, single-write authority, retained effect evidence and simulation-only admission. A winning adapter response settles valid effect evidence before completion clock checks; a prior timeout winner ignores late responses. The existing modules, scalar CEL subset and ordered fixture matcher suffice.
 
-Compiler/shared-artifact and Node-runtime implementation are the first parallel assignments; Java runtime and both host/scenario demonstrations follow the compiled-artifact checkpoint. No effect behavior is implemented or qualified yet. Preserve the read-only corpus and packaged-host behavior; keep the demo app deferred.
+The [compiler checkpoint](../../conformance/single-effect/README.md) is accepted: 47 tests passed an independent clean coverage build in 20.43 seconds; the architect's bounded semantic review found no blocker. Two fresh CLI processes reproduced the 5,439-byte effect artifact, and the original two-argument CLI reproduced the 2,874-byte read golden. Compiler coverage is 795/840 lines and 624/729 branches. Runtime and host behavior are not qualified by compilation.
+
+Node implementation is underway. Java runtime implementation follows this compiler checkpoint, then both host/scenario demonstrations and combined CI acceptance. Preserve the read-only corpus and packaged-host behavior; keep the demo app deferred.
 
 ### Acceptance and stop condition
 

@@ -4,7 +4,9 @@ Load for code/test/contract changes. Apply to core and demo; keep demo tests loc
 
 Status: read-profile regression, component coverage and combined local verification pass. The installed [`keir-contract` CI check](https://github.com/rore/keir-core/actions/runs/40921421530) passed on `69d01b6` in 47 seconds on 2026-10-29: 92 Java tests, 154 Node tests, the packaged Node host test and complete cross-runtime/host verification. Workflow-level contract-policy protection remains [proposed](internal/workflow/core-contract-ci-proposal.md#behavioral-contract).
 
-Current checkpoint commands and measured evidence:
+The effect compiler checkpoint adds 47 passing compiler tests, independently replayed in a 20.43-second clean coverage build on 2026-10-30; coverage is 795/840 lines and 624/729 branches. Fresh effect/read CLI bytes match their goldens. Effect runtime and combined host conformance remain pending.
+
+Accepted read-profile baseline commands and measurements (2026-10-29):
 
 | Command from repository root | Result |
 | --- | --- |

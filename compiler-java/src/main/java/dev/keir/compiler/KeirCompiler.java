@@ -9,9 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-/** Compiler for the candidate keir-read/1 profile; grants no activation authority. */
+/** Compiler for the admitted read and single-effect profiles; grants no activation authority. */
 public final class KeirCompiler {
     public static final String PROFILE = "keir-read/1";
+    public static final String EFFECT_PROFILE = "keir-effect/1";
     public static final String IDENTITY = "keir-compiler-java/0.1.0-SNAPSHOT";
     private static final Map<String, String> PACKAGES = Map.of("celJava", "0.14.0", "celNode", "0.6.1",
             "protobufJava", "4.35.1", "protobufNode", "2.6.2");
@@ -23,6 +24,7 @@ public final class KeirCompiler {
     public record Environment(String profile, String compiler, Map<String, String> packages) {
         public Environment { packages = Map.copyOf(packages); }
         public static Environment supported() { return new Environment(PROFILE, IDENTITY, PACKAGES); }
+        public static Environment effect() { return new Environment(EFFECT_PROFILE, IDENTITY, PACKAGES); }
     }
     public record Diagnostic(String code, String path, String message) {}
     public record Compilation(byte[] artifact, String artifactDigest, List<Diagnostic> diagnostics) {
@@ -40,10 +42,11 @@ public final class KeirCompiler {
             if (trustedDcmBytes == null) fail("SYNTAX_INVALID", "/dcm");
             Object parsedSource = StrictData.parse(sourceBytes, "/source");
             Object parsedDcm = StrictData.parse(trustedDcmBytes, "/dcm");
-            Map<String, Object> source = sourceShape(parsedSource);
-            Dcm dcm = Dcm.parse(parsedDcm);
+            boolean effect = environment != null && EFFECT_PROFILE.equals(environment.profile());
+            Map<String, Object> source = sourceShape(parsedSource, effect);
+            Dcm dcm = Dcm.parse(parsedDcm, effect);
             if (StrictData.canonical(dcm.root()).length > StrictData.MAX_BYTES) fail("BUDGET_EXCEEDED", "/dcm");
-            if (environment == null || !PROFILE.equals(environment.profile())
+            if (environment == null || !(effect ? EFFECT_PROFILE : PROFILE).equals(environment.profile())
                     || !IDENTITY.equals(environment.compiler()) || !PACKAGES.equals(environment.packages()))
                 fail("PIN_MISMATCH", "/source");
             var domain = object(source.get("domain"), "/source/domain");
@@ -55,7 +58,7 @@ public final class KeirCompiler {
             String entryId = (String) source.get("entrypoint");
             var entry = dcm.entrypoints().get(entryId);
             if (entry == null) fail("ENTRY_GRANT_DENIED", "/source/entrypoint");
-            preflight(source, dcm, entry);
+            preflight(source, dcm, entry, effect);
             var variables = new TreeMap<String, String>();
             variables.put("input", entry.input());
             var expressions = new TreeMap<String, Object>();
@@ -68,6 +71,8 @@ public final class KeirCompiler {
                 var step = object(sourceSteps.get(i), path);
                 String id = (String) step.get("id");
                 if (step.containsKey("call")) {
+                    if (step.containsKey("when") && !"Boolean".equals(variables.get(step.get("when"))))
+                        fail("TYPE_MISMATCH", path + "/when");
                     String capability = (String) step.get("call");
                     var definition = dcm.capabilities().get(capability);
                     var supplied = object(step.get("args"), path + "/args");
@@ -78,9 +83,22 @@ public final class KeirCompiler {
                         args.put(name, binding(supplied.get(name), parameter.getValue().type(), variables,
                                 dcm, expressions, nodes, argPath));
                     }
-                    steps.add(Map.of("op", "CALL", "id", id, "capability", capability,
+                    var call = new TreeMap<String,Object>(Map.of("op", "CALL", "id", id, "capability", capability,
                             "version", definition.version(), "args", args, "resultType", definition.result()));
-                    variables.put(id, definition.result());
+                    if (step.containsKey("when")) call.put("when", step.get("when"));
+                    if (step.containsKey("onError")) {
+                        var handlers = new TreeMap<String,Object>();
+                        for (var handler : object(step.get("onError"), path + "/onError").entrySet()) {
+                            String handlerPath = pointer(path + "/onError", handler.getKey());
+                            var fields = object(object(handler.getValue(), handlerPath).get("record"), handlerPath + "/record");
+                            handlers.put(handler.getKey(), Map.of("type", entry.output(), "fields",
+                                    lowerRecord(fields, dcm.record(entry.output()).fields(), variables, dcm,
+                                            expressions, nodes, handlerPath + "/record")));
+                        }
+                        call.put("onError", handlers);
+                    }
+                    steps.add(call);
+                    if (!step.containsKey("when")) variables.put(id, definition.result());
                     totalCalls++;
                 } else {
                     var value = binding(step.get("let"), null, variables, dcm, expressions, nodes, path + "/let");
@@ -91,17 +109,13 @@ public final class KeirCompiler {
             }
             var output = dcm.record(entry.output()).fields();
             var returned = object(object(source.get("return"), "/source/return").get("record"), "/source/return/record");
-            var fields = new TreeMap<String, Object>();
-            for (var field : output.entrySet()) {
-                String path = pointer("/source/return/record", field.getKey());
-                fields.put(field.getKey(), binding(returned.get(field.getKey()), field.getValue(), variables,
-                        dcm, expressions, nodes, path));
-            }
+            var fields = lowerRecord(returned, output, variables, dcm, expressions, nodes, "/source/return/record");
             if (totalCalls > 4 || nodes[0] > 512) fail("BUDGET_EXCEEDED", "/source/steps");
             byte[] descriptors = dcm.descriptorBytes();
             if (descriptors.length > 65_536) fail("BUDGET_EXCEEDED", "/dcm/types");
             var artifact = new TreeMap<String, Object>();
-            artifact.put("format", "keir-artifact/read-1"); artifact.put("profile", PROFILE);
+            artifact.put("format", effect ? "keir-artifact/effect-1" : "keir-artifact/read-1");
+            artifact.put("profile", effect ? EFFECT_PROFILE : PROFILE);
             artifact.put("compiler", environment.compiler()); artifact.put("environment", environment.packages());
             artifact.put("sourceDigest", StrictData.digest(source)); artifact.put("dcmDigest", dcmDigest);
             artifact.put("dcm", dcm.root()); artifact.put("entrypoint", entryId);
@@ -127,14 +141,25 @@ public final class KeirCompiler {
         var parsed = Expressions.parse((String) binding.get("cel"), variables.keySet(), path + "/cel");
         var compiled = Expressions.compile(parsed, expected, variables, dcm, path + "/cel");
         String id = "e" + expressions.size();
-        expressions.put(id, compiled.metadata()); nodes[0] += compiled.nodes();
+        nodes[0] += compiled.nodes();
+        expressions.put(id, compiled.metadata());
         return Map.of("expr", id, "type", compiled.type());
     }
 
+    private static Map<String,Object> lowerRecord(Map<String,Object> fields, Map<String,String> types,
+            Map<String,String> variables, Dcm dcm, Map<String,Object> expressions, int[] nodes, String path) {
+        var lowered = new TreeMap<String,Object>();
+        for (var field : types.entrySet()) lowered.put(field.getKey(), binding(fields.get(field.getKey()),
+                field.getValue(), variables, dcm, expressions, nodes, pointer(path, field.getKey())));
+        return lowered;
+    }
+
     private static void preflight(
-            Map<String, Object> source, Dcm dcm, Dcm.Entrypoint entry) {
+            Map<String, Object> source, Dcm dcm, Dcm.Entrypoint entry, boolean effect) {
         var names = new HashSet<String>(); names.add("input");
+        var binds = new HashSet<String>();
         var calls = new HashMap<String, Integer>();
+        int totalCalls = 0, writes = 0;
         var steps = (List<?>) source.get("steps");
         for (int i = 0; i < steps.size(); i++) {
             String path = "/source/steps/" + i;
@@ -146,6 +171,15 @@ public final class KeirCompiler {
                 String capability = (String) step.get("call");
                 var definition = dcm.capabilities().get(capability);
                 if (definition == null) fail("CAPABILITY_UNKNOWN", path + "/call");
+                if (effect) {
+                    if (++totalCalls > 4) fail("BUDGET_EXCEEDED", "/source/steps");
+                    if ("WRITE".equals(definition.effect())) {
+                        if (++writes > 1) fail("BUDGET_EXCEEDED", path + "/call");
+                        if (writes > entry.effectGrant()) fail("ENTRY_GRANT_DENIED", path + "/call");
+                    }
+                    if (step.containsKey("when") && !binds.contains(step.get("when")))
+                        fail("DATAFLOW_UNAVAILABLE", path + "/when");
+                }
                 if (calls.merge(capability, 1, Integer::sum) > entry.grants().getOrDefault(capability, 0))
                     fail("ENTRY_GRANT_DENIED", path + "/call");
                 var args = object(step.get("args"), path + "/args");
@@ -159,16 +193,28 @@ public final class KeirCompiler {
                     if (!args.containsKey(parameter.getKey())) fail("TYPE_MISMATCH", argPath);
                     checkLiteral(args.get(parameter.getKey()), parameter.getValue().type(), dcm, argPath);
                 }
-            } else checkLiteral(step.get("let"), null, dcm, path + "/let");
+                if (step.containsKey("onError")) for (var handler : object(step.get("onError"), path + "/onError").entrySet()) {
+                    String handlerPath = pointer(path + "/onError", handler.getKey());
+                    if (!definition.errors().contains(handler.getKey())) fail("FIELD_UNKNOWN", handlerPath);
+                    var fields = object(object(handler.getValue(), handlerPath).get("record"), handlerPath + "/record");
+                    preflightRecord(fields, dcm.record(entry.output()).fields(), dcm, handlerPath + "/record");
+                }
+            } else {
+                checkLiteral(step.get("let"), null, dcm, path + "/let");
+                binds.add(id);
+            }
             names.add(id);
         }
         var fields = object(object(source.get("return"), "/source/return").get("record"), "/source/return/record");
-        var output = dcm.record(entry.output()).fields();
-        for (String key : fields.keySet()) if (!output.containsKey(key)) fail("FIELD_UNKNOWN", pointer("/source/return/record", key));
+        preflightRecord(fields, dcm.record(entry.output()).fields(), dcm, "/source/return/record");
+    }
+
+    private static void preflightRecord(Map<String,Object> fields, Map<String,String> output, Dcm dcm, String path) {
+        for (String key : fields.keySet()) if (!output.containsKey(key)) fail("FIELD_UNKNOWN", pointer(path, key));
         for (var field : output.entrySet()) {
-            String path = pointer("/source/return/record", field.getKey());
-            if (!fields.containsKey(field.getKey())) fail("TYPE_MISMATCH", path);
-            checkLiteral(fields.get(field.getKey()), field.getValue(), dcm, path);
+            String fieldPath = pointer(path, field.getKey());
+            if (!fields.containsKey(field.getKey())) fail("TYPE_MISMATCH", fieldPath);
+            checkLiteral(fields.get(field.getKey()), field.getValue(), dcm, fieldPath);
         }
     }
 
@@ -177,7 +223,7 @@ public final class KeirCompiler {
         if (value.containsKey("literal")) Expressions.literal(value.get("literal"), expected, dcm, path + "/literal");
     }
 
-    private static Map<String, Object> sourceShape(Object parsed) {
+    private static Map<String, Object> sourceShape(Object parsed, boolean effect) {
         var source = object(parsed, "/source");
         shape(source, Set.of("language", "domain", "entrypoint", "name", "steps", "return"), "/source");
         if (!"keir/v0".equals(source.get("language"))) fail("PROFILE_UNSUPPORTED", "/source/language");
@@ -193,7 +239,12 @@ public final class KeirCompiler {
         for (int i = 0; i < steps.size(); i++) {
             String path = "/source/steps/" + i;
             var step = object(steps.get(i), path);
-            shape(step, step.containsKey("call") ? Set.of("id", "call", "args") : Set.of("id", "let"), path);
+            var fields = new HashSet<>(step.containsKey("call") ? Set.of("id", "call", "args") : Set.of("id", "let"));
+            if (effect && step.containsKey("call")) {
+                if (step.containsKey("when")) fields.add("when");
+                if (step.containsKey("onError")) fields.add("onError");
+            }
+            shape(step, fields, path);
             identifier(step.get("id"), "[A-Za-z][A-Za-z0-9]{0,63}", path + "/id");
             if (step.containsKey("call")) {
                 identifier(step.get("call"), "[A-Za-z][A-Za-z0-9.]{0,99}", path + "/call");
@@ -204,18 +255,33 @@ public final class KeirCompiler {
                     identifier(arg.getKey(), "[A-Za-z][A-Za-z0-9]{0,63}", argPath);
                     bindingShape(arg.getValue(), argPath);
                 }
+                if (step.containsKey("when")) identifier(step.get("when"), "[A-Za-z][A-Za-z0-9]{0,63}", path + "/when");
+                if (step.containsKey("onError")) {
+                    var handlers = object(step.get("onError"), path + "/onError");
+                    if (handlers.isEmpty()) fail("SYNTAX_INVALID", path + "/onError");
+                    if (handlers.size() > 16) fail("BUDGET_EXCEEDED", path + "/onError");
+                    for (var handler : handlers.entrySet()) {
+                        String handlerPath = pointer(path + "/onError", handler.getKey());
+                        identifier(handler.getKey(), "[A-Z][A-Z0-9_]{0,63}", handlerPath);
+                        recordShape(handler.getValue(), handlerPath);
+                    }
+                }
             } else bindingShape(step.get("let"), path + "/let");
         }
-        var returned = object(source.get("return"), "/source/return");
-        shape(returned, Set.of("record"), "/source/return");
-        var fields = object(returned.get("record"), "/source/return/record");
-        if (fields.size() > 16) fail("BUDGET_EXCEEDED", "/source/return/record");
-        for (var field : fields.entrySet()) {
-            String path = pointer("/source/return/record", field.getKey());
-            identifier(field.getKey(), "[A-Za-z][A-Za-z0-9]{0,63}", path);
-            bindingShape(field.getValue(), path);
-        }
+        recordShape(source.get("return"), "/source/return");
         return source;
+    }
+
+    private static void recordShape(Object value, String path) {
+        var returned = object(value, path);
+        shape(returned, Set.of("record"), path);
+        var fields = object(returned.get("record"), path + "/record");
+        if (fields.size() > 16) fail("BUDGET_EXCEEDED", path + "/record");
+        for (var field : fields.entrySet()) {
+            String fieldPath = pointer(path + "/record", field.getKey());
+            identifier(field.getKey(), "[A-Za-z][A-Za-z0-9]{0,63}", fieldPath);
+            bindingShape(field.getValue(), fieldPath);
+        }
     }
 
     private static void bindingShape(Object raw, String path) {

@@ -1,0 +1,29 @@
+language: keir/v0
+domain: {id: sample.followup, version: '1', fingerprint: 'sha256:d97c00f679ed0441817a610a71faeda949069c34fcb2a8d89774838d87a71e77'}
+entrypoint: TaskCompleted
+name: create-project-followup
+steps:
+  - id: source
+    call: tasks.get
+    args:
+      taskId: {cel: input.taskId}
+    onError:
+      TASK_NOT_FOUND:
+        record:
+          status: {literal: SOURCE_MISSING}
+  - id: eligible
+    let: {cel: 'source.status == "COMPLETED" && source.projectId == input.projectId'}
+  - id: created
+    when: eligible
+    call: tasks.createFollowUp
+    args:
+      sourceTaskId: {cel: source.id}
+      projectId: {cel: input.projectId}
+      title: {cel: input.title}
+    onError:
+      CREATE_REJECTED:
+        record:
+          status: {literal: REJECTED}
+return:
+  record:
+    status: {cel: 'eligible ? "CREATED" : "NO_OP"'}

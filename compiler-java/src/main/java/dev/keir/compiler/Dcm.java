@@ -8,7 +8,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-/** Validates the closed read-1 model and builds its scalar protobuf bridge. */
+/** Validates the selected closed model and builds its scalar protobuf bridge. */
 final class Dcm {
     record Type(String kind, String base, List<String> values, Map<String,String> fields) {
         boolean scalar() { return !kind.equals("record"); }
@@ -17,7 +17,7 @@ final class Dcm {
     record Capability(String version, Map<String,Parameter> parameters, String result,
                       String effect, List<String> errors) {}
     record Entrypoint(String input, String output, String trigger, Map<String,Object> consumer,
-                      Map<String,Integer> grants) {}
+                      Map<String,Integer> grants, int effectGrant) {}
     private static final Set<String> RESERVED = Set.of("as", "break", "const", "continue", "else",
             "false", "for", "function", "if", "import", "in", "let", "loop", "namespace",
             "null", "package", "return", "true", "var", "void", "while");
@@ -63,8 +63,20 @@ final class Dcm {
     }
 
     static Dcm parse(Object value) {
-        var root = shape(value,"/dcm","format","domain","types","capabilities","entrypoints");
-        supported(root.get("format"),"keir-dcm/read-1","/dcm/format");
+        return parse(value,false);
+    }
+
+    static Dcm parse(Object value, boolean effectProfile) {
+        var root = effectProfile
+                ? shape(value,"/dcm","format","domain","types","capabilities","entrypoints","hostKey","assurance")
+                : shape(value,"/dcm","format","domain","types","capabilities","entrypoints");
+        supported(root.get("format"),effectProfile ? "keir-dcm/effect-1" : "keir-dcm/read-1","/dcm/format");
+        if (effectProfile) {
+            if (!"SIMULATION_ONLY".equals(root.get("assurance"))) throw invalid("/dcm/assurance");
+            var key = shape(root.get("hostKey"),"/dcm/hostKey","source","type");
+            if (!"requestKey".equals(key.get("source"))) throw invalid("/dcm/hostKey/source");
+            metadataText(key.get("type"),"/dcm/hostKey/type");
+        }
         var domain = shape(root.get("domain"),"/dcm/domain","id","version");
         text(domain.get("id"),"/dcm/domain/id");
         text(domain.get("version"),"/dcm/domain/version");
@@ -113,7 +125,8 @@ final class Dcm {
             identifier(entry.getKey(),path,true);
             var cap = shape(entry.getValue(),path,"version","parameters","result","effect","errors");
             String version = text(cap.get("version"),child(path,"version"));
-            supported(cap.get("effect"),"READ",child(path,"effect"));
+            String effect = text(cap.get("effect"),child(path,"effect"));
+            if (!effect.equals("READ") && !(effectProfile && effect.equals("WRITE"))) throw unsupported(child(path,"effect"));
             String result = reference(cap.get("result"),child(path,"result"));
             requireType(types,result,child(path,"result"),true);
             var parameters = new TreeMap<String,Parameter>();
@@ -127,24 +140,45 @@ final class Dcm {
                 if (!binding.equals("agent") && !binding.equals("host")) throw invalid(child(pp,"binding"));
                 parameters.put(param.getKey(),new Parameter(type,binding));
             }
-            var errors = strings(cap.get("errors"),child(path,"errors"),Integer.MAX_VALUE,false,true);
-            capabilities.put(entry.getKey(),new Capability(version,immutable(parameters),result,"READ",errors));
+            var errors = strings(cap.get("errors"),child(path,"errors"),effectProfile ? 16 : Integer.MAX_VALUE,false,true);
+            capabilities.put(entry.getKey(),new Capability(version,immutable(parameters),result,effect,errors));
         }
         var entries = new TreeMap<String,Entrypoint>();
         for (var entry : boundedMap(root.get("entrypoints"),"/dcm/entrypoints",4).entrySet()) {
             String path = child("/dcm/entrypoints",entry.getKey());
             identifier(entry.getKey(),path,true);
-            var ep = shape(entry.getValue(),path,"input","output","trigger","consumer","grants");
+            var ep = effectProfile
+                    ? shape(entry.getValue(),path,"input","output","trigger","placement","consumer","grants","effectGrant","event")
+                    : shape(entry.getValue(),path,"input","output","trigger","consumer","grants");
             String input = reference(ep.get("input"),child(path,"input"));
             String output = reference(ep.get("output"),child(path,"output"));
             requireType(types,input,child(path,"input"),true);
             requireType(types,output,child(path,"output"),true);
-            supported(ep.get("trigger"),"REQUEST",child(path,"trigger"));
+            if (effectProfile) {
+                if (!"EVENT".equals(ep.get("trigger"))) throw invalid(child(path,"trigger"));
+                if (!"AFTER_COMMIT".equals(ep.get("placement"))) throw invalid(child(path,"placement"));
+            } else supported(ep.get("trigger"),"REQUEST",child(path,"trigger"));
             var consumer = shape(ep.get("consumer"),child(path,"consumer"),"id","version","kind");
             String consumerIdPath = child(child(path,"consumer"),"id");
             identifier(text(consumer.get("id"),consumerIdPath),consumerIdPath,true);
             text(consumer.get("version"),child(child(path,"consumer"),"version"));
-            supported(consumer.get("kind"),"DISPLAY",child(child(path,"consumer"),"kind"));
+            if (effectProfile) {
+                if (!"EVENT_REPORT".equals(consumer.get("kind"))) throw invalid(child(child(path,"consumer"),"kind"));
+            } else supported(consumer.get("kind"),"DISPLAY",child(child(path,"consumer"),"kind"));
+            int effectGrant = 0;
+            if (effectProfile) {
+                String gp = child(path,"effectGrant");
+                Object n = ep.get("effectGrant");
+                if (!(n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long || n instanceof BigInteger)) throw invalid(gp);
+                var count = new BigInteger(n.toString());
+                if (count.signum() < 0 || count.compareTo(BigInteger.ONE) > 0) throw invalid(gp);
+                effectGrant = count.intValue();
+                var event = shape(ep.get("event"),child(path,"event"),"idType","sourceType");
+                for (String field : List.of("idType","sourceType")) {
+                    String type = metadataText(event.get(field),child(child(path,"event"),field));
+                    if (!types.containsKey(type) || !types.get(type).kind.equals("nominal")) throw invalid(child(child(path,"event"),field));
+                }
+            }
             var grants = new TreeMap<String,Integer>();
             for (var grant : boundedMap(ep.get("grants"),child(path,"grants"),8).entrySet()) {
                 String gp = child(child(path,"grants"),grant.getKey());
@@ -156,7 +190,7 @@ final class Dcm {
                 if (count.compareTo(BigInteger.valueOf(4)) > 0) throw budget(gp);
                 grants.put(grant.getKey(),count.intValue());
             }
-            entries.put(entry.getKey(),new Entrypoint(input,output,"REQUEST",freezeMap(consumer),immutable(grants)));
+            entries.put(entry.getKey(),new Entrypoint(input,output,effectProfile ? "EVENT" : "REQUEST",freezeMap(consumer),immutable(grants),effectGrant));
         }
         if (entries.isEmpty()) throw invalid("/dcm/entrypoints");
         return new Dcm(root,types,capabilities,entries);
@@ -192,6 +226,10 @@ final class Dcm {
         String ref = text(value,path);
         if (!ref.matches("[A-Za-z][A-Za-z0-9]{0,63}")) throw invalid(path);
         return ref;
+    }
+    private static String metadataText(Object value,String path) {
+        try { return text(value,path); }
+        catch (CompileFailure failure) { throw invalid(path); }
     }
     private static void identifier(String value,String path,boolean dotted) {
         if (!value.matches(dotted ? "[A-Za-z][A-Za-z0-9.]{0,99}" : "[A-Za-z][A-Za-z0-9]{0,63}") || RESERVED.contains(value)) throw invalid(path);
