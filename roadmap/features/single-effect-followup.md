@@ -60,7 +60,7 @@ The Node runtime checkpoint is accepted after independent source review, 231 def
 
 The Java runtime checkpoint is accepted after focused concurrency review and 95 independently passing tests in 23.05 seconds, preserving all 56 read tests. Coverage is 869/875 lines and 808/939 branches. Java consumes Node's exact supplemental handler bytes through existing test resources, with no duplicate fixture or compiler dependency. Both runtimes permit identical business/key-contract label strings without exposing the native key; static zero effect authority is distinguished from the one-write hard ceiling.
 
-Latest Node regression passes 232 tests in 1.78 seconds (100% source lines, 96.88% branches), including the static effect-authority diagnostic regression. Both packaged effect-host demonstrations, shared effect parity and combined CI acceptance remain pending. Preserve the read-only corpus and packaged-host behavior; keep the demo app deferred.
+Combined local acceptance passes: 164 Java tests (47 compiler, 95 runtime, 22 host) in a 33.57-second clean coverage build, 274 default Node tests in 2.05 seconds, both installed Node-host tests, and full transport parity for 25 effect scenarios plus 61 unchanged read cases/52 invocations. Four fresh compiler processes reproduce both golden artifacts; four independent packaged-host batches match. Consumer regressions preserve all declared handler labels without converting rejection into success and retain prior confirmed effects when a later read rejects. Effect-host CI acceptance remains pending; the demo app stays deferred.
 
 ### Acceptance and stop condition
 

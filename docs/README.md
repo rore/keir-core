@@ -2,14 +2,14 @@
 
 Keir lets a host expose hooks and approved capabilities that customers compose into application behavior. The host owns permissions, real adapter guarantees and result consumption. Keir validates and executes constrained extensions; host-integrated agents can assist with integration and authoring.
 
-**Current status:** design and initial repository structure. No working Keir compiler, runtime or released specification is included yet. Both Java and Node runtimes are initial scope.
+**Current status:** an experimental Java compiler and Java/Node runtimes execute read-and-decide and simulation-only single-effect profiles. Both have maintained specifications, shared scenarios and independent packaged hosts. See [testing evidence](testing.md) for local and CI status; production qualification and release remain open.
 
 ## Public documentation
 
 - [Specifications](specs/README.md): maintained language, domain capability model (DCM), artifact, runtime and host contracts, with review and implementation status.
 - [Agent guides](agents/README.md): separate guidance for the host integration assistant and customer extension assistant. Runnable integrations and optional skill packaging come later.
-- [Embedding examples](../examples/README.md): intended Java and Node host examples; currently placeholders.
-- [Conformance](../conformance/README.md): shared executable contract fixtures, once implemented.
+- [Embedding examples](../examples/README.md): runnable Java and Node hosts for classification and follow-up simulation.
+- [Conformance](../conformance/README.md): shared source, compiled artifacts and independent expectations for both runtimes.
 
 ## For contributors
 

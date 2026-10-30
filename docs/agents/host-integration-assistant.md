@@ -1,6 +1,6 @@
 # Host integration assistant
 
-**Status:** initial assistant guidance over the implemented read profile. Host-integrated discovery, approval and activation tools remain future host work. Read the [agent overview](README.md) and [specification status](../specs/README.md).
+**Status:** initial assistant guidance over the implemented read and simulation-only effect profiles. Host-integrated discovery, approval and activation tools remain future host work. Read the [agent overview](README.md) and [specification status](../specs/README.md).
 
 ## Task and inputs
 
@@ -22,10 +22,10 @@ The host integration surface needs authorized interface inspection, definition d
 
 ## First worked integration: read and classify
 
-The separately versioned [single-effect contract](../specs/single-effect.md) is **accepted for implementation only**. Its post-commit sample must preserve the original typed host key to both adapters, validate protected event/source relationships, and report confirmed/none/unknown effects even when execution later fails. Do not stringify a native key or replace it with an execution ID. Propose a separate small DCM with ordinary scalar project/title data and one possible write; no due-date/tag/search support is implied. This checkpoint rejects real admission: fake scenarios and declarations cannot certify authorization, atomic uniqueness, collision safety or retention. Real host guarantees require owner evidence and a later accepted admission contract.
+The separately versioned [single-effect contract](../specs/single-effect.md) is **implemented for controlled simulation**. Its [25 scenarios](../../conformance/single-effect/README.md) use both packaged runtimes. Preserve the original typed host key to both adapters, validate protected event/source relationships, and report confirmed/none/unknown effects even when execution later fails. Do not stringify a native key or replace it with an execution ID. Propose a separate small DCM with ordinary scalar project/title data and one possible write; no due-date/tag/search support is implied. This checkpoint rejects real admission: fake scenarios and declarations cannot certify authorization, atomic uniqueness, collision safety or retention. Real host guarantees require owner evidence and a later accepted admission contract.
 
 Use the complete [sample DCM](../specs/domain-model.md#sample-model) and [extension example](../specs/language.md#source-and-example). Propose a REQUEST hook `ClassifyTask` with input `taskId`, a read `tasks.get`, and a DISPLAY consumer. Its business result is DONE or PENDING; it is not permission to update a task. Propose the actorId host binding and a scoped adapter that returns the requested task or a declared error. Do not derive actorId from customer source.
 
 Ask the host owner to review that exact definition and real access-control obligations. The host computes the approved DCM digest and separately retains the expected compiler-output artifact digest. Neither a model's self-description nor passing simulation publishes a trusted catalog. For the controlled sample, test task status COMPLETED -> DONE and OPEN -> PENDING, plus inaccessible task -> no display. Fake adapter results establish only simulated behavior.
 
-Current candidate `keir-read/1` excludes writes, guards/error handlers, collections, optional fields, numbers and time. If the requested integration needs them, report unsupported scope rather than inventing fields or hiding policy in a new task-specific eligibility adapter. See the [host tool boundaries](../specs/host-integration.md#two-product-assistant-surfaces); no live tools are claimed implemented here.
+The read profile `keir-read/1` excludes writes, guards/error handlers, collections, optional fields, numbers and time. If the requested integration needs them, report unsupported scope rather than inventing fields or hiding policy in a new task-specific eligibility adapter. See the [host tool boundaries](../specs/host-integration.md#two-product-assistant-surfaces); no live tools are claimed implemented here.

@@ -6,8 +6,8 @@
   "exports": "./src/index.js",
   "files": ["src", "README.md"],
   "scripts": {
-    "test": "node --test test/*.test.js ../conformance/read-and-decide/node.test.mjs",
-    "test:coverage": "node --experimental-test-coverage --test-coverage-include=src/*.js --test test/*.test.js ../conformance/read-and-decide/node.test.mjs",
+    "test": "node --test test/*.test.js ../conformance/read-and-decide/node.test.mjs ../conformance/single-effect/node.test.mjs ../examples/node-host/effect-consumer.test.mjs",
+    "test:coverage": "node --experimental-test-coverage --test-coverage-include=src/*.js --test test/*.test.js ../conformance/read-and-decide/node.test.mjs ../conformance/single-effect/node.test.mjs ../examples/node-host/effect-consumer.test.mjs",
     "test:cel": "node ../conformance/cel-profile/qualify.mjs"
   },
   "dependencies": {

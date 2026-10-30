@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { runScenarios } from './run.mjs';
+import { runEffectScenarios } from './effect.mjs';
 
 test('packed Node runtime consumes the Java artifact and displays only validated completed results', async () => {
   const bytes = readFileSync(process.env.KEIR_ARTIFACT_FILE ?? new URL('../../conformance/read-and-decide/artifact.json', import.meta.url));
@@ -15,4 +16,18 @@ test('packed Node runtime consumes the Java artifact and displays only validated
     assert.deepEqual(item.calls, [{ agentArgs: { taskId: 'task1' }, protectedArgs: { actorId: 'user1' } }]);
     assert.doesNotMatch(JSON.stringify(item.outcome.trace), /task1|user1/);
   }
+});
+
+test('installed effect runtime executes the complete independent scenario/consumer batch', async () => {
+  const fixture = new URL('../../conformance/single-effect/', import.meta.url);
+  const rows = await runEffectScenarios(readFileSync(new URL('artifact.json', fixture)),
+    readFileSync(new URL('artifact.sha256', fixture), 'utf8').trim(), readFileSync(new URL('dcm.sha256', fixture), 'utf8').trim());
+  const scenarios = JSON.parse(readFileSync(new URL('scenarios.json', fixture), 'utf8'));
+  assert.deepEqual(rows, scenarios.map(row => ({ id: row.id, ...row.expect })));
+  const confirmedFailure = rows.find(row => row.id === 'confirmed-return-limit');
+  assert.equal(confirmedFailure.consumption.classification, 'LIMIT_EXCEEDED');
+  assert.equal(confirmedFailure.consumption.effects[0].state, 'CONFIRMED');
+  assert.equal(Object.hasOwn(confirmedFailure.consumption, 'result'), false);
+  assert.equal(rows.find(row => row.id === 'write-rejected').consumption.classification, 'BUSINESS_REJECTION');
+  assert.equal(rows.find(row => row.id === 'lost-response').consumption.classification, 'UNCERTAIN');
 });
