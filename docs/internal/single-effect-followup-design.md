@@ -120,6 +120,7 @@ These are implementation obligations, not passing test claims. Compile once and 
 | Trace reserve at five available WRITE slots / one fewer | Dispatch only when intent, dispatch, settlement, success and terminal fit; no unrecorded effect. |
 | Exact raw/canonical DCM, string/record/AST limits and +1 | Existing inclusive caps and diagnostic taxonomy; handler AST included. |
 | Missing/extra/wrong-order/unconsumed scenario stub | Simulation fails independently of runtime classification; no rewritten expectation. |
+| Different steps with identical capability/version/arguments | Reconcile actual captures with dispatch trace by ordinal; a wrong stub step fails simulation. Report the trace's actual step, never copy the expected label. |
 | Simulated duplicate event and payload mismatch | Fixture-labelled duplicate confirmation or definite rejection; unchanged key; no claim of real duplicate safety. |
 | Deterministic compile and old artifact compatibility | Same input/pins -> byte-identical artifact; old read format remains closed and unchanged. |
 
