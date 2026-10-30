@@ -52,7 +52,7 @@ Use a separately versioned minimal sample DCM whose scalar task projection and c
 
 ### Current execution
 
-Started on 2026-10-30 after read-profile acceptance. The architect has been offered the bounded effect/key/simulation contract review; both core developers have been offered independent implementation-readiness checks. Acceptance is pending. Semantic implementation follows review of the agreed contract and exact file ownership. The first visible result is the same follow-up-created/no-op/rejected/uncertain scenario on Java and Node, with the read-only corpus preserved. The demo app remains deferred.
+Started on 2026-10-30 after read-profile acceptance. The architect accepted the bounded effect/key/simulation contract review; both core developers accepted independent implementation-readiness checks. Semantic implementation follows review of the agreed contract and exact file ownership. The first visible result is the same follow-up-created/no-op/rejected/uncertain scenario on Java and Node, with the read-only corpus preserved. The demo app remains deferred.
 
 ### Acceptance and stop condition
 
