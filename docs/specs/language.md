@@ -4,6 +4,8 @@ Status: implemented experimental checkpoint, verified locally in Java and Node. 
 
 ## Source and example
 
+This page defines `keir-read/1`. Planned `when`/`onError` syntax and definite-availability restrictions belong only to the separately selected [single-effect profile](single-effect.md#source-and-definite-availability); they are not accepted additions to this read grammar.
+
 Accept UTF-8 JSON or YAML containing only the JSON data model. Reject duplicate keys, unknown properties, aliases, anchors, merge keys, tags, multiple documents, malformed Unicode, null and numbers in bindings. No coercion. Mapping order is immaterial; step order matters. Enforce [limits](runtime.md#limits) before and during parsing.
 
 For both source and DCM, YAML uses JSON-compatible scalar resolution, not YAML 1.1 implicit typing. Only lowercase plain `true`, `false`, `null` and the JSON number grammar `-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?` resolve implicitly to non-string values. Other nonempty plain scalars, including `yes`, `on`, `TRUE`, timestamps, `0x10`, `01`, `.inf` and `~`, remain strings. Quoted scalars remain strings. Empty/omitted YAML values are rejected rather than implicitly becoming null. Mapping keys must resolve to strings; reject non-string keys and duplicate decoded keys. Reject every explicit tag, anchor, alias and merge key, including otherwise standard explicit tags. This parsing rule does not admit numeric/null bindings: subsequent schema validation rejects them and accepts numbers only in the bounded integer metadata fields that explicitly require them. No rounding, loss of numeric precision or conversion to fit an expected field type is permitted; for example an unquoted numeric `domain.version` is rejected, not stringified.

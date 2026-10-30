@@ -4,6 +4,8 @@ Status: implemented experimental checkpoint; deterministic compiler output and l
 
 ## Compiler boundary
 
+This page specifies `keir-read/1`. The planned [single-effect artifact](single-effect.md#artifact) uses a separate profile and format with checked guard/handler fields and definite environments. Canonicalization, external pins and the independent raw/canonical DCM ceilings remain shared; old artifacts are not reinterpreted or migrated.
+
 Conceptual API: `compile(sourceBytes, trustedDcmBytes, trustedEnvironment) -> ArtifactBytes | Diagnostics`. The environment selects profile `keir-read/1` and exact compiler/CEL/protobuf package identities. CLI transport must preserve these arguments without shell interpolation, bound subprocess input/output/time/concurrency and emit no artifact on failure. Runtime execution never requires the compiler.
 
 Source may select any declared entrypoint within the trusted DCM, subject to that entrypoint's grants. The compiler environment has no separate expected-entrypoint selector. The embedding host independently selects the expected entrypoint/consumer during runtime admission; successful compilation alone does not authorize that selection.

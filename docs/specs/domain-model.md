@@ -4,6 +4,8 @@ Status: implemented experimental checkpoint. This is the explicit small model fo
 
 ## Closed schema
 
+This schema remains `keir-dcm/read-1`. The planned [effect DCM](single-effect.md#closed-dcm-additions) has a new format, explicit lifecycle/effect authority, one protected native-key contract and simulation-only assurance. Those fields must not be silently admitted into the read format.
+
 All fields below are required; unknown fields fail. Maps have unique keys. Types and identifiers obey language identifier rules. Root: `{format,domain,types,capabilities,entrypoints}`. `format` is `keir-dcm/read-1`; `domain` is `{id,version}` with nonempty bounded strings. Types are named definitions of exactly one shape:
 
 - `{kind:"nominal",base:"String"}`.

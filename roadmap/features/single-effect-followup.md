@@ -52,7 +52,9 @@ Use a separately versioned minimal sample DCM whose scalar task projection and c
 
 ### Current execution
 
-Started on 2026-10-30 after read-profile acceptance. Both core developers completed reviewed implementation-readiness checks: the existing modules, scalar CEL subset and ordered fixture matcher suffice. The architect is resolving the effect/key/simulation contract, including skipped-result availability and receipts retained across uncertain writes or later failures. Semantic implementation follows review of that contract and exact file ownership. The first visible result is the same follow-up-created/no-op/rejected/uncertain scenario on Java and Node, with the read-only corpus preserved. The demo app remains deferred.
+Started on 2026-10-30 after read-profile acceptance. Both core developers completed reviewed implementation-readiness checks. The [effect contract](../../docs/specs/single-effect.md) and [design/acceptance matrix](../../docs/internal/single-effect-followup-design.md) are accepted for implementation: separate effect profile, no guarded-result references, original native host-key forwarding, single-write authority, retained effect evidence and simulation-only admission. A winning adapter response settles valid effect evidence before completion clock checks; a prior timeout winner ignores late responses. The existing modules, scalar CEL subset and ordered fixture matcher suffice.
+
+Compiler/shared-artifact and Node-runtime implementation are the first parallel assignments; Java runtime and both host/scenario demonstrations follow the compiled-artifact checkpoint. No effect behavior is implemented or qualified yet. Preserve the read-only corpus and packaged-host behavior; keep the demo app deferred.
 
 ### Acceptance and stop condition
 

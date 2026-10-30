@@ -18,6 +18,8 @@ These contracts narrow baseline language/DCM/compiler/simulation drafts for this
 
 ## Maintaining a contract
 
+The separately versioned [single-effect profile](single-effect.md) is **accepted for implementation, not yet supported** for [one guarded follow-up](../../roadmap/features/single-effect-followup.md). It defines guards, terminal business handlers, original native host-key forwarding, retained effect receipts and simulation-only admission. It does not widen the implemented read profile or establish real write guarantees. See the [design and acceptance vectors](../internal/single-effect-followup-design.md).
+
 For each affected feature: review the draft, specify the supported behavior, add accepted/rejected conformance examples, implement it, and reconcile discoveries. A maintained contract identifies status, supported scope, unresolved decisions, compatibility consequences, verification evidence and superseded baseline sections.
 
 Keep normative rules here, rationale in [internal decisions](../internal/README.md), and task-oriented explanations in [agent guides](../agents/README.md). Schemas, catalog descriptions and examples must agree with the written rules. Structural validation does not prove semantic safety; shared [conformance fixtures](../../conformance/README.md) supply executable evidence.
