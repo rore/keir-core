@@ -10,6 +10,8 @@ Sample input is `{"taskId":"task1"}`. Trusted host bindings independently includ
 
 ## Two product assistant surfaces
 
+The planned [single-effect host contract](single-effect.md#trace-and-consumer) introduces EVENT_REPORT for post-commit simulation, including handled rejection and uncertain/confirmed effect receipts. It does not change this read DISPLAY consumer. [Ordered effect scenarios](single-effect.md#ordered-simulation-protocol-and-acceptance) use the same compiled artifact and runtime, and cannot grant real-mode admission.
+
 Host integration assistant may draft the model/adapter/consumer definitions and tests in an authorized workspace. Human host owner approves the exact model revision and actual adapter evidence before publication. Customer extension assistant discovers only that approved scoped surface and proposes source/scenarios. It cannot publish a model, choose protected actor values or authenticate its own artifact. Both refer to these contracts; no agent runtime belongs in core.
 
 Minimal future tool contracts: model validation accepts a proposed model and returns safe diagnostics (no publication); discovery accepts authenticated host scope and returns approved model digest, hook/capability descriptions and limits; compilation accepts source with a host-selected model, returning diagnostics or an unapproved artifact reference; simulation accepts an artifact reference and bounded scenario data, returning trace and consumer outcome. Tool authority comes from the host, not text in descriptions. These names describe operations, not shipped CLI/MCP methods. Activation requests and live agent repair loops are outside this increment.

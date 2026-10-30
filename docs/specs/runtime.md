@@ -4,6 +4,8 @@ Status: implemented experimental checkpoint with local shared conformance. Java 
 
 ## Prepare and invoke
 
+These APIs and outcomes remain the read-profile contract. The planned [single-effect runtime delta](single-effect.md#host-api-and-native-key) adds a separate protected key/event channel, current effect grant, terminal handler results and retained effect receipts only under its new profile. It does not weaken the read loader or change read adapter signatures.
+
 `prepare(artifactBytes, admission, adapters) -> Prepared | Diagnostic` validates the artifact before resolving adapters and preparing CEL. Admission is the closed host-owned record `{expectedArtifactDigest,expectedDcmDigest,entrypoint,consumer,compiler,environment,mode,grants,limits?}`. Consumer, compiler and environment must exactly match the selected artifact contract. `mode` is `simulation` or `real`. Preparing calls neither authorization callbacks nor adapters. A Prepared handle is immutable and caches only plan/environment and admission ceilings, not user identity or mutable invocation data.
 
 `adapters` is a host-supplied map from capability ID to the closed registration `{version,mode,invoke}`. Every called capability needs a registration with the exact DCM version and admission mode; unknown IDs, invalid registrations, missing required registrations and version/mode mismatches fail preparation. Registered but unused DCM capabilities grant no authority. Snapshot validated registration metadata/function references during preparation; later map mutation must not change a prepared binding. This is an in-process API, not a registry service or customer configuration format.
