@@ -1,7 +1,7 @@
 ---
 id: single-effect-followup
 title: Add a guarded follow-up effect and simulation
-status: active
+status: done
 priority: high
 commitment: committed
 milestone: Execute extensions in Java and Node
@@ -40,31 +40,26 @@ Multiple mutating calls, collection macros/search/date calculations, automatic r
 
 Second runnable increment; depends on [the read-only path](portable-core-first-slice.md) and the additional measured profile/contract support it requires. It is deliberately smaller than the baseline invoice example. List macros, search and time arithmetic are introduced by their own later demonstration and evidence.
 
-The two core developers cover the portable implementation and samples under bounded manager assignments. Demo development is deferred until useful packaged core behavior is available; real persistence/authorization evidence belongs to [task integration](demo-task-integration.md). The architect owns any new effect/outcome contracts. No implementation is assigned by this plan alone.
+Core implementation and packaged samples are complete. Real persistence, authorization and admission evidence belongs to [task integration](demo-task-integration.md); the native demo app has not started. Further effect contracts remain separate work.
 
-### Before implementation
+### Accepted contract
 
-The read-only scenario is accepted with [local and CI evidence](portable-core-first-slice.md#current-execution). Before implementing this follow-up, specify when, guarded-result availability and terminal business handlers; conservative counts over all possible writes; effect intent/confirmed/none/unknown records; and failure after an already confirmed effect. No guarded-result access is admitted without a supported presence proof.
+The [effect specification](../../docs/specs/single-effect.md) and [design rationale](../../docs/internal/single-effect-followup-design.md) define the supported delta: a separate profile, a prior Boolean guard, no guarded-result references, terminal business handlers, conservative one-write authority and retained receipts. Winning response evidence settles before completion checks; a prior timeout winner ignores late responses.
 
-Define the original host-key type/source, protected event/source binding, result/argument validation and the isolated simulation admission path. Pending fake guarantees must never be usable to admit real production adapters. Use one possible write and one binding; no mutual-exclusivity analysis or multi-key namespace design is needed.
+The separate scalar model preserves the baseline and read compatibility identities. Project equality and title are business data; adapters independently enforce native authorization and protected origin. Both adapters receive the original typed host key outside CEL. Real admission is rejected; simulations certify no production adapter.
 
-Use a separately versioned minimal sample DCM whose scalar task projection and create signature do not require dueAt; preserve the original baseline fixture and its compatibility identity. Compare project IDs at their nominal ProjectId type. The target project and title are validated business data, not permissions: the adapter independently authorizes creation, verifies the requested source and protected origin relationship, and applies native invariants. A matching project condition must not become an authorization bypass.
+### Completion evidence
 
-### Current execution
+Accepted on 2026-10-30 at implementation commit `ff69257`. The [product CI check](https://github.com/rore/keir-core/actions/runs/41113166355) passes compilation, both runtime suites, packaged-host tests and full transport parity. The [read demonstration](portable-core-first-slice.md) remains unchanged. This completes the first milestone's controlled demonstrations; real task integration stays separate.
 
-Started on 2026-10-30 after read-profile acceptance. Both core developers completed reviewed implementation-readiness checks. The [effect contract](../../docs/specs/single-effect.md) and [design/acceptance matrix](../../docs/internal/single-effect-followup-design.md) are accepted for implementation: separate effect profile, no guarded-result references, original native host-key forwarding, single-write authority, retained effect evidence and simulation-only admission. A winning adapter response settles valid effect evidence before completion clock checks; a prior timeout winner ignores late responses. The existing modules, scalar CEL subset and ordered fixture matcher suffice.
+- 164 Java tests (47 compiler, 95 runtime, 22 host) pass a clean coverage build in 33.57 seconds. Default Node regression passes 274 tests in 2.05 seconds; both installed-host tests pass in 0.50 seconds.
+- Four fresh compiler processes reproduce the 5,439-byte effect artifact and 2,874-byte read artifact. Both runtimes and all four packaged-host batches match 25 effect scenarios and 61 read cases/52 invocations, including full outcomes, ordered calls, traces and consumption.
+- Source review and regressions cover key-contract namespaces, original native identity, authority rejection before dispatch, exact handler result limits, deadline winner races, retained confirmation after failure and rejection provenance independent of handler labels. Simulation step IDs derive from actual dispatch traces; an external mismatch ledger catches swallowed adapter errors.
+- [Testing evidence](../../docs/testing.md) records coverage and package boundaries. Both runtimes consume the same supplemental Java-compiled handler fixture. Installed Node source matches the six-file archive with verified integrity; the Java host excludes compiler/parser dependencies.
 
-The [compiler checkpoint](../../conformance/single-effect/README.md) is accepted: 47 tests passed an independent clean coverage build in 20.43 seconds; the architect's bounded semantic review found no blocker. Two fresh CLI processes reproduced the 5,439-byte effect artifact, and the original two-argument CLI reproduced the 2,874-byte read golden. Compiler coverage is 795/840 lines and 624/729 branches. Runtime and host behavior are not qualified by compilation.
+The core developers completed their bounded assignments. No demo-app implementation is included. Real-mode admission, persistence, certified authorization/uniqueness, durable replay, exactly-once effects and hard synchronous resource containment remain outside this checkpoint.
 
-The Node runtime checkpoint is accepted after independent source review, 231 default tests in 2.24 seconds (100% source lines, 96.71% branches), exact six-file package/source comparison and integrity-enabled installed read-host smoke. Review reproduced and fixed an extra key-label collision restriction: opaque contract IDs use a separate namespace from business type names. Four regressions preserve native key identity across matching label strings. The handler fixture also proves the exact 8,192/8,193-byte result boundary with original rejection cause and NONE retained.
-
-The Java runtime checkpoint is accepted after focused concurrency review and 95 independently passing tests in 23.05 seconds, preserving all 56 read tests. Coverage is 869/875 lines and 808/939 branches. Java consumes Node's exact supplemental handler bytes through existing test resources, with no duplicate fixture or compiler dependency. Both runtimes permit identical business/key-contract label strings without exposing the native key; static zero effect authority is distinguished from the one-write hard ceiling.
-
-Combined local acceptance passes: 164 Java tests (47 compiler, 95 runtime, 22 host) in a 33.57-second clean coverage build, 274 default Node tests in 2.05 seconds, both installed Node-host tests, and full transport parity for 25 effect scenarios plus 61 unchanged read cases/52 invocations. Four fresh compiler processes reproduce both golden artifacts; four independent packaged-host batches match. Consumer regressions preserve all declared handler labels without converting rejection into success and retain prior confirmed effects when a later read rejects. Effect-host CI acceptance remains pending; the demo app stays deferred.
-
-The [first combined CI attempt](https://github.com/rore/keir-core/actions/runs/41111171874) was cancelled after ten minutes inside the Java effect tests. A snapshot-race test could block its caller through an inline completion callback; independent invocation and a bounded latch preserve its assertions without changing runtime behavior or CI timeouts. All 12 affected tests pass locally in 1.10 seconds. Replacement CI acceptance remains pending.
-
-### Acceptance and stop condition
+### Retained regression obligations
 
 Show qualifying and nonqualifying inputs, handled business rejection, read failure, definite write rejection and lost response on both runtimes. Assert unchanged host-key forwarding and protected origin; show that missing/incompatible key and a second guarded write are rejected. Preserve honest effect receipts if return evaluation fails after a write. Run the first scenario unchanged as regression coverage.
 
