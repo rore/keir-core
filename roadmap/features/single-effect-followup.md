@@ -62,6 +62,8 @@ The Java runtime checkpoint is accepted after focused concurrency review and 95 
 
 Combined local acceptance passes: 164 Java tests (47 compiler, 95 runtime, 22 host) in a 33.57-second clean coverage build, 274 default Node tests in 2.05 seconds, both installed Node-host tests, and full transport parity for 25 effect scenarios plus 61 unchanged read cases/52 invocations. Four fresh compiler processes reproduce both golden artifacts; four independent packaged-host batches match. Consumer regressions preserve all declared handler labels without converting rejection into success and retain prior confirmed effects when a later read rejects. Effect-host CI acceptance remains pending; the demo app stays deferred.
 
+The [first combined CI attempt](https://github.com/rore/keir-core/actions/runs/41111171874) was cancelled after ten minutes inside the Java effect tests. A snapshot-race test could block its caller through an inline completion callback; independent invocation and a bounded latch preserve its assertions without changing runtime behavior or CI timeouts. All 12 affected tests pass locally in 1.10 seconds. Replacement CI acceptance remains pending.
+
 ### Acceptance and stop condition
 
 Show qualifying and nonqualifying inputs, handled business rejection, read failure, definite write rejection and lost response on both runtimes. Assert unchanged host-key forwarding and protected origin; show that missing/incompatible key and a second guarded write are rejected. Preserve honest effect receipts if return evaluation fails after a write. Run the first scenario unchanged as regression coverage.
