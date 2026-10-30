@@ -202,6 +202,127 @@ final class DcmTest {
         failure(model,"DCM_INVALID","/dcm/domain/id");
     }
 
+    @Test void effectProfileRetainsReadAndWriteCapabilitiesAndImmutableMetadata() {
+        var model = effectSample();
+        assertEquals("READ",Dcm.parse(model,true).capabilities().get("tasks.get").effect());
+        map(model,"capabilities","tasks.get").put("effect","WRITE");
+        Dcm dcm = Dcm.parse(model,true);
+        assertEquals("WRITE",dcm.capabilities().get("tasks.get").effect());
+        assertEquals("EVENT",dcm.entrypoints().get("ClassifyTask").trigger());
+        assertEquals(1,dcm.entrypoints().get("ClassifyTask").effectGrant());
+        assertEquals(0,Dcm.parse(sample()).entrypoints().get("ClassifyTask").effectGrant());
+        map(model,"entrypoints","ClassifyTask").put("effectGrant",0);
+        assertEquals(0,Dcm.parse(model,true).entrypoints().get("ClassifyTask").effectGrant());
+        map(model,"hostKey").put("type","changed");
+        map(model,"entrypoints","ClassifyTask","event").put("idType","changed");
+        assertEquals("sample.RequestUuid/1",map(dcm.root(),"hostKey").get("type"));
+        assertEquals("EventId",map(dcm.root(),"entrypoints","ClassifyTask","event").get("idType"));
+        assertThrows(UnsupportedOperationException.class,()->map(dcm.root(),"hostKey").clear());
+        assertThrows(UnsupportedOperationException.class,()->map(dcm.root(),"entrypoints","ClassifyTask","event").clear());
+    }
+
+    @Test void selectedProfileRejectsMixedFormatsAndUnknownEffectFields() {
+        var model = effectSample();
+        model.put("format","keir-dcm/read-1");
+        effectFailure(model,"PROFILE_UNSUPPORTED","/dcm/format");
+        model = sample(); model.put("format","keir-dcm/effect-1");
+        failure(model,"PROFILE_UNSUPPORTED","/dcm/format");
+        effectFailure(sample(),"DCM_INVALID","/dcm/hostKey");
+        failure(effectSample(),"FIELD_UNKNOWN","/dcm/assurance");
+        model = effectSample(); model.put("extra",true);
+        effectFailure(model,"FIELD_UNKNOWN","/dcm/extra");
+        model = effectSample(); map(model,"hostKey").put("extra",true);
+        effectFailure(model,"FIELD_UNKNOWN","/dcm/hostKey/extra");
+        model = effectSample(); map(model,"entrypoints","ClassifyTask").put("extra",true);
+        effectFailure(model,"FIELD_UNKNOWN","/dcm/entrypoints/ClassifyTask/extra");
+        model = effectSample(); map(model,"entrypoints","ClassifyTask","event").put("extra",true);
+        effectFailure(model,"FIELD_UNKNOWN","/dcm/entrypoints/ClassifyTask/event/extra");
+        model = effectSample(); map(model,"entrypoints","ClassifyTask","event").remove("sourceType");
+        effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/event/sourceType");
+    }
+
+    @Test void effectLifecycleAndKeyMetadataFailAsInvalidDcm() {
+        var model = effectSample(); model.put("assurance","REAL");
+        effectFailure(model,"DCM_INVALID","/dcm/assurance");
+        model = effectSample(); map(model,"hostKey").put("source","input");
+        effectFailure(model,"DCM_INVALID","/dcm/hostKey/source");
+        for (Object value : Arrays.asList(null,true,"","\ud800","é".repeat(129))) {
+            model = effectSample(); map(model,"hostKey").put("type",value);
+            effectFailure(model,"DCM_INVALID","/dcm/hostKey/type");
+        }
+        model = effectSample(); map(model,"hostKey").put("type","é".repeat(128));
+        Dcm.parse(model,true);
+        model = effectSample(); map(model,"entrypoints","ClassifyTask").put("trigger","REQUEST");
+        effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/trigger");
+        for (Object placement : Arrays.asList(null,1,"BEFORE_COMMIT","UNKNOWN")) {
+            model = effectSample(); map(model,"entrypoints","ClassifyTask").put("placement",placement);
+            effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/placement");
+        }
+        model = effectSample(); map(model,"entrypoints","ClassifyTask","consumer").put("kind","DISPLAY");
+        effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/consumer/kind");
+    }
+
+    @Test void effectGrantIsOnlyAnExactZeroOrOneIncludingNativeIntegers() {
+        for (Object value : List.of((byte)0,(short)1,0,1L,BigInteger.ZERO,BigInteger.ONE)) {
+            var model = effectSample(); map(model,"entrypoints","ClassifyTask").put("effectGrant",value);
+            assertEquals(((Number)value).intValue(),Dcm.parse(model,true).entrypoints().get("ClassifyTask").effectGrant());
+        }
+        for (Object value : Arrays.asList(null,-1,2,1.0,"1",true,new BigInteger("9007199254740992"))) {
+            var model = effectSample(); map(model,"entrypoints","ClassifyTask").put("effectGrant",value);
+            effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/effectGrant");
+        }
+    }
+
+    @Test void effectEventsRequireDeclaredNominalStringTypes() {
+        for (String field : List.of("idType","sourceType")) for (Object type : Arrays.asList(null,true,"String","Boolean","TaskStatus","Task","Missing")) {
+            var model = effectSample(); map(model,"entrypoints","ClassifyTask","event").put(field,type);
+            effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/event/"+field);
+        }
+        var model = effectSample(); map(model,"types","EventId").put("base","Boolean");
+        effectFailure(model,"DCM_INVALID","/dcm/types/EventId/base");
+    }
+
+    @Test void effectErrorsAreCappedWithoutNarrowingReadErrorLists() {
+        var errors = new ArrayList<String>();
+        for (int i=0;i<16;i++) errors.add("ERROR"+i);
+        var model = effectSample(); map(model,"capabilities","tasks.get").put("errors",errors);
+        assertEquals(16,Dcm.parse(model,true).capabilities().get("tasks.get").errors().size());
+        errors.add("EXTRA");
+        effectFailure(model,"BUDGET_EXCEEDED","/dcm/capabilities/tasks.get/errors");
+        model = sample(); map(model,"capabilities","tasks.get").put("errors",errors);
+        assertEquals(17,Dcm.parse(model).capabilities().get("tasks.get").errors().size());
+        model = effectSample(); map(model,"capabilities","tasks.get").put("effect","UNKNOWN");
+        effectFailure(model,"PROFILE_UNSUPPORTED","/dcm/capabilities/tasks.get/effect");
+    }
+
+    @Test void nativeKeyContractDoesNotBecomeABusinessTypeOrDescriptor() {
+        var model = effectSample();
+        assertNull(Dcm.parse(model,true).fileDescriptor().findMessageTypeByName("sample.RequestUuid/1"));
+        map(model,"types","Task","fields").put("id","sample.RequestUuid/1");
+        effectFailure(model,"DCM_INVALID","/dcm/types/Task/fields/id");
+        model = effectSample(); map(model,"capabilities","tasks.get","parameters","actorId").put("type","sample.RequestUuid/1");
+        effectFailure(model,"DCM_INVALID","/dcm/capabilities/tasks.get/parameters/actorId/type");
+    }
+
+    private static void effectFailure(Object model,String code,String path) {
+        CompileFailure error = assertThrows(CompileFailure.class,() -> Dcm.parse(model,true));
+        assertEquals(code,error.code);
+        assertEquals(path,error.path);
+        assertEquals(code,error.getMessage());
+    }
+    private static Map<String,Object> effectSample() {
+        var model = sample();
+        model.put("format","keir-dcm/effect-1"); model.put("assurance","SIMULATION_ONLY");
+        model.put("hostKey",new LinkedHashMap<>(Map.of("source","requestKey","type","sample.RequestUuid/1")));
+        map(model,"types").put("EventId",new LinkedHashMap<>(Map.of("kind","nominal","base","String")));
+        map(model,"types").put("EventSource",new LinkedHashMap<>(Map.of("kind","nominal","base","String")));
+        var entry = map(model,"entrypoints","ClassifyTask");
+        entry.put("trigger","EVENT"); entry.put("placement","AFTER_COMMIT"); entry.put("effectGrant",1);
+        entry.put("event",new LinkedHashMap<>(Map.of("idType","EventId","sourceType","EventSource")));
+        map(entry,"consumer").put("kind","EVENT_REPORT");
+        return model;
+    }
+
     private static void failure(Object model,String code,String path) {
         CompileFailure error = assertThrows(CompileFailure.class,() -> Dcm.parse(model));
         assertEquals(code,error.code);

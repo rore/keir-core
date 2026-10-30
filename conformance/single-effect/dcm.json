@@ -1,0 +1,25 @@
+{
+  "format":"keir-dcm/effect-1",
+  "domain":{"id":"sample.followup","version":"1"},
+  "assurance":"SIMULATION_ONLY",
+  "hostKey":{"source":"requestKey","type":"sample.RequestUuid/1"},
+  "types":{
+    "TaskId":{"kind":"nominal","base":"String"},
+    "UserId":{"kind":"nominal","base":"String"},
+    "ProjectId":{"kind":"nominal","base":"String"},
+    "EventId":{"kind":"nominal","base":"String"},
+    "TaskStatus":{"kind":"enum","values":["OPEN","COMPLETED"]},
+    "FollowupStatus":{"kind":"enum","values":["CREATED","NO_OP","SOURCE_MISSING","REJECTED"]},
+    "FollowupInput":{"kind":"record","fields":{"taskId":"TaskId","projectId":"ProjectId","title":"String"}},
+    "Task":{"kind":"record","fields":{"id":"TaskId","projectId":"ProjectId","status":"TaskStatus"}},
+    "CreatedTask":{"kind":"record","fields":{"id":"TaskId"}},
+    "FollowupResult":{"kind":"record","fields":{"status":"FollowupStatus"}}
+  },
+  "capabilities":{
+    "tasks.get":{"version":"1","parameters":{"taskId":{"type":"TaskId","binding":"agent"},"actorId":{"type":"UserId","binding":"host"}},"result":"Task","effect":"READ","errors":["TASK_NOT_FOUND","ACCESS_DENIED"]},
+    "tasks.createFollowUp":{"version":"1","parameters":{"sourceTaskId":{"type":"TaskId","binding":"agent"},"projectId":{"type":"ProjectId","binding":"agent"},"title":{"type":"String","binding":"agent"},"actorId":{"type":"UserId","binding":"host"}},"result":"CreatedTask","effect":"WRITE","errors":["CREATE_REJECTED","ACCESS_DENIED"]}
+  },
+  "entrypoints":{
+    "TaskCompleted":{"input":"FollowupInput","output":"FollowupResult","trigger":"EVENT","placement":"AFTER_COMMIT","consumer":{"id":"sample.followup.report","version":"1","kind":"EVENT_REPORT"},"grants":{"tasks.get":1,"tasks.createFollowUp":1},"effectGrant":1,"event":{"idType":"EventId","sourceType":"TaskId"}}
+  }
+}

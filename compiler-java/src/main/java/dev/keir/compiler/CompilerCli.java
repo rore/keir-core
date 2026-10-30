@@ -14,13 +14,15 @@ public final class CompilerCli {
     public static void main(String[] args) { System.exit(run(args, System.out, System.err)); }
 
     static int run(String[] args, PrintStream output, PrintStream errors) {
-        if (args.length != 2) return error(errors, "SYNTAX_INVALID", "/source");
+        boolean effect = args.length == 3 && "--profile=keir-effect/1".equals(args[2]);
+        if (args.length != 2 && !effect) return error(errors, "SYNTAX_INVALID", "/source");
         byte[] source, model;
         try { source = read(args[0]); }
         catch (IOException | RuntimeException e) { return error(errors, "SYNTAX_INVALID", "/source"); }
         try { model = read(args[1]); }
         catch (IOException | RuntimeException e) { return error(errors, "SYNTAX_INVALID", "/dcm"); }
-        var result = new KeirCompiler().compile(source, model, KeirCompiler.Environment.supported());
+        var result = new KeirCompiler().compile(source, model,
+                effect ? KeirCompiler.Environment.effect() : KeirCompiler.Environment.supported());
         if (result.succeeded()) {
             output.writeBytes(result.artifact());
             return 0;

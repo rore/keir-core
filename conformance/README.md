@@ -1,6 +1,8 @@
 # Shared conformance
 
-The [read-and-decide fixtures](read-and-decide/README.md) contain maintained source, DCM, deterministic Java compiler output and a 61-case shared corpus executed by both runtimes. The combined verifier compares full results, calls, authorization, traces and consumption and checks independent packaged hosts. The supplemental two-read fixture covers grant exhaustion and prepared reuse in both module suites. The [CEL qualification](cel-profile/README.md) records the earlier expression bridge. Both runtimes consume the same artifact bytes; product CI remains proposed.
+The [read-and-decide fixtures](read-and-decide/README.md) contain maintained source, DCM, deterministic Java compiler output and a 61-case shared corpus executed by both runtimes. The combined verifier compares full results, calls, authorization, traces and consumption and checks independent packaged hosts. The supplemental two-read fixture covers grant exhaustion and prepared reuse in both module suites. The [CEL qualification](cel-profile/README.md) records the earlier expression bridge. Both runtimes consume the same artifact bytes in the installed product CI check.
+
+The [single-effect fixture](single-effect/README.md) is verified compiler output for the next increment. Its runtime execution, effect receipts and simulation conformance are pending; it does not inherit the read profile's execution evidence.
 
 Compare typed values, exact call order and arguments, guard decisions, effects and termination classes. Keep compiler rejection tests, expression interoperability, runner conformance and real host adapter guarantees distinct.
 

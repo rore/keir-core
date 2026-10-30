@@ -1,6 +1,6 @@
 # Single-effect profile
 
-Status: **accepted for implementation on 2026-10-30; not implemented**. This is the bounded contract for [single-effect-followup](../../roadmap/features/single-effect-followup.md). Implementation and shared Java/Node conformance are feature-completion gates. [Design and sample](../internal/single-effect-followup-design.md) explain the choices. Existing `keir-read/1` artifacts, APIs, fixtures and DISPLAY consumption remain unchanged.
+Status: **compiler checkpoint verified on 2026-10-30; runtime implementation and qualification pending**. This is the bounded contract for [single-effect-followup](../../roadmap/features/single-effect-followup.md), accepted for implementation on 2026-10-30. Shared Java/Node execution and host conformance remain feature-completion gates. [Design and sample](../internal/single-effect-followup-design.md) explain the choices; the [compiled fixture](../../conformance/single-effect/README.md) records current evidence. Existing `keir-read/1` artifacts, APIs, fixtures and DISPLAY consumption remain unchanged.
 
 ## Versions and inherited rules
 
