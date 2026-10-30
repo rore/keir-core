@@ -6,6 +6,8 @@ Status: read-profile regression, component coverage and combined local verificat
 
 The effect compiler checkpoint adds 47 passing compiler tests, independently replayed in a 20.43-second clean coverage build on 2026-10-30; coverage is 795/840 lines and 624/729 branches. Fresh effect/read CLI bytes match their goldens. Effect runtime and combined host conformance remain pending.
 
+The Node effect checkpoint passes 231 default tests in 2.24 seconds, including all prior read cases; source coverage is 100% lines and 96.71% branches. A freshly packed six-file runtime matches its installed bytes and passes the old read-host smoke (0.59 seconds) with exact integrity and unchanged registry pins. Java effect review and combined host/scenario parity remain pending; module success does not certify real adapters.
+
 Accepted read-profile baseline commands and measurements (2026-10-29):
 
 | Command from repository root | Result |
