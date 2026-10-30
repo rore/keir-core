@@ -228,11 +228,13 @@ class EffectRuntimeTest {
         var invocation=invocation(UUID.randomUUID(),new KeirRuntime.Deadline(()->{
             if(writing.compareAndSet(true,false)) {
                 settled.countDown();
-                try { release.await(); } catch(InterruptedException failure) { Thread.currentThread().interrupt(); }
+                try { assertTrue(release.await(2,TimeUnit.SECONDS),"Snapshot test was not released"); }
+                catch(InterruptedException failure) { Thread.currentThread().interrupt(); throw new AssertionError(failure); }
             }
             return 0;
         },10000),1L,r->done(true));
-        var pending=KeirRuntime.invokeEffect(prepared,INPUT,invocation);
+        // CompletionStage callbacks may run inline before invokeEffect returns.
+        var pending=CompletableFuture.supplyAsync(()->KeirRuntime.invokeEffect(prepared,INPUT,invocation)).thenCompose(stage->stage);
         try {
             assertTrue(settled.await(2,TimeUnit.SECONDS)); response.clear(); response.putAll(Map.of("kind","TRANSIENT_FAILURE","effect","NONE"));
         } finally { release.countDown(); }

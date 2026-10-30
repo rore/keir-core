@@ -8,6 +8,8 @@ Effect checkpoint coverage: compiler 795/840 lines and 624/729 branches; Java ru
 
 Effect regression covers conservative single-write admission, guard availability, original key identity, fresh grants, native deadline races, retained receipts, handler/result boundaries, ordered simulation mismatches and consumer validation. The shared supplemental handler artifact is Java-compiled; both runtime suites consume the same bytes. The following older measurements remain historical read-profile baselines.
 
+The [first combined effect CI attempt](https://github.com/rore/keir-core/actions/runs/41111171874) was cancelled after ten minutes inside `EffectRuntimeTest`. Its snapshot race test could block its own caller when a completion callback ran inline. The test now starts invocation independently and bounds the release latch, preserving all receipt/mutation assertions. All 12 affected tests pass locally in 1.10 seconds; replacement CI acceptance is pending. No runtime or CI timeout was changed.
+
 Accepted read-profile baseline commands and measurements (2026-10-29):
 
 | Command from repository root | Result |
