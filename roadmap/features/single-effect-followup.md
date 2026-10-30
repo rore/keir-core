@@ -56,7 +56,9 @@ Started on 2026-10-30 after read-profile acceptance. Both core developers comple
 
 The [compiler checkpoint](../../conformance/single-effect/README.md) is accepted: 47 tests passed an independent clean coverage build in 20.43 seconds; the architect's bounded semantic review found no blocker. Two fresh CLI processes reproduced the 5,439-byte effect artifact, and the original two-argument CLI reproduced the 2,874-byte read golden. Compiler coverage is 795/840 lines and 624/729 branches. Runtime and host behavior are not qualified by compilation.
 
-Node implementation is underway. Java runtime implementation follows this compiler checkpoint, then both host/scenario demonstrations and combined CI acceptance. Preserve the read-only corpus and packaged-host behavior; keep the demo app deferred.
+The Node runtime checkpoint is accepted after independent source review, 231 default tests in 2.24 seconds (100% source lines, 96.71% branches), exact six-file package/source comparison and integrity-enabled installed read-host smoke. Review reproduced and fixed an extra key-label collision restriction: opaque contract IDs use a separate namespace from business type names. Four regressions preserve native key identity across matching label strings. The handler fixture also proves the exact 8,192/8,193-byte result boundary with original rejection cause and NONE retained.
+
+The Java runtime checkpoint is under focused review. Both host/scenario demonstrations, shared effect parity and combined CI acceptance remain pending. Preserve the read-only corpus and packaged-host behavior; keep the demo app deferred.
 
 ### Acceptance and stop condition
 

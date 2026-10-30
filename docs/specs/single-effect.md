@@ -1,6 +1,6 @@
 # Single-effect profile
 
-Status: **compiler checkpoint verified on 2026-10-30; runtime implementation and qualification pending**. This is the bounded contract for [single-effect-followup](../../roadmap/features/single-effect-followup.md), accepted for implementation on 2026-10-30. Shared Java/Node execution and host conformance remain feature-completion gates. [Design and sample](../internal/single-effect-followup-design.md) explain the choices; the [compiled fixture](../../conformance/single-effect/README.md) records current evidence. Existing `keir-read/1` artifacts, APIs, fixtures and DISPLAY consumption remain unchanged.
+Status: **compiler and Node runtime checkpoints verified on 2026-10-30; Java runtime review and combined qualification pending**. This is the bounded contract for [single-effect-followup](../../roadmap/features/single-effect-followup.md), accepted for implementation on 2026-10-30. Shared Java/Node execution and host conformance remain feature-completion gates. [Design and sample](../internal/single-effect-followup-design.md) explain the choices; the [compiled fixture](../../conformance/single-effect/README.md) records current evidence. Existing `keir-read/1` artifacts, APIs, fixtures and DISPLAY consumption remain unchanged.
 
 ## Versions and inherited rules
 
@@ -20,7 +20,7 @@ Whole-document parse/shape, DCM/pins and structural/authority/reference prefligh
 
 ## Closed DCM additions
 
-The root is exactly `{format,domain,types,capabilities,entrypoints,hostKey,assurance}`. `assurance` must be `SIMULATION_ONLY` for this checkpoint; it is a restriction, not a certification. `hostKey` is exactly `{source,type}`: source must be `requestKey`; type is a nonempty string bounded to 256 UTF-8 bytes identifying an exact host-native key contract. It is **not** a business/CEL type and cannot be named by source parameters, record fields, literals or descriptors. One binding only, shared by all calls in this invocation.
+The root is exactly `{format,domain,types,capabilities,entrypoints,hostKey,assurance}`. `assurance` must be `SIMULATION_ONLY` for this checkpoint; it is a restriction, not a certification. `hostKey` is exactly `{source,type}`: source must be `requestKey`; type is a nonempty string bounded to 256 UTF-8 bytes identifying an exact host-native key contract. It is **not** a business/CEL type and cannot be referenced as a key contract by source parameters, record fields, literals or descriptors. Its label belongs to a separate namespace: equality with `String`, `Boolean` or a declared business type name is permitted and creates no type alias, conversion or access to the key. Business references resolve only against built-ins/DCM types, never `hostKey.type`. One binding only, shared by all calls in this invocation.
 
 Capability fields are unchanged except `effect` accepts `READ` or `WRITE`. The root key and entrypoint event context are supplied to both kinds through the protected adapter channel below, never merged into `parameters`. Existing scalar `binding:host` parameters remain supported. WRITE responses must obey the effect outcomes below. All business error codes remain stable declared strings; this profile caps each capability's errors at 16.
 

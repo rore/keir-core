@@ -113,6 +113,7 @@ These are implementation obligations, not passing test claims. Compile once and 
 | Pre-commit placement, zero static effect grant, forged READ effect | Compile/prepare rejection before callbacks/dispatch. |
 | Missing/wrong native key, validator false/throw, wrong event type | HOST_CONTEXT_INVALID before the first read; no conversion or key leak. |
 | Adapter keyType or host keyBinding differs from DCM | ADMISSION_INVALID during prepare, before validator/authorization/adapter callbacks. |
+| Key contract label equals a built-in or declared business type name | The separate metadata namespace permits equality. Exact keyBinding/adapter label matching and unchanged opaque-key identity still apply; source gains no key access. |
 | Key/event/source overrides in source | Compile rejection; protected origin mismatch rejected by adapter before mutation. |
 | Current call/effect grant zero or invalid/widened | Reached call denied or invocation invalid before dispatch; skipped call does not consume dynamic grant. |
 | Real mode with fake assurance/registrations | Prepare rejection, no callbacks; no certification by scenario success. |

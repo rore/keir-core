@@ -10,4 +10,4 @@ java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar conform
 
 Stdout is the canonical artifact; preserve it as bytes. `artifact.sha256` independently pins the 5,439-byte artifact; `dcm.sha256` pins the 1,721-byte canonical model. Two fresh compiler processes reproduced these bytes, and the original two-argument read CLI still reproduced its golden artifact.
 
-The compiler checkpoint passed 47 tests. Java/Node effect execution, ordered simulation and packaged-host behavior remain unqualified. Fixtures use fictional data; the model's simulation-only assurance cannot authorize real writes.
+The compiler checkpoint passed 47 tests. Node module execution is verified, including the separate handler-boundary fixture; Java review, ordered cross-runtime simulation and packaged effect-host behavior remain pending. Fixtures use fictional data; the model's simulation-only assurance cannot authorize real writes.
