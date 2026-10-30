@@ -119,6 +119,13 @@ test('rejects unavailable guarded records even as unused environment declaration
   rejected(item.bytes, item.admission);
 });
 
+test('a write without static effect authority is distinct from the hard write-count ceiling', () => {
+  const item = alteredEffect(artifact => { artifact.dcm.entrypoints[artifact.entrypoint].effectGrant = 0; });
+  const result = rejected(item.bytes, item.admission);
+  assert.equal(result.code, 'ENTRY_GRANT_DENIED');
+  assert.equal(result.path, '/artifact/steps/2');
+});
+
 test('null optional guard/handler fields fail closed even with an independently selected raw digest', () => {
   for (const field of ['when', 'onError']) {
     const artifact = structuredClone(effectArtifact);

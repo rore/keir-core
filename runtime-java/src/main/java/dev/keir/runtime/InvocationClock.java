@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongFunction;
 import java.util.function.LongSupplier;
+import java.util.function.UnaryOperator;
 
 /** Stops asynchronous waiting; host callbacks and underlying I/O must enforce their own deadlines. */
 final class InvocationClock {
@@ -32,7 +33,12 @@ final class InvocationClock {
     }
 
     CompletionStage<Object> waitFor(LongFunction<CompletionStage<?>> action, String path, String failureCode, Runnable onDispatch) {
-        Wait wait = new Wait(path, failureCode);
+        return waitForEffect(action, path, failureCode, onDispatch, null, null);
+    }
+
+    CompletionStage<Object> waitForEffect(LongFunction<CompletionStage<?>> action, String path, String failureCode,
+                                        Runnable onDispatch, UnaryOperator<Object> onResponse, Runnable onSettled) {
+        Wait wait = new Wait(path, failureCode, onResponse, onSettled);
         long budget;
         try {
             budget = remaining(path);
@@ -53,11 +59,18 @@ final class InvocationClock {
 
     private final class Wait {
         private final String path, failureCode;
+        private final UnaryOperator<Object> onResponse;
+        private final Runnable onSettled;
+        private final boolean effect;
         private final CompletableFuture<Object> result = new CompletableFuture<>();
         private ScheduledFuture<?> timer;
         private boolean active = true;
+        private boolean committed;
 
-        Wait(String path, String failureCode) { this.path = path; this.failureCode = failureCode; }
+        Wait(String path, String failureCode, UnaryOperator<Object> onResponse, Runnable onSettled) {
+            this.path = path; this.failureCode = failureCode; this.onResponse = onResponse; this.onSettled = onSettled;
+            effect = onResponse != null || onSettled != null;
+        }
 
         long commit(Runnable onDispatch) {
             Throwable failure;
@@ -67,6 +80,7 @@ final class InvocationClock {
                     long budget = remaining(path);
                     if (onDispatch != null) onDispatch.run();
                     // Dispatch commits here; later cancellation stops waiting, not this in-flight host action.
+                    committed = true;
                     return budget;
                 } catch (Throwable error) { failure = error instanceof RuntimeFault ? error : invalid(); }
                 close();
@@ -85,6 +99,10 @@ final class InvocationClock {
         }
 
         void expired(long left, long chunk) {
+            if (effect && left <= chunk) {
+                if (claim()) settled(null, new RuntimeFault("BUDGET_EXCEEDED", path), false);
+                return;
+            }
             Throwable failure;
             synchronized (this) {
                 if (!active) return;
@@ -95,10 +113,15 @@ final class InvocationClock {
                 } catch (Throwable error) { failure = error instanceof RuntimeFault ? error : invalid(); }
                 close();
             }
-            deliver(null, failure);
+            if (effect) settled(null, failure, false);
+            else deliver(null, failure);
         }
 
         void completed(Object value, Throwable failure) {
+            if (effect) {
+                if (claim()) settled(value, failure == null ? null : new RuntimeFault(failureCode, path), failure == null);
+                return;
+            }
             synchronized (this) {
                 if (!active) return;
                 try {
@@ -107,6 +130,25 @@ final class InvocationClock {
                 } catch (Throwable error) { failure = error instanceof RuntimeFault ? error : invalid(); }
                 close();
             }
+            deliver(value, failure);
+        }
+
+        private synchronized boolean claim() {
+            if (!active) return false;
+            close();
+            return true;
+        }
+
+        private void settled(Object value, Throwable failure, boolean response) {
+            try {
+                if (response && onResponse != null) value = onResponse.apply(value);
+            } catch (Throwable error) { failure = error instanceof RuntimeFault ? error : invalid(); }
+            finally {
+                try { if (committed && onSettled != null) onSettled.run(); }
+                catch (Throwable error) { if (failure == null) failure = error instanceof RuntimeFault ? error : invalid(); }
+            }
+            try { remaining(path); }
+            catch (Throwable error) { failure = error instanceof RuntimeFault ? error : invalid(); }
             deliver(value, failure);
         }
 

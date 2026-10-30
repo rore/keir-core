@@ -1,6 +1,6 @@
 # Single-effect profile
 
-Status: **compiler and Node runtime checkpoints verified on 2026-10-30; Java runtime review and combined qualification pending**. This is the bounded contract for [single-effect-followup](../../roadmap/features/single-effect-followup.md), accepted for implementation on 2026-10-30. Shared Java/Node execution and host conformance remain feature-completion gates. [Design and sample](../internal/single-effect-followup-design.md) explain the choices; the [compiled fixture](../../conformance/single-effect/README.md) records current evidence. Existing `keir-read/1` artifacts, APIs, fixtures and DISPLAY consumption remain unchanged.
+Status: **compiler and both runtime module checkpoints verified on 2026-10-30; combined scenario/host qualification pending**. This is the bounded contract for [single-effect-followup](../../roadmap/features/single-effect-followup.md), accepted for implementation on 2026-10-30. Shared Java/Node scenario execution and host conformance remain feature-completion gates. [Design and sample](../internal/single-effect-followup-design.md) explain the choices; the [compiled fixture](../../conformance/single-effect/README.md) records current evidence. Existing `keir-read/1` artifacts, APIs, fixtures and DISPLAY consumption remain unchanged.
 
 ## Versions and inherited rules
 
@@ -33,6 +33,8 @@ The host supplies an admitted event after the original operation committed. Noth
 Keep the envelope fields, descriptor format and typed binding representation from [compiler-artifact](compiler-artifact.md), with the new profile/format/DCM pins. BIND is unchanged. CALL is `{op:CALL,id,capability,version,args,resultType,when?,onError?}`. `when` retains the checked earlier Boolean BIND ID. Each `onError` value lowers to `{type:outputType,fields:{field:loweredBinding,...}}`. Root return is unchanged. Allocate expression IDs in the source order defined above. Each `variables` map is exactly the definitely available environment for that position, including unused but available variables; guarded results are never inserted. Recompute and check these environments during preparation, rather than trusting artifact declarations.
 
 Preparation independently checks guard/handler references, all type overlays, conservative calls/writes, lifecycle, key metadata and grants. No source interpretation or new opcode is needed. Unknown instructions/fields, forged effect classifications, omitted required checks or incompatible versions fail closed before callbacks or dispatch. Keep old golden bytes and rejection corpus unchanged.
+
+Both loaders distinguish static effect authority from the hard ceiling: a WRITE exceeding the entrypoint's zero effect grant fails `ENTRY_GRANT_DENIED` at its `/artifact/steps/<index>`; a second possible WRITE fails `BUDGET_EXCEEDED`, regardless of guards.
 
 ## Host API and native key
 

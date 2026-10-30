@@ -12,7 +12,12 @@ final class Artifact {
     private Artifact() {}
 
     record Plan(Map<String,Object> document, Map<String,Object> dcm, Map<String,Object> entrypoint,
-                Map<String,Map<String,Object>> contexts, Map<String,Integer> calls, int callCount) {
+                Map<String,Map<String,Object>> contexts, Map<String,Integer> calls, int callCount,
+                boolean effect, int writeCount) {
+        Plan(Map<String,Object> document, Map<String,Object> dcm, Map<String,Object> entrypoint,
+             Map<String,Map<String,Object>> contexts, Map<String,Integer> calls, int callCount) {
+            this(document,dcm,entrypoint,contexts,calls,callCount,false,0);
+        }
         Plan {
             document = snapshot(document); dcm = snapshot(dcm); entrypoint = snapshot(entrypoint);
             LinkedHashMap<String,Map<String,Object>> copied = new LinkedHashMap<>();
@@ -46,11 +51,19 @@ final class Artifact {
     private static boolean scalarType(Map<String,Object> dcm, Object type) { return type instanceof String text && scalar(dcm, text); }
     private static boolean recordType(Map<String,Object> dcm, Object type) { return type instanceof String text && record(dcm, text); }
 
-    private static void model(Map<String,Object> dcm) {
+    private static void model(Map<String,Object> dcm, boolean effect) {
         String p = MODEL;
-        exact(dcm, p, "format", "domain", "types", "capabilities", "entrypoints");
-        require("keir-dcm/read-1".equals(dcm.get("format")), p);
+        if (effect) exact(dcm,p,"format","domain","types","capabilities","entrypoints","hostKey","assurance");
+        else exact(dcm, p, "format", "domain", "types", "capabilities", "entrypoints");
+        require((effect ? "keir-dcm/effect-1" : "keir-dcm/read-1").equals(dcm.get("format")), p);
         require(canonical(dcm).length <= Profile.DCM_BYTES, p, "BUDGET_EXCEEDED");
+        if (effect) {
+            require("SIMULATION_ONLY".equals(dcm.get("assurance")),p+"/assurance","DCM_INVALID");
+            exact(dcm.get("hostKey"),p+"/hostKey","source","type");
+            Map<String,Object> key = map(dcm.get("hostKey"),p+"/hostKey");
+            require("requestKey".equals(key.get("source")),p+"/hostKey/source","DCM_INVALID");
+            metadataText(key.get("type"),p+"/hostKey/type");
+        }
         exact(dcm.get("domain"), p + "/domain", "id", "version");
         Map<String,Object> domain = map(dcm.get("domain"), p);
         text(domain.get("id"), p, true, 256); text(domain.get("version"), p, true, 256);
@@ -76,24 +89,46 @@ final class Artifact {
         for (var item : caps.entrySet()) {
             named(item.getKey(), p, true); Map<String,Object> cap = map(item.getValue(),p);
             exact(cap,p,"version","parameters","result","effect","errors"); text(cap.get("version"),p,true,256);
-            require("READ".equals(cap.get("effect")) && recordType(dcm,cap.get("result")),p);
+            require(("READ".equals(cap.get("effect")) || effect && "WRITE".equals(cap.get("effect"))) && recordType(dcm,cap.get("result")),p);
             for (var parameter : bounded(cap.get("parameters"),p,16).entrySet()) {
                 named(parameter.getKey(),p,false); exact(parameter.getValue(),p,"type","binding");
                 Map<String,Object> param = map(parameter.getValue(),p);
                 require(scalarType(dcm,param.get("type")) && ("agent".equals(param.get("binding")) || "host".equals(param.get("binding"))),p);
             }
             List<Object> errors = list(cap.get("errors"),p); require(new HashSet<>(errors).size() == errors.size(),p);
+            if (effect) require(errors.size()<=16,p+"/capabilities/"+item.getKey()+"/errors","BUDGET_EXCEEDED");
             for (Object error : errors) require(error instanceof String text && text.matches("[A-Z][A-Z0-9_]{0,63}"),p);
         }
         Map<String,Object> entries = bounded(dcm.get("entrypoints"),p + "/entrypoints",4); require(!entries.isEmpty(),p);
         for (var item : entries.entrySet()) {
             named(item.getKey(),p,true); Map<String,Object> entry = map(item.getValue(),p);
-            exact(entry,p,"input","output","trigger","consumer","grants");
-            require(recordType(dcm,entry.get("input")) && recordType(dcm,entry.get("output")) && "REQUEST".equals(entry.get("trigger")),p);
+            if (effect) exact(entry,p,"input","output","trigger","placement","consumer","grants","effectGrant","event");
+            else exact(entry,p,"input","output","trigger","consumer","grants");
+            require(recordType(dcm,entry.get("input")) && recordType(dcm,entry.get("output")),p);
+            if (effect) {
+                String path = p+"/entrypoints/"+item.getKey();
+                require("EVENT".equals(entry.get("trigger")),path+"/trigger","DCM_INVALID");
+                require("AFTER_COMMIT".equals(entry.get("placement")),path+"/placement","DCM_INVALID");
+                try { number(entry.get("effectGrant"),0,1,path+"/effectGrant"); }
+                catch (RuntimeFault failure) { throw new RuntimeFault("DCM_INVALID",path+"/effectGrant"); }
+                exact(entry.get("event"),path+"/event","idType","sourceType");
+                Map<String,Object> event = map(entry.get("event"),path+"/event");
+                for (String field : List.of("idType","sourceType")) {
+                    String type = metadataText(event.get(field),path+"/event/"+field);
+                    require("nominal".equals(definition(dcm,type).get("kind")),path+"/event/"+field,"DCM_INVALID");
+                }
+            } else require("REQUEST".equals(entry.get("trigger")),p);
             exact(entry.get("consumer"),p,"id","version","kind"); Map<String,Object> consumer = map(entry.get("consumer"),p);
-            named(consumer.get("id"),p,true); text(consumer.get("version"),p,true,256); require("DISPLAY".equals(consumer.get("kind")),p);
+            named(consumer.get("id"),p,true); text(consumer.get("version"),p,true,256);
+            if (effect) require("EVENT_REPORT".equals(consumer.get("kind")),p+"/entrypoints/"+item.getKey()+"/consumer/kind","DCM_INVALID");
+            else require("DISPLAY".equals(consumer.get("kind")),p);
             for (var grant : bounded(entry.get("grants"),p,8).entrySet()) { require(caps.containsKey(grant.getKey()),p); number(grant.getValue(),1,4,p); }
         }
+    }
+
+    private static String metadataText(Object value,String path) {
+        try { return text(value,path,true,256); }
+        catch (RuntimeFault failure) { throw new RuntimeFault("DCM_INVALID",path); }
     }
 
     static Object value(Map<String,Object> dcm, String name, Object value, String path, String code) {
@@ -117,14 +152,19 @@ final class Artifact {
     }
 
     static Plan validate(Map<String,Object> artifact) {
+        return validate(artifact,false);
+    }
+
+    static Plan validate(Map<String,Object> artifact, boolean effect) {
         exact(artifact,"/artifact","format","profile","compiler","environment","sourceDigest","dcmDigest","dcm","entrypoint","descriptors","expressions","steps","return");
-        require("keir-artifact/read-1".equals(artifact.get("format")) && "keir-read/1".equals(artifact.get("profile")),"/artifact");
+        require((effect ? "keir-artifact/effect-1" : "keir-artifact/read-1").equals(artifact.get("format")) &&
+                (effect ? "keir-effect/1" : "keir-read/1").equals(artifact.get("profile")),"/artifact");
         text(artifact.get("compiler"),"/artifact/compiler",true,256);
         shape(artifact.get("environment"),Profile.ENVIRONMENT.keySet(),"/artifact/environment");
         require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment","PIN_MISMATCH");
         for (String key : List.of("sourceDigest","dcmDigest")) require(artifact.get(key) instanceof String text && text.matches("sha256:[0-9a-f]{64}"),"/artifact/"+key);
         require(digest(canonical(artifact.get("dcm"))).equals(artifact.get("dcmDigest")),"/artifact/dcmDigest");
-        Map<String,Object> dcm = map(artifact.get("dcm"),MODEL); model(dcm);
+        Map<String,Object> dcm = map(artifact.get("dcm"),MODEL); model(dcm,effect);
         Map<String,Object> entries = map(dcm.get("entrypoints"),MODEL); require(entries.containsKey(artifact.get("entrypoint")),"/artifact/entrypoint");
         Map<String,Object> entry = map(entries.get(artifact.get("entrypoint")),MODEL);
         require(artifact.get("steps") instanceof List<?> steps && !steps.isEmpty() && steps.size() <= Profile.STEPS,"/artifact/steps","BUDGET_EXCEEDED");
@@ -132,13 +172,17 @@ final class Artifact {
         Map<String,Object> expressions = bounded(artifact.get("expressions"),"/artifact/expressions",Profile.TOTAL_AST_NODES);
         Map<String,Object> variables = new LinkedHashMap<>(); variables.put("input",entry.get("input"));
         LinkedHashMap<String,Map<String,Object>> contexts = new LinkedHashMap<>();
-        Map<String,Integer> calls = new LinkedHashMap<>(); int callCount = 0;
+        Map<String,Integer> calls = new LinkedHashMap<>(); int callCount = 0, writeCount = 0;
+        Set<String> ids = new HashSet<>(), booleanBinds = new HashSet<>();
         for (int i=0; i<steps.size(); i++) {
             String p = "/artifact/steps/"+i; Map<String,Object> step = map(steps.get(i),p);
             named(step.get("id"),p,false); String id = (String)step.get("id");
-            require(!Set.of("input","Boolean","String").contains(id) && !variables.containsKey(id) && !types(dcm).containsKey(id),p);
+            require(!Set.of("input","Boolean","String").contains(id) && ids.add(id) && !types(dcm).containsKey(id),p);
             if ("CALL".equals(step.get("op"))) {
-                exact(step,p,"op","id","capability","version","args","resultType");
+                Set<String> fields = new HashSet<>(Set.of("op","id","capability","version","args","resultType"));
+                if (effect) for (String optional : List.of("when","onError")) if (step.containsKey(optional)) fields.add(optional);
+                shape(step,fields,p);
+                if (step.containsKey("when")) require(booleanBinds.contains(step.get("when")),p+"/when");
                 Map<String,Object> caps = map(dcm.get("capabilities"),MODEL); require(caps.containsKey(step.get("capability")),p);
                 Map<String,Object> cap = map(caps.get(step.get("capability")),p);
                 require(Objects.equals(step.get("version"),cap.get("version")) && Objects.equals(step.get("resultType"),cap.get("result")),p);
@@ -146,22 +190,42 @@ final class Artifact {
                 params.forEach((key,param)-> { if ("agent".equals(map(param,p).get("binding"))) agent.add(key); });
                 shape(step.get("args"),agent,p+"/args");
                 for (String arg : agent) binding(dcm,expressions,variables,contexts,map(step.get("args"),p).get(arg),map(params.get(arg),p).get("type"),p+"/args/"+arg);
+                if (step.containsKey("onError")) {
+                    Map<String,Object> handlers = map(step.get("onError"),p+"/onError");
+                    require(!handlers.isEmpty(),p+"/onError");
+                    require(handlers.size()<=16,p+"/onError","BUDGET_EXCEEDED");
+                    for (String code : new TreeSet<>(handlers.keySet())) {
+                        String path = pointer(p+"/onError",code);
+                        require(list(cap.get("errors"),path).contains(code),path);
+                        output(dcm,entry,expressions,variables,contexts,handlers.get(code),path);
+                    }
+                }
                 String capability = (String)step.get("capability"); calls.merge(capability,1,Integer::sum); callCount++;
                 Object grant = map(entry.get("grants"),p).get(capability);
                 require(callCount <= Profile.CALLS && grant instanceof Number && calls.get(capability) <= ((Number)grant).longValue(),p,"BUDGET_EXCEEDED");
+                if (effect && "WRITE".equals(cap.get("effect"))) {
+                    require(++writeCount<=1,p,"BUDGET_EXCEEDED");
+                    require(writeCount<=((Number)entry.get("effectGrant")).intValue(),p,"ENTRY_GRANT_DENIED");
+                }
             } else if ("BIND".equals(step.get("op"))) {
                 exact(step,p,"op","id","value","resultType");
                 binding(dcm,expressions,variables,contexts,step.get("value"),step.get("resultType"),p+"/value");
+                if ("Boolean".equals(step.get("resultType"))) booleanBinds.add(id);
             } else throw new RuntimeFault("ARTIFACT_INVALID",p);
-            variables.put(id,step.get("resultType"));
+            if (!step.containsKey("when")) variables.put(id,step.get("resultType"));
         }
-        Map<String,Object> returned = map(artifact.get("return"),"/artifact/return"); exact(returned,"/artifact/return","type","fields");
-        require(Objects.equals(returned.get("type"),entry.get("output")),"/artifact/return");
-        Map<String,Object> fields = map(definition(dcm,(String)entry.get("output")).get("fields"),MODEL);
-        shape(returned.get("fields"),fields.keySet(),"/artifact/return/fields");
-        for (String field : new TreeSet<>(fields.keySet())) binding(dcm,expressions,variables,contexts,map(returned.get("fields"),"/artifact/return").get(field),fields.get(field),"/artifact/return/fields/"+field);
+        output(dcm,entry,expressions,variables,contexts,artifact.get("return"),"/artifact/return");
         require(contexts.size() == expressions.size(),"/artifact/expressions");
-        return new Plan(artifact,dcm,entry,contexts,calls,callCount);
+        return new Plan(artifact,dcm,entry,contexts,calls,callCount,effect,writeCount);
+    }
+
+    private static void output(Map<String,Object> dcm,Map<String,Object> entry,Map<String,Object> expressions,
+                               Map<String,Object> variables,LinkedHashMap<String,Map<String,Object>> contexts,Object value,String path) {
+        Map<String,Object> returned = map(value,path); exact(returned,path,"type","fields");
+        require(Objects.equals(returned.get("type"),entry.get("output")),path);
+        Map<String,Object> fields = map(definition(dcm,(String)entry.get("output")).get("fields"),MODEL);
+        shape(returned.get("fields"),fields.keySet(),path+"/fields");
+        for (String field : new TreeSet<>(fields.keySet())) binding(dcm,expressions,variables,contexts,map(returned.get("fields"),path).get(field),fields.get(field),pointer(path+"/fields",field));
     }
 
     private static void binding(Map<String,Object> dcm, Map<String,Object> expressions, Map<String,Object> variables,
