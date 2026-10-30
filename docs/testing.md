@@ -2,11 +2,11 @@
 
 Load for code/test/contract changes. Apply to core and demo; keep demo tests local and workflow management in core.
 
-Status: read-profile regression, component coverage and combined local verification pass. The installed [`keir-contract` CI check](https://github.com/rore/keir-core/actions/runs/40921421530) passed on `69d01b6` in 47 seconds on 2026-10-29: 92 Java tests, 154 Node tests, the packaged Node host test and complete cross-runtime/host verification. Workflow-level contract-policy protection remains [proposed](internal/workflow/core-contract-ci-proposal.md#behavioral-contract).
+Status: read and effect profiles pass combined local verification. The full clean Java coverage build passes 164 tests (47 compiler, 95 runtime, 22 host) in 33.57 seconds. Default Node regression passes 274 tests in 2.05 seconds, and both installed-host tests pass. The combined verifier reproduces both artifacts with four compiler processes, compares 61 read cases/52 invocations and 25 effect scenarios, and checks all four packaged-host batches. Effect-host CI acceptance is pending; the [read CI checkpoint](https://github.com/rore/keir-core/actions/runs/40921421530) remains accepted. Workflow-level contract-policy protection remains [proposed](internal/workflow/core-contract-ci-proposal.md#behavioral-contract).
 
-The effect compiler checkpoint adds 47 passing compiler tests, independently replayed in a 20.43-second clean coverage build on 2026-10-30; coverage is 795/840 lines and 624/729 branches. Fresh effect/read CLI bytes match their goldens. Compilation does not qualify runtime or host behavior.
+Effect checkpoint coverage: compiler 795/840 lines and 624/729 branches; Java runtime 869/875 lines and 808/939 branches; Node source 100% lines and 96.88% branches. The six-file Node runtime archive matches installed source with exact integrity and unchanged registry pins. Coverage does not certify real adapters, hard resource containment or production readiness.
 
-The Node effect checkpoint passes 232 default tests in 1.78 seconds, including all prior read cases; source coverage is 100% lines and 96.88% branches. A freshly packed six-file runtime matches its installed bytes and passes the old read-host smoke (0.45 seconds) with exact integrity and unchanged registry pins. Java's effect checkpoint passes 95 runtime tests in a 23.05-second independent clean coverage build, including the same supplemental handler artifact; coverage is 869/875 lines and 808/939 branches. Combined host/scenario parity remains pending; module success does not certify real adapters.
+Effect regression covers conservative single-write admission, guard availability, original key identity, fresh grants, native deadline races, retained receipts, handler/result boundaries, ordered simulation mismatches and consumer validation. The shared supplemental handler artifact is Java-compiled; both runtime suites consume the same bytes. The following older measurements remain historical read-profile baselines.
 
 Accepted read-profile baseline commands and measurements (2026-10-29):
 
@@ -51,10 +51,10 @@ Use the reviewed [read profile acceptance matrix](specs/host-integration.md#acce
 
 Protect these paths when their verification is live:
 
-- `docs/specs/**` and `conformance/read-and-decide/**`.
-- Compiler `StrictDataTest.java`, `DcmTest.java`, `KeirCompilerTest.java` in `compiler-java/src/test/java/dev/keir/compiler/`.
-- Node `canonical.test.js`, `cel.test.js`, `prepare.test.js`, `invoke.test.js`, `scalars.test.js`, `multi-call.test.js` and their actual Java-generated fixtures.
-- Java artifact/CEL/clock/invocation/data/shared/multi-call tests, both host tests and test-selection/parity runners. The [proposal](internal/workflow/core-contract-ci-proposal.md#behavioral-contract) lists exact paths.
+- `docs/specs/**`, `conformance/read-and-decide/**` and `conformance/single-effect/**`.
+- Compiler `StrictDataTest.java`, `DcmTest.java`, `KeirCompilerTest.java`, `SingleEffectCompilerTest.java` in `compiler-java/src/test/java/dev/keir/compiler/`.
+- Node `effect-prepare.test.js`, `effect-invoke.test.js`, `effect-handler.test.js`, `canonical.test.js`, `cel.test.js`, `prepare.test.js`, `invoke.test.js`, `scalars.test.js`, `multi-call.test.js` and their actual Java-generated fixtures.
+- Java artifact/CEL/clock/invocation/data/shared/multi-call/effect tests, host consumers and their tests, simulation harness regressions and test-selection/parity runners. The [proposal](internal/workflow/core-contract-ci-proposal.md#behavioral-contract) lists exact paths.
 
 Do not blanket-protect helper tests or diagnostic benchmarks. Add later behavior only with accepted features; probe results do not certify full runtime guarantees.
 
@@ -68,6 +68,7 @@ behaviorContracts:
   paths:
     - docs/specs/**
     - conformance/read-and-decide/**
+    - conformance/single-effect/**
     # Add exact module contract-test and selection-runner paths.
   verification: keir-contract
 ```

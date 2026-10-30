@@ -1,6 +1,6 @@
 # One guarded follow-up: design and implementation handoff
 
-Status: **accepted for implementation on 2026-10-30**; no new behavior is implemented by this document. Owning feature: [single-effect-followup](../../roadmap/features/single-effect-followup.md). Normative delta: [single-effect profile](../specs/single-effect.md). This handoff is limited to one post-commit effect and deterministic simulation, preserving the accepted read profile.
+Status: **implemented experimental checkpoint, locally verified on 2026-10-30**; effect-host CI acceptance pending. Owning feature: [single-effect-followup](../../roadmap/features/single-effect-followup.md). Normative delta: [single-effect profile](../specs/single-effect.md). See [testing evidence](../testing.md) and [25 shared scenarios](../../conformance/single-effect/README.md). This record covers one post-commit effect and deterministic simulation, preserving the read profile; it certifies no real adapter.
 
 ## Decisions and evidence
 

@@ -1,6 +1,6 @@
 # Customer extension assistant
 
-**Status:** initial assistant guidance. The read-profile compiler and simulated runtimes are implemented; host-integrated customer authoring and activation tools remain future work. Read the [agent overview](README.md) and [specification status](../specs/README.md).
+**Status:** initial assistant guidance. The read and simulation-only effect profiles are implemented; host-integrated customer authoring and activation tools remain future work. Read the [agent overview](README.md) and [specification status](../specs/README.md).
 
 ## Task and inputs
 
@@ -24,10 +24,10 @@ If tools, capabilities or facts are unavailable, explain the limitation or ask t
 
 ## First worked customization: classify a task
 
-The [single-effect follow-up](../internal/single-effect-followup-design.md) is an **accepted design**, not currently supported authoring. When accepted and implemented, discover its separately approved profile/model; compare native scalar status and nominal project fields in source, use one Boolean guard, and never reference its guarded result. Propose created, no-op, handled rejection and lost-response scenarios. Explain that BUSINESS_REJECTION remains rejection even with a displayed record, and UNKNOWN is neither success nor proof of no effect. Never author or derive a host key, override protected event origin, infer authorization from project equality, or treat passing fakes as permission to activate real writes.
+The [single-effect follow-up](../internal/single-effect-followup-design.md) is **implemented for controlled simulation**; use the [worked scenarios](../../conformance/single-effect/README.md). Discover its separately approved profile/model; compare native scalar status and nominal project fields in source, use one Boolean guard, and never reference its guarded result. Propose created, no-op, handled rejection and lost-response scenarios. Explain that BUSINESS_REJECTION remains rejection even with a displayed record, and UNKNOWN is neither success nor proof of no effect. Never author or derive a host key, override protected event origin, infer authorization from project equality, or treat passing fakes as permission to activate real writes.
 
 Request: “Show DONE when the selected task is completed; otherwise show PENDING.” Discover the approved `ClassifyTask` hook and `tasks.get` capability, then adapt the [short source example](../specs/language.md#source-and-example) using the actual approved DCM digest. The example fingerprint applies only to the documented sample model, not a different host catalog. Read native status, bind the comparison and return the declared classification; no custom host eligibility API is needed.
 
 Propose two independent expectations: completed task -> DONE, open task -> PENDING. Also propose missing/inaccessible task -> no classification displayed. Have the human review intent; use the exact compiled artifact for both host simulations. Explain the separate program result and DISPLAY/NOT_DISPLAYED consumer outcome. Do not turn a lookup failure into PENDING.
 
-If compilation rejects `/source/steps/0/args/actorId` with `HOST_BINDING_OVERRIDE`, remove that unauthorized argument; the host supplies identity separately. A new capability requires host integration work, not a renamed call or edited catalog. This candidate only supports the [read profile](../specs/README.md); do not promise writes, tags/search, dates, activation or live AI tools. It does not complete the later follow-up example.
+If compilation rejects `/source/steps/0/args/actorId` with `HOST_BINDING_OVERRIDE`, remove that unauthorized argument; the host supplies identity separately. A new capability requires host integration work, not a renamed call or edited catalog. For this REQUEST example use the [read profile](../specs/README.md). Use the separately admitted effect profile only for its supported post-commit simulation; do not promise real writes, tags/search, dates, activation or live AI tools.

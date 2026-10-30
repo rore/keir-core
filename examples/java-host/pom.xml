@@ -10,7 +10,11 @@
     <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.12.2</version><scope>test</scope></dependency>
   </dependencies>
   <build>
-    <testResources><testResource><directory>${project.basedir}/../../conformance/read-and-decide</directory><targetPath>read-and-decide</targetPath></testResource></testResources>
+    <resources><resource><directory>${project.basedir}/../../conformance/single-effect</directory><targetPath>single-effect</targetPath><includes><include>scenarios.json</include></includes></resource></resources>
+    <testResources>
+      <testResource><directory>${project.basedir}/../../conformance/read-and-decide</directory><targetPath>read-and-decide</targetPath></testResource>
+      <testResource><directory>${project.basedir}/../../conformance/single-effect</directory><targetPath>single-effect</targetPath></testResource>
+    </testResources>
     <plugins>
     <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.1</version>
       <executions><execution><phase>package</phase><goals><goal>shade</goal></goals><configuration>

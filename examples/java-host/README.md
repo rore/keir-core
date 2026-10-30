@@ -32,3 +32,28 @@ Focused in-process host tests exercise the complete batch, consumer validation, 
 ```
 
 Host-correction verification on 2026-10-29: five host tests passed (0.705 seconds focused, 1.105 seconds with coverage). The coherent offline root coverage build passed 89 tests in 16.396 seconds. Host coverage is 64/66 lines (96.97%) and 52/52 branches (100%); the two missed lines are the thin `main`/`System.exit` wrapper. The packaged CLI is also exercised once as a four-case batch outside the coverage agent. Compiler/runtime behavior and the primary golden/shared expectations are unchanged.
+
+## Post-commit effect simulation
+
+The additional `dev.keir.examples.EffectHost` entrypoint runs the fixed 25-case [single-effect corpus](../../conformance/single-effect/scenarios.json). The original JAR manifest and two-argument read CLI remain unchanged. After the same package build, run from the repository root:
+
+```powershell
+java -cp examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar dev.keir.examples.EffectHost `
+  conformance/single-effect/artifact.json `
+  sha256:d441413373a59a0a40a509143146fef8fe9c1c2426bee430965efddee591f31c `
+  sha256:d97c00f679ed0441817a610a71faeda949069c34fcb2a8d89774838d87a71e77
+```
+
+The artifact and both independent pins are external admission inputs. Only the fixed scenario catalog is packaged as a resource. The whole batch may exceed 65,536 bytes; each closed scenario is bounded to 65,536 bytes and four stubs, with at most 64 cases per batch. The complete batch is validated/executed before stdout receives one array of `{id,outcome,calls,consumption}` rows. Invalid arguments exit 2; invalid files, pins, scenarios or simulation assertions exit 1 with no partial batch and a fixed diagnostic.
+
+Trusted fixtures supply the native `java.util.UUID`, event, protected actor, grants, authorization and logical clock. Scenario input cannot override them. Both adapters receive the exact original UUID object. Arguments and protected origins are checked before a stub is consumed; captured calls are matched to actual `CALL_DISPATCHED` events by ordinal, taking step IDs from those events. A separate violation ledger prevents a runtime-caught adapter mismatch from passing as an expected business failure. No source interpretation, alternate execution engine or compiler dependency is used.
+
+The independent EVENT_REPORT consumer checks the closed outcome, trace, error/cause, result and effect shapes. A terminal handler may return any typed output enum value, including NO_OP or CREATED; classification and error remain BUSINESS_REJECTION, and the label establishes no effect evidence. Uncertainty has no ordinary result, and a CONFIRMED receipt can accompany failed execution or rejection of a later read. Trace evidence must distinguish an earlier confirmed write from the rejected call; a rejected write still requires NONE. Malformed outcomes return `{status:NOT_REPORTED,code:OUTCOME_INVALID}`. Duplicate/payload-mismatch cases use explicitly preseeded fake responses; they do not establish real persistence, atomic deduplication, retention, authorization or recovery guarantees. No real adapter mode is admitted.
+
+The test-only `dev.keir.runtime.EffectScenarioDriver` emits the same full rows using the runtime module's pinned resources and this packaged host. The combined verifier supplies both the host JAR and runtime test classes on its classpath. A small reflective call avoids adding a reverse runtime-to-host dependency or duplicating the simulator. On Windows:
+
+```powershell
+java -cp "examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar;runtime-java/target/test-classes" dev.keir.runtime.EffectScenarioDriver
+```
+
+Module checkpoint on 2026-10-30: offline host/runtime coverage verification passed 95 runtime and 22 host tests in 12.83 seconds. Host coverage is 339/342 lines and 456/514 branches, including all lines in the effect simulator, consumer and JSON transport. Both fresh packaged effect entrypoints matched all 25 complete expected rows; the old four-case read CLI and four packaged effect CLI rejection cases also passed. The JAR retains the read manifest, contains the fixed catalog and excludes Keir/CEL compiler, CEL parser, ANTLR and YAML classes. Combined Node/Java verification and CI acceptance are separate manager-owned checkpoints.

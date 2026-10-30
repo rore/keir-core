@@ -94,11 +94,13 @@ behaviorContracts:
   paths:
     - docs/specs/**
     - conformance/read-and-decide/**
+    - conformance/single-effect/**
     - conformance/cel-profile/evidence/bundle.json
     - conformance/cel-profile/fixtures.json
     - compiler-java/src/test/java/dev/keir/compiler/StrictDataTest.java
     - compiler-java/src/test/java/dev/keir/compiler/DcmTest.java
     - compiler-java/src/test/java/dev/keir/compiler/KeirCompilerTest.java
+    - compiler-java/src/test/java/dev/keir/compiler/SingleEffectCompilerTest.java
     - runtime-java/src/test/java/dev/keir/runtime/ArtifactTest.java
     - runtime-java/src/test/java/dev/keir/runtime/CheckedCelTest.java
     - runtime-java/src/test/java/dev/keir/runtime/InvocationClockTest.java
@@ -107,15 +109,31 @@ behaviorContracts:
     - runtime-java/src/test/java/dev/keir/runtime/SharedConformanceTest.java
     - runtime-java/src/test/java/dev/keir/runtime/MultiCallConformanceTest.java
     - runtime-java/src/test/java/dev/keir/runtime/ScenarioDriver.java
+    - runtime-java/src/test/java/dev/keir/runtime/EffectAdmissionTest.java
+    - runtime-java/src/test/java/dev/keir/runtime/EffectArtifactTest.java
+    - runtime-java/src/test/java/dev/keir/runtime/EffectClockTest.java
+    - runtime-java/src/test/java/dev/keir/runtime/EffectHandlerTest.java
+    - runtime-java/src/test/java/dev/keir/runtime/EffectRuntimeTest.java
+    - runtime-java/src/test/java/dev/keir/runtime/EffectScenarioDriver.java
     - runtime-node/test/canonical.test.js
     - runtime-node/test/cel.test.js
     - runtime-node/test/prepare.test.js
     - runtime-node/test/invoke.test.js
     - runtime-node/test/scalars.test.js
     - runtime-node/test/multi-call.test.js
+    - runtime-node/test/effect-prepare.test.js
+    - runtime-node/test/effect-invoke.test.js
+    - runtime-node/test/effect-handler.test.js
     - runtime-node/test/fixtures/**
     - examples/java-host/src/test/java/dev/keir/examples/JavaHostTest.java
+    - examples/java-host/src/test/java/dev/keir/examples/EffectConsumerTest.java
+    - examples/java-host/src/test/java/dev/keir/examples/EffectHostTest.java
+    - examples/java-host/src/main/java/dev/keir/examples/EffectConsumer.java
+    - examples/java-host/src/main/java/dev/keir/examples/EffectSimulation.java
     - examples/node-host/test.mjs
+    - examples/node-host/effect-consumer.mjs
+    - examples/node-host/effect-consumer.test.mjs
+    - examples/node-host/effect-simulation.mjs
     - runtime-node/package.json
     - pom.xml
     - compiler-java/pom.xml

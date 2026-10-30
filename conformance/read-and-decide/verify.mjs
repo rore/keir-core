@@ -71,7 +71,34 @@ try {
     assert.deepEqual(rows[i].outcome, expected.outcome, `${rows[i].scenario} host outcome differs from corpus`);
     assert.deepEqual(rows[i].consumption, expected.consumption, `${rows[i].scenario} host consumption differs from corpus`);
   }
-  console.log(`Verified ${cases.length} shared cases/${cases.reduce((count, row) => count + row.runs.length, 0)} invocations, 2 compiler runs, 2 host batches; artifact ${artifactDigest}.`);
+  const effectFixture = resolve(repo, 'conformance/single-effect');
+  const effectCases = parse(readFileSync(resolve(effectFixture, 'scenarios.json')));
+  const effectPin = readFileSync(resolve(effectFixture, 'artifact.sha256'), 'utf8').trim();
+  const effectDcmPin = readFileSync(resolve(effectFixture, 'dcm.sha256'), 'utf8').trim();
+  const effectArgs = ['-jar', compiler, resolve(effectFixture, 'source.yaml'), resolve(effectFixture, 'dcm.json'), '--profile=keir-effect/1'];
+  const effectFirst = run(java, effectArgs, 'First effect compiler run');
+  const effectSecond = run(java, effectArgs, 'Second effect compiler run');
+  assert.deepEqual(effectFirst, effectSecond, 'Fresh effect compiler runs produced different bytes');
+  assert.deepEqual(effectFirst, readFileSync(resolve(effectFixture, 'artifact.json')), 'Generated effect artifact differs from committed bytes');
+  assert.equal(`sha256:${createHash('sha256').update(effectFirst).digest('hex')}`, effectPin, 'Fresh effect artifact differs from independent pin');
+  const effectGenerated = resolve(repo, '.tools/contract-verification/effect-artifact.json');
+  writeFileSync(effectGenerated, effectFirst);
+  for (const file of ['README.md', 'package.json']) {
+    assert.deepEqual(readFileSync(resolve(repo, 'examples/node-host/node_modules/@keir/runtime-node', file)),
+      readFileSync(resolve(repo, 'runtime-node', file)), `Installed Node package differs from reviewed file: ${file}`);
+  }
+  assert.deepEqual(readFileSync(resolve(runtimeClasses, 'single-effect/artifact.json')), effectFirst, 'Java effect resources contain stale artifact bytes');
+  assert.deepEqual(parse(readFileSync(resolve(runtimeClasses, 'single-effect/scenarios.json'))), effectCases, 'Java effect resources contain stale scenarios');
+  const effectExpected = effectCases.map(row => ({ id: row.id, ...row.expect }));
+  const effectJava = jsonRun(java, ['-cp', `${hostJar}${delimiter}${runtimeClasses}`, 'dev.keir.runtime.EffectScenarioDriver'], 'Java effect scenario batch');
+  const effectNode = jsonRun(process.execPath, [resolve(effectFixture, 'run-node.mjs')], 'Node effect scenario batch');
+  assert.deepEqual(effectJava, effectExpected, 'Java effect rows differ from hand-authored expectations');
+  assert.deepEqual(effectNode, effectJava, 'Complete Java and Node effect rows differ');
+  const effectNodeHost = jsonRun(process.execPath, [resolve(repo, 'examples/node-host/effect.mjs'), effectGenerated, effectPin, effectDcmPin], 'Installed Node effect host batch');
+  const effectJavaHost = jsonRun(java, ['-cp', hostJar, 'dev.keir.examples.EffectHost', effectGenerated, effectPin, effectDcmPin], 'Packaged Java effect host batch');
+  assert.deepEqual(effectNodeHost, effectExpected, 'Installed Node effect host differs from full shared expectations');
+  assert.deepEqual(effectJavaHost, effectNodeHost, 'Packaged effect hosts differ');
+  console.log(`Verified ${cases.length} read cases/${cases.reduce((count, row) => count + row.runs.length, 0)} invocations and ${effectCases.length} effect scenarios, 4 compiler runs, 4 host batches; artifacts ${artifactDigest}, ${effectPin}.`);
 } catch (error) {
   const message = String(error?.message ?? 'Verification failed').split('\n', 1)[0]
     .replaceAll(repo, '<repo>');
