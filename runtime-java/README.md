@@ -1,6 +1,8 @@
-# Java read-and-decide runtime
+# Java runtime
 
 `keir-runtime-java` executes the shared `keir-read/1` artifact with JDK 21 and CEL Java 0.14.0. It has no dependency on the Keir compiler, CEL compiler/parser, ANTLR or YAML. Compilation belongs outside execution; see the independent [Java host](../examples/java-host/README.md) for a packaged simulation.
+
+The separate `keir-effect/1` API implements the [single-effect contract](../docs/specs/single-effect.md) with simulation registrations only. Shared effect host/scenario qualification is a separate checkpoint; the packaged read host remains unchanged.
 
 `KeirRuntime.prepare(bytes, admission, adapters)` returns a `Preparation` containing either an immutable `Prepared` handle or a safe `Diagnostic`. Admission supplies an externally trusted whole-artifact digest, DCM digest, entrypoint, consumer, compiler and environment pins, adapter mode, grants and optional narrowing limits. The whole-byte digest is checked before JSON parsing. Canonical JSON, the complete DCM and plan, generated descriptors, checked CEL metadata and the restricted expression profile are checked before CEL runtime preparation. Preparation invokes no host callback.
 
@@ -8,7 +10,19 @@
 
 Authorization receives `{entrypoint}`, then `{entrypoint,capability,version}` before each call. An `Adapter` registers an exact version, simulation/real mode and asynchronous function receiving separate immutable agent and protected argument maps plus remaining milliseconds. It returns the closed SUCCESS, BUSINESS_REJECTION or TRANSIENT_FAILURE records from the [runtime contract](../docs/specs/runtime.md). Host adapters retain responsibility for resource access and actual I/O deadlines.
 
-`Outcome.toMap()` exposes a deeply immutable JSON-compatible record; `toJson()` serializes its canonical bytes. Only COMPLETED includes a result. Failures carry safe code/path pairs; traces expose event order and identifiers, without argument values or exception text. Validate results again in the selected host consumer.
+`Outcome.toMap()` exposes a deeply immutable JSON-compatible record; `toJson()` serializes its canonical bytes. In the read profile only COMPLETED includes a result. Failures carry safe code/path pairs; traces expose event order and identifiers, without argument values or exception text. Validate results again in the selected host consumer.
+
+For effects use `prepareEffect(bytes, admission, Map<String,EffectAdapter>)` and `invokeEffect(prepared, businessInput, EffectInvocation)`. These named methods preserve the original read adapter, invocation and preparation signatures. Preparation requires the effect artifact/model formats explicitly and independently checks guards, pre-call handler environments, checked CEL, one potential write and static grants. It invokes no validator, authorizer or adapter.
+
+Effect admission extends the existing map with `effectGrant` (integer 0 or 1) and a typed `new KeyBinding(type, validator)` registration. Each immutable `EffectAdapter(version, mode, keyType, function)` must match the DCM and use `simulation`; real mode is rejected. The validator's `Object validate(Object key)` must return a Boolean and must be bounded, pure and perform no I/O. Preparation retains its function reference; each invocation supplies its own key.
+
+`EffectInvocation` adds `Long effectGrant`, `Object requestKey` and `Map<String,Object> event` to the read invocation fields. The grant may only narrow admission; zero denies a reached write before its authorization callback. The event is exactly `{id,source}`, with nominal String values. Invocation validates bindings, grants, event and a non-null accepted key before the first adapter call, including on no-op paths. The sample validator accepts `java.util.UUID`; the runtime makes no assumption about that representation.
+
+The effect adapter receives `(agentArgs, protectedArgs, remainingMs, HostContext)`. `HostContext` contains the invocation's **original key reference** and an immutable event snapshot. The runtime never traverses, clones, converts, hashes or compares the key. The host owns its immutability, uniqueness and wire representation. Neither key nor event values enter CEL, artifacts or traces. Both read and write adapters in the effect profile use this fourth argument; read-profile adapters keep their three arguments.
+
+An effect outcome always adds immutable `effects()` / `effects` containing zero or one `{step,capability,state}` receipts. Skipped and undispatched writes have none. A dispatched write starts UNKNOWN; a winning closed response establishes CONFIRMED or NONE before completion clock and value checks. Timeout winners ignore late responses. Failures retain evidence; an outstanding UNKNOWN forces UNCERTAIN with the original safe failure code. Confirmation is adapter evidence, not rollback or crash durability.
+
+Business rejection is terminal. A matching typed handler may add a result while retaining BUSINESS_REJECTION and its original error. Handler failure adds that rejection as the nonrecursive `error.cause`. False guards skip arguments, per-call authorization and dispatch. Trace reservation prevents writes unless intent, dispatch, settlement, possible success and termination can all fit.
 
 Async authorization and adapter waits have finite native timeouts even when an injected logical clock stays stationary. Expiry checks run on independent daemon workers so a blocking host clock does not occupy the shared scheduler; that clock can still retain its own worker/invocation. Expired or regressing clocks stop later work, and late completions are ignored. Synchronous CEL and synchronous host callbacks cannot be preempted. Checked-AST/data ceilings and before/after clock checks do not establish hard execution deadlines, CPU gas equivalence, memory isolation or production tenant containment. Stopping the wait does not cancel underlying host I/O.
 
@@ -31,5 +45,7 @@ Checkpoint verification on 2026-10-29: the canonical offline clean coverage buil
 | Runtime | 697/704 (99.01%) | 600/717 (83.68%) |
 
 Coverage review includes authority, callback failure and timeout paths. Uncovered paths include defensive checks behind preparation invariants, CEL planner/evaluator exception handling and native timeout rearming beyond a 2,147,483,647 ms chunk. Long-duration timer behavior and hard synchronous interruption remain unqualified; these measurements are regression evidence, not containment guarantees.
+
+Effect module checkpoint on 2026-10-30: 95 runtime tests passed independent offline clean coverage verification in 23.05 seconds, preserving all 56 existing read tests. Coverage is 869/875 lines and 808/939 branches. Tests execute the pinned primary artifact and load Node's same compiled handler-output fixture through existing test resources, including exact 8,192-byte success and 8,193-byte rejection with NONE and the original cause retained. They cover native key identity, separate key-label namespaces, prepared reuse, admission/authority rejection, false guards, terminal handlers, trace reservation, winning response evidence before invalid/expired clocks, timeout-first late responses and outer-envelope mutation. Shared effect scenarios, EVENT_REPORT host consumption and packaged effect hosts remain separate acceptance work.
 
 See the [compiler build notes](../compiler-java/README.md) for pinned tooling and POSIX cache isolation.

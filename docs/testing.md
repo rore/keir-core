@@ -4,9 +4,9 @@ Load for code/test/contract changes. Apply to core and demo; keep demo tests loc
 
 Status: read-profile regression, component coverage and combined local verification pass. The installed [`keir-contract` CI check](https://github.com/rore/keir-core/actions/runs/40921421530) passed on `69d01b6` in 47 seconds on 2026-10-29: 92 Java tests, 154 Node tests, the packaged Node host test and complete cross-runtime/host verification. Workflow-level contract-policy protection remains [proposed](internal/workflow/core-contract-ci-proposal.md#behavioral-contract).
 
-The effect compiler checkpoint adds 47 passing compiler tests, independently replayed in a 20.43-second clean coverage build on 2026-10-30; coverage is 795/840 lines and 624/729 branches. Fresh effect/read CLI bytes match their goldens. Effect runtime and combined host conformance remain pending.
+The effect compiler checkpoint adds 47 passing compiler tests, independently replayed in a 20.43-second clean coverage build on 2026-10-30; coverage is 795/840 lines and 624/729 branches. Fresh effect/read CLI bytes match their goldens. Compilation does not qualify runtime or host behavior.
 
-The Node effect checkpoint passes 231 default tests in 2.24 seconds, including all prior read cases; source coverage is 100% lines and 96.71% branches. A freshly packed six-file runtime matches its installed bytes and passes the old read-host smoke (0.59 seconds) with exact integrity and unchanged registry pins. Java effect review and combined host/scenario parity remain pending; module success does not certify real adapters.
+The Node effect checkpoint passes 232 default tests in 1.78 seconds, including all prior read cases; source coverage is 100% lines and 96.88% branches. A freshly packed six-file runtime matches its installed bytes and passes the old read-host smoke (0.45 seconds) with exact integrity and unchanged registry pins. Java's effect checkpoint passes 95 runtime tests in a 23.05-second independent clean coverage build, including the same supplemental handler artifact; coverage is 869/875 lines and 808/939 branches. Combined host/scenario parity remains pending; module success does not certify real adapters.
 
 Accepted read-profile baseline commands and measurements (2026-10-29):
 

@@ -58,7 +58,9 @@ The [compiler checkpoint](../../conformance/single-effect/README.md) is accepted
 
 The Node runtime checkpoint is accepted after independent source review, 231 default tests in 2.24 seconds (100% source lines, 96.71% branches), exact six-file package/source comparison and integrity-enabled installed read-host smoke. Review reproduced and fixed an extra key-label collision restriction: opaque contract IDs use a separate namespace from business type names. Four regressions preserve native key identity across matching label strings. The handler fixture also proves the exact 8,192/8,193-byte result boundary with original rejection cause and NONE retained.
 
-The Java runtime checkpoint is under focused review. Both host/scenario demonstrations, shared effect parity and combined CI acceptance remain pending. Preserve the read-only corpus and packaged-host behavior; keep the demo app deferred.
+The Java runtime checkpoint is accepted after focused concurrency review and 95 independently passing tests in 23.05 seconds, preserving all 56 read tests. Coverage is 869/875 lines and 808/939 branches. Java consumes Node's exact supplemental handler bytes through existing test resources, with no duplicate fixture or compiler dependency. Both runtimes permit identical business/key-contract label strings without exposing the native key; static zero effect authority is distinguished from the one-write hard ceiling.
+
+Latest Node regression passes 232 tests in 1.78 seconds (100% source lines, 96.88% branches), including the static effect-authority diagnostic regression. Both packaged effect-host demonstrations, shared effect parity and combined CI acceptance remain pending. Preserve the read-only corpus and packaged-host behavior; keep the demo app deferred.
 
 ### Acceptance and stop condition
 

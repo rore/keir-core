@@ -183,7 +183,8 @@ export function validatePlan(artifact) {
       requireThat(callCount <= LIMITS.calls && calls[step.capability] <= (entrypoint.grants[step.capability] ?? 0), p, 'BUDGET_EXCEEDED');
       if (cap.effect === 'WRITE') {
         writeCount++;
-        requireThat(writeCount <= 1 && writeCount <= entrypoint.effectGrant, p, 'BUDGET_EXCEEDED');
+        requireThat(writeCount <= 1, p, 'BUDGET_EXCEEDED');
+        requireThat(writeCount <= entrypoint.effectGrant, p, 'ENTRY_GRANT_DENIED');
       }
     } else if (step.op === 'BIND') {
       shape(step, ['op', 'id', 'value', 'resultType'], p);
