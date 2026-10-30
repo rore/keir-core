@@ -1,7 +1,7 @@
 ---
 id: single-effect-followup
 title: Add a guarded follow-up effect and simulation
-status: queued
+status: active
 priority: high
 commitment: committed
 milestone: Execute extensions in Java and Node
@@ -49,6 +49,10 @@ The read-only scenario is accepted with [local and CI evidence](portable-core-fi
 Define the original host-key type/source, protected event/source binding, result/argument validation and the isolated simulation admission path. Pending fake guarantees must never be usable to admit real production adapters. Use one possible write and one binding; no mutual-exclusivity analysis or multi-key namespace design is needed.
 
 Use a separately versioned minimal sample DCM whose scalar task projection and create signature do not require dueAt; preserve the original baseline fixture and its compatibility identity. Compare project IDs at their nominal ProjectId type. The target project and title are validated business data, not permissions: the adapter independently authorizes creation, verifies the requested source and protected origin relationship, and applies native invariants. A matching project condition must not become an authorization bypass.
+
+### Current execution
+
+Started on 2026-10-30 after read-profile acceptance. The architect has been offered the bounded effect/key/simulation contract review; both core developers have been offered independent implementation-readiness checks. Acceptance is pending. Semantic implementation follows review of the agreed contract and exact file ownership. The first visible result is the same follow-up-created/no-op/rejected/uncertain scenario on Java and Node, with the read-only corpus preserved. The demo app remains deferred.
 
 ### Acceptance and stop condition
 
