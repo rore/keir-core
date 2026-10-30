@@ -59,7 +59,7 @@ Expectations are hand-authored from the contract, not approved snapshots of runn
 
 The Java test driver should read this same file, prepare once per case and emit the same ordered array of `{id,prepare,runs}` objects. Each normalized run is `{outcome,calls,authorizations,consumption}`. Preparation diagnostics compare `code`/`path`; human message text is excluded. Callback requests and logical time follow the table above; exception text and wall timestamps are never compared. Java driver code belongs to `runtime-java`, and the embedding example remains separate.
 
-Both runtimes pass this corpus and the combined verifier compares their entire normalized outputs. Component coverage and independent packaged hosts are checked locally. Read-profile CI passes; effect-host CI acceptance and production qualification remain separate. See [current testing evidence](../../docs/testing.md). See the complete [acceptance matrix](../../docs/specs/host-integration.md#acceptance-fixtures) and [testing guidance](../../docs/testing.md).
+Both runtimes pass this corpus and the combined verifier compares their entire normalized outputs. Component coverage and independent packaged hosts are checked locally. Read and effect profiles pass local and CI verification; production qualification remains separate. See [current testing evidence](../../docs/testing.md). See the complete [acceptance matrix](../../docs/specs/host-integration.md#acceptance-fixtures) and [testing guidance](../../docs/testing.md).
 
 ## Verify both runtimes and packaged hosts
 
