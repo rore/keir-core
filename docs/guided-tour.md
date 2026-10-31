@@ -50,7 +50,7 @@ The host publishes approved operations independently of any particular extension
 
 The host also declares errors and supplies protected context such as authenticated actor identity. A program cannot choose another actor or supply credentials.
 
-The DCM describes logical contracts. The host binds an exact approved DCM snapshot together with compatible capability invokers into a reusable bound host model. An invoker bridges the runner to an internal service, usually through a host-owned HTTP/RPC client:
+The DCM describes logical contracts. The host binds an exact approved DCM snapshot together with compatible capability invokers into a reusable bound host model. See the [binding interface](specs/host-model-binding.md) for the technical contract. An invoker bridges the runner to an internal service, usually through a host-owned HTTP/RPC client:
 
 ```text
 tasks.get instruction -> registered invoker -> internal task service
