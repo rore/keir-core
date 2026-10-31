@@ -22,16 +22,16 @@
 - Customer ownership stays in source -> change project/title without changing hook/DCM/host code; generic creation arguments exclude follow-up-specific fields.
 - Compatibility remains stable -> all `/1` golden bytes and fast compiler/Java/Node/shared regressions pass.
 - Evidence and review are adequate -> independent technical plan/result review, recorded user scope authorization, current Work Record, public-content checks and exact delivery revisions.
-**Plan review:** Architect gap review and technical freeze are complete with no new product decision. Separate clean-context technical plan review of the concrete appendix remains pending; no implementation readiness is claimed.
+**Plan review:** Agent technical review: independent clean-context plan review in Plan review below, approved at 4a3af9d. Architect gap review and technical freeze found no new product decision; implementation may proceed within the recorded approved scope.
 **Approvals:** Approved by user 2026-10-31: "ok, so can we now align what deveoped so far?" Scope is implementation of the already reviewed design and user-corrected tour at revision 85733de; this does not approve new behavior or contract departures. Any uncovered product decision requires renewed approval before dependent implementation.
 **Exceptions:** —
-**State:** Blocked
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 - User requested implementation alignment after reviewing the tour and correcting ownership, model binding, task creation and documentation/process scope. Current main is 85733de; working tree was clean before creating this record.
-- Planning checkpoint: architect completed the bounded gap review and technical freeze; both core developers confirmed availability and no competing assignment. Fresh isolated code checkouts are prepared; historical checkouts stay intact. Independent plan review is pending. No compiler/runtime edit or implementation assignment has begun.
+- Planning checkpoint: architect completed the bounded gap review and technical freeze; both core developers confirmed availability and no competing assignment. Fresh isolated code checkouts are prepared; historical checkouts stay intact. Independent plan review approved the frozen plan. No compiler/runtime edit has begun; exact A/B implementation offers are next.
 - Canonical owning feature: [generic hook/capability correction](../../roadmap/features/generic-hook-capability-contract.md). Manager alone updates its shared roadmap state.
 
 ## Evidence
@@ -50,7 +50,13 @@ Proposed disjoint ownership:
 
 Sequence: freeze exact Java/Node API wrappers, closed fields, diagnostic precedence and data-only scenario formats; obtain independent plan review; deliver compiler/fixture checkpoint while Node starts contract-based unit work; implement both bound-model/plan-validation/execution paths by reusing existing safety algorithms; update packaged hosts and shared verifier; run focused then combined fast regression and independent result review. Every `/2` read/effect profile must pass, not only the task example.
 
-The [technical appendix](../../docs/internal/generic-runtime-alignment-plan.md) now fixes Java/Node signatures and wrappers, closed host records, diagnostic ordering, shared fixture schema/IDs, exact model pins and finite host-harness budgets without a runtime registry or revocation API. Manager made the shared/effect fixture applicability table explicit from the architect's profile intent. Fresh authorizers enforce revocation; existing approved snapshots remain usable. Independent review must resolve any appendix/contract conflict before code starts.
+The [technical appendix](../../docs/internal/generic-runtime-alignment-plan.md) now fixes Java/Node signatures and wrappers, closed host records, diagnostic ordering, shared fixture schema/IDs, exact model pins and finite host-harness budgets without a runtime registry or revocation API. Manager made the shared/effect fixture applicability table explicit from the architect's profile intent. Fresh authorizers enforce revocation; existing approved snapshots remain usable. Independent review found no blocking appendix/contract conflict and approved implementation under the existing user authorization.
+
+Agent technical review: independent clean-context implementation-plan reviewer, 2026-10-31.
+Reviewed revision: 4a3af9d076e7dd67d3ea56f96b23211b8948b2d1.
+Verification adequacy: approved after inspecting this record, the appendix, three published contracts, testing guidance, compiler/Java/Node seams and existing runners/verifier. Required component negatives remain part of acceptance: policy/nominal forgery, registration mutation, scopes/model coexistence, revocation, capacity boundary/+1 and late effect evidence. No new product decision or required technical fix was identified. Implementation correctness and measured enforcement remain for result review.
+
+Worker slices share this record. Each records its own implementation/evidence in its isolated copy and reports selected code commits separately from record bookkeeping; manager consolidates the canonical copy. Global State stays Ready to implement until integrated verification passes; a finished slice records its completion and remaining dependency in prose. Final acceptance requires independent technical result review and the High-risk human result review of the concrete tested outcome.
 
 ## Result review
 
