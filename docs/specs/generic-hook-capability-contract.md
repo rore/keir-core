@@ -4,6 +4,8 @@ Status: **reviewed target contract; not implemented or accepted for execution**.
 
 ## Responsibility boundaries
 
+**Packaging decision (2026-10-31):** upcoming `/2` artifacts reference an exact immutable host-approved DCM rather than embedding it. The host supplies that model and compatible callable capability registrations. Model/descriptor preparation may be shared; program validation and fresh invocation authority remain separate. The [adopted model-sharing direction](../internal/artifact-model-sharing-evaluation.md) supersedes inherited embedded-packaging assumptions. Exact envelope/API and lifecycle rules still need specification before implementation; existing `/1` bytes and loaders remain unchanged.
+
 A host publishes a scoped, approved capability catalog. A hook defines its input projection, allowed output and consumer, trigger, lifecycle placement and effect ceiling. A customer extension selects and composes catalog operations; the host need not anticipate its call list. A required map naming the operations of a sample program is not the generic hook contract.
 
 | Boundary | Authority and obligation |

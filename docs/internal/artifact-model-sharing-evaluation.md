@@ -1,6 +1,6 @@
 # Sharing approved models across compiled programs
 
-Status: **reviewed recommendation awaiting a packaging decision, not an accepted format/API or implementation**. The [owning feature](../../roadmap/features/generic-hook-capability-contract.md) remains active. Current `/1` and reviewed `/2` documents retain embedded packaging until this decision is accepted.
+Status: **shared-model direction adopted on 2026-10-31; exact format/API contract and implementation pending**. The [owning feature](../../roadmap/features/generic-hook-capability-contract.md) remains active. The upcoming `/2` design will use exact model references and host-supplied immutable model handles. Existing `/1` embedded packaging remains unchanged.
 
 ## Recommendation and alternatives
 
