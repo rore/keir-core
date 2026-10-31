@@ -31,16 +31,16 @@
 ## Implementation
 
 - User requested implementation alignment after reviewing the tour and correcting ownership, model binding, task creation and documentation/process scope. Current main is 85733de; working tree was clean before creating this record.
-- Planning checkpoint: architect offer and developer availability checks are being prepared. No compiler/runtime edit or implementation assignment has begun.
+- Planning checkpoint: architect explicitly accepted the bounded read-only review, verified its role/revision and reported no competing assignment. Developer availability checks are pending. No compiler/runtime edit or implementation assignment has begun.
 - Canonical owning feature: [generic hook/capability correction](../../roadmap/features/generic-hook-capability-contract.md). Manager alone updates its shared roadmap state.
 
 ## Evidence
 
-Pending implementation. Existing `/1` results are regression input, not proof of `/2` support.
+Pending implementation. Existing `/1` results are regression input, not proof of `/2` support. A focused baseline check independently verified the artifact/model digests and model contents of the read, two-read and single-effect golden fixtures. No build or fixture edit was needed; complete regression will run after implementation.
 
 ## Plan review
 
-Pending architect assessment of the implementation plan, risk, verification and any uncovered decisions.
+Architect review accepted and in progress against the published target. Exact API/fixture freeze, developer file ownership and any uncovered decisions remain pending; this is not plan approval or implementation readiness.
 
 ## Result review
 
