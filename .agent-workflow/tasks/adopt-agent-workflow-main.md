@@ -58,7 +58,11 @@ Agent technical review: independent clean-context result review, 2026-10-31.
 Reviewed revision: core 2e3ea0cb77afd2d01e27730fe283ce7c66b53968 and demo b5e224c6755e1cfc50eeaeb7b8ad86f6d9cfe8c6.
 Verification adequacy: approved. The reviewer inspected both diffs, policy/config, current process and saved positive/negative reports. Documentation/spec/roadmap exemptions and required code/mixed/instruction records behave as authorized; explicit core-owned demo record validation works. Only the expected shadow architecture-review advisory remains. No product or CI/vendor changes require runtime-suite reruns. Real-use adoption by later agents remains unverified.
 
-No implementation changes remain. The task remains Ready for review as required by the installed state vocabulary; delivery is recorded separately after the main pushes.
+No implementation changes remain. The task remains Ready for review under the installed state vocabulary; result review is approved.
+
+## Delivery
+
+Core policy, guidance and review evidence were pushed to main through 2c0d632; demo guidance was pushed to main at b5e224c. Both pushes succeeded. This final record update closes delivery bookkeeping; no PR, CI workflow, hook, branch-protection or environment change was made. Future tasks should use the configured applicability and explicit core-owned record identity.
 
 ## Scope correction
 
