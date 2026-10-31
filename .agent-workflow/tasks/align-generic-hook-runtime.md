@@ -31,12 +31,12 @@
 ## Implementation
 
 - User requested implementation alignment after reviewing the tour and correcting ownership, model binding, task creation and documentation/process scope. Current main is 85733de; working tree was clean before creating this record.
-- Implementation checkpoint: architect freeze and independent plan review are complete. Both core developers explicitly accepted their disjoint slices and verified clean isolated checkouts at 0120145; implementation work is underway. A starts the compiler/reference-fixture checkpoint, B starts Node API/binding work against the freeze. Historical checkouts stay intact. No `/2` execution or test result is claimed yet.
+- Implementation checkpoint: architect freeze and independent plan review are complete. Both core developers explicitly accepted their disjoint slices and verified clean isolated checkouts at 0120145; implementation work is underway. A starts the compiler/reference-fixture checkpoint, B starts Node API/binding work against the freeze. Historical checkouts stay intact. Runtime/host acceptance is still pending; compiler checkpoint results are recorded below.
 - Canonical owning feature: [generic hook/capability correction](../../roadmap/features/generic-hook-capability-contract.md). Manager alone updates its shared roadmap state.
 
 ## Evidence
 
-Pending implementation. Existing `/1` results are regression input, not proof of `/2` support. A focused baseline check independently verified the artifact/model digests and model contents of the read, two-read and single-effect golden fixtures. No build or fixture edit was needed; complete regression will run after implementation.
+Implementation is partial. Existing `/1` results are regression input, not proof of `/2` runtime support. A focused baseline check independently verified the artifact/model digests and model contents of the read, two-read and single-effect golden fixtures. No build or fixture edit was needed; complete regression will run after implementation.
 
 Compiler/reference-fixture checkpoint accepted: selected 8008ff8 integrated as db8944f, limited to compiler changes/tests and six reference programs under conformance/generic-hooks. Manager independently checked all artifact/source/model pins, reference-only envelopes, source-only project/title variants, exact generic-create arguments, scope and privacy. Final code passed all 58 compiler tests (11 new) with coverage: 848/893 lines and 724/835 branches. Each reference fixture is compiled twice with exact byte comparison. `/1` golden files are unchanged. Exact fixtures were routed to Node; Java runtime/hosts and cross-runtime acceptance remain unfinished.
 
