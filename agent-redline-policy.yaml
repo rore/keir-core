@@ -9,14 +9,15 @@ zones:
     - path: agent-redline-policy.yaml
       reason: risk policy changes
       checkpoint: architecture-review
-    - path: docs/internal/decisions/**
-      reason: architecture and product decisions
-      checkpoint: architecture-review
   blue:
     - path: roadmap/**
       reason: shared planning updates
-    - path: docs/README.md
-      reason: documentation navigation
+    - path: docs/**
+      reason: documentation-only work, including design and specification text
+    - path: README.md
+      reason: project documentation
+    - path: CONTRIBUTING.md
+      reason: contributor documentation
 checkpoints:
   architecture-review:
     description: Review structural policy or decision changes
