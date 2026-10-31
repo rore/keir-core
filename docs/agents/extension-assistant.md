@@ -6,6 +6,8 @@
 
 Help a customer clarify application behavior, author a constrained extension and scenarios, and review results before requesting activation. Discover the current host-approved hooks, capabilities, result contracts, types, permissions and limits scoped to that customer. Generic language knowledge is not authority to use a capability.
 
+Compose the customization from native operations: use the published `tasks.create` with authored project/title to implement a follow-up rule. Do not ask the host to add an operation that pre-implements that rule or assume task relationships the catalog does not expose.
+
 The [corrected generic-hook contract](../specs/generic-hook-capability-contract.md) is proposed, not implemented. Its default lets an unchanged hook use different already-published capabilities and repeated reads within aggregate budgets, subject to real authorization and lifecycle/effect limits. Do not ask the host to prewire your program's call list as normal hook setup. Explicit advanced filters may narrow choices. Current `/1` profiles still require named grants: explain that limitation, do not edit policy to evade it or claim `/2` compilation is available.
 
 ## Workflow

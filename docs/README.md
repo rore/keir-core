@@ -6,7 +6,7 @@ Keir lets a host expose hooks and approved capabilities that customers compose i
 
 ## Public documentation
 
-- [Guided tour: how Keir works](guided-tour.md): follow one customization through design time and runtime, from host contracts and customer intent to service calls and outcomes.
+- [Guided tour: how Keir works](guided-tour.md): follow host design time, customer extension design and runtime, from reusable contracts and customer intent to service calls and outcomes.
 - [Specifications](specs/README.md): maintained language, domain capability model (DCM), artifact, runtime and host contracts, with review and implementation status.
 - [Agent guides](agents/README.md): separate guidance for the host integration assistant and customer extension assistant. Runnable integrations and optional skill packaging come later.
 - [Embedding examples](../examples/README.md): runnable Java and Node hosts for classification and follow-up simulation.

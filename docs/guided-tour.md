@@ -2,9 +2,9 @@
 
 Keir lets customers compose a host application's approved capabilities into new behavior. The host defines where extensions run and what they can access. Keir validates and executes the resulting programs. A host-integrated AI agent helps a customer describe, test and review a customization without writing code.
 
-This tour explains the intended model in two parts: [design time](#design-time), when the host integration and customer program are defined, and [runtime](#runtime), when an event executes the selected program. For exact schemas and language rules, use the [specifications](specs/README.md) and [complete worked example](specs/generic-hook-example.md).
+This tour follows three stages: [host design time](#host-design-time), when the application developer defines the integration; [customer extension design](#customer-extension-design), when a customer authors and tests a customization; and [runtime](#runtime), when an event executes the selected program. For exact schemas and language rules, use the [specifications](specs/README.md) and [complete worked example](specs/generic-hook-example.md).
 
-## The scenario
+**The scenario**
 
 A task-management application wants customers to customize what happens after a task completes. One customer asks:
 
@@ -19,7 +19,7 @@ The host exposes a generic `TaskCompleted` event hook. The extension reads the t
 | Keir | Source validation, compilation, simulation execution, runtime checks and execution outcomes |
 | Host-integrated agents | Help the host developer define the integration, or help the customer author and test a program; neither grants itself authority |
 
-## Design time
+## Host design time
 
 ### 1. The host defines the hook and domain model
 
@@ -46,7 +46,9 @@ The host publishes approved operations independently of any particular extension
 | Capability | Effect | Business arguments | Successful result |
 | --- | --- | --- | --- |
 | `tasks.get` | READ | `taskId` | Task ID, project ID and status |
-| `tasks.createFollowUp` | WRITE | Source task ID, project ID and title | Created task ID |
+| `tasks.create` | WRITE | Project ID and title | Created task ID |
+
+The host offers ordinary task creation. The extension makes it a follow-up by choosing when to call it, which project to use and what title to give the task. This example does not create an implicit parent link; a relationship would need a generic field explicitly exposed by the host.
 
 The host also declares errors and supplies protected context such as authenticated actor identity. A program cannot choose another actor or supply credentials.
 
@@ -62,7 +64,11 @@ The hook does not need a list of the calls this particular program will make. Ex
 
 A **host integration assistant** can help the developer define these contracts and bindings. The host owner approves publication and remains responsible for the services' actual guarantees.
 
-### 3. The customer authors the extension
+**Checkpoint:** the host has published a reusable hook and catalog, bound service invokers and established permissions and guarantees. It has not implemented a customer's follow-up rule. Different customer programs can use this same approved integration.
+
+## Customer extension design
+
+### 1. The customer authors the extension
 
 A separate **customer extension assistant** clarifies the request, discovers the approved contract and generates a constrained Keir program. It can help resolve a project name to an ID, but the customer's chosen ID becomes a program constant.
 
@@ -79,10 +85,9 @@ steps:
   - id: eligible
     let: {cel: 'source.status == "COMPLETED" && source.projectId == eligibleProject'}
   - id: created
-    call: tasks.createFollowUp
+    call: tasks.create
     when: eligible
     args:
-      sourceTaskId: {cel: input.taskId}
       projectId: {cel: eligibleProject}
       title: {literal: 'Follow up'}
 return:
@@ -94,7 +99,7 @@ The [complete source](specs/generic-hook-example.md#customer-authors-the-program
 
 Changing `project1` to another project changes the customer's source. It does not change the host's hook payload, service code or catalog.
 
-### 4. The compiler validates the source and emits an artifact
+### 2. The compiler validates the source and emits an artifact
 
 The compiler receives the source, a separately trusted DCM and the selected compiler profile/environment. There is no actual task event at compile time. `input.taskId` means a typed value that a future invocation will supply.
 
@@ -106,7 +111,7 @@ CEL expressions are parsed and type-checked into a structured expression represe
 
 The host prepares the artifact against its bound model, checking the artifact's identity, compatible environment and capability bindings. Preparation binds an executable plan; it performs no business service calls and does not cache current user authorization.
 
-### 5. Simulation checks intended behavior
+### 3. Simulation checks intended behavior
 
 The authoring flow runs the same compiled program through the runner with simulation invokers. These return controlled service responses and record requested writes without performing real mutations.
 
@@ -120,7 +125,7 @@ The authoring flow runs the same compiled program through the runner with simula
 
 The customer and agent inspect outcomes, call arguments and traces. Simulation checks program behavior under supplied scenarios. It does not certify real service authorization, idempotency or commit behavior; those need host integration tests.
 
-### 6. The host activates the reviewed revision
+### 4. The host activates the reviewed revision
 
 After the required review, the host records the exact artifact revision, hook and customer scope to activate, together with its approved bound model. The agent can request activation through host tools; approval and activation follow host policy.
 
@@ -167,10 +172,10 @@ For another project, or an OPEN task, `eligible` is false and the guarded write 
 With `eligible` true, the write's evaluated business arguments are:
 
 ```json
-{"sourceTaskId":"task1","projectId":"project1","title":"Follow up"}
+{"projectId":"project1","title":"Follow up"}
 ```
 
-The runner validates these arguments, checks current authority, the remaining deadline and the single-write allowance, then dispatches. Protected identity and original native key/event context travel through the host-owned channel rather than customer arguments. The service remains responsible for resource access, business invariants and its declared native guarantees.
+The runner validates these arguments, checks current authority, the remaining deadline and the single-write allowance, then dispatches `tasks.create` to the ordinary task-creation service. Protected identity and original native key/event context travel through the host-owned channel rather than customer arguments. The service remains responsible for resource access, business invariants and its declared native guarantees; it does not implement this extension's project condition or follow-up logic.
 
 Suppose the adapter returns:
 
@@ -197,7 +202,7 @@ The trace records execution events without exposing credentials or protected arg
 
 **Checkpoint:** the host supplied facts and authority, the customer program chose the behavior, internal services performed the operations, and Keir enforced the execution boundary and reported what is known about the result.
 
-## Continue reading
+**Continue reading**
 
 - [Complete example with DCM and source](specs/generic-hook-example.md)
 - [Hook, catalog and ownership contracts](specs/generic-hook-capability-contract.md)
