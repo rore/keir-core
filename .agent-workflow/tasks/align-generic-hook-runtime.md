@@ -53,6 +53,8 @@ Java follow-up `c04d6d1` integrated as `8a2d390`, limited to five source/test fi
 
 Java diagnostic follow-up `2f2adcb` integrated as `9999766`, changing only the generic unknown-call classification and its regression. Manager verified the published requirement and preserved legacy branch, then passed the targeted test against both actual read/effect artifacts with unknown string, Boolean and object capability IDs (six mutations; 8.612-second reactor build). Developer full coverage reports 127 runtime/30 host tests passing. The deadline-test ordering correction and integrated Node/Java qualification remain pending; no final result approval or push is claimed.
 
+Node shared-corpus checkpoint: exact dependency `476c5f5` adopted as local `1150f1b`, preserving owned edits and leaving shared fixtures unchanged. Developer reports all nine read/nineteen effect rows and harness negatives passing (37 tests including an owned consumer negative, 2.30 seconds), plus 17 real-reference/eight API tests. Wrong-origin matches the authoritative row: one READ, then WRITE authorization denial at `/steps/3`, without an effect. A protected-argument capture representation mismatch was fixed in the host; expectations were preserved. Final owned regression, installed-package checks, host review and selected Node source delivery remain pending. These reports do not replace manager verification of the integrated revision.
+
 ## Plan review
 
 Architect reviewed the implementation seams and published contracts at 65a0cf4. It found no new product decision and retained High/Large classification. This design-author assessment does not replace the required independent clean-context plan review.
