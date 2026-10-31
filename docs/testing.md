@@ -26,6 +26,22 @@ JaCoCo baselines: compiler 711/756 lines (94.05%), 501/607 branches (82.54%); Ja
 
 ## Fast feedback
 
+### Generic-hook contract planned regression
+
+The [proposed `/2` acceptance matrix](specs/generic-hook-capability-contract.md#examples-and-rejection-obligations) is not covered by the passing `/1` measurements above. Later implementation must add separate fixtures and retain the existing corpus unchanged:
+
+- Run two programs against one unchanged hook/DCM: select a different already-published compatible READ, then repeat READs within the aggregate bound. Omit advanced policy at hook, admission and invocation. Do not add sample-specific named grants to make these pass.
+- Distinguish omitted/empty policy and quota maps from `allow: []`; prove inherited restrictions, explicit allow/deny/quota narrowing, zero quotas, rejected widening, unknown IDs, null/malformed controls and per-call authorization. No source-controlled policy or binding can widen scope.
+- Exercise boundary/+1 aggregate counts independently of optional named quotas; reject a WRITE on a read hook, zero effect ceiling and a second potential WRITE even behind false/exclusive guards. Reject unsupported lifecycle and real effect admission.
+- Preserve `/1` required-map omission/rejection semantics and golden bytes. Reject mixed profile/format pairs and old `grants` in `/2`; test deliberate legacy-map conversion, including empty maps, separately from host-approved widening.
+- Compile each new program once and execute those exact bytes through Java, Node and packaged hosts. Compare typed outcomes, ordered calls and protected arguments, traces, effect receipts and consumption. Preserve winner/clock/late-response/handler guarantees and native key identity; do not duplicate expensive race qualification solely for a policy change.
+- Keep the legitimate host-defined payload unchanged across programs with different authored project/title constants. Test proposed explicit nominal literals: declared nominal String type, malformed/unknown/non-nominal annotation, wrong nominal assignment/equality, Unicode/byte bounds, rejection of dynamic casts and protected-key types, source/artifact digest changes and renewed selection, resource denial and Java/Node parity. Existing `/1` fixture-injected `input.projectId/title` are not evidence for this authoring path; no configuration channel is added.
+- Use the [complete ownership example](specs/generic-hook-example.md#acceptance-obligations) as a planned vector: changing `project1` to `project2` changes only source/artifact, keeps DCM/hook/input/context/host code fixed, and changes the original task's outcome from a possible write to NO_OP. Verify both runtimes use the same artifact for each revision and still enforce current authorization.
+
+These are regression obligations for a corrected requirement, not a frozen-catalog or product-value experiment. Simulation does not establish real authorization, idempotency, atomicity or recovery.
+
+### Execution feedback
+
 - During development run affected tests; before integrating semantic changes run the complete fast regression suite.
 - Default Maven/npm tests select deterministic unit/component/shared conformance cases. Use bounded fixtures, fake adapters and logical clocks; batch compiler/JVM startup.
 - Initial warm targets: focused tests within 5 seconds; complete fast suite within 60 seconds. Measure duration/slowest cases; report cold dependency setup separately. These are investigation budgets, not timing assertions.

@@ -1,5 +1,7 @@
 # Keir specifications
 
+The [generic hook/capability correction](generic-hook-capability-contract.md) is **proposed, not implemented**. It removes mandatory program-specific hook/admission/invocation grants in new `/2` profiles, with optional narrowing controls and unchanged single-write safety. Existing `/1` behavior and evidence below remain unchanged; they do not qualify the corrected default.
+
 The first maintained contract is **`keir-read/1`, an implemented experimental checkpoint** for REQUEST/read/classify/display. The Java compiler and both runtimes pass the same local and CI conformance corpus and packaged-host verification. [Testing evidence](../testing.md) records supported scope and limitations; production qualification and release remain open.
 
 The [language/DCM specification feature](../../roadmap/features/specify-language-and-domain-model.md) owns the initial supported contract. Specifications mature with feature implementation and conformance, without a whole-system design freeze.

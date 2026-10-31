@@ -1,10 +1,12 @@
 # Read-and-decide runtime
 
+Required grant maps on this page are `/1` compatibility behavior. The [proposed generic-hook `/2` API delta](generic-hook-capability-contract.md#versioned-delta) replaces them with optional narrowing policy, while keeping current authorization and aggregate budgets mandatory. It is not implemented; omission must not widen any old invocation.
+
 Status: implemented experimental checkpoint with local shared conformance. Java and Node share this behavior and [artifact contract](compiler-artifact.md). APIs below define data/ownership semantics; Java futures and Node promises implement the same asynchronous adapter boundary. Production containment qualification remains open.
 
 ## Prepare and invoke
 
-These APIs and outcomes remain the read-profile contract. The planned [single-effect runtime delta](single-effect.md#host-api-and-native-key) adds a separate protected key/event channel, current effect grant, terminal handler results and retained effect receipts only under its new profile. It does not weaken the read loader or change read adapter signatures.
+These APIs and outcomes remain the read-profile contract. The implemented [single-effect runtime delta](single-effect.md#host-api-and-native-key) adds a separate protected key/event channel, current effect grant, terminal handler results and retained effect receipts only under its separate profile. It does not weaken the read loader or change read adapter signatures.
 
 `prepare(artifactBytes, admission, adapters) -> Prepared | Diagnostic` validates the artifact before resolving adapters and preparing CEL. Admission is the closed host-owned record `{expectedArtifactDigest,expectedDcmDigest,entrypoint,consumer,compiler,environment,mode,grants,limits?}`. Consumer, compiler and environment must exactly match the selected artifact contract. `mode` is `simulation` or `real`. Preparing calls neither authorization callbacks nor adapters. A Prepared handle is immutable and caches only plan/environment and admission ceilings, not user identity or mutable invocation data.
 
