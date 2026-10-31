@@ -8,11 +8,11 @@ Help a customer clarify application behavior, author a constrained extension and
 
 Compose the customization from native operations: use the published `tasks.create` with authored project/title to implement a follow-up rule. Do not ask the host to add an operation that pre-implements that rule or assume task relationships the catalog does not expose.
 
-The [corrected generic-hook contract](../specs/generic-hook-capability-contract.md) is proposed, not implemented. Its default lets an unchanged hook use different already-published capabilities and repeated reads within aggregate budgets, subject to real authorization and lifecycle/effect limits. Do not ask the host to prewire your program's call list as normal hook setup. Explicit advanced filters may narrow choices. Current `/1` profiles still require named grants: explain that limitation, do not edit policy to evade it or claim `/2` compilation is available.
+The implemented [experimental `/2` contract](../specs/generic-hook-capability-contract.md) lets an unchanged hook use different published capabilities and repeated reads within aggregate budgets. Current authorization, lifecycle/effect limits and explicit advanced filters still apply. Do not ask the host to prewire your call list or widen policy. `/1` retains required grants; choose a supported profile explicitly. Effects remain simulation-only.
 
 ## Workflow
 
-Author customer-selected project/title constants inside the program unless explicit logic obtains them elsewhere. Keep host payload unchanged. The [proposed nominal literal](../specs/generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority) supplies business typing, not authority. Current `/1` cannot construct a ProjectId literal; fixture-injected values do not establish that authoring path. Do not invent hook inputs or a configuration channel to work around it.
+Author customer-selected project/title constants in source unless explicit logic obtains them elsewhere. Keep host payload unchanged. `/2` [nominal literals](../specs/generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority) supply business typing, not authority; `/1` retains its restrictions. Do not invent hook inputs or a configuration channel.
 
 1. Clarify the requirement, expected outcomes, missing-data behavior and error cases.
 2. Discover the approved scoped catalog, hook contract, supported profile and any explicit restrictive policy. Compose compatible operations; under the corrected contract, repeated reads need aggregate budget, not a default named grant per operation. Explain current implementation limits rather than widening the catalog.
@@ -22,7 +22,7 @@ Author customer-selected project/title constants inside the program unless expli
 
 ## Authority and tools
 
-Under the proposed `/2` [host binding](../specs/host-model-binding.md), the host supplies the exact catalog and invokers together. Author against that published model reference; do not select clients or substitute a model/adapter map. Another program may use other already-published capabilities without rebinding the host. Adopting a changed catalog requires explicit recompilation and host selection; existing programs can retain an available, approved earlier snapshot. Unavailable or revoked exact dependencies cannot fall back to the latest version.
+Under `/2` [host binding](../specs/host-model-binding.md), the host supplies the exact catalog and invokers together. Author against that published reference; do not select clients or substitute models/adapters. Other programs may reuse the binding. A changed catalog needs explicit recompilation/selection; earlier programs may retain an available approved snapshot. Never fall back from an unavailable or revoked dependency to the latest version.
 
 Do not change the authoritative DCM, register capabilities/endpoints, widen grants, select protected identity/key values, certify adapters or approve your own activation. Host metadata is not ordinary source input. Successful simulation cannot establish real authorization, duplicate suppression or commit guarantees.
 
@@ -32,7 +32,7 @@ If tools, capabilities or facts are unavailable, explain the limitation or ask t
 
 ## First worked customization: classify a task
 
-The [complete target walkthrough](../specs/generic-hook-example.md) traces host definitions, authored constants, compilation and invocation. Changing a constant changes source/artifact and requires normal review/selection; hook schema and host code stay fixed. It is not currently runnable.
+The [complete worked example](../specs/generic-hook-example.md) and runnable `/2` fixtures trace host definitions, authored constants, compilation and invocation. A changed constant changes source/artifact and needs normal review/selection; hook schema and host code stay fixed.
 
 The examples below are legacy `/1` demonstrations. New-profile acceptance must cover different published reads and repeated reads under one unchanged hook, plus denial/budget cases. Keep at most one WRITE; future idempotency proposals do not enable multi-write or recovery now.
 

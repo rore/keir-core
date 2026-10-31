@@ -2,9 +2,11 @@
 
 Load for code/test/contract changes. Apply to core and demo; keep demo tests local and workflow management in core.
 
-Status: read and effect profiles pass combined local verification. The full clean Java coverage build passes 164 tests (47 compiler, 95 runtime, 22 host) in 33.57 seconds. Default Node regression passes 274 tests in 2.05 seconds, and both installed-host tests pass. The combined verifier reproduces both artifacts with four compiler processes, compares 61 read cases/52 invocations and 25 effect scenarios, and checks all four packaged-host batches. The [effect-host CI check](https://github.com/rore/keir-core/actions/runs/41113166355) passes on `ff69257`; the [read CI checkpoint](https://github.com/rore/keir-core/actions/runs/40921421530) remains accepted. Workflow-level contract-policy protection remains [proposed](internal/workflow/core-contract-ci-proposal.md#behavioral-contract).
+Local `/2` alignment verification on implementation `933c5c8` (2026-10-31) passes alongside preserved `/1` regression. The clean Java coverage build passes 216 tests (58 compiler, 128 runtime, 30 host) in 52.470 seconds. Default Node regression passes all 367 tests in 4.175 seconds, without failures or skips; all three installed-host tests pass in 0.967 seconds. The combined verifier checks 61 legacy read cases/52 invocations, 25 legacy effect scenarios, nine generic read/nineteen generic effect rows, sixteen fresh compiler processes and eight packaged-host batches. Independent technical result review approves this local scope; production qualification and release remain open.
 
-Effect checkpoint coverage: compiler 795/840 lines and 624/729 branches; Java runtime 869/875 lines and 808/939 branches; Node source 100% lines and 96.88% branches. The six-file Node runtime archive matches installed source with exact integrity and unchanged registry pins. Coverage does not certify real adapters, hard resource containment or production readiness.
+Current coverage: compiler 848/893 lines and 724/835 branches; Java runtime 1117/1129 lines and 1043/1223 branches; Java host 490/494 lines and 678/784 branches; Node source 100% lines and 97.73% branches. All seven Node archive files equal their reviewed and installed bytes; archive/metadata/lock integrity matches and registry pins are unchanged. The packaged Java host matches all 51 runtime/host class files and excludes compiler/parser dependencies. Coverage does not certify real adapters, decoded-heap containment or production readiness.
+
+The [effect-host CI check](https://github.com/rore/keir-core/actions/runs/41113166355) on `ff69257` and [read CI checkpoint](https://github.com/rore/keir-core/actions/runs/40921421530) are earlier `/1` evidence; the new alignment has not yet run in CI. Workflow-level contract-policy protection remains [proposed](internal/workflow/core-contract-ci-proposal.md#behavioral-contract). The following older measurements are historical checkpoints.
 
 Effect regression covers conservative single-write admission, guard availability, original key identity, fresh grants, native deadline races, retained receipts, handler/result boundaries, ordered simulation mismatches and consumer validation. The shared supplemental handler artifact is Java-compiled; both runtime suites consume the same bytes. The following older measurements remain historical read-profile baselines.
 
@@ -26,9 +28,9 @@ JaCoCo baselines: compiler 711/756 lines (94.05%), 501/607 branches (82.54%); Ja
 
 ## Fast feedback
 
-### Generic-hook contract planned regression
+### Generic-hook regression
 
-The [proposed `/2` acceptance matrix](specs/generic-hook-capability-contract.md#examples-and-rejection-obligations) is not covered by the passing `/1` measurements above. Later implementation must add separate fixtures and retain the existing corpus unchanged:
+The [`/2` acceptance matrix](specs/generic-hook-capability-contract.md#examples-and-rejection-obligations) is exercised by separate [generic fixtures](../conformance/generic-hooks/README.md) and compiler/Java/Node component negatives; the legacy corpus remains unchanged. Preserve these regression obligations:
 
 - Run two programs against one unchanged hook/DCM: select a different already-published compatible READ, then repeat READs within the aggregate bound. Omit advanced policy at hook, admission and invocation. Do not add sample-specific named grants to make these pass.
 - Distinguish omitted/empty policy and quota maps from `allow: []`; prove inherited restrictions, explicit allow/deny/quota narrowing, zero quotas, rejected widening, unknown IDs, null/malformed controls and per-call authorization. No source-controlled policy or binding can widen scope.
@@ -39,7 +41,7 @@ The [proposed `/2` acceptance matrix](specs/generic-hook-capability-contract.md#
 - Use the [complete ownership example](specs/generic-hook-example.md#acceptance-obligations) as a planned vector: changing `project1` to `project2` changes only source/artifact, keeps DCM/hook/input/context/host code fixed, and changes the original task's outcome from a possible write to NO_OP. Verify both runtimes use the same artifact for each revision and still enforce current authorization.
 - Keep the task-creation capability generic: `tasks.create` receives project/title, while eligibility and follow-up intent stay in the program. Test exact create arguments and separate protected event/key context; do not require a follow-up-specific source-task argument or assume an undeclared relationship. This updates planned `/2` vectors, not `/1` compatibility goldens.
 
-These are regression obligations for a corrected requirement, not a frozen-catalog or product-value experiment. Simulation does not establish real authorization, idempotency, atomicity or recovery.
+Combined-invalid regressions also preserve safety/policy-before-binding diagnostics, approval-field validation before model parsing, descriptor-safe accessor rejection and unused WRITE catalog selection without read WRITE authority. These are technical regression obligations, not a product-value experiment. Simulation does not establish real authorization, idempotency, atomicity or recovery.
 
 ### Execution feedback
 
@@ -70,10 +72,11 @@ Use the reviewed [read profile acceptance matrix](specs/host-integration.md#acce
 
 Protect these paths when their verification is live:
 
-- `docs/specs/**`, `conformance/read-and-decide/**` and `conformance/single-effect/**`.
+- `docs/specs/**`, `conformance/read-and-decide/**`, `conformance/single-effect/**` and `conformance/generic-hooks/**`.
 - Compiler `StrictDataTest.java`, `DcmTest.java`, `KeirCompilerTest.java`, `SingleEffectCompilerTest.java` in `compiler-java/src/test/java/dev/keir/compiler/`.
 - Node `effect-prepare.test.js`, `effect-invoke.test.js`, `effect-handler.test.js`, `canonical.test.js`, `cel.test.js`, `prepare.test.js`, `invoke.test.js`, `scalars.test.js`, `multi-call.test.js` and their actual Java-generated fixtures.
 - Java artifact/CEL/clock/invocation/data/shared/multi-call/effect tests, host consumers and their tests, simulation harness regressions and test-selection/parity runners. The [proposal](internal/workflow/core-contract-ci-proposal.md#behavioral-contract) lists exact paths.
+- Generic compiler, artifact/context/runtime, model-binding, policy, reference-execution and combined-invalid preflight tests; generic host capacity/consumer/simulation tests. They run in default regression; this list does not activate the separate policy block.
 
 Do not blanket-protect helper tests or diagnostic benchmarks. Add later behavior only with accepted features; probe results do not certify full runtime guarantees.
 

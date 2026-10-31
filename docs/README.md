@@ -2,7 +2,7 @@
 
 Keir lets a host expose hooks and approved capabilities that customers compose into application behavior. The host owns permissions, real adapter guarantees and result consumption. Keir validates and executes constrained extensions; host-integrated agents can assist with integration and authoring.
 
-**Current status:** an experimental Java compiler and Java/Node runtimes execute read-and-decide and simulation-only single-effect profiles. Both have maintained specifications, shared scenarios and independent packaged hosts. See [testing evidence](testing.md) for local and CI status; production qualification and release remain open.
+**Current status:** the experimental Java compiler and Java/Node runtimes execute `/1` and `/2` read and simulation-only single-effect profiles. `/2` adds generic catalog composition, authored nominal constants and reference artifacts bound to a complete host model/invoker catalog. Shared scenarios and independent packaged hosts pass local verification. See [testing evidence](testing.md) for the separate local and CI status; production qualification and release remain open.
 
 ## Public documentation
 

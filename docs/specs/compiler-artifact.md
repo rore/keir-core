@@ -1,6 +1,6 @@
 # Read-and-decide compiler and artifact
 
-The [proposed generic-hook correction](generic-hook-capability-contract.md#versioned-delta) requires new profile/DCM/artifact identifiers and explicit compiler selection. This page's `/1` envelope and grant semantics remain unchanged. Changing a version string or deleting grants is not migration.
+The implemented [generic-hook `/2` contract](generic-hook-capability-contract.md#versioned-delta) uses explicit new profile/DCM/artifact identifiers and [reference artifacts](host-model-binding.md#exact-reference-artifact). This page's `/1` envelope and grant semantics remain unchanged. Changing a version string or deleting grants is not migration.
 
 Status: implemented experimental checkpoint; deterministic compiler output and local Java/Node execution pass [verification](../../conformance/read-and-decide/README.md#verify-both-runtimes-and-packaged-hosts). One Java compiler library/CLI emits one artifact consumed unchanged by both runtimes. This replaces the baseline's illustrative multi-file bundle for this profile only.
 

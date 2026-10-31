@@ -9,7 +9,7 @@ Keir has two product-facing agent personas. Both are host integrations over Keir
 
 **Status:** initial guidance for proposed workflows, not installed tools or a complete SDK. Host integrations and optional skill packaging are future work.
 
-Both guides distinguish the implemented `/1` profiles from the [proposed generic-hook correction](../specs/generic-hook-capability-contract.md). Generic hooks must not require a sample program's call list; optional restrictive policy, aggregate budgets and current authorization are separate concerns. Do not advertise the corrected default as executable before compiler and both runtimes qualify it.
+Both guides distinguish legacy `/1` contracts from the implemented experimental [generic-hook `/2` profiles](../specs/generic-hook-capability-contract.md). Local compiler, Java/Node and packaged-host checks pass; effects remain simulation-only. Generic hooks do not require a sample program's call list. Optional policy, aggregate budgets and current authorization remain separate; passing simulation does not certify real adapters or production readiness.
 
 Each guide explains the system, task, inputs, allowed actions and approvals. Both reference one [specification set](../specs/README.md); prompts must not contain a competing language/DCM specification. As APIs are implemented, provide structured schemas, scoped discovery, diagnostics and valid/invalid examples from the same contracts.
 

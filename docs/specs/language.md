@@ -1,6 +1,6 @@
 # Read-and-decide language contract
 
-The [generic-hook proposal](generic-hook-capability-contract.md) keeps source `keir/v0` but changes catalog/policy checks under explicitly selected `/2` profiles. It permits repeated and different published reads within aggregate budgets without named hook grants, and proposes explicit nominal literals for authored project constants without changing the host payload or adding configuration channels. The `/1` rules and example below remain implemented compatibility behavior.
+The implemented [generic-hook `/2` contract](generic-hook-capability-contract.md) keeps source `keir/v0`, permits repeated/different published reads without named grants, and adds explicit nominal literals for authored constants. It changes no host payload and adds no configuration channel. The `/1` rules and example below remain compatibility behavior.
 
 Status: implemented experimental checkpoint, verified locally in Java and Node. Profile `keir-read/1` is selected by the trusted compiler configuration. It implements a strict subset of source `keir/v0`; unsupported baseline syntax is rejected. See [status](README.md), [DCM](domain-model.md) and [artifact](compiler-artifact.md).
 

@@ -8,7 +8,7 @@ For fresh execution, use `invokeProgram` with `Invocation2` for read/2, or `invo
 
 `keir-runtime-java` executes the shared `keir-read/1` artifact with JDK 21 and CEL Java 0.14.0. It has no dependency on the Keir compiler, CEL compiler/parser, ANTLR or YAML. Compilation belongs outside execution; see the independent [Java host](../examples/java-host/README.md) for a packaged simulation.
 
-The separate `keir-effect/1` API implements the [single-effect contract](../docs/specs/single-effect.md) with simulation registrations only. Shared effect host/scenario qualification is a separate checkpoint; the packaged read host remains unchanged.
+The separate `keir-effect/1` API implements the [single-effect contract](../docs/specs/single-effect.md) with simulation registrations only. Legacy and generic effect scenarios pass shared Java/Node packaged-host verification; the packaged read entrypoint remains compatible.
 
 `KeirRuntime.prepare(bytes, admission, adapters)` returns a `Preparation` containing either an immutable `Prepared` handle or a safe `Diagnostic`. Admission supplies an externally trusted whole-artifact digest, DCM digest, entrypoint, consumer, compiler and environment pins, adapter mode, grants and optional narrowing limits. The whole-byte digest is checked before JSON parsing. Canonical JSON, the complete DCM and plan, generated descriptors, checked CEL metadata and the restricted expression profile are checked before CEL runtime preparation. Preparation invokes no host callback.
 
