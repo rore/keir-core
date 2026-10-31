@@ -31,7 +31,7 @@
 ## Implementation
 
 - User requested implementation alignment after reviewing the tour and correcting ownership, model binding, task creation and documentation/process scope. Current main is 85733de; working tree was clean before creating this record.
-- Planning checkpoint: architect completed the bounded read-only gap review; one developer confirmed availability, with the other check pending. A read-only technical-freeze follow-up has been offered. No compiler/runtime edit or implementation assignment has begun.
+- Planning checkpoint: architect completed the bounded read-only gap review; both core developers confirmed availability and no competing assignment. A read-only technical-freeze follow-up has been offered. Fresh isolated code checkouts are being prepared; historical checkouts stay intact. No compiler/runtime edit or implementation assignment has begun.
 - Canonical owning feature: [generic hook/capability correction](../../roadmap/features/generic-hook-capability-contract.md). Manager alone updates its shared roadmap state.
 
 ## Evidence
