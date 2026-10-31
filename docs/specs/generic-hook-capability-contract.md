@@ -24,6 +24,14 @@ The [complete TaskCompleted walkthrough](generic-hook-example.md) applies this o
 
 The catalog is a host-selected snapshot, not a wildcard over installed adapters or future publications. Adding a catalog operation changes its digest and requires recompilation and host reselection. Choosing a different **already-published** operation or repeating a read does not require changing the hook. Host-specific tenant selection, authenticated transport, endpoint publication and activation remain host responsibilities; this correction adds no policy service.
 
+## Capability invocation across services
+
+Treat internal service-to-service operations, including HTTP or RPC calls, as the normal integration case. A capability describes a logical operation, not a requirement that its business implementation runs inside the runner process. The registered adapter is the runner-facing dispatch bridge; an in-process service method is another supported implementation choice.
+
+The host supplies a compatible client/adapter for each registered capability version. That bridge maps validated arguments to the remote request and maps responses to declared results, rejections and effect evidence. Service routing, credentials, trusted identity propagation, connection management and transport details remain host-owned integration concerns, outside customer source and compiled artifacts. The DCM supplies the logical typed contract; a model reference does not itself locate or authorize a service. This does not require a built-in HTTP client, service discovery system or generated transport bindings in Keir.
+
+Remote calls retain the same current authorization, resource checks and deadline obligations. A local timeout or cancellation does not establish that a remote operation stopped. Losing a response after a possible WRITE must preserve UNKNOWN/UNCERTAIN unless the native contract establishes a definite outcome; do not add automatic retries. Shared model preparation does not cache user credentials or current permissions. Finalize transport-independent dispatch semantics with the shared-model binding API before implementation.
+
 ## Event facts, extension choices and protected authority
 
 The host defines the hook payload independently of any one extension. Preserve its legitimate fields even when a sample does not use them. Do not require the host to add customer-selected project/title fields merely to make one follow-up program work.
