@@ -4,7 +4,7 @@ import { narrowPolicy, Fault } from '../src/validation.js';
 
 const dcm = { capabilities: Object.fromEntries(['tasks.get', 'tasks.getSummary', 'tasks.create'].map(id => [id, {}])) };
 const all = { 'tasks.get': 4, 'tasks.getSummary': 4, 'tasks.create': 4 };
-const read = { 'tasks.get': 4, 'tasks.getSummary': 4, 'tasks.create': 0 };
+const denied = { 'tasks.get': 4, 'tasks.getSummary': 4, 'tasks.create': 0 };
 const narrow = (policy, previous = all, catalog = dcm) => narrowPolicy(catalog, policy, previous, '/policy');
 function invalid(policy, previous = all, catalog = dcm) {
   assert.throws(() => narrow(policy, previous, catalog), error => error instanceof Fault && error.code === 'ARTIFACT_INVALID' && error.path.startsWith('/policy'));
@@ -44,11 +44,11 @@ test('quotas cannot widen ceilings or grant positive quota to denied capabilitie
   invalid({ maxCalls: { 'tasks.get': 5 } });
 });
 
-test('read profile ceiling prevents allowing or widening a published WRITE', () => {
-  assert.deepEqual(narrow(undefined, read), read);
-  invalid({ allow: ['tasks.get', 'tasks.create'] }, read);
-  invalid({ maxCalls: { 'tasks.create': 1 } }, read);
-  invalid({ allow: ['tasks.create'] }, read);
+test('a preceding denial prevents allowing or widening that capability', () => {
+  assert.deepEqual(narrow(undefined, denied), denied);
+  invalid({ allow: ['tasks.get', 'tasks.create'] }, denied);
+  invalid({ maxCalls: { 'tasks.create': 1 } }, denied);
+  invalid({ allow: ['tasks.create'] }, denied);
 });
 
 test('rejects malformed policies, unknown and duplicate IDs, and catalog overflow', () => {

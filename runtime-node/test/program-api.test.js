@@ -60,10 +60,11 @@ test('remaining external pins and malformed restrictions precede the negative em
     [{ compiler: 'other/1' }, '/admission/compiler'], [{ consumer: {} }, '/admission/consumer'],
     [{ entrypoint: 'Other' }, '/admission/entrypoint'], [{ environment: {} }, '/admission/environment'],
     [{ mode: 'real' }, '/admission/mode'], [{ capabilityPolicy: null }, '/admission/capabilityPolicy'],
-    [{ capabilityPolicy: undefined }, '/admission/capabilityPolicy'], [{ capabilityPolicy: { allow: ['sample.write'] } }, '/admission/capabilityPolicy'],
+    [{ capabilityPolicy: undefined }, '/admission/capabilityPolicy'],
     [{ limits: null }, '/admission/limits'], [{ limits: { steps: 9 } }, '/admission/limits'],
   ]) rejected(bytes, bound(), admitted(bytes, overrides), 'ADMISSION_INVALID', path);
   rejected(bytes, bound(), admitted(bytes), 'BUDGET_EXCEEDED', '/artifact/steps');
+  rejected(bytes, bound(), admitted(bytes, { capabilityPolicy: { allow: ['sample.write'] } }), 'BUDGET_EXCEEDED', '/artifact/steps');
 });
 
 test('legacy and reference API families reject wrong or forged handles without rejected promises', async () => {

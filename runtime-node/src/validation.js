@@ -124,7 +124,7 @@ export function validateModel(dcm, profile, p = '/artifact/dcm') {
     named(entry.consumer.id, p, true); text(entry.consumer.version, p, true); requireThat(entry.consumer.kind === (effect ? 'EVENT_REPORT' : 'DISPLAY'), p);
     if (v2) {
       if (Object.hasOwn(entry, 'capabilityPolicy')) requireThat(entry.capabilityPolicy !== undefined, p);
-      policies[id] = narrowPolicy(dcm, entry.capabilityPolicy, Object.fromEntries(Object.entries(dcm.capabilities).map(([cap, value]) => [cap, effect || value.effect === 'READ' ? LIMITS.calls : 0])), p);
+      policies[id] = narrowPolicy(dcm, entry.capabilityPolicy, Object.fromEntries(Object.keys(dcm.capabilities).map(cap => [cap, LIMITS.calls])), p);
     } else for (const cap of keys(entry.grants, p, 8)) { requireThat(Object.hasOwn(dcm.capabilities, cap), p); integer(entry.grants[cap], LIMITS.calls, p); }
   }
   return { scalar, record, policies, effectGrants };
@@ -176,7 +176,7 @@ export function validateEnvelope(artifact, bound) {
   return { v2, effect, dcm: artifact.dcm };
 }
 
-export function validatePlan(artifact, bound) {
+export function validatePlan(artifact, bound, admission) {
   const { v2, effect, dcm } = validateEnvelope(artifact, bound);
   const { scalar } = v2 ? bound.model : validateModel(dcm);
   requireThat(Object.hasOwn(dcm.entrypoints, artifact.entrypoint), '/artifact/entrypoint');
@@ -184,6 +184,7 @@ export function validatePlan(artifact, bound) {
   const policy = v2 ? bound.model.policies[artifact.entrypoint] : entrypoint.grants;
   const effectGrant = v2 ? bound.model.effectGrants[artifact.entrypoint] : entrypoint.effectGrant;
   requireThat(Array.isArray(artifact.steps) && artifact.steps.length > 0 && artifact.steps.length <= LIMITS.steps, '/artifact/steps', 'BUDGET_EXCEEDED');
+  if (v2) requireThat(artifact.steps.length <= admission.limits.steps, '/artifact/steps', 'BUDGET_EXCEEDED');
   const expressionNames = keys(artifact.expressions, '/artifact/expressions', LIMITS.totalAstNodes);
   const variables = Object.fromEntries([['input', entrypoint.input]]);
   const contexts = new Map();
@@ -212,6 +213,21 @@ export function validatePlan(artifact, bound) {
     const output = dcm.types[entrypoint.output]; shape(value.fields, Object.keys(output.fields), path + '/fields');
     for (const field of Object.keys(output.fields).sort()) binding(value.fields[field], output.fields[field], path + '/fields/' + field);
   }
+  function countCall(capability, cap, path) {
+    callCount++; calls[capability] = (calls[capability] ?? 0) + 1;
+    requireThat(callCount <= LIMITS.calls && (v2 || calls[capability] <= (entrypoint.grants[capability] ?? 0)), path, 'BUDGET_EXCEEDED');
+    if (v2) requireThat(callCount <= admission.limits.calls, '/artifact/steps', 'BUDGET_EXCEEDED');
+    if (cap.effect === 'WRITE') {
+      writeCount++;
+      requireThat(writeCount <= 1, path, 'BUDGET_EXCEEDED');
+      requireThat(effect && writeCount <= effectGrant, path, 'ENTRY_GRANT_DENIED');
+      if (v2) requireThat(writeCount <= admission.effectGrant, '/admission/effectGrant', 'AUTHORITY_DENIED');
+    }
+    if (v2) {
+      requireThat(calls[capability] <= policy[capability], path, 'ENTRY_GRANT_DENIED');
+      requireThat(calls[capability] <= admission.grants[capability], '/admission/capabilityPolicy', 'AUTHORITY_DENIED');
+    }
+  }
   artifact.steps.forEach((step, index) => {
     const p = '/artifact/steps/' + index;
     named(step?.id, p); requireThat(!names.has(step.id), p); names.add(step.id);
@@ -225,6 +241,7 @@ export function validatePlan(artifact, bound) {
       if (Object.hasOwn(step, 'when')) requireThat(booleanBinds.has(step.when), p + '/when');
       const agent = Object.keys(cap.parameters).filter(k => cap.parameters[k].binding === 'agent').sort();
       shape(step.args, agent, p + '/args');
+      if (v2) countCall(step.capability, cap, p);
       for (const arg of agent) binding(step.args[arg], cap.parameters[arg].type, p + '/args/' + arg);
       if (Object.hasOwn(step, 'onError')) {
         const codes = keys(step.onError, p + '/onError', 16); requireThat(codes.length > 0, p + '/onError');
@@ -233,14 +250,7 @@ export function validatePlan(artifact, bound) {
           returned(step.onError[code], p + '/onError/' + pointer(code));
         }
       }
-      callCount++; calls[step.capability] = (calls[step.capability] ?? 0) + 1;
-      requireThat(callCount <= LIMITS.calls && (v2 || calls[step.capability] <= (entrypoint.grants[step.capability] ?? 0)), p, 'BUDGET_EXCEEDED');
-      if (cap.effect === 'WRITE') {
-        writeCount++;
-        requireThat(writeCount <= 1, p, 'BUDGET_EXCEEDED');
-        requireThat(effect && writeCount <= effectGrant, p, 'ENTRY_GRANT_DENIED');
-      }
-      if (v2) requireThat(calls[step.capability] <= policy[step.capability], p, 'ENTRY_GRANT_DENIED');
+      if (!v2) countCall(step.capability, cap, p);
     } else if (step.op === 'BIND') {
       shape(step, ['op', 'id', 'value', 'resultType'], p);
       binding(step.value, step.resultType, p + '/value');
