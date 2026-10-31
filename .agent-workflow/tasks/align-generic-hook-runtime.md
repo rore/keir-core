@@ -61,6 +61,8 @@ Java coverage-only follow-up `bcf4cc8` adds six envelope mutations requiring an 
 
 Node source `62c7e06` integrated as `95e4eb6`, limited to 21 Node runtime/host files; selected Java dependencies and worker record bookkeeping were not replayed. Developer component review resolved its envelope-order and independent host authorization findings. Manager verification on the combined code passed the clean Java coverage build (58 compiler, 128 runtime, 30 host tests; 52.470 seconds) and all 359 default Node tests (4.983 seconds; 100% lines/97.55% branches). The packaged Java JAR matches all 51 runtime/host class files, excludes compiler/parser dependencies and preserves the legacy manifest. The seven-file Node archive matches its reviewed lock integrity. Installed Node and complete cross-process verification are deferred until the additional source-review corrections below.
 
+The Node owner explicitly accepted the same five-finding result-review continuation through the authorized fallback and resumed in the retained checkout. It will reproduce the uncovered cases, preserve `/1` and shared artifacts, and deliver source separately from evidence after full owned coverage/package verification. Canonical requirements, approvals and integration remain manager-owned; no competing task or duplicate source application was created.
+
 ## Plan review
 
 Architect reviewed the implementation seams and published contracts at 65a0cf4. It found no new product decision and retained High/Large classification. This design-author assessment does not replace the required independent clean-context plan review.
