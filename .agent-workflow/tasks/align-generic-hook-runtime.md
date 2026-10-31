@@ -38,6 +38,8 @@
 
 Pending implementation. Existing `/1` results are regression input, not proof of `/2` support. A focused baseline check independently verified the artifact/model digests and model contents of the read, two-read and single-effect golden fixtures. No build or fixture edit was needed; complete regression will run after implementation.
 
+Compiler/reference-fixture checkpoint accepted: selected 8008ff8 integrated as db8944f, limited to compiler changes/tests and six reference programs under conformance/generic-hooks. Manager independently checked all artifact/source/model pins, reference-only envelopes, source-only project/title variants, exact generic-create arguments, scope and privacy. Final code passed all 58 compiler tests (11 new) with coverage: 848/893 lines and 724/835 branches. Each reference fixture is compiled twice with exact byte comparison. `/1` golden files are unchanged. Exact fixtures were routed to Node; Java runtime/hosts and cross-runtime acceptance remain unfinished.
+
 ## Plan review
 
 Architect reviewed the implementation seams and published contracts at 65a0cf4. It found no new product decision and retained High/Large classification. This design-author assessment does not replace the required independent clean-context plan review.
