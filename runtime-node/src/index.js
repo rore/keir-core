@@ -1,8 +1,10 @@
 import { canonicalBytes, digest, parseCanonical } from './canonical.js';
 import { prepareExpressions, evaluateBinding } from './cel.js';
-import { ENVIRONMENT, LIMITS, Fault, requireThat as ok, keys, shape, integer, freeze, pointer, validatePlan, validateValue } from './validation.js';
+import { ENVIRONMENT, LIMITS, Fault, requireThat as ok, keys, shape, text, integer, freeze, pointer, narrowPolicy, validateEnvelope, validatePlan, validateValue } from './validation.js';
+import { modelFor } from './model.js';
 
 export { ENVIRONMENT };
+export { bindModel } from './model.js';
 const handles = new WeakMap();
 const same = (left, right) => canonicalBytes(left).equals(canonicalBytes(right));
 const diagnostic = (code, path) => Object.freeze({ code, path, message: 'The selected artifact or host configuration is invalid.' });
@@ -61,13 +63,71 @@ export function prepare(artifactBytes, admission, adapters) {
       }
     }
     const handle = Object.freeze(Object.create(null));
-    handles.set(handle, { artifact: freeze(artifact), entrypoint: plan.entrypoint, grants: freeze(grants), limits: freeze(limits), cel, adapters: selectedAdapters, hostFields,
+    handles.set(handle, { version: 1, artifact: freeze(artifact), dcm: artifact.dcm, entrypoint: plan.entrypoint, grants: freeze(grants), limits: freeze(limits), cel, adapters: selectedAdapters, hostFields,
       effect: plan.effect, effectGrant: admission.effectGrant, keyValidator });
     return handle;
   } catch (error) {
     const path = error instanceof Fault ? error.path : '/artifact';
     const code = error instanceof Fault ? error.code : 'ARTIFACT_INVALID';
     return diagnostic(code === 'ARTIFACT_INVALID' && path.startsWith('/admission') ? 'ADMISSION_INVALID' : code, path);
+  }
+}
+
+export function prepareProgram(artifactBytes, boundModel, admission) {
+  let path = '/binding', code = 'ADMISSION_INVALID';
+  try {
+    const bound = modelFor(boundModel); ok(bound, path, code);
+    path = '/admission';
+    shape(admission, ['expectedArtifactDigest', 'expectedDcmDigest', 'entrypoint', 'consumer', 'compiler', 'environment', 'mode',
+      ...['capabilityPolicy', 'limits', ...(bound.effect ? ['effectGrant'] : [])].filter(field => Object.hasOwn(admission ?? {}, field))], path);
+    path = '/admission/expectedArtifactDigest';
+    ok(typeof admission.expectedArtifactDigest === 'string' && /^sha256:[0-9a-f]{64}$/.test(admission.expectedArtifactDigest), path, code);
+    path = '/artifact'; code = 'ARTIFACT_INVALID';
+    ok(artifactBytes instanceof Uint8Array, path, code); ok(artifactBytes.byteLength <= LIMITS.artifactBytes, path, 'BUDGET_EXCEEDED');
+    const bytes = Buffer.from(artifactBytes); ok(digest(bytes) === admission.expectedArtifactDigest, path, 'PIN_MISMATCH');
+    const artifact = parseCanonical(bytes); validateEnvelope(artifact, bound);
+    const entrypoint = bound.dcm.entrypoints[artifact.entrypoint];
+    const limits = { steps: LIMITS.steps, calls: LIMITS.calls, totalAstNodes: LIMITS.totalAstNodes, traceEvents: LIMITS.traceEvents };
+    let grants = { ...bound.model.policies[artifact.entrypoint] };
+    let effectGrant = bound.effect ? bound.model.effectGrants[artifact.entrypoint] : 0;
+    code = 'ADMISSION_INVALID';
+    for (const field of Object.keys(admission).sort()) {
+      path = '/admission/' + field;
+      if (field === 'capabilityPolicy') {
+        ok(admission.capabilityPolicy !== undefined, path); grants = narrowPolicy(bound.dcm, admission.capabilityPolicy, grants, path);
+      } else if (field === 'compiler') ok(admission.compiler === artifact.compiler, path);
+      else if (field === 'consumer') ok(same(admission.consumer, entrypoint.consumer), path);
+      else if (field === 'effectGrant') { integer(admission.effectGrant, effectGrant, path, 0); effectGrant = admission.effectGrant; }
+      else if (field === 'entrypoint') ok(admission.entrypoint === artifact.entrypoint, path);
+      else if (field === 'environment') ok(same(admission.environment, artifact.environment), path);
+      else if (field === 'expectedDcmDigest') ok(admission.expectedDcmDigest === bound.modelRef.digest, path);
+      else if (field === 'limits') for (const name of keys(admission.limits, path, 4).sort()) {
+        ok(Object.hasOwn(limits, name), path); integer(admission.limits[name], limits[name], path, name === 'traceEvents' ? 2 : 0);
+        limits[name] = admission.limits[name];
+      }
+      else if (field === 'mode') ok(admission.mode === bound.mode, path);
+    }
+    path = '/artifact'; code = 'ARTIFACT_INVALID';
+    const plan = validatePlan(artifact, bound);
+    ok(artifact.steps.length <= limits.steps && plan.callCount <= limits.calls, '/artifact/steps', 'BUDGET_EXCEEDED');
+    for (const [id, count] of Object.entries(plan.calls)) ok(count <= grants[id], '/admission/capabilityPolicy', 'AUTHORITY_DENIED');
+    ok(plan.writeCount <= effectGrant, '/admission/effectGrant', 'AUTHORITY_DENIED');
+    const cel = prepareExpressions(artifact, plan.contexts, bound);
+    ok(cel.totalNodes <= limits.totalAstNodes, '/artifact/expressions', 'BUDGET_EXCEEDED');
+    const hostFields = Object.create(null);
+    for (const id of Object.keys(plan.calls)) for (const [name, parameter] of Object.entries(bound.dcm.capabilities[id].parameters)) if (parameter.binding === 'host') {
+      if (!Object.hasOwn(hostFields, name)) hostFields[name] = [];
+      hostFields[name].push(parameter.type);
+    }
+    const prepared = Object.freeze(Object.create(null));
+    handles.set(prepared, { version: 2, artifact: freeze(artifact), dcm: bound.dcm, entrypoint, grants: freeze(grants), limits: freeze(limits), cel,
+      adapters: bound.adapters, hostFields, effect: bound.effect, effectGrant, keyValidator: bound.keyValidator, scope: bound.scope, bound });
+    return Object.freeze({ prepared, diagnostic: null });
+  } catch (error) {
+    const fault = error instanceof Fault;
+    const selectedCode = fault && ['PIN_MISMATCH', 'BUDGET_EXCEEDED', 'AUTHORITY_DENIED', 'ENTRY_GRANT_DENIED', 'CAPABILITY_UNKNOWN'].includes(error.code) ? error.code : code;
+    const selectedPath = code === 'ARTIFACT_INVALID' && fault ? error.path : path;
+    return Object.freeze({ prepared: null, diagnostic: diagnostic(selectedCode, selectedPath) });
   }
 }
 
@@ -136,7 +196,10 @@ function effectEvidence(response) {
   return 'UNKNOWN';
 }
 
-export async function invoke(prepared, businessInput, trustedInvocation) {
+export function invoke(prepared, businessInput, trustedInvocation) { return execute(prepared, businessInput, trustedInvocation, 1); }
+export function invokeProgram(prepared, businessInput, trustedInvocation) { return execute(prepared, businessInput, trustedInvocation, 2); }
+
+async function execute(prepared, businessInput, trustedInvocation, version) {
   const plan = handles.get(prepared);
   const trace = [];
   const effects = [];
@@ -154,15 +217,20 @@ export async function invoke(prepared, businessInput, trustedInvocation) {
   }
   emit('INVOCATION_START');
   try {
-    ok(plan, '', 'HOST_CONTEXT_INVALID');
-    try { shape(trustedInvocation, ['bindings', 'deadline', 'authorize', 'grants', ...(plan.effect ? ['effectGrant', 'requestKey', 'event'] : [])], ''); }
+    ok(plan && plan.version === version, '', 'HOST_CONTEXT_INVALID');
+    try {
+      shape(trustedInvocation, ['bindings', 'deadline', 'authorize', ...(version === 2 ? ['scope',
+        ...(Object.hasOwn(trustedInvocation ?? {}, 'capabilityPolicy') ? ['capabilityPolicy'] : [])] : ['grants']),
+      ...(plan.effect ? ['requestKey', 'event', ...(version === 1 || Object.hasOwn(trustedInvocation ?? {}, 'effectGrant') ? ['effectGrant'] : [])] : [])], '');
+      if (version === 2) { text(trustedInvocation.scope, '', true); ok(trustedInvocation.scope === plan.scope, ''); }
+    }
     catch { throw new Fault('HOST_CONTEXT_INVALID', ''); }
     ok(typeof trustedInvocation.authorize === 'function', '', 'HOST_CONTEXT_INVALID');
     let clock;
     try { clock = deadline(trustedInvocation.deadline); } catch { throw new Fault('HOST_CONTEXT_INVALID', ''); }
     clock.remaining('');
     const { artifact, entrypoint, adapters, hostFields } = plan;
-    const dcm = artifact.dcm;
+    const dcm = plan.dcm;
     const state = Object.fromEntries([['input', validateValue(dcm, entrypoint.input, businessInput, '/input', 'INPUT_INVALID')]]);
     const bindings = Object.create(null);
     try {
@@ -171,7 +239,10 @@ export async function invoke(prepared, businessInput, trustedInvocation) {
     } catch (error) { throw new Fault(error instanceof Fault && error.code === 'BUDGET_EXCEEDED' ? error.code : 'HOST_BINDING_INVALID', '/hostBindings'); }
     const grants = Object.create(null);
     try {
-      for (const id of keys(trustedInvocation.grants, '', 8)) {
+      if (version === 2) {
+        if (Object.hasOwn(trustedInvocation, 'capabilityPolicy')) ok(trustedInvocation.capabilityPolicy !== undefined, '');
+        Object.assign(grants, narrowPolicy(dcm, trustedInvocation.capabilityPolicy, plan.grants, ''));
+      } else for (const id of keys(trustedInvocation.grants, '', 8)) {
         ok(Object.hasOwn(plan.grants, id), '', 'HOST_CONTEXT_INVALID');
         integer(trustedInvocation.grants[id], plan.grants[id], '');
         grants[id] = trustedInvocation.grants[id];
@@ -180,8 +251,8 @@ export async function invoke(prepared, businessInput, trustedInvocation) {
     let hostContext, effectGrant;
     if (plan.effect) {
       try {
-        integer(trustedInvocation.effectGrant, plan.effectGrant, '', 0);
-        effectGrant = trustedInvocation.effectGrant;
+        effectGrant = version === 2 && !Object.hasOwn(trustedInvocation, 'effectGrant') ? plan.effectGrant : trustedInvocation.effectGrant;
+        integer(effectGrant, plan.effectGrant, '', 0);
         shape(trustedInvocation.event, ['id', 'source'], '');
         const event = Object.freeze({
           id: validateValue(dcm, entrypoint.event.idType, trustedInvocation.event.id, '', 'HOST_CONTEXT_INVALID'),

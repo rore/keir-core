@@ -1,6 +1,6 @@
 # Node runtime
 
-ESM library implementing the bounded `keir-read/1` and simulation-only `keir-effect/1` artifact profiles. It prepares trusted Java compiler output once and returns typed outcomes with redacted traces. Runtime execution requires Node, not Java or the compiler. The current tested environment is Node 24.14.1, CEL-ES 0.6.1 and protobuf 2.6.2; dependency pins are recorded in the npm lockfile.
+ESM library implementing bounded read and simulation-only effect profiles. Legacy `keir-read/1` and `keir-effect/1` APIs remain available; `keir-read/2` and `keir-effect/2` add complete scoped model binding and reference artifacts. It prepares trusted Java compiler output once and returns typed outcomes with redacted traces. Runtime execution requires Node, not Java or the compiler. The current tested environment is Node 24.14.1, CEL-ES 0.6.1 and protobuf 2.6.2; dependency pins are recorded in the npm lockfile.
 
 The [read and decide](../roadmap/features/portable-core-first-slice.md) profile preserves its three-argument adapter API and DISPLAY consumption. The [single-effect contract](../docs/specs/single-effect.md) adds one guarded post-commit write with receipts and terminal business handlers. Complete compiler/Java-runtime/Node-runtime acceptance remains a separate combined gate. Source parsing, real effect admission, live activation and production containment remain outside this library.
 
@@ -23,7 +23,7 @@ const outcome = await invoke(selected, { taskId: 'task1' }, {
 });
 ```
 
-The IDs above are fictional fixture values. `clock`, `authorize`, `readTask`, digests and artifact selection are host-owned inputs. Never derive the trusted expected digest from the same untrusted artifact being admitted. [The artifact contract](../docs/specs/compiler-artifact.md) and [runtime contract](../docs/specs/runtime.md) define the supported formats and authority boundary.
+The example above retains the `/1` API. Its IDs are fictional fixture values. `clock`, `authorize`, `readTask`, digests and artifact selection are host-owned inputs. Never derive the trusted expected digest from the same untrusted artifact being admitted. [The artifact contract](../docs/specs/compiler-artifact.md) and [runtime contract](../docs/specs/runtime.md) define the supported formats and authority boundary.
 
 `prepare` returns an opaque frozen handle or the closed diagnostic `{code,path,message}`. It checks the externally held digest before parsing, then canonical UTF-8 JSON, the complete DCM/plan, exact pins and consumer, descriptors, CEL variables/types and function/overload pairs. Protobuf nesting is bounded before decoding. Unknown fields, duplicate keys, noncanonical encodings and unsupported constructs fail closed. Preparation calls neither adapters nor authorization. The handle snapshots registration metadata/functions and contains no caller identity or invocation values.
 
@@ -65,4 +65,38 @@ Default tests include the shared [scenario corpus and harness checks](../conform
 
 Effect module tests consume the separately Java-compiled `conformance/single-effect` fixture and its external artifact/model pins. They cover guards, original native keys, grants, receipts, response/timeout priority and late-result isolation. They do not execute a Node compiler or certify real adapters.
 
-Build a local tarball and run the separately packaged [host example](../examples/node-host/README.md). The package exports only `prepare`, `invoke` and the fixed qualified `ENVIRONMENT`; validation and qualification helpers are internal.
+The reference profiles use separate [bound-model APIs](../docs/specs/host-model-binding.md):
+
+```js
+import { bindModel, prepareProgram, invokeProgram, ENVIRONMENT } from '@keir/runtime-node';
+
+const binding = bindModel(approvedDcmBytes, {
+  scope: approvedScope, modelRef: approvedModelRef, profile: 'keir-effect/2',
+  environment: ENVIRONMENT, mode: 'simulation',
+  keyBinding: { type: 'sample.RequestUuid/1', validate: validateRequestKey }
+}, {
+  'tasks.get': { version: '1', mode: 'simulation', keyType: 'sample.RequestUuid/1', invoke: readTask },
+  'tasks.create': { version: '1', mode: 'simulation', keyType: 'sample.RequestUuid/1', invoke: createTask }
+});
+if (binding.diagnostic) throw new Error(binding.diagnostic.code);
+const program = prepareProgram(approvedArtifactBytes, binding.boundModel, {
+  expectedArtifactDigest, expectedDcmDigest, entrypoint: 'TaskCompleted',
+  consumer: { id: 'sample.followup.report', version: '1', kind: 'EVENT_REPORT' },
+  compiler: 'keir-compiler-java/0.1.0-SNAPSHOT', environment: ENVIRONMENT, mode: 'simulation'
+});
+if (program.diagnostic) throw new Error(program.diagnostic.code);
+const result = await invokeProgram(program.prepared, { taskId: 'task1' }, {
+  scope: approvedScope, bindings: { actorId: 'user1' }, deadline: { clock, expiresAtMs }, authorize,
+  requestKey: originalRequestKey, event: { id: 'event1', source: 'task1' }
+});
+```
+
+Both wrappers are frozen, closed two-field records: `{boundModel,diagnostic}` and `{prepared,diagnostic}`, with exactly one non-null value. Handles are privately branded; lookalikes and wrong API families fail closed. Model binding validates all definitions and exactly one compatible invoker per catalog capability, including unused operations. It snapshots bytes, metadata and functions without calling invokers or the key validator. Model/type state is reused within the binding, while each program's complete plan and checked expressions are independently validated. Reference artifacts cannot override the bound model, descriptors, scope or invokers.
+
+The host independently approves the exact model reference, compiler/environment and artifact pins. `invokeProgram` requires the binding's exact scope and fresh authorization; scope equality alone grants nothing. No caller identity, key, event, deadline or authorization result is cached. Replacing a registration requires a new binding; existing Prepared handles retain the old one. Read bindings use three-field registrations and may use real or simulation mode; effect bindings remain simulation-only and pass the original native key to both read and write adapters unchanged.
+
+`/2` omits named grants by default. Optional `capabilityPolicy` (`allow`, `deny`, `maxCalls`) narrows the published catalog at hook, admission and fresh invocation boundaries; omission preserves earlier restrictions. Explicit widening or null values are invalid. The aggregate limits remain separate, and potential calls count conservatively at preparation. Read programs cannot dispatch WRITE operations even when the catalog publishes them. Effect ceilings inherit from the preceding boundary when omitted, defaulting to one at the hook, with a hard maximum of one potential WRITE. A fresh zero ceiling permits a skipped write but denies a reached one before dispatch.
+
+The Java-compiled `/2` fixtures and source-only project/title variants are exercised by the default module/shared tests. The source owns those choices; generic `tasks.create` receives `projectId` and `title`, with native event provenance outside business arguments. No source compiler/parser, transport client, registry or activation service is added to the runtime. Finite handle and in-flight budgets in the sample host are host-owned qualification limits, not runtime lifecycle APIs or decoded-heap containment guarantees.
+
+Build a local tarball and run the separately packaged [host example](../examples/node-host/README.md). The package exports `prepare`, `invoke`, `bindModel`, `prepareProgram`, `invokeProgram` and the fixed qualified `ENVIRONMENT`; validation and qualification helpers are internal.

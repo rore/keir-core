@@ -50,14 +50,27 @@ function decode(schema, bytes) {
   return message;
 }
 
-export function prepareExpressions(artifact, contexts) {
-  const dcm = artifact.dcm;
+function descriptorSet(dcm) {
   const records = Object.keys(dcm.types).filter(k => dcm.types[k].kind === 'record').sort();
-  const descriptorBytes = base64(artifact.descriptors, 65536, '/artifact/descriptors');
-  const expected = create(FileDescriptorSetSchema, { file: [{ name: 'keir_read.proto', package: 'keir.read', syntax: 'proto3', messageType: records.map(name => ({ name, field: Object.keys(dcm.types[name].fields).sort().map((field, i) => ({ name: field, jsonName: field, number: i + 1, label: 1, type: dcm.types[name].fields[field] === 'Boolean' ? 8 : 9 })) })) }] });
-  const descriptor = decode(FileDescriptorSetSchema, descriptorBytes);
-  ok(Buffer.from(toBinary(FileDescriptorSetSchema, expected)).equals(descriptorBytes), '/artifact/descriptors');
-  const registry = createFileRegistry(descriptor);
+  return create(FileDescriptorSetSchema, { file: [{ name: 'keir_read.proto', package: 'keir.read', syntax: 'proto3', messageType: records.map(name => ({ name, field: Object.keys(dcm.types[name].fields).sort().map((field, i) => ({ name: field, jsonName: field, number: i + 1, label: 1, type: dcm.types[name].fields[field] === 'Boolean' ? 8 : 9 })) })) }] });
+}
+
+export function prepareModelTypes(dcm, path = '/binding/dcm/types') {
+  const descriptor = descriptorSet(dcm), bytes = Buffer.from(toBinary(FileDescriptorSetSchema, descriptor));
+  ok(bytes.length <= 65536, path, 'BUDGET_EXCEEDED');
+  return { registry: createFileRegistry(descriptor), descriptorBytes: bytes };
+}
+
+export function prepareExpressions(artifact, contexts, model) {
+  const dcm = model ? model.dcm : artifact.dcm;
+  let registry;
+  if (model) registry = model.types.registry;
+  else {
+    const descriptorBytes = base64(artifact.descriptors, 65536, '/artifact/descriptors');
+    const descriptor = decode(FileDescriptorSetSchema, descriptorBytes);
+    ok(Buffer.from(toBinary(FileDescriptorSetSchema, descriptorSet(dcm))).equals(descriptorBytes), '/artifact/descriptors');
+    registry = createFileRegistry(descriptor);
+  }
   const prepared = new Map();
   let totalNodes = 0;
   const scalar = type => type === 'Boolean' || type === 'String' || ['nominal', 'enum'].includes(dcm.types[type]?.kind);

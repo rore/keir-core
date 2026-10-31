@@ -102,3 +102,48 @@ export function parseCanonical(bytes, maxBytes = MAX_BYTES) {
 export function digest(bytes) {
   return `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
 }
+
+// Model input may be formatted JSON; detect duplicate keys before JSON.parse loses them.
+export function parseModelJson(bytes) {
+  const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  let offset = 0;
+  const whitespace = () => { while (offset < text.length && /[ \t\r\n]/.test(text[offset])) offset++; };
+  const take = token => { whitespace(); if (text[offset++] !== token) throw new Error('Invalid model JSON'); };
+  function string() {
+    whitespace(); const start = offset;
+    take('"');
+    let escaped = false;
+    while (offset < text.length) {
+      const char = text[offset++];
+      if (!escaped && char === '"') return JSON.parse(text.slice(start, offset));
+      if (!escaped && char === '\\') escaped = true; else escaped = false;
+    }
+    throw new Error('Invalid model string');
+  }
+  function value(depth = 1) {
+    if (depth > MAX_DEPTH) throw new Error('Model JSON exceeds depth limit');
+    whitespace(); const token = text[offset];
+    if (token === '{') {
+      offset++; const names = new Set(); whitespace();
+      if (text[offset] === '}') { offset++; return; }
+      while (true) {
+        const key = string(); if (names.has(key)) throw new Error('Duplicate model key'); names.add(key);
+        take(':'); value(depth + 1); whitespace();
+        if (text[offset] === '}') { offset++; return; }
+        take(',');
+      }
+    } else if (token === '[') {
+      offset++; whitespace(); if (text[offset] === ']') { offset++; return; }
+      while (true) {
+        value(depth + 1); whitespace(); if (text[offset] === ']') { offset++; return; }
+        take(',');
+      }
+    } else if (token === '"') string();
+    else {
+      const match = /^(?:true|false|0|[1-9][0-9]*)/.exec(text.slice(offset));
+      if (!match) throw new Error('Invalid model value'); offset += match[0].length;
+    }
+  }
+  value(); whitespace(); if (offset !== text.length) throw new Error('Trailing model JSON');
+  const result = JSON.parse(text); canonicalBytes(result); return result;
+}

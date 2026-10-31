@@ -32,11 +32,39 @@ export function freeze(value) {
   return value;
 }
 
-export function validateModel(dcm) {
-  const p = '/artifact/dcm';
-  const effect = dcm?.format === 'keir-dcm/effect-1';
+export function narrowPolicy(dcm, policy, previous, path) {
+  const catalog = keys(dcm.capabilities, path, 8).sort();
+  const ceilings = Object.fromEntries(catalog.map(id => [id, previous[id]]));
+  if (policy === undefined) return ceilings;
+  const fields = keys(policy, path, 3);
+  requireThat(fields.every(field => ['allow', 'deny', 'maxCalls'].includes(field)), path);
+  function list(field) {
+    const values = policy[field];
+    requireThat(Array.isArray(values) && Object.getPrototypeOf(values) === Array.prototype && values.length <= catalog.length, path);
+    requireThat(Reflect.ownKeys(values).length === values.length + 1, path);
+    for (let i = 0; i < values.length; i++) {
+      const item = Object.getOwnPropertyDescriptor(values, String(i));
+      requireThat(item && Object.hasOwn(item, 'value') && catalog.includes(item.value), path);
+    }
+    requireThat(new Set(values).size === values.length, path); return values;
+  }
+  if (Object.hasOwn(policy, 'allow')) {
+    const allow = list('allow'); requireThat(allow.every(id => previous[id] > 0), path);
+    for (const id of catalog) if (!allow.includes(id)) ceilings[id] = 0;
+  }
+  if (Object.hasOwn(policy, 'deny')) for (const id of list('deny')) ceilings[id] = 0;
+  if (Object.hasOwn(policy, 'maxCalls')) for (const id of keys(policy.maxCalls, path, 8).sort()) {
+    requireThat(catalog.includes(id), path); integer(policy.maxCalls[id], ceilings[id], path, 0);
+    ceilings[id] = policy.maxCalls[id];
+  }
+  return ceilings;
+}
+
+export function validateModel(dcm, profile, p = '/artifact/dcm') {
+  const v2 = profile === 'keir-read/2' || profile === 'keir-effect/2';
+  const effect = v2 ? profile === 'keir-effect/2' : dcm?.format === 'keir-dcm/effect-1';
   shape(dcm, ['format', 'domain', 'types', 'capabilities', 'entrypoints', ...(effect ? ['hostKey', 'assurance'] : [])], p);
-  requireThat(effect || dcm.format === 'keir-dcm/read-1', p);
+  requireThat(v2 ? dcm.format === (effect ? 'keir-dcm/effect-2' : 'keir-dcm/read-2') : effect || dcm.format === 'keir-dcm/read-1', p);
   requireThat(canonicalBytes(dcm).length <= LIMITS.dcmBytes, p, 'BUDGET_EXCEEDED');
   shape(dcm.domain, ['id', 'version'], p + '/domain');
   text(dcm.domain.id, p, true); text(dcm.domain.version, p, true);
@@ -56,8 +84,8 @@ export function validateModel(dcm) {
       for (const field of fields) named(field, p);
     } else throw new Fault('DCM_INVALID', p);
   }
-  const scalar = type => type === 'Boolean' || type === 'String' || ['nominal', 'enum'].includes(dcm.types[type]?.kind);
-  const record = type => dcm.types[type]?.kind === 'record';
+  const scalar = type => (!v2 || typeof type === 'string') && (type === 'Boolean' || type === 'String' || ['nominal', 'enum'].includes(dcm.types[type]?.kind));
+  const record = type => (!v2 || typeof type === 'string') && dcm.types[type]?.kind === 'record';
   if (effect) {
     requireThat(dcm.assurance === 'SIMULATION_ONLY', p);
     shape(dcm.hostKey, ['source', 'type'], p + '/hostKey');
@@ -68,32 +96,38 @@ export function validateModel(dcm) {
   for (const id of keys(dcm.capabilities, p + '/capabilities', 8)) {
     named(id, p, true);
     const cap = dcm.capabilities[id]; shape(cap, ['version', 'parameters', 'result', 'effect', 'errors'], p);
-    text(cap.version, p, true); requireThat((cap.effect === 'READ' || effect && cap.effect === 'WRITE') && record(cap.result), p);
+    text(cap.version, p, true); requireThat((cap.effect === 'READ' || (effect || v2) && cap.effect === 'WRITE') && record(cap.result), p);
     for (const param of keys(cap.parameters, p, 16)) {
       named(param, p); shape(cap.parameters[param], ['type', 'binding'], p);
       requireThat(scalar(cap.parameters[param].type) && ['agent', 'host'].includes(cap.parameters[param].binding), p);
     }
     requireThat(Array.isArray(cap.errors) && new Set(cap.errors).size === cap.errors.length, p);
-    if (effect) requireThat(cap.errors.length <= 16, p);
+    if (effect || v2) requireThat(cap.errors.length <= 16, p);
     for (const error of cap.errors) requireThat(typeof error === 'string' && /^[A-Z][A-Z0-9_]{0,63}$/.test(error), p);
   }
   const entries = keys(dcm.entrypoints, p + '/entrypoints', 4); requireThat(entries.length > 0, p);
+  const policies = Object.create(null), effectGrants = Object.create(null);
   for (const id of entries) {
     named(id, p, true);
     const entry = dcm.entrypoints[id];
-    shape(entry, ['input', 'output', 'trigger', 'consumer', 'grants', ...(effect ? ['placement', 'effectGrant', 'event'] : [])], p);
+    shape(entry, ['input', 'output', 'trigger', 'consumer', ...(v2 ? (Object.hasOwn(entry, 'capabilityPolicy') ? ['capabilityPolicy'] : []) : ['grants']),
+      ...(effect ? ['placement', 'event', ...(!v2 || Object.hasOwn(entry, 'effectGrant') ? ['effectGrant'] : [])] : [])], p);
     requireThat(record(entry.input) && record(entry.output) && entry.trigger === (effect ? 'EVENT' : 'REQUEST'), p);
     if (effect) {
       requireThat(entry.placement === 'AFTER_COMMIT', p);
-      integer(entry.effectGrant, 1, p, 0);
+      if (!v2 || Object.hasOwn(entry, 'effectGrant')) integer(entry.effectGrant, 1, p, 0);
+      effectGrants[id] = entry.effectGrant ?? 1;
       shape(entry.event, ['idType', 'sourceType'], p);
-      requireThat(dcm.types[entry.event.idType]?.kind === 'nominal' && dcm.types[entry.event.sourceType]?.kind === 'nominal', p);
+      requireThat((!v2 || typeof entry.event.idType === 'string' && typeof entry.event.sourceType === 'string') && dcm.types[entry.event.idType]?.kind === 'nominal' && dcm.types[entry.event.sourceType]?.kind === 'nominal', p);
     }
     shape(entry.consumer, ['id', 'version', 'kind'], p);
     named(entry.consumer.id, p, true); text(entry.consumer.version, p, true); requireThat(entry.consumer.kind === (effect ? 'EVENT_REPORT' : 'DISPLAY'), p);
-    for (const cap of keys(entry.grants, p, 8)) { requireThat(Object.hasOwn(dcm.capabilities, cap), p); integer(entry.grants[cap], LIMITS.calls, p); }
+    if (v2) {
+      if (Object.hasOwn(entry, 'capabilityPolicy')) requireThat(entry.capabilityPolicy !== undefined, p);
+      policies[id] = narrowPolicy(dcm, entry.capabilityPolicy, Object.fromEntries(Object.entries(dcm.capabilities).map(([cap, value]) => [cap, effect || value.effect === 'READ' ? LIMITS.calls : 0])), p);
+    } else for (const cap of keys(entry.grants, p, 8)) { requireThat(Object.hasOwn(dcm.capabilities, cap), p); integer(entry.grants[cap], LIMITS.calls, p); }
   }
-  return { scalar, record };
+  return { scalar, record, policies, effectGrants };
 }
 
 export function validateValue(dcm, typeName, value, path, code) {
@@ -116,9 +150,22 @@ export function validateValue(dcm, typeName, value, path, code) {
   }
 }
 
-export function validatePlan(artifact) {
-  shape(artifact, ['format', 'profile', 'compiler', 'environment', 'sourceDigest', 'dcmDigest', 'dcm', 'entrypoint', 'descriptors', 'expressions', 'steps', 'return'], '/artifact');
-  const effect = artifact.profile === 'keir-effect/1';
+export function validateEnvelope(artifact, bound) {
+  const v2 = bound !== undefined;
+  shape(artifact, ['format', 'profile', 'compiler', 'environment', 'sourceDigest', ...(v2 ? ['modelRef'] : ['dcmDigest', 'dcm', 'descriptors']), 'entrypoint', 'expressions', 'steps', 'return'], '/artifact');
+  const effect = v2 ? bound.profile === 'keir-effect/2' : artifact.profile === 'keir-effect/1';
+  if (v2) {
+    shape(artifact.environment, Object.keys(ENVIRONMENT), '/artifact/environment');
+    shape(artifact.modelRef, ['domainId', 'domainVersion', 'format', 'digest', 'descriptorRecipe'], '/artifact/modelRef');
+    text(artifact.compiler, '/artifact/compiler', true);
+    requireThat(typeof artifact.entrypoint === 'string' && Object.hasOwn(bound.dcm.entrypoints, artifact.entrypoint), '/artifact/entrypoint');
+    requireThat(Object.keys(ENVIRONMENT).every(k => artifact.environment[k] === ENVIRONMENT[k]), '/artifact/environment');
+    requireThat(artifact.format === (effect ? 'keir-artifact/effect-2' : 'keir-artifact/read-2'), '/artifact/format');
+    requireThat(canonicalBytes(artifact.modelRef).equals(canonicalBytes(bound.modelRef)), '/artifact/modelRef');
+    requireThat(artifact.profile === bound.profile, '/artifact/profile');
+    requireThat(typeof artifact.sourceDigest === 'string' && /^sha256:[0-9a-f]{64}$/.test(artifact.sourceDigest), '/artifact/sourceDigest');
+    return { v2, effect, dcm: bound.dcm };
+  }
   requireThat(effect ? artifact.format === 'keir-artifact/effect-1' : artifact.format === 'keir-artifact/read-1' && artifact.profile === 'keir-read/1', '/artifact');
   text(artifact.compiler, '/artifact/compiler', true);
   shape(artifact.environment, Object.keys(ENVIRONMENT), '/artifact/environment');
@@ -126,10 +173,16 @@ export function validatePlan(artifact) {
   for (const key of ['sourceDigest', 'dcmDigest']) requireThat(typeof artifact[key] === 'string' && /^sha256:[0-9a-f]{64}$/.test(artifact[key]), '/artifact/' + key);
   requireThat(digest(canonicalBytes(artifact.dcm)) === artifact.dcmDigest, '/artifact/dcmDigest');
   requireThat(artifact.dcm.format === (effect ? 'keir-dcm/effect-1' : 'keir-dcm/read-1'), '/artifact/dcm');
-  const { scalar } = validateModel(artifact.dcm);
-  const dcm = artifact.dcm;
+  return { v2, effect, dcm: artifact.dcm };
+}
+
+export function validatePlan(artifact, bound) {
+  const { v2, effect, dcm } = validateEnvelope(artifact, bound);
+  const { scalar } = v2 ? bound.model : validateModel(dcm);
   requireThat(Object.hasOwn(dcm.entrypoints, artifact.entrypoint), '/artifact/entrypoint');
   const entrypoint = dcm.entrypoints[artifact.entrypoint];
+  const policy = v2 ? bound.model.policies[artifact.entrypoint] : entrypoint.grants;
+  const effectGrant = v2 ? bound.model.effectGrants[artifact.entrypoint] : entrypoint.effectGrant;
   requireThat(Array.isArray(artifact.steps) && artifact.steps.length > 0 && artifact.steps.length <= LIMITS.steps, '/artifact/steps', 'BUDGET_EXCEEDED');
   const expressionNames = keys(artifact.expressions, '/artifact/expressions', LIMITS.totalAstNodes);
   const variables = Object.fromEntries([['input', entrypoint.input]]);
@@ -143,7 +196,7 @@ export function validatePlan(artifact) {
     shape(value, [isLiteral ? 'literal' : 'expr', 'type'], path);
     requireThat(value.type === type && scalar(type), path);
     if (isLiteral) {
-      requireThat(dcm.types[type]?.kind !== 'nominal', path);
+      requireThat(v2 || dcm.types[type]?.kind !== 'nominal', path);
       validateValue(dcm, type, value.literal, path, 'ARTIFACT_INVALID');
     } else {
       requireThat(value.expr === `e${nextExpression++}` && Object.hasOwn(artifact.expressions, value.expr), path);
@@ -165,7 +218,8 @@ export function validatePlan(artifact) {
     if (step.op === 'CALL') {
       shape(step, ['op', 'id', 'capability', 'version', 'args', 'resultType',
         ...(effect && Object.hasOwn(step, 'when') ? ['when'] : []), ...(effect && Object.hasOwn(step, 'onError') ? ['onError'] : [])], p);
-      requireThat(Object.hasOwn(dcm.capabilities, step.capability), p);
+      if (v2) requireThat(typeof step.capability === 'string', p);
+      requireThat(Object.hasOwn(dcm.capabilities, step.capability), p, v2 ? 'CAPABILITY_UNKNOWN' : 'ARTIFACT_INVALID');
       const cap = dcm.capabilities[step.capability];
       requireThat(step.version === cap.version && step.resultType === cap.result, p);
       if (Object.hasOwn(step, 'when')) requireThat(booleanBinds.has(step.when), p + '/when');
@@ -180,12 +234,13 @@ export function validatePlan(artifact) {
         }
       }
       callCount++; calls[step.capability] = (calls[step.capability] ?? 0) + 1;
-      requireThat(callCount <= LIMITS.calls && calls[step.capability] <= (entrypoint.grants[step.capability] ?? 0), p, 'BUDGET_EXCEEDED');
+      requireThat(callCount <= LIMITS.calls && (v2 || calls[step.capability] <= (entrypoint.grants[step.capability] ?? 0)), p, 'BUDGET_EXCEEDED');
       if (cap.effect === 'WRITE') {
         writeCount++;
         requireThat(writeCount <= 1, p, 'BUDGET_EXCEEDED');
-        requireThat(writeCount <= entrypoint.effectGrant, p, 'ENTRY_GRANT_DENIED');
+        requireThat(effect && writeCount <= effectGrant, p, 'ENTRY_GRANT_DENIED');
       }
+      if (v2) requireThat(calls[step.capability] <= policy[step.capability], p, 'ENTRY_GRANT_DENIED');
     } else if (step.op === 'BIND') {
       shape(step, ['op', 'id', 'value', 'resultType'], p);
       binding(step.value, step.resultType, p + '/value');
@@ -195,5 +250,5 @@ export function validatePlan(artifact) {
   });
   returned(artifact.return, '/artifact/return');
   requireThat(nextExpression === expressionNames.length, '/artifact/expressions');
-  return { entrypoint, contexts, calls, callCount, writeCount, effect };
+  return { entrypoint, contexts, calls, callCount, writeCount, effect, policy, effectGrant };
 }
