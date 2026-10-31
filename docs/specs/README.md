@@ -1,8 +1,8 @@
 # Keir specifications
 
-The [generic hook/capability correction](generic-hook-capability-contract.md) is **proposed, not implemented**. It removes mandatory program-specific hook/admission/invocation grants in new `/2` profiles, with optional narrowing controls and unchanged single-write safety. Existing `/1` behavior and evidence below remain unchanged; they do not qualify the corrected default.
+The [generic hook/capability contract](generic-hook-capability-contract.md) is **implemented and locally verified under experimental `/2` profiles**. It replaces mandatory program-specific grants with optional narrowing controls while preserving aggregate bounds and single-write safety. Six compiled programs and 28 shared scenarios pass in both runtimes and packaged hosts; existing `/1` behavior and golden bytes remain unchanged.
 
-The proposed [host model binding](host-model-binding.md) defines `/2` reference artifacts and a single complete-catalog DCM/invoker binding, reusable preparation, remote dispatch and lifecycle obligations. Its Java/Node API sketches are unimplemented.
+The implemented [host model binding](host-model-binding.md) defines `/2` reference artifacts and a complete-catalog DCM/invoker binding with reusable model preparation and fresh invocation authority. See the [worked example](generic-hook-example.md), runnable hosts and [testing evidence](../testing.md). Real transport guarantees, production containment and release remain unqualified; local `/2` results do not imply a new CI result.
 
 The first maintained contract is **`keir-read/1`, an implemented experimental checkpoint** for REQUEST/read/classify/display. The Java compiler and both runtimes pass the same local and CI conformance corpus and packaged-host verification. [Testing evidence](../testing.md) records supported scope and limitations; production qualification and release remain open.
 

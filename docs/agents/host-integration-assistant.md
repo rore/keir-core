@@ -8,15 +8,15 @@ Help the host developer define domain types, generic hooks and result consumers,
 
 Expose reusable native operations, not the customization being demonstrated: `tasks.create` creates a task; the extension supplies its project/title and decides that creation is a follow-up. Do not hide the program's eligibility or composition in a special adapter. Domain-specific atomic operations remain valid when they are actual host contracts. See the [capability ownership rule](../specs/generic-hook-capability-contract.md#responsibility-boundaries).
 
-Design new hooks around inputs, allowed outputs, lifecycle and effect constraints, not a sample program's capability list. Customers compose already-published operations and repeat reads within aggregate budgets. Capability allow/deny lists and per-capability quotas are advanced opt-in restrictions only. Required per-hook, admission and invocation `grants` in current `/1` samples are an architectural limitation, not the intended default. The [corrected `/2` contract](../specs/generic-hook-capability-contract.md) is proposed and cannot yet be executed. If asked for a runnable current sample, retain its required legacy fields and disclose the limitation; never silently strip them or claim corrected support.
+Design hooks around inputs, outputs, lifecycle and effect constraints. Under the implemented [experimental `/2` contract](../specs/generic-hook-capability-contract.md), customers select published operations and repeat reads within aggregate budgets. Named filters and quotas are advanced opt-in restrictions. `/1` samples retain required grants for compatibility; never remove their fields or infer `/2` from field omission. Select the supported profile explicitly.
 
 Assume capability business operations usually live behind internal service-to-service APIs, including HTTP/RPC. A registered adapter bridges the runner to those services; do not equate its local callable interface with a local business implementation. Keep routing, credentials, trusted identity propagation, deadlines and transport/result mapping host-owned. A timed-out remote WRITE may still commit; preserve uncertainty and do not invent retries or verified native guarantees. See the [dispatch boundary](../specs/generic-hook-capability-contract.md#capability-invocation-across-services).
 
 ## Workflow
 
-For the proposed `/2` [binding API](../specs/host-model-binding.md), bind the complete approved DCM and all compatible invokers once, then prepare extensions using that handle. Do not accept a separately swappable adapter map at preparation or curate the registration around a sample call list. Keep approval scope/current lifecycle checks explicit; share clients only without leaking caller identity. Missing catalog bindings reject setup even when the current program does not call them. Explain that this API and its reference artifacts remain unimplemented.
+For the `/2` [binding API](../specs/host-model-binding.md), bind the complete approved DCM and compatible invokers once; check diagnostics before preparing programs against the handle. Do not swap invokers at preparation or curate registration around one program. Keep scope/current lifecycle checks explicit and client identity request-local. Missing unused bindings reject setup. Effects remain simulation-only; real service guarantees need host evidence.
 
-Preserve the host-defined payload, including legitimate fields unused by a sample. Customer project/title choices belong as program constants unless explicitly obtained elsewhere. Current fixture injection is not that authoring path; the [nominal-literal correction](../specs/generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority) is not implemented. Do not add hook fields or configuration machinery to work around missing language support.
+Preserve the host-defined payload, including unused legitimate fields. Customer project/title choices belong in source unless explicitly obtained elsewhere. `/2` supports [nominal literals](../specs/generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority); these supply typing, not authority. Do not add sample-specific hook fields or a configuration channel.
 
 1. Clarify where customization is allowed and how the host invokes and consumes hook results.
 2. Draft the scoped catalog and generic hook separately. Identify protected parameters, effect/lifecycle ceilings, aggregate limits, compatibility and unresolved guarantees. Add named capability restrictions only for an explicit host requirement; do not infer them from one proposed program.
@@ -32,7 +32,7 @@ The host integration surface needs authorized interface inspection, definition d
 
 ## First worked integration: read and classify
 
-Use the [complete target walkthrough](../specs/generic-hook-example.md) to check ownership: host definitions/authority, customer logic/constants, compiler artifact and runtime invocation. The corrected example is not currently runnable.
+Use the [complete worked example](../specs/generic-hook-example.md) and its runnable `/2` fixtures to check ownership: host definitions/authority, customer logic/constants, compiler artifact and fresh runtime invocation.
 
 The examples below are legacy checkpoints. Corrected hooks admit other published reads and repeated reads without hook changes, subject to current authorization and aggregate limits. At most one WRITE is supported; future idempotent adapters do not imply atomic multi-write or automatic recovery.
 

@@ -1,6 +1,6 @@
 # Read-and-decide runtime
 
-Required grant maps on this page are `/1` compatibility behavior. The [proposed generic-hook `/2` API delta](generic-hook-capability-contract.md#versioned-delta) replaces them with optional narrowing policy, while keeping current authorization and aggregate budgets mandatory. It is not implemented; omission must not widen any old invocation.
+Required grant maps here are `/1` compatibility behavior. The implemented [generic-hook `/2` API](host-model-binding.md) uses reference artifacts, complete model/invoker binding and optional narrowing policy; current authorization and aggregate budgets remain mandatory. Omission must never widen an old invocation.
 
 Status: implemented experimental checkpoint with local shared conformance. Java and Node share this behavior and [artifact contract](compiler-artifact.md). APIs below define data/ownership semantics; Java futures and Node promises implement the same asynchronous adapter boundary. Production containment qualification remains open.
 

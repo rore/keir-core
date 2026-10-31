@@ -1,6 +1,6 @@
 # Read-and-decide DCM contract
 
-This page preserves the implemented `/1` schema, including required grants. For generic hook defaults without named grants, see the [proposed `/2` correction](generic-hook-capability-contract.md). Do not remove fields from an existing `/1` DCM or treat its sample grant map as the product's default hook design.
+This page preserves the implemented `/1` schema, including required grants. For the implemented generic defaults without named grants, see the [`/2` contract](generic-hook-capability-contract.md). Do not remove fields from an existing `/1` DCM or treat its sample grant map as the default hook design.
 
 Status: implemented experimental checkpoint. This is the explicit small model format `keir-dcm/read-1`, not compatibility with every field of baseline `modelVersion: 0.1.0`. A host selects the authoritative model; source may reference it but never supply replacement authority. See [language](language.md).
 
