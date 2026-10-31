@@ -19,6 +19,7 @@ Load only your selected role and this guide at role entry. For assignments, read
 
 - Manager alone writes the canonical core roadmap for both repos. Public features own scope/status/evidence; private checkout/routing details stay in ignored local notes. Specify repo, checkout, file ownership and acceptance. Isolate concurrent edits; reserve shared writes and preserve others' work.
 - Use collection-coordination for assignments/handoffs and optional participation. Obtain acceptance, not just delivery. Use exact verified work references; tool gaps do not block ordinary work.
+- After accepted integration, recoverably archive completed task worktrees. Retain only active work or a concrete upcoming assignment; record the reason and revisit point in ignored coordination notes. Preserve required uncommitted/ignored artifacts. Manager verifies cleanup or justified retention before closing work.
 - Prefer Relay for team coordination; use authorized fallback when needed, preserving settings. Do useful independent work or yield for peer results; no busy polling or ACK loops.
 - Before assigning a new Relay name, publish its unique mapping to a readable guide inside `roles/`. Verify identity with persistent-agent-roles; never guess/take over a name. Role adoption grants no task or settings authority.
 
