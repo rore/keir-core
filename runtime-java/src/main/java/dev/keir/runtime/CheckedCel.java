@@ -30,6 +30,33 @@ final class CheckedCel {
     private record Value(String type, List<String> literals) { Value(String type) { this(type, null); } }
     private record Prepared(CelRuntime.Program program, Map<String,Object> variables, String resultType) {}
 
+    static final class Model {
+        private final Map<String,Object> dcm;
+        private final Descriptors.FileDescriptor descriptor;
+        private final CelRuntime runtime;
+        private final int descriptorBytes;
+
+        private Model(Map<String,Object> dcm, Descriptors.FileDescriptor descriptor, int descriptorBytes) {
+            this.dcm = map(immutable(dcm),"/binding/dcm");
+            this.descriptor = descriptor; this.descriptorBytes = descriptorBytes;
+            this.runtime = CelRuntimeFactory.plannerRuntimeBuilder()
+                    .setOptions(CelOptions.current().enableHeterogeneousNumericComparisons(true)
+                            .comprehensionMaxIterations(0).build()).addFileTypes(descriptor).build();
+        }
+
+        int descriptorBytes() { return descriptorBytes; }
+    }
+
+    static Model bindModel2(Map<String,Object> dcm) {
+        var descriptors = expectedDescriptors(dcm);
+        int size = descriptors.getSerializedSize();
+        if (size > 65_536) throw new RuntimeFault("BUDGET_EXCEEDED","/binding/dcm/types");
+        try {
+            return new Model(dcm,Descriptors.FileDescriptor.buildFrom(descriptors.getFile(0),
+                    new Descriptors.FileDescriptor[0]),size);
+        } catch (Exception failure) { throw new RuntimeFault("ADMISSION_INVALID","/binding/dcm"); }
+    }
+
     static final class Bundle {
         private final Map<String,Object> dcm;
         private final Descriptors.FileDescriptor descriptor;
@@ -69,6 +96,8 @@ final class CheckedCel {
     }
 
     static Bundle prepare(Artifact.Plan plan) {
+        if (Set.of("keir-read/2","keir-effect/2").contains(plan.document().get("profile")))
+            return prepare2(plan,bindModel2(plan.dcm()));
         Map<String,Object> dcm = plan.dcm();
         byte[] descriptors = base64(plan.document().get("descriptors"), 65_536, "/artifact/descriptors");
         DescriptorProtos.FileDescriptorSet decoded = decode(DescriptorProtos.FileDescriptorSet.parser(),
@@ -76,9 +105,15 @@ final class CheckedCel {
         require(Arrays.equals(descriptors, deterministic(expectedDescriptors(dcm))), "/artifact/descriptors");
         try {
             var file = Descriptors.FileDescriptor.buildFrom(decoded.getFile(0), new Descriptors.FileDescriptor[0]);
-            var runtime = CelRuntimeFactory.plannerRuntimeBuilder()
-                    .setOptions(CelOptions.current().enableHeterogeneousNumericComparisons(true)
-                            .comprehensionMaxIterations(0).build()).addFileTypes(file).build();
+            return prepare2(plan,new Model(dcm,file,descriptors.length));
+        } catch (RuntimeFault failure) { throw failure; }
+        catch (Exception failure) { throw new RuntimeFault("ARTIFACT_INVALID", EXPRESSIONS); }
+    }
+
+    static Bundle prepare2(Artifact.Plan plan, Model model) {
+        require(model != null && model.dcm.equals(plan.dcm()),"/artifact/modelRef");
+        Map<String,Object> dcm = model.dcm;
+        try {
             Map<String,Prepared> prepared = new HashMap<>();
             int totalNodes = 0;
             for (var item : plan.contexts().entrySet()) {
@@ -101,10 +136,10 @@ final class CheckedCel {
                         && checked.getReferenceMapMap().keySet().equals(gate.references), EXPRESSIONS);
                 totalNodes += gate.ids.size();
                 budget(totalNodes <= 512);
-                var program = runtime.createProgram(CelProtoAbstractSyntaxTree.fromCheckedExpr(checked).getAst());
+                var program = model.runtime.createProgram(CelProtoAbstractSyntaxTree.fromCheckedExpr(checked).getAst());
                 prepared.put(item.getKey(), new Prepared(program, variables, resultType));
             }
-            return new Bundle(dcm, file, prepared, totalNodes);
+            return new Bundle(dcm, model.descriptor, prepared, totalNodes);
         } catch (RuntimeFault failure) { throw failure; }
         catch (Exception failure) { throw new RuntimeFault("ARTIFACT_INVALID", EXPRESSIONS); }
     }
