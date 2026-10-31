@@ -1,0 +1,715 @@
+[
+  {
+    "format": "keir-scenario/read-2",
+    "id": "normal",
+    "given": {
+      "input": {
+        "taskId": "task1"
+      },
+      "fixture": "normal",
+      "program": "main"
+    },
+    "stubs": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        },
+        "response": {
+          "kind": "SUCCESS",
+          "value": {
+            "id": "task1",
+            "status": "COMPLETED"
+          }
+        }
+      }
+    ],
+    "expect": {
+      "outcome": {
+        "classification": "COMPLETED",
+        "result": {
+          "classification": "DONE"
+        },
+        "trace": [
+          {
+            "sequence": 0,
+            "event": "INVOCATION_START"
+          },
+          {
+            "sequence": 1,
+            "event": "STEP_START",
+            "step": "source"
+          },
+          {
+            "sequence": 2,
+            "event": "CALL_DISPATCHED",
+            "step": "source",
+            "capability": "tasks.get"
+          },
+          {
+            "sequence": 3,
+            "event": "CALL_SUCCEEDED",
+            "step": "source",
+            "capability": "tasks.get"
+          },
+          {
+            "sequence": 4,
+            "event": "STEP_START",
+            "step": "completed"
+          },
+          {
+            "sequence": 5,
+            "event": "VALUE_BOUND",
+            "step": "completed"
+          },
+          {
+            "sequence": 6,
+            "event": "RETURNED"
+          },
+          {
+            "sequence": 7,
+            "event": "TERMINATED"
+          }
+        ]
+      },
+      "calls": [
+        {
+          "step": "source",
+          "capability": "tasks.get",
+          "version": "1",
+          "args": {
+            "taskId": "task1"
+          },
+          "protectedArgs": {
+            "actorId": "user1"
+          }
+        }
+      ],
+      "consumption": {
+        "status": "DISPLAYED",
+        "result": {
+          "classification": "DONE"
+        }
+      }
+    }
+  },
+  {
+    "format": "keir-scenario/read-2",
+    "id": "repeated",
+    "given": {
+      "input": {
+        "taskId": "task1"
+      },
+      "fixture": "normal",
+      "program": "repeated"
+    },
+    "stubs": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        },
+        "response": {
+          "kind": "SUCCESS",
+          "value": {
+            "id": "task1",
+            "status": "COMPLETED"
+          }
+        }
+      },
+      {
+        "step": "second",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        },
+        "response": {
+          "kind": "SUCCESS",
+          "value": {
+            "id": "task1",
+            "status": "COMPLETED"
+          }
+        }
+      }
+    ],
+    "expect": {
+      "outcome": {
+        "classification": "COMPLETED",
+        "result": {
+          "classification": "DONE"
+        },
+        "trace": [
+          {
+            "sequence": 0,
+            "event": "INVOCATION_START"
+          },
+          {
+            "sequence": 1,
+            "event": "STEP_START",
+            "step": "source"
+          },
+          {
+            "sequence": 2,
+            "event": "CALL_DISPATCHED",
+            "step": "source",
+            "capability": "tasks.get"
+          },
+          {
+            "sequence": 3,
+            "event": "CALL_SUCCEEDED",
+            "step": "source",
+            "capability": "tasks.get"
+          },
+          {
+            "sequence": 4,
+            "event": "STEP_START",
+            "step": "second"
+          },
+          {
+            "sequence": 5,
+            "event": "CALL_DISPATCHED",
+            "step": "second",
+            "capability": "tasks.get"
+          },
+          {
+            "sequence": 6,
+            "event": "CALL_SUCCEEDED",
+            "step": "second",
+            "capability": "tasks.get"
+          },
+          {
+            "sequence": 7,
+            "event": "STEP_START",
+            "step": "completed"
+          },
+          {
+            "sequence": 8,
+            "event": "VALUE_BOUND",
+            "step": "completed"
+          },
+          {
+            "sequence": 9,
+            "event": "RETURNED"
+          },
+          {
+            "sequence": 10,
+            "event": "TERMINATED"
+          }
+        ]
+      },
+      "calls": [
+        {
+          "step": "source",
+          "capability": "tasks.get",
+          "version": "1",
+          "args": {
+            "taskId": "task1"
+          },
+          "protectedArgs": {
+            "actorId": "user1"
+          }
+        },
+        {
+          "step": "second",
+          "capability": "tasks.get",
+          "version": "1",
+          "args": {
+            "taskId": "task1"
+          },
+          "protectedArgs": {
+            "actorId": "user1"
+          }
+        }
+      ],
+      "consumption": {
+        "status": "DISPLAYED",
+        "result": {
+          "classification": "DONE"
+        }
+      }
+    }
+  },
+  {
+    "format": "keir-scenario/read-2",
+    "id": "alternate",
+    "given": {
+      "input": {
+        "taskId": "task1"
+      },
+      "fixture": "normal",
+      "program": "alternate"
+    },
+    "stubs": [
+      {
+        "step": "source",
+        "capability": "tasks.lookup",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        },
+        "response": {
+          "kind": "SUCCESS",
+          "value": {
+            "id": "task1",
+            "status": "COMPLETED"
+          }
+        }
+      }
+    ],
+    "expect": {
+      "outcome": {
+        "classification": "COMPLETED",
+        "result": {
+          "classification": "DONE"
+        },
+        "trace": [
+          {
+            "sequence": 0,
+            "event": "INVOCATION_START"
+          },
+          {
+            "sequence": 1,
+            "event": "STEP_START",
+            "step": "source"
+          },
+          {
+            "sequence": 2,
+            "event": "CALL_DISPATCHED",
+            "step": "source",
+            "capability": "tasks.lookup"
+          },
+          {
+            "sequence": 3,
+            "event": "CALL_SUCCEEDED",
+            "step": "source",
+            "capability": "tasks.lookup"
+          },
+          {
+            "sequence": 4,
+            "event": "STEP_START",
+            "step": "completed"
+          },
+          {
+            "sequence": 5,
+            "event": "VALUE_BOUND",
+            "step": "completed"
+          },
+          {
+            "sequence": 6,
+            "event": "RETURNED"
+          },
+          {
+            "sequence": 7,
+            "event": "TERMINATED"
+          }
+        ]
+      },
+      "calls": [
+        {
+          "step": "source",
+          "capability": "tasks.lookup",
+          "version": "1",
+          "args": {
+            "taskId": "task1"
+          },
+          "protectedArgs": {
+            "actorId": "user1"
+          }
+        }
+      ],
+      "consumption": {
+        "status": "DISPLAYED",
+        "result": {
+          "classification": "DONE"
+        }
+      }
+    }
+  },
+  {
+    "format": "keir-scenario/read-2",
+    "id": "open",
+    "given": {
+      "input": {
+        "taskId": "task1"
+      },
+      "fixture": "normal",
+      "program": "main"
+    },
+    "stubs": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        },
+        "response": {
+          "kind": "SUCCESS",
+          "value": {
+            "id": "task1",
+            "status": "OPEN"
+          }
+        }
+      }
+    ],
+    "expect": {
+      "outcome": {
+        "classification": "COMPLETED",
+        "result": {
+          "classification": "PENDING"
+        },
+        "trace": [
+          {
+            "sequence": 0,
+            "event": "INVOCATION_START"
+          },
+          {
+            "sequence": 1,
+            "event": "STEP_START",
+            "step": "source"
+          },
+          {
+            "sequence": 2,
+            "event": "CALL_DISPATCHED",
+            "step": "source",
+            "capability": "tasks.get"
+          },
+          {
+            "sequence": 3,
+            "event": "CALL_SUCCEEDED",
+            "step": "source",
+            "capability": "tasks.get"
+          },
+          {
+            "sequence": 4,
+            "event": "STEP_START",
+            "step": "completed"
+          },
+          {
+            "sequence": 5,
+            "event": "VALUE_BOUND",
+            "step": "completed"
+          },
+          {
+            "sequence": 6,
+            "event": "RETURNED"
+          },
+          {
+            "sequence": 7,
+            "event": "TERMINATED"
+          }
+        ]
+      },
+      "calls": [
+        {
+          "step": "source",
+          "capability": "tasks.get",
+          "version": "1",
+          "args": {
+            "taskId": "task1"
+          },
+          "protectedArgs": {
+            "actorId": "user1"
+          }
+        }
+      ],
+      "consumption": {
+        "status": "DISPLAYED",
+        "result": {
+          "classification": "PENDING"
+        }
+      }
+    }
+  },
+  {
+    "format": "keir-scenario/read-2",
+    "id": "invocation-denied",
+    "given": {
+      "input": {
+        "taskId": "task1"
+      },
+      "fixture": "invocation-denied",
+      "program": "main"
+    },
+    "stubs": [],
+    "expect": {
+      "outcome": {
+        "classification": "FAILED",
+        "error": {
+          "code": "AUTHORITY_DENIED",
+          "path": ""
+        },
+        "trace": [
+          {
+            "sequence": 0,
+            "event": "INVOCATION_START"
+          },
+          {
+            "sequence": 1,
+            "event": "TERMINATED",
+            "code": "AUTHORITY_DENIED"
+          }
+        ]
+      },
+      "calls": [],
+      "consumption": {
+        "status": "NOT_DISPLAYED",
+        "code": "AUTHORITY_DENIED"
+      }
+    }
+  },
+  {
+    "format": "keir-scenario/read-2",
+    "id": "call-denied",
+    "given": {
+      "input": {
+        "taskId": "task1"
+      },
+      "fixture": "call-denied",
+      "program": "main"
+    },
+    "stubs": [],
+    "expect": {
+      "outcome": {
+        "classification": "FAILED",
+        "error": {
+          "code": "AUTHORITY_DENIED",
+          "path": "/steps/0"
+        },
+        "trace": [
+          {
+            "sequence": 0,
+            "event": "INVOCATION_START"
+          },
+          {
+            "sequence": 1,
+            "event": "STEP_START",
+            "step": "source"
+          },
+          {
+            "sequence": 2,
+            "event": "TERMINATED",
+            "code": "AUTHORITY_DENIED"
+          }
+        ]
+      },
+      "calls": [],
+      "consumption": {
+        "status": "NOT_DISPLAYED",
+        "code": "AUTHORITY_DENIED"
+      }
+    }
+  },
+  {
+    "format": "keir-scenario/read-2",
+    "id": "wrong-scope",
+    "given": {
+      "input": {
+        "taskId": "task1"
+      },
+      "fixture": "wrong-scope",
+      "program": "main"
+    },
+    "stubs": [],
+    "expect": {
+      "outcome": {
+        "classification": "FAILED",
+        "error": {
+          "code": "HOST_CONTEXT_INVALID",
+          "path": ""
+        },
+        "trace": [
+          {
+            "sequence": 0,
+            "event": "INVOCATION_START"
+          },
+          {
+            "sequence": 1,
+            "event": "TERMINATED",
+            "code": "HOST_CONTEXT_INVALID"
+          }
+        ]
+      },
+      "calls": [],
+      "consumption": {
+        "status": "NOT_DISPLAYED",
+        "code": "HOST_CONTEXT_INVALID"
+      }
+    }
+  },
+  {
+    "format": "keir-scenario/read-2",
+    "id": "read-throws",
+    "given": {
+      "input": {
+        "taskId": "task1"
+      },
+      "fixture": "read-throws",
+      "program": "main"
+    },
+    "stubs": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        },
+        "response": {
+          "kind": "SUCCESS",
+          "value": {
+            "id": "task1",
+            "status": "COMPLETED"
+          }
+        }
+      }
+    ],
+    "expect": {
+      "outcome": {
+        "classification": "FAILED",
+        "error": {
+          "code": "ADAPTER_EXCEPTION",
+          "path": "/steps/0"
+        },
+        "trace": [
+          {
+            "sequence": 0,
+            "event": "INVOCATION_START"
+          },
+          {
+            "sequence": 1,
+            "event": "STEP_START",
+            "step": "source"
+          },
+          {
+            "sequence": 2,
+            "event": "CALL_DISPATCHED",
+            "step": "source",
+            "capability": "tasks.get"
+          },
+          {
+            "sequence": 3,
+            "event": "TERMINATED",
+            "code": "ADAPTER_EXCEPTION"
+          }
+        ]
+      },
+      "calls": [
+        {
+          "step": "source",
+          "capability": "tasks.get",
+          "version": "1",
+          "args": {
+            "taskId": "task1"
+          },
+          "protectedArgs": {
+            "actorId": "user1"
+          }
+        }
+      ],
+      "consumption": {
+        "status": "NOT_DISPLAYED",
+        "code": "ADAPTER_EXCEPTION"
+      }
+    }
+  },
+  {
+    "format": "keir-scenario/read-2",
+    "id": "missing",
+    "given": {
+      "input": {
+        "taskId": "task1"
+      },
+      "fixture": "normal",
+      "program": "main"
+    },
+    "stubs": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        },
+        "response": {
+          "kind": "BUSINESS_REJECTION",
+          "code": "TASK_NOT_FOUND"
+        }
+      }
+    ],
+    "expect": {
+      "outcome": {
+        "classification": "BUSINESS_REJECTION",
+        "error": {
+          "code": "TASK_NOT_FOUND",
+          "path": "/steps/0"
+        },
+        "trace": [
+          {
+            "sequence": 0,
+            "event": "INVOCATION_START"
+          },
+          {
+            "sequence": 1,
+            "event": "STEP_START",
+            "step": "source"
+          },
+          {
+            "sequence": 2,
+            "event": "CALL_DISPATCHED",
+            "step": "source",
+            "capability": "tasks.get"
+          },
+          {
+            "sequence": 3,
+            "event": "TERMINATED",
+            "code": "TASK_NOT_FOUND"
+          }
+        ]
+      },
+      "calls": [
+        {
+          "step": "source",
+          "capability": "tasks.get",
+          "version": "1",
+          "args": {
+            "taskId": "task1"
+          },
+          "protectedArgs": {
+            "actorId": "user1"
+          }
+        }
+      ],
+      "consumption": {
+        "status": "NOT_DISPLAYED",
+        "code": "TASK_NOT_FOUND"
+      }
+    }
+  }
+]

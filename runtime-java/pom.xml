@@ -18,6 +18,7 @@
   </dependencies>
   <build>
     <testResources>
+      <testResource><directory>${project.basedir}/../conformance/generic-hooks</directory><targetPath>generic-hooks</targetPath></testResource>
       <testResource><directory>${project.basedir}/../conformance/single-effect</directory><targetPath>single-effect</targetPath></testResource>
       <testResource><directory>${project.basedir}/../conformance/read-and-decide</directory><targetPath>read-and-decide</targetPath></testResource>
       <testResource><directory>${project.basedir}/../runtime-node/test/fixtures</directory><targetPath>supplemental</targetPath></testResource>

@@ -1,5 +1,11 @@
 # Java runtime
 
+The explicit `/2` APIs bind a complete host-approved catalog once, then prepare reference-only programs against that immutable binding. Call `KeirRuntime.bindModel(dcmBytes, approval, invokers)` and check its `ModelBinding` before using `boundModel()`. Approval supplies the exact model reference, scope, profile, environment and mode; effect approval also supplies the typed `KeyBinding`. Register every catalog capability, including unused or policy-denied operations. Binding snapshots metadata and callable references without invoking them.
+
+Call `prepareProgram(artifactBytes, boundModel, admission)` with independent artifact/model pins, entrypoint, consumer, compiler, environment and mode. It directly validates the `/2` envelope and checked plan against reusable model descriptors. Optional `capabilityPolicy` and limits only narrow the hook; omitted effect ceilings inherit the default maximum of one potential WRITE. `/2` admission forbids legacy `grants` and preparation-time invokers or key bindings.
+
+For fresh execution, use `invokeProgram` with `Invocation2` for read/2, or `invokeEffectProgram` with `EffectInvocation2` for effect/2. Supply matching scope, current protected bindings, deadline, authorizer and `Optional.empty()` for an omitted policy. Effects additionally require the original native key, event and `OptionalLong.empty()` to inherit the admitted effect ceiling. Null Optional objects are invalid. The new and legacy invocation methods reject handles from the other profile generation. The existing execution engine retains authorization, limits and honest response/timeout receipts. The [generic host](../examples/java-host/README.md) uses the six shared compiler artifacts; combined Java/Node acceptance remains an integration check.
+
 `keir-runtime-java` executes the shared `keir-read/1` artifact with JDK 21 and CEL Java 0.14.0. It has no dependency on the Keir compiler, CEL compiler/parser, ANTLR or YAML. Compilation belongs outside execution; see the independent [Java host](../examples/java-host/README.md) for a packaged simulation.
 
 The separate `keir-effect/1` API implements the [single-effect contract](../docs/specs/single-effect.md) with simulation registrations only. Shared effect host/scenario qualification is a separate checkpoint; the packaged read host remains unchanged.

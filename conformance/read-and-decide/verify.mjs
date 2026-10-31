@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, resolve, delimiter } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { verifyGeneric } from '../generic-hooks/verify.mjs';
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 try {
@@ -34,7 +35,13 @@ try {
     assert.ok(existsSync(path), `Missing required input: ${local(path)}`);
   }
   assert.equal(process.argv.length, 2, 'This verifier accepts no arguments');
-  for (const file of ['canonical.js', 'cel.js', 'index.js', 'validation.js']) {
+  const sourceFiles = (directory, prefix = '') => readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+    const file = `${prefix}${entry.name}`;
+    return entry.isDirectory() ? sourceFiles(resolve(directory, entry.name), `${file}/`) : [file];
+  }).sort();
+  const reviewedSource = sourceFiles(resolve(repo, 'runtime-node/src'));
+  assert.deepEqual(sourceFiles(resolve(repo, 'examples/node-host/node_modules/@keir/runtime-node/src')), reviewedSource, 'Installed Node source file set differs');
+  for (const file of reviewedSource) {
     assert.deepEqual(readFileSync(resolve(repo, 'examples/node-host/node_modules/@keir/runtime-node/src', file)),
       readFileSync(resolve(repo, 'runtime-node/src', file)), `Installed Node runtime differs from reviewed source: ${file}`);
   }
@@ -98,7 +105,8 @@ try {
   const effectJavaHost = jsonRun(java, ['-cp', hostJar, 'dev.keir.examples.EffectHost', effectGenerated, effectPin, effectDcmPin], 'Packaged Java effect host batch');
   assert.deepEqual(effectNodeHost, effectExpected, 'Installed Node effect host differs from full shared expectations');
   assert.deepEqual(effectJavaHost, effectNodeHost, 'Packaged effect hosts differ');
-  console.log(`Verified ${cases.length} read cases/${cases.reduce((count, row) => count + row.runs.length, 0)} invocations and ${effectCases.length} effect scenarios, 4 compiler runs, 4 host batches; artifacts ${artifactDigest}, ${effectPin}.`);
+  const generic = verifyGeneric({ repo, run });
+  console.log(`Verified ${cases.length} read cases/${cases.reduce((count, row) => count + row.runs.length, 0)} invocations and ${effectCases.length} effect scenarios; ${generic.read} generic read/${generic.effect} generic effect scenarios, 16 compiler runs, 8 host batches; artifacts ${artifactDigest}, ${effectPin}.`);
 } catch (error) {
   const message = String(error?.message ?? 'Verification failed').split('\n', 1)[0]
     .replaceAll(repo, '<repo>');
