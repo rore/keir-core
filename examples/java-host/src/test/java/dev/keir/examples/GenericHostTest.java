@@ -93,4 +93,20 @@ class GenericHostTest {
         err.reset(); assertEquals(1,GenericHost.run(new String[]{temp.resolve("private").toString()},new PrintStream(out),new PrintStream(err))); assertFalse(err.toString().contains(temp.toString()));
         Path file=temp.resolve("bounded.json"); Files.write(file,new byte[1_048_576]); assertEquals(1_048_576,GenericHost.read(file,1_048_576).length); Files.write(file,new byte[1_048_577]); capacity(()->{ try { GenericHost.read(file,1_048_576); } catch(IOException failure) { throw new RuntimeException(failure); } });
     }
+    @Test void executeAcceptsOnlyCanonicalPinsWithOptionalLineEnding() throws Exception {
+        Path source=fixture("effect"), copy=temp.resolve("effect");
+        Files.createDirectory(copy);
+        try(var files=Files.list(source)) { for(Path file:files.toList()) Files.copy(file,copy.resolve(file.getFileName())); }
+        List<Path> pins;
+        try(var files=Files.list(copy)) { pins=files.filter(file->file.getFileName().toString().endsWith(".sha256")).toList(); }
+        byte[] expected=GenericHost.execute(source);
+        for(String ending:List.of("", "\n", "\r\n")) {
+            for(Path pin:pins) Files.writeString(pin,Files.readString(source.resolve(pin.getFileName())).trim()+ending);
+            assertArrayEquals(expected,GenericHost.execute(copy));
+        }
+        Files.writeString(copy.resolve("dcm.sha256"),Files.readString(source.resolve("dcm.sha256")).trim()+" \n");
+        assertThrows(IllegalArgumentException.class,()->GenericHost.execute(copy));
+        Files.writeString(copy.resolve("dcm.sha256"),Files.readString(source.resolve("dcm.sha256")).trim()+"\n ".repeat(2));
+        assertThrows(IllegalArgumentException.class,()->GenericHost.execute(copy));
+    }
 }

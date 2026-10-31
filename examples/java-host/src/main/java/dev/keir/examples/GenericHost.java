@@ -34,7 +34,9 @@ public final class GenericHost {
         try(var stream=Files.newInputStream(path)) { byte[] bytes=stream.readNBytes(max+1); GenericCapacity.capacity(bytes.length<=max); return bytes; }
     }
     private static String pin(Path path) throws IOException {
-        String value=new String(read(path,72),StandardCharsets.UTF_8).trim();
+        String value=new String(read(path,73),StandardCharsets.UTF_8);
+        if(value.endsWith("\r\n")) value=value.substring(0,value.length()-2);
+        else if(value.endsWith("\n")) value=value.substring(0,value.length()-1);
         EffectSimulation.check(value.matches("sha256:[0-9a-f]{64}"),"Invalid independent fixture pin"); return value;
     }
 }
