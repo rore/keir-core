@@ -57,6 +57,8 @@ Node shared-corpus checkpoint: exact dependency `476c5f5` adopted as local `1150
 
 Java timing correction `73c736b` integrated as `29bccb8`, changing only preparation order in the existing late-response test. The 150 ms deadline and all receipt/uncertainty assertions are unchanged. Manager reran the affected test successfully (8.755-second reactor build). All reported Java source corrections are now integrated; final combined verification and independent result review remain open. Node's host reviewer found a missing independent catalog/version check in the sample authorizer; its owner reproduced the regression and is correcting it before package qualification.
 
+Java coverage-only follow-up `bcf4cc8` adds six envelope mutations requiring an empty compiler to fail at `/artifact/compiler` before invalid format/profile in both `/2` profiles. Manager inspected and integrated the eight-line test-only delta; production code and fixtures are unchanged. Developer verification passed all ten GenericArtifactTest methods in a 7.017-second build. Reuse this component result until the final integrated suite rather than repeat an unchanged check. No prior source or worker bookkeeping was replayed.
+
 ## Plan review
 
 Architect reviewed the implementation seams and published contracts at 65a0cf4. It found no new product decision and retained High/Large classification. This design-author assessment does not replace the required independent clean-context plan review.
