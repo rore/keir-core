@@ -37,7 +37,7 @@
 - Initial independent plan review requested an explicit, tested demo command path. The revised plan provides it; the user also corrected applicability before implementation. No policy edits have begun. Independent revised-plan review is approved; implementation may start.
 
 - Implemented the approved policy and guidance changes in both repos. Required records for code/mixed/governance work; configured documentation exemptions, mirrored blue zones, retained policy red zones/shadow mode, and kept CI untouched.
-- Focused policy/resolver/applicability/demo checks and link/privacy review completed. State advanced to Ready for review; independent result review is pending before delivery.
+- Focused policy/resolver/applicability/demo checks and link/privacy review completed. State advanced to Ready for review; independent result review approved the candidate before delivery.
 
 ## Evidence
 
@@ -54,7 +54,11 @@ Raw local reports are disposable verification outputs, not public source artifac
 
 ## Result review
 
-Pending independent technical review.
+Agent technical review: independent clean-context result review, 2026-10-31.
+Reviewed revision: core 2e3ea0cb77afd2d01e27730fe283ce7c66b53968 and demo b5e224c6755e1cfc50eeaeb7b8ad86f6d9cfe8c6.
+Verification adequacy: approved. The reviewer inspected both diffs, policy/config, current process and saved positive/negative reports. Documentation/spec/roadmap exemptions and required code/mixed/instruction records behave as authorized; explicit core-owned demo record validation works. Only the expected shadow architecture-review advisory remains. No product or CI/vendor changes require runtime-suite reruns. Real-use adoption by later agents remains unverified.
+
+No implementation changes remain. The task remains Ready for review as required by the installed state vocabulary; delivery is recorded separately after the main pushes.
 
 ## Scope correction
 
