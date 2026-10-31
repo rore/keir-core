@@ -45,6 +45,8 @@ Java developer evidence at `64a4ef7`: final runtime/host verification passed 122
 
 Canonical clean coverage verification at `476c5f5` passed all 58 compiler and 122 runtime tests but failed Java host verification: 29 tests, one failure and one error. The bounded digest-file reader rejects a valid SHA-256 line with CRLF after a fresh Windows checkout. Independent partial source review also found unbounded recursive snapshots of malformed invocation policy/bindings/event maps can overflow before returning a safe failure outcome. Both fixes and targeted regressions are assigned to the Java owner; integrated acceptance remains pending. No expectation, safety obligation or global environment setting is weakened.
 
+Node developer checkpoint: adopted exact compiler dependency `db8944f` as local `1a0bab0` without changing shared fixtures. All six externally pinned Java artifacts bind, prepare and execute: read main/repeated/alternate use one get, two gets and lookup respectively; effect main creates, project2 returns NO_OP and title2 creates with the changed title. Creation arguments are exactly projectId/title and native key identity is retained. This is reported component execution against real compiler bytes, not accepted shared-row parity or packaged-host evidence. Node source selection, host completion and independent runtime review remain in progress.
+
 ## Plan review
 
 Architect reviewed the implementation seams and published contracts at 65a0cf4. It found no new product decision and retained High/Large classification. This design-author assessment does not replace the required independent clean-context plan review.
