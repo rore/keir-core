@@ -156,6 +156,21 @@ class GenericRuntimeTest {
         }
     }
 
+    @Test void unknownStringCapabilityAndMalformedCapabilityHaveDistinctGenericDiagnostics() throws Exception {
+        for(String profile:List.of("read","effect")) {
+            var model=profile.equals("read")?bound("read","scope",reads((a,h,ms)->done(true))):
+                    bound("effect","scope",effects((a,h,ms,c)->done(true),(a,h,ms,c)->done(true)));
+            int index=profile.equals("read")?0:1;
+            for(Object capability:List.of("tasks.missing",false,Map.of("invalid",true))) {
+                var artifact=document(file(profile,"artifact.json"));
+                map(list(artifact.get("steps"),"").get(index),"").put("capability",capability);
+                byte[] bytes=canonical(artifact);
+                denied(KeirRuntime.prepareProgram(bytes,model,admission(profile,bytes)),
+                        capability instanceof String?"CAPABILITY_UNKNOWN":"ARTIFACT_INVALID","/artifact/steps/"+index);
+            }
+        }
+    }
+
     @Test void admissionAndInvocationPolicyOnlyNarrowAndOmissionInherits() throws Exception {
         AtomicInteger calls=new AtomicInteger(); var bound=bound("read","scope",reads((a,h,ms)->{calls.incrementAndGet();return done(read("COMPLETED"));}));
         byte[] bytes=file("read","artifact-repeated.json");
