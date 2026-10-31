@@ -12,6 +12,8 @@ Assume capability business operations usually live behind internal service-to-se
 
 ## Workflow
 
+For the proposed `/2` [binding API](../specs/host-model-binding.md), bind the complete approved DCM and all compatible invokers once, then prepare extensions using that handle. Do not accept a separately swappable adapter map at preparation or curate the registration around a sample call list. Keep approval scope/current lifecycle checks explicit; share clients only without leaking caller identity. Missing catalog bindings reject setup even when the current program does not call them. Explain that this API and its reference artifacts remain unimplemented.
+
 Preserve the host-defined payload, including legitimate fields unused by a sample. Customer project/title choices belong as program constants unless explicitly obtained elsewhere. Current fixture injection is not that authoring path; the [nominal-literal correction](../specs/generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority) is not implemented. Do not add hook fields or configuration machinery to work around missing language support.
 
 1. Clarify where customization is allowed and how the host invokes and consumes hook results.

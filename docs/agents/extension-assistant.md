@@ -20,6 +20,8 @@ Author customer-selected project/title constants inside the program unless expli
 
 ## Authority and tools
 
+Under the proposed `/2` [host binding](../specs/host-model-binding.md), the host supplies the exact catalog and invokers together. Author against that published model reference; do not select clients or substitute a model/adapter map. Another program may use other already-published capabilities without rebinding the host. Adopting a changed catalog requires explicit recompilation and host selection; existing programs can retain an available, approved earlier snapshot. Unavailable or revoked exact dependencies cannot fall back to the latest version.
+
 Do not change the authoritative DCM, register capabilities/endpoints, widen grants, select protected identity/key values, certify adapters or approve your own activation. Host metadata is not ordinary source input. Successful simulation cannot establish real authorization, duplicate suppression or commit guarantees.
 
 The authoring surface needs scoped discovery, compilation, simulation, diagnostics and activation requests. These describe responsibilities, not existing API names. Hosts must define each tool's schemas, limits, permissions and effects; runtime capabilities remain a separate approved set.

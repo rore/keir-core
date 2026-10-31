@@ -1,6 +1,6 @@
 # Sharing approved models across compiled programs
 
-Status: **shared-model direction adopted on 2026-10-31; exact format/API contract and implementation pending**. The [owning feature](../../roadmap/features/generic-hook-capability-contract.md) remains active. The upcoming `/2` design will use exact model references and host-supplied immutable model handles. Existing `/1` embedded packaging remains unchanged.
+Status: **shared-model direction adopted on 2026-10-31; binding target reviewed, implementation pending**. The [owning feature](../../roadmap/features/generic-hook-capability-contract.md) remains active. The [binding contract](../specs/host-model-binding.md) defines `/2` exact model references and host-supplied immutable model/invoker handles. Existing `/1` embedded packaging remains unchanged.
 
 ## Recommendation and alternatives
 
@@ -20,20 +20,18 @@ The [artifact contract](../specs/compiler-artifact.md) embeds complete DCM and d
 
 [Java CheckedCel](../../runtime-java/src/main/java/dev/keir/runtime/CheckedCel.java) reconstructs expected descriptors, compares bytes, builds a file descriptor/CEL runtime and prepares each expression. [Node CEL](../../runtime-node/src/cel.js) similarly compares deterministic descriptors, creates a registry and plans expressions. These paths are called per preparation; they do not implement cross-program model handles. Existing Prepared objects already amortize work across invocations of one program.
 
-Share the validated immutable DCM, deterministic descriptor bytes/objects, and model type lookup/registry. Descriptors describe all DCM records, so they are model-derived rather than program-specific; generate them once using a pinned recipe. Retain per-program source digest, exact model reference, profile/compiler/environment pins, entrypoint, instructions, constants, checked expressions, variable/result types, guards/handlers and return. Plan checks and CheckedExpr admission remain per-program; a trusted model cannot validate arbitrary checked bytes by association. Adapter registrations, narrowed policy and consumer selection remain host-bound preparation data. Input, identity, keys, deadlines, authorization results and execution state remain fresh invocation data.
+Share the validated immutable DCM, deterministic descriptor bytes/objects, and model type lookup/registry. Descriptors describe all DCM records, so they are model-derived rather than program-specific; generate them once using a pinned recipe. Retain per-program source digest, exact model reference, profile/compiler/environment pins, entrypoint, instructions, constants, checked expressions, variable/result types, guards/handlers and return. Plan checks and CheckedExpr admission remain per-program; a trusted model cannot validate arbitrary checked bytes by association. The subsequent binding contract puts adapter registrations in the host-bound model handle; narrowed policy and consumer selection remain per-program admission data. Input, identity, keys, deadlines, authorization results and execution state remain fresh invocation data.
 
 Identical names such as `keir.read.Task` cannot identify a shared descriptor globally. Key reusable type state by exact DCM digest, DCM/profile format, descriptor-recipe identity and full qualified CEL/protobuf environment. Default to isolated host approval namespaces as well. Use separate immutable registries, not a process-global registry overwritten by the latest model. Expression plans belong to their program/model/environment; cross-program sharing needs separate proof. Java thread safety and Node concurrent-invocation isolation require tests, not an inference from immutable wrappers.
 
 ## Trust and API boundary
 
-Conceptual operations only; these names are not shipped methods:
+The subsequent [binding contract](../specs/host-model-binding.md) specifies the coherent public boundary below, superseding this evaluation's earlier independently supplied model/adapters sketch. These names are not shipped methods:
 
 ```text
 compiler: compile(source, trustedDcm, pinnedEnvironment) -> referenceArtifact
-host/runtime: prepareModel(approvedDcmBytes, expectedModelIdentity,
-                           pinnedEnvironment, resourceLimits) -> ModelHandle
-host/runtime: prepareProgram(artifactBytes, ModelHandle,
-                             trustedAdmission, adapters) -> Prepared
+host/runtime: bindModel(approvedDcmBytes, trustedApproval, completeInvokers) -> BoundModel
+host/runtime: prepareProgram(artifactBytes, BoundModel, trustedAdmission) -> Prepared
 host/runtime: invoke(Prepared, hostPayload, freshProtectedContext) -> Outcome
 ```
 
@@ -67,4 +65,4 @@ Do not silently strip DCM/descriptors from `/1` or reinterpret reviewed `/2` byt
 
 Future acceptance: same artifact/model pair in Java/Node; missing/wrong digest/environment/scope rejection; simultaneous same-named record versions; registration mutation resistance; concurrent calls without identity leakage; revoked Prepared rejection; in-flight receipt retention; cold-start dependencies; bounded cache pressure and offline execution. Change compiler envelope emission, both artifact validators and CEL preparation seams, host preparation APIs, packaged hosts and shared fixtures together.
 
-Review must settle format allocation, descriptor recipe/version encoding, lifecycle diagnostics and host cache/retirement limits. Recommend explicit handles and derived descriptors now; defer registries, closure artifacts and automatic compatibility. No implementation, benchmark, production readiness or new profile qualification is claimed.
+The proposed binding contract now specifies format allocation, descriptor recipe encoding and lifecycle diagnostics; host deployments must select finite cache/retirement limits. Review and cross-runtime implementation evidence remain required. Defer registries, closure artifacts and automatic compatibility. No implementation, benchmark, production readiness or new profile qualification is claimed.
