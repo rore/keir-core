@@ -291,8 +291,9 @@ class GenericRuntimeTest {
         var result=await(KeirRuntime.invokeEffectProgram(prepared("effect","main",bound),Map.of("taskId","task1"),invocation));
         assertEquals("CONFIRMED",result.effects().get(0).get("state"));error(result,"BUDGET_EXCEEDED","/steps/3");
         var lateBound=bound("effect","scope",effects((a,h,ms,c)->done(effectRead("COMPLETED")),(a,h,ms,c)->response));
+        var latePrepared=prepared("effect","main",lateBound);
         var late=new KeirRuntime.EffectInvocation2("scope",normal.bindings(),new KeirRuntime.Deadline(System::currentTimeMillis,System.currentTimeMillis()+150),normal.authorize(),Optional.empty(),OptionalLong.empty(),KEY,normal.event());
-        result=await(KeirRuntime.invokeEffectProgram(prepared("effect","main",lateBound),Map.of("taskId","task1"),late));
+        result=await(KeirRuntime.invokeEffectProgram(latePrepared,Map.of("taskId","task1"),late));
         assertEquals("UNCERTAIN",result.classification());assertEquals("UNKNOWN",result.effects().get(0).get("state"));
         byte[] snapshot=result.toJson();response.complete(confirmed());assertArrayEquals(snapshot,result.toJson());
     }
