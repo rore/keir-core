@@ -20,6 +20,7 @@ final class CapabilityPolicy {
 
     static State narrow(State inherited, Object policy, String path, String invalidCode) {
         try {
+            if (!(policy instanceof Map<?,?> raw) || raw.size()>3) throw new RuntimeFault(invalidCode,path);
             Map<String,Object> controls = map(policy, path);
             if (!Set.of("allow", "deny", "maxCalls").containsAll(controls.keySet())) throw new RuntimeFault(invalidCode,path);
             Set<String> catalog = inherited.ceilings().keySet();
@@ -32,6 +33,7 @@ final class CapabilityPolicy {
             }
             deny.forEach(id -> result.put(id,0L));
             if (controls.containsKey("maxCalls")) {
+                if (!(controls.get("maxCalls") instanceof Map<?,?> rawQuotas) || rawQuotas.size()>8) throw new RuntimeFault(invalidCode,path);
                 Map<String,Object> quotas = map(controls.get("maxCalls"),path);
                 if (quotas.size() > 8 || !catalog.containsAll(quotas.keySet())) throw new RuntimeFault(invalidCode,path);
                 for (String id : new TreeSet<>(quotas.keySet())) {

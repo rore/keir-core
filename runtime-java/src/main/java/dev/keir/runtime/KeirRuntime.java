@@ -381,7 +381,7 @@ public final class KeirRuntime {
             long grant=invocation.effectGrant().isPresent()?invocation.effectGrant().getAsLong():prepared.effectGrant;
             require(grant>=0 && grant<=prepared.effectGrant,"HOST_CONTEXT_INVALID","");
             Map<String,Object> event;
-            try { event=snapshot(invocation.event()); }
+            try { event=contextFields2(invocation.event(),Set.of("id","source")); }
             catch (RuntimeException failure) { throw new RuntimeFault("HOST_CONTEXT_INVALID",""); }
             EffectInvocation effect=new EffectInvocation(common.bindings(),common.deadline(),common.authorize(),common.grants(),grant,invocation.requestKey(),event);
             return run.start(businessInput,common,effect).handle((outcome,failure)->failure==null?outcome:run.failed(failure));
@@ -392,12 +392,21 @@ public final class KeirRuntime {
                                        Authorizer authorize,Optional<Map<String,Object>> policy) {
         require(Objects.equals(prepared.boundModel.scope,scope) && policy!=null && deadline!=null && authorize!=null,"HOST_CONTEXT_INVALID","");
         CapabilityPolicy.State narrowed;
-        try { narrowed=CapabilityPolicy.narrow(prepared.policy,policy.isPresent()?snapshot(policy.get()):Map.of(),"","HOST_CONTEXT_INVALID"); }
+        try { narrowed=CapabilityPolicy.narrow(prepared.policy,policy.isPresent()?policy.get():Map.of(),"","HOST_CONTEXT_INVALID"); }
         catch (RuntimeException failure) { throw new RuntimeFault("HOST_CONTEXT_INVALID",""); }
         Map<String,Object> copied;
-        try { copied=snapshot(bindings); }
+        try { copied=contextFields2(bindings,prepared.hostFields.keySet()); }
         catch (RuntimeException failure) { throw new RuntimeFault("HOST_BINDING_INVALID","/hostBindings"); }
         return new Invocation(copied,deadline,authorize,narrowed.ceilings());
+    }
+
+    private static Map<String,Object> contextFields2(Map<String,Object> value,Set<String> fields) {
+        require(value!=null && value.size()==fields.size(),"HOST_CONTEXT_INVALID","");
+        shape(value,fields,"");
+        // Validated model fields are scalar; typed preflight rejects containers without traversing them.
+        Map<String,Object> copied=new LinkedHashMap<>();
+        for(String field:fields) copied.put(field,value.get(field));
+        return Collections.unmodifiableMap(copied);
     }
 
     private static final class Run {
