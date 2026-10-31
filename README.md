@@ -23,7 +23,7 @@ Compile once, execute the same artifact in either runtime. Each runtime is separ
 
 ## Start here
 
-- [Guided tour: design time and runtime](docs/guided-tour.md)
+- [Guided tour: host design, customer extension design and runtime](docs/guided-tour.md)
 - [Public documentation](docs/README.md)
 - [Specification status and contracts](docs/specs/README.md)
 - [Host and customer agent guides](docs/agents/README.md)

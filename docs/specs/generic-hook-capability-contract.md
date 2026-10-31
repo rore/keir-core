@@ -8,6 +8,8 @@ Status: **reviewed target contract; not implemented or accepted for execution**.
 
 A host publishes a scoped, approved capability catalog. A hook defines its input projection, allowed output and consumer, trigger, lifecycle placement and effect ceiling. A customer extension selects and composes catalog operations; the host need not anticipate its call list. A required map naming the operations of a sample program is not the generic hook contract.
 
+Capabilities expose reusable host-domain operations rather than pre-implementing a customer's customization. In the task example, the host publishes `tasks.create` with project/title arguments; the extension decides when and why to create a follow-up. The adapter must not hide that project's filter, the title or the follow-up rule. Native domain-specific operations can still be appropriate when they express an actual host operation or atomic guarantee; Keir does not require every capability to be CRUD.
+
 | Boundary | Authority and obligation |
 | --- | --- |
 | Catalog publication and discovery | Host selects the complete effective DCM for the authenticated customer scope. Publication controls visibility; discovery exposes only that approved scope. Neither descriptions nor discovery results authorize a native operation. |
@@ -64,10 +66,9 @@ steps:
   - id: eligible
     let: {cel: 'source.status == "COMPLETED" && source.projectId == eligibleProject'}
   - id: created
-    call: tasks.createFollowUp
+    call: tasks.create
     when: eligible
     args:
-      sourceTaskId: {cel: input.taskId}
       projectId: {cel: eligibleProject}
       title: {literal: 'Follow up'}
 ```
@@ -126,7 +127,7 @@ Keep the single-effect receipt and winner rules unchanged: winning CONFIRMED/NON
 
 ## Examples and rejection obligations
 
-These are proposed `/2` fragments, not runnable `/1` fixtures. Assume the approved catalog already defines `tasks.get` and `tasks.getSummary` as READ operations accepting agent `taskId` and protected `actorId`, returning a record with `status: TaskStatus`. It also defines `tasks.createFollowUp` as WRITE. Use existing scalar/nominal types, an input with two TaskId fields, and an output Classification enum.
+These are proposed `/2` fragments, not runnable `/1` fixtures. Assume the approved catalog already defines `tasks.get` and `tasks.getSummary` as READ operations accepting agent `taskId` and protected `actorId`, returning a record with `status: TaskStatus`. It also defines the generic `tasks.create` as WRITE. Use existing scalar/nominal types, an input with two TaskId fields, and an output Classification enum.
 
 ```yaml
 # entrypoints.ClassifyTasks in keir-dcm/read-2

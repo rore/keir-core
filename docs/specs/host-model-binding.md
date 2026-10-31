@@ -65,9 +65,9 @@ var bound = bindModel(approvedDcmBytes, approval, Map.of(
     "tasks.get", new EffectAdapter("1", "simulation", keyType,
         (args, trusted, ms, nativeContext) ->
             taskBridge.get(args, trusted, ms, nativeContext)),
-    "tasks.createFollowUp", new EffectAdapter("1", "simulation", keyType,
+    "tasks.create", new EffectAdapter("1", "simulation", keyType,
         (args, trusted, ms, nativeContext) ->
-            taskBridge.createFollowUp(args, trusted, ms, nativeContext))));
+            taskBridge.create(args, trusted, ms, nativeContext))));
 // Check binding/preparation diagnostics before using either handle.
 var prepared = prepareProgram(approvedArtifactBytes, bound, admission);
 var outcome = invoke(prepared, Map.of("taskId", taskId), freshInvocation);
@@ -78,9 +78,9 @@ const bound = bindModel(approvedDcmBytes, approval, {
   "tasks.get": {version: "1", mode: "simulation", keyType,
     invoke: (args, trusted, ms, nativeContext) =>
       taskBridge.get(args, trusted, ms, nativeContext)},
-  "tasks.createFollowUp": {version: "1", mode: "simulation", keyType,
+  "tasks.create": {version: "1", mode: "simulation", keyType,
     invoke: (args, trusted, ms, nativeContext) =>
-      taskBridge.createFollowUp(args, trusted, ms, nativeContext)}
+      taskBridge.create(args, trusted, ms, nativeContext)}
 });
 // Check binding/preparation diagnostics before using either handle.
 const prepared = prepareProgram(approvedArtifactBytes, bound, admission);

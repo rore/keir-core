@@ -28,7 +28,7 @@ The input projection and `FollowupResult` output below are this example host's c
   },
   "capabilities":{
     "tasks.get":{"version":"1","parameters":{"taskId":{"type":"TaskId","binding":"agent"},"actorId":{"type":"UserId","binding":"host"}},"result":"Task","effect":"READ","errors":["TASK_NOT_FOUND","ACCESS_DENIED"]},
-    "tasks.createFollowUp":{"version":"1","parameters":{"sourceTaskId":{"type":"TaskId","binding":"agent"},"projectId":{"type":"ProjectId","binding":"agent"},"title":{"type":"String","binding":"agent"},"actorId":{"type":"UserId","binding":"host"}},"result":"CreatedTask","effect":"WRITE","errors":["CREATE_REJECTED","ACCESS_DENIED"]}
+    "tasks.create":{"version":"1","parameters":{"projectId":{"type":"ProjectId","binding":"agent"},"title":{"type":"String","binding":"agent"},"actorId":{"type":"UserId","binding":"host"}},"result":"CreatedTask","effect":"WRITE","errors":["CREATE_REJECTED","ACCESS_DENIED"]}
   },
   "entrypoints":{
     "TaskCompleted":{"input":"TaskCompletedInput","output":"FollowupResult","trigger":"EVENT","placement":"AFTER_COMMIT","consumer":{"id":"sample.followup.report","version":"1","kind":"EVENT_REPORT"},"event":{"idType":"EventId","sourceType":"TaskId"}}
@@ -40,13 +40,15 @@ The input projection and `FollowupResult` output below are this example host's c
 
 Effect ceiling omission means one under the proposed format; it never permits a second potential WRITE. Catalog declarations and simulation cannot certify real native behavior.
 
+`tasks.create` is ordinary task creation. The extension's condition, selected project and title make the new task a follow-up in this scenario. There is no special follow-up service operation, implicit parent link or `sourceTaskId` creation argument. If the host exposes a generic relationship field, the program must supply it explicitly. Trigger provenance remains in protected event context and does not become a customer-controlled task field.
+
 ## Customer authors the program
 
 The customer chooses project `project1` and title `Follow up` inside this source. The ProjectId annotation is the proposed literal syntax, not currently accepted by `/1`. The fingerprint below is the canonical digest of the DCM above, not an authentication credential.
 
 ```yaml
 language: keir/v0
-domain: {id: sample.tasks, version: '2', fingerprint: 'sha256:b7bef9206ca65cbf5e1ac3551b042e116d07c9a008d298fe5cc043d0509b602e'}
+domain: {id: sample.tasks, version: '2', fingerprint: 'sha256:68b72e4da41aa006a6a8182b5b8a6a4363a6734688da3c1e0c3807c0aff4ac04'}
 entrypoint: TaskCompleted
 name: follow-up-in-selected-project
 steps:
@@ -59,10 +61,9 @@ steps:
   - id: eligible
     let: {cel: 'source.status == "COMPLETED" && source.projectId == eligibleProject'}
   - id: created
-    call: tasks.createFollowUp
+    call: tasks.create
     when: eligible
     args:
-      sourceTaskId: {cel: input.taskId}
       projectId: {cel: eligibleProject}
       title: {literal: 'Follow up'}
 return:
@@ -85,7 +86,7 @@ There is no read of the guarded `created` result. The ordinary return is reached
 
 Both adapter registrations use `{version:"1",mode:"simulation",keyType:"sample.RequestUuid/1",invoke:<host function>}`. Preparing validates metadata and the artifact; it calls neither adapters nor authorization. Future implementation must reconstruct the typed literal environment in both loaders rather than trust forged annotations. Current compiler/loader support remains `/1`; this document does not supply a runnable `/2` API invocation.
 
-The exact modelRef is `{domainId:"sample.tasks",domainVersion:"2",format:"keir-dcm/effect-2",digest:"sha256:b7bef9206ca65cbf5e1ac3551b042e116d07c9a008d298fe5cc043d0509b602e",descriptorRecipe:"keir-record-descriptors/1"}`. See [equivalent Java/Node host sketches](host-model-binding.md#equivalent-host-sketches). The host-held scope and invokers are not serialized into this reference.
+The exact modelRef is `{domainId:"sample.tasks",domainVersion:"2",format:"keir-dcm/effect-2",digest:"sha256:68b72e4da41aa006a6a8182b5b8a6a4363a6734688da3c1e0c3807c0aff4ac04",descriptorRecipe:"keir-record-descriptors/1"}`. See [equivalent Java/Node host sketches](host-model-binding.md#equivalent-host-sketches). The host-held scope and invokers are not serialized into this reference.
 
 ## Host invokes with unchanged facts and protected context
 
@@ -100,7 +101,7 @@ Business input is exactly `{"taskId":"task1"}`. Trusted invocation supplies:
 
 The host selects the approved artifact for this invocation. The runtime executes it against those facts/context; it does not re-author source or fetch implicit settings. Entry authorization precedes execution. Each reached call receives separate agent/protected arguments, remaining deadline and protected key/event context. The host authorizer and native adapter remain responsible for current resource access and invariants; a typed constant can still refer to a nonexistent, wrong-scope or revoked project.
 
-With read result `{id:"task1",projectId:"project1",status:"COMPLETED"}`, the write receives agent `{sourceTaskId:"task1",projectId:"project1",title:"Follow up"}` and protected `{actorId:"user1"}`. A valid SUCCESS/CONFIRMED response with `{id:"task2"}` permits COMPLETED/CREATED with a CONFIRMED receipt. A different project or OPEN status skips the write and returns COMPLETED/NO_OP with no effect. An inaccessible resource rejects; a dispatched write with unknown commit terminates UNCERTAIN, no normal result. EVENT_REPORT preserves these distinctions and cannot undo the native event.
+With read result `{id:"task1",projectId:"project1",status:"COMPLETED"}`, the generic create receives agent `{projectId:"project1",title:"Follow up"}` and protected `{actorId:"user1"}`; original key/event information remains in the separate native context. A valid SUCCESS/CONFIRMED response with `{id:"task2"}` permits COMPLETED/CREATED with a CONFIRMED receipt. A different project or OPEN status skips the write and returns COMPLETED/NO_OP with no effect. An inaccessible resource rejects; a dispatched write with unknown commit terminates UNCERTAIN, no normal result. EVENT_REPORT preserves these distinctions and cannot undo the native event.
 
 ## Acceptance obligations
 
