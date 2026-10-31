@@ -244,7 +244,8 @@ final class Artifact {
                 if (effect) for (String optional : List.of("when","onError")) if (step.containsKey(optional)) fields.add(optional);
                 shape(step,fields,p);
                 if (step.containsKey("when")) require(booleanBinds.contains(step.get("when")),p+"/when");
-                Map<String,Object> caps = map(dcm.get("capabilities"),MODEL); require(caps.containsKey(step.get("capability")),p);
+                Map<String,Object> caps = map(dcm.get("capabilities"),MODEL);
+                require(caps.containsKey(step.get("capability")),p,generic && step.get("capability") instanceof String?"CAPABILITY_UNKNOWN":"ARTIFACT_INVALID");
                 Map<String,Object> cap = map(caps.get(step.get("capability")),p);
                 require(Objects.equals(step.get("version"),cap.get("version")) && Objects.equals(step.get("resultType"),cap.get("result")),p);
                 Map<String,Object> params = map(cap.get("parameters"),p); Set<String> agent = new TreeSet<>();
