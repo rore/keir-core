@@ -67,6 +67,8 @@ Verification adequacy: approved after inspecting this record, the appendix, thre
 
 Worker slices share this record. Each records its own implementation/evidence in its isolated copy and reports selected code commits separately from record bookkeeping; manager consolidates the canonical copy. Global State stays Ready to implement until integrated verification passes; a finished slice records its completion and remaining dependency in prose. Final acceptance requires independent technical result review and the High-risk human result review of the concrete tested outcome.
 
+Current record ownership: the manager alone maintains canonical requirements, immutable baseline, approval evidence and global State. A and B supply separately attributable source revisions and component evidence; neither edits the canonical approval/state surface or independently accepts the overall delivery. Updated coordination guidance calls for separate records for independently owned implementation tasks; these assignments fit that distinction despite sharing a feature. The existing in-flight record and approvals are preserved while the authoritative Workflow procedure for reconciling active work is confirmed. Do not relabel the assignments as bounded assistance, duplicate prior approval or infer complete delivery from a passing slice.
+
 ## Result review
 
 Agent technical review: independent clean-context reviewer, partial Java/shared source review, 2026-10-31.
