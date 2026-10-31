@@ -4,7 +4,7 @@ These records support Keir development. Public contracts and product guidance be
 
 - [Design baseline](design-baseline/README.md): all supplied designs and illustrative fixtures kept together, including host integration v0.5 and host-owned multi-effect contracts v0.7. They are review inputs, not implementation or certification evidence.
 - [Decisions](decisions/0001-repositories-and-runtimes.md): accepted decisions and rationale, including [product direction](decisions/0002-product-proposition-and-evaluation.md) and [restricted CEL/resources](decisions/0003-restricted-cel-resource-policy.md).
-- [Workflow](workflow/agent-workflow-bootstrap-summary.md): bootstrap history, advisory-policy proposal and CI setup. Historical excerpts retain their original paths; active repository configs determine current behavior.
+- [Current workflow](workflow/current-process.md): task records, documentation exemptions and direct-main delivery for core and demo. [Bootstrap history](workflow/agent-workflow-bootstrap-summary.md) preserves the earlier opt-in policy and CI setup; it does not define today's process.
 - [Development-plan architecture review](development-plan-review.md): full supplied-design coverage, component/dependency analysis, early gaps and reasoning behind the runnable sequence. Feature state and the accepted execution sequence live in the roadmap.
 - [Artifact/model sharing evaluation](artifact-model-sharing-evaluation.md): recommendation comparing embedded models with exact host-supplied immutable snapshots; not an implemented packaging change.
 

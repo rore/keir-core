@@ -2,7 +2,9 @@
 
 This project is at the design-to-implementation boundary. Start with the [roadmap](roadmap/board.md) and choose a bounded change with observable acceptance criteria.
 
-The [shared roadmap](roadmap/board.md) tracks both core and demo work. Keep feature status and cross-repository acceptance there. Agent Workflow is currently optional in core; when used, its Work Records stay in core. Demo changes use their own tests and review without a second Work Record process.
+The [shared roadmap](roadmap/board.md) tracks both core and demo work. Keep feature status and cross-repository acceptance there. Follow the [current Agent Workflow process](docs/internal/workflow/current-process.md) for code, mixed changes and governance work in either repo, with one task-specific Work Record in core. Documentation-only and roadmap-only changes are exempt through the configured applicability paths. Demo code and tests remain in demo; it needs no second workflow installation.
+
+Work directly on `main` for now; no PR is required. Keep planning, risk-based review, verification and delivery evidence in the record. Use a unique explicit task identity rather than a record named `main`.
 
 [Advisory CI](docs/internal/workflow/agent-workflow-ci-proposal.md) runs on main pushes and PRs. Read the job summaries and verdict artifacts for findings. Workflow findings do not fail the jobs; invalid policies, missing reports and tool failures do. No check is required for pushing or merging.
 

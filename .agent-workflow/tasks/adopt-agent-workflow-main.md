@@ -27,7 +27,7 @@
 **Plan review:** Agent technical review: independent plan review documented under Plan review in this record; approved after the user scope correction and explicit demo verification path.
 **Approvals:** User scope correction: "documentation and roadmap should not need this - this is why we have the option to define what to skip in agent workflow". User authorized the process change and direct-main delivery: "also, can we start using agent workflow process for all our work? i don't mean opening prs - let's skip the pr process for now and work on main, but still keeping the process and work record". No additional human approval required at Elevated risk.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -36,9 +36,21 @@
 - Redline classification: RED because `agent-workflow.yaml` changes; architecture-review scope is explicitly authorized by the user. No PR label is invented; shadow reporting remains advisory.
 - Initial independent plan review requested an explicit, tested demo command path. The revised plan provides it; the user also corrected applicability before implementation. No policy edits have begun. Independent revised-plan review is approved; implementation may start.
 
+- Implemented the approved policy and guidance changes in both repos. Required records for code/mixed/governance work; configured documentation exemptions, mirrored blue zones, retained policy red zones/shadow mode, and kept CI untouched.
+- Focused policy/resolver/applicability/demo checks and link/privacy review completed. State advanced to Ready for review; independent result review is pending before delivery.
+
 ## Evidence
 
-Pending implementation and focused verification.
+Focused verification completed on the candidate policy/guidance diff:
+
+- Both YAML policies validate against the installed schemas. The installed bootstrap applicability serializer reproduces the approved docs/roadmap/root-document paths with workflowRequired=false and the existing conservative automatic direct-default flag.
+- Positive probes for ordinary docs, docs/specs, roadmap, root documentation and demo docs return a passing workflow.applicability without requiring a task record.
+- Missing-record probes for code, docs-plus-code and agent instructions return blocking workrecord.required_for_branch_changes.
+- The complete core change set resolves this record and has no blocking failures; only the expected shadow architecture-review checkpoint remains advisory. The complete demo guidance diff validates through the explicit core-root slug with a fresh demo Redline report.
+- Explicit resolver lookup finds this record on main. Forty-three local/cross-repository links and anchors, fenced blocks, changed-content privacy, and absence of CI/vendor/product-source edits were checked.
+- Runtime suites were not rerun: no product implementation or tests changed. This verifies configured policy and instructions, not future agents' real-use adoption.
+
+Raw local reports are disposable verification outputs, not public source artifacts.
 
 ## Result review
 

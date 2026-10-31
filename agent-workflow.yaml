@@ -5,13 +5,15 @@ workRecord:
   backend: local
   local:
     taskPath: ".agent-workflow/tasks/{slug}.md"
-  requiredForBranchChanges: false
-redline: optional
+  requiredForBranchChanges: true
+redline: required
 redlineVerdictPath: build/redline-verdict.json
 applicability:
   documentationOnly:
     paths:
       - roadmap/
-      - docs/README.md
+      - docs/
+      - README.md
+      - CONTRIBUTING.md
     workflowRequired: false
     directDefaultBranchAllowed: false
