@@ -31,7 +31,7 @@
 ## Implementation
 
 - User requested implementation alignment after reviewing the tour and correcting ownership, model binding, task creation and documentation/process scope. Current main is 85733de; working tree was clean before creating this record.
-- Planning checkpoint: architect completed the bounded gap review and technical freeze; both core developers confirmed availability and no competing assignment. Fresh isolated code checkouts are prepared; historical checkouts stay intact. Independent plan review approved the frozen plan. Exact A/B implementation offers have been sent against the reviewed base; acceptance/start evidence is pending. No compiler/runtime edit is claimed yet.
+- Implementation checkpoint: architect freeze and independent plan review are complete. Both core developers explicitly accepted their disjoint slices and verified clean isolated checkouts at 0120145; implementation work is underway. A starts the compiler/reference-fixture checkpoint, B starts Node API/binding work against the freeze. Historical checkouts stay intact. No `/2` execution or test result is claimed yet.
 - Canonical owning feature: [generic hook/capability correction](../../roadmap/features/generic-hook-capability-contract.md). Manager alone updates its shared roadmap state.
 
 ## Evidence
