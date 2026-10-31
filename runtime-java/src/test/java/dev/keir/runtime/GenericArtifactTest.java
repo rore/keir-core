@@ -64,6 +64,14 @@ class GenericArtifactTest {
         rejects(()->Artifact.validateEnvelope2(wrongEnvironment,dcm,false),"ARTIFACT_INVALID","/artifact/environment");
     }
 
+    @Test void invalidCompilerPrecedesInvalidFormatAndProfileInBothGenericEnvelopes() throws Exception {
+        for(boolean effect:List.of(false,true)) for(var fields:List.of(Set.of("format"),Set.of("profile"),Set.of("format","profile"))) {
+            var dcm=model(effect);var artifact=artifact(effect);artifact.put("compiler","");
+            fields.forEach(field->artifact.put(field,"unsupported"));
+            rejects(()->Artifact.validateEnvelope2(artifact,dcm,effect),"ARTIFACT_INVALID","/artifact/compiler");
+        }
+    }
+
     @Test void completeCatalogIsValidatedButReadCannotCallItsUnusedWrite() throws Exception {
         var dcm = model(false); var artifact = artifact(false);
         var caps = map(dcm.get("capabilities"),"/test");
