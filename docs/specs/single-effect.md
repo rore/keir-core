@@ -1,5 +1,9 @@
 # Single-effect profile
 
+This page retains implemented `/1` grant semantics. The [proposed generic-hook `/2` correction](generic-hook-capability-contract.md) removes mandatory named grants and defaults the effect ceiling to one, without enabling a second write, new lifecycles or real adapters. Its receipt/key/handler guarantees inherit this contract unchanged.
+
+The current follow-up sample's `input.projectId` and `input.title` come from simulation fixtures. They do not demonstrate authored project/title constants. The [proposed correction](generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority) puts customer choices in the program, preserves the legitimate host-defined payload, and identifies the nominal-literal limitation without introducing a configuration channel.
+
 Status: **implemented experimental checkpoint, verified locally and in CI on 2026-10-30**. This is the bounded contract for [single-effect-followup](../../roadmap/features/single-effect-followup.md). Java and Node execute the same compiled artifact across 25 shared scenarios and both independent packaged hosts. [Testing evidence](../testing.md), [design and sample](../internal/single-effect-followup-design.md) and the [compiled fixture](../../conformance/single-effect/README.md) record scope and verification. Existing `keir-read/1` artifacts, APIs, fixtures and DISPLAY consumption remain unchanged. Real-mode admission is rejected; simulated adapters establish no production write guarantee.
 
 ## Versions and inherited rules

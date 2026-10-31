@@ -8,6 +8,8 @@ The hosting application defines extension points and exposes approved capabiliti
 
 ## Components
 
+The [generic-hook contract correction](docs/specs/generic-hook-capability-contract.md) is proposed, not implemented: new profiles will remove mandatory program-specific capability grants while retaining authorization, aggregate budgets and the single-write ceiling. Current experimental profiles still enforce the old grant maps.
+
 | Path | Responsibility |
 | --- | --- |
 | [compiler-java/](compiler-java/README.md) | Validate source IR against a trusted domain model and emit a portable artifact; library and CLI |
