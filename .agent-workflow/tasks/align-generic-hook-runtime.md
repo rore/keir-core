@@ -47,6 +47,8 @@ Canonical clean coverage verification at `476c5f5` passed all 58 compiler and 12
 
 Node developer checkpoint: adopted exact compiler dependency `db8944f` as local `1a0bab0` without changing shared fixtures. All six externally pinned Java artifacts bind, prepare and execute: read main/repeated/alternate use one get, two gets and lookup respectively; effect main creates, project2 returns NO_OP and title2 creates with the changed title. Creation arguments are exactly projectId/title and native key identity is retained. This is reported component execution against real compiler bytes, not accepted shared-row parity or packaged-host evidence. Node source selection, host completion and independent runtime review remain in progress.
 
+Node component review found and corrected `/2` envelope diagnostic ordering and strict string validation for model/program selectors; focused reference/API tests report 25 passing cases. The published unknown-capability diagnostic also exposed a Java mismatch: unknown string capability IDs must use CAPABILITY_UNKNOWN, while malformed non-string IDs retain ARTIFACT_INVALID and `/1` behavior stays unchanged. This correction and regression are assigned to the Java owner. The exact shared corpus dependency is available; its delayed notification was passed through the authorized fallback so Node host qualification can proceed. Adoption and shared-row results remain to be confirmed.
+
 ## Plan review
 
 Architect reviewed the implementation seams and published contracts at 65a0cf4. It found no new product decision and retained High/Large classification. This design-author assessment does not replace the required independent clean-context plan review.
