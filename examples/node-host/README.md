@@ -27,3 +27,17 @@ node --test examples/node-host/test.mjs
 It emits deterministic rows containing runtime outcomes, trusted call captures and separate EVENT_REPORT receipts. Handled rejection remains BUSINESS_REJECTION even with a result. Failed execution may retain a CONFIRMED effect; lost response is UNCERTAIN with UNKNOWN, without an ordinary result. The consumer validates closed outcome/result/error/effect/trace envelopes independently; it does not infer external effects from source-authored labels.
 
 The simulator module imports no runtime and receives the selected API from its caller. Default conformance tests inject the source library before host installation; this command injects only the installed package. Its local corpus and trusted fixtures are part of this repository example, with no sibling runtime-source import. Both commands preserve their original native keys and keep them outside public traces. No task application, live activation, real deduplication or persistence guarantee is implemented.
+
+The separate `/2` host binds the complete reviewed catalog once, prepares the fixed Java-produced program variants, and executes each scenario with fresh scope, authorization and native context:
+
+```sh
+node examples/node-host/generic.mjs conformance/generic-hooks/read
+node examples/node-host/generic.mjs conformance/generic-hooks/effect
+node --test examples/node-host/test.mjs
+```
+
+The directory is trusted operator input for this qualification command. Model/artifact pins are separate reviewed files; program names map only to fixed basenames. Scenario data cannot select paths, callable code, credentials, mode, keys or authority. All 9 read and 19 effect scenarios use the ordinary installed library; default source tests inject the source library into the same simulator before host installation. Both batches emit `{id,outcome,calls,consumption}` rows and compare them with independently authored expectations.
+
+The `/2` input retains the hook's actual task ID. Project and title are compiled customer choices; changing only those source literals does not change the model, input or adapter. The generic creation bridge receives only project/title business arguments plus separate protected actor and original key/event context. Request-local fixture state uses Node's `AsyncLocalStorage`; no process-global current user is used. The authorizer independently checks the entrypoint, published capability and exact version before fixture decisions. Captures are paired with actual dispatch traces by ordinal, and an external mismatch ledger prevents caught adapter exceptions from hiding a failed simulation.
+
+The local harness permits four live model handles, eight Prepared handles, one synchronous bind/prepare operation and two in-flight invocations, with no queue. It rejects raw model bytes above 65,536 and artifact bytes above 1,048,576 before calling the library. Each model slot reserves the full 65,536-byte canonical-model and descriptor ceilings, bounding each aggregate to 262,144 without another descriptor parser. Prepared slots bound retained artifact selection to 8,388,608 bytes; pinned/in-flight users prevent early release. Capacity rejection has the host test reason `CAPACITY_EXCEEDED`, not a fabricated Keir outcome. Bounded file reads and a 1 MiB output ceiling protect the command's fixed batch. These controlled limits do not claim production sizing, decoded-heap isolation or revocation/retirement services.

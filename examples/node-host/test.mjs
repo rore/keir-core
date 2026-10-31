@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { runScenarios } from './run.mjs';
 import { runEffectScenarios } from './effect.mjs';
+import { runGeneric } from './generic.mjs';
 
 test('packed Node runtime consumes the Java artifact and displays only validated completed results', async () => {
   const bytes = readFileSync(process.env.KEIR_ARTIFACT_FILE ?? new URL('../../conformance/read-and-decide/artifact.json', import.meta.url));
@@ -15,6 +17,14 @@ test('packed Node runtime consumes the Java artifact and displays only validated
   for (const item of outputs) {
     assert.deepEqual(item.calls, [{ agentArgs: { taskId: 'task1' }, protectedArgs: { actorId: 'user1' } }]);
     assert.doesNotMatch(JSON.stringify(item.outcome.trace), /task1|user1/);
+  }
+});
+
+test('installed bound-model runtime matches both full shared /2 fixture batches', async () => {
+  for (const profile of ['read', 'effect']) {
+    const directory = new URL(`../../conformance/generic-hooks/${profile}/`, import.meta.url);
+    const scenarios = JSON.parse(readFileSync(new URL('scenarios.json', directory), 'utf8'));
+    assert.deepEqual(await runGeneric(fileURLToPath(directory)), scenarios.map(row => ({ id: row.id, ...row.expect })));
   }
 });
 
