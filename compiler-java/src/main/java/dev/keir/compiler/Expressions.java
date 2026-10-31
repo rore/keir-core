@@ -78,6 +78,14 @@ final class Expressions {
         return expected == null ? type.type() : assign(type, expected, dcm, path);
     }
 
+    static String nominalLiteral(Object value, Object annotation, String expected, Dcm dcm, String path) {
+        if (!(annotation instanceof String type) || dcm.type(type) == null
+                || !dcm.type(type).kind().equals("nominal")) throw new CompileFailure("NOMINAL_MISMATCH", path + "/type");
+        if (!(value instanceof String text)) throw new CompileFailure("PROFILE_UNSUPPORTED", path + "/literal");
+        bounded(text, path + "/literal");
+        return expected == null ? type : assign(new Value(type), expected, dcm, path + "/literal");
+    }
+
     private static CelType celType(String type, Dcm dcm) {
         if (dcm.type(type).kind().equals("record")) return StructTypeReference.create("keir.read." + type);
         return type.equals("Boolean") ? SimpleType.BOOL : SimpleType.STRING;

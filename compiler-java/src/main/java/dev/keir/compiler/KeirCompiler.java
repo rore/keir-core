@@ -13,6 +13,8 @@ import java.util.TreeMap;
 public final class KeirCompiler {
     public static final String PROFILE = "keir-read/1";
     public static final String EFFECT_PROFILE = "keir-effect/1";
+    public static final String READ2_PROFILE = "keir-read/2";
+    public static final String EFFECT2_PROFILE = "keir-effect/2";
     public static final String IDENTITY = "keir-compiler-java/0.1.0-SNAPSHOT";
     private static final Map<String, String> PACKAGES = Map.of("celJava", "0.14.0", "celNode", "0.6.1",
             "protobufJava", "4.35.1", "protobufNode", "2.6.2");
@@ -25,6 +27,8 @@ public final class KeirCompiler {
         public Environment { packages = Map.copyOf(packages); }
         public static Environment supported() { return new Environment(PROFILE, IDENTITY, PACKAGES); }
         public static Environment effect() { return new Environment(EFFECT_PROFILE, IDENTITY, PACKAGES); }
+        public static Environment read2() { return new Environment(READ2_PROFILE, IDENTITY, PACKAGES); }
+        public static Environment effect2() { return new Environment(EFFECT2_PROFILE, IDENTITY, PACKAGES); }
     }
     public record Diagnostic(String code, String path, String message) {}
     public record Compilation(byte[] artifact, String artifactDigest, List<Diagnostic> diagnostics) {
@@ -42,11 +46,12 @@ public final class KeirCompiler {
             if (trustedDcmBytes == null) fail("SYNTAX_INVALID", "/dcm");
             Object parsedSource = StrictData.parse(sourceBytes, "/source");
             Object parsedDcm = StrictData.parse(trustedDcmBytes, "/dcm");
-            boolean effect = environment != null && EFFECT_PROFILE.equals(environment.profile());
-            Map<String, Object> source = sourceShape(parsedSource, effect);
-            Dcm dcm = Dcm.parse(parsedDcm, effect);
+            boolean effect = environment != null && (EFFECT_PROFILE.equals(environment.profile()) || EFFECT2_PROFILE.equals(environment.profile()));
+            boolean generic = environment != null && (READ2_PROFILE.equals(environment.profile()) || EFFECT2_PROFILE.equals(environment.profile()));
+            Map<String, Object> source = sourceShape(parsedSource, effect, generic);
+            Dcm dcm = Dcm.parse(parsedDcm, effect, generic);
             if (StrictData.canonical(dcm.root()).length > StrictData.MAX_BYTES) fail("BUDGET_EXCEEDED", "/dcm");
-            if (environment == null || !(effect ? EFFECT_PROFILE : PROFILE).equals(environment.profile())
+            if (environment == null || !(generic ? effect ? EFFECT2_PROFILE : READ2_PROFILE : effect ? EFFECT_PROFILE : PROFILE).equals(environment.profile())
                     || !IDENTITY.equals(environment.compiler()) || !PACKAGES.equals(environment.packages()))
                 fail("PIN_MISMATCH", "/source");
             var domain = object(source.get("domain"), "/source/domain");
@@ -114,12 +119,16 @@ public final class KeirCompiler {
             byte[] descriptors = dcm.descriptorBytes();
             if (descriptors.length > 65_536) fail("BUDGET_EXCEEDED", "/dcm/types");
             var artifact = new TreeMap<String, Object>();
-            artifact.put("format", effect ? "keir-artifact/effect-1" : "keir-artifact/read-1");
-            artifact.put("profile", effect ? EFFECT_PROFILE : PROFILE);
+            artifact.put("format", "keir-artifact/" + (effect ? "effect-" : "read-") + (generic ? "2" : "1"));
+            artifact.put("profile", environment.profile());
             artifact.put("compiler", environment.compiler()); artifact.put("environment", environment.packages());
-            artifact.put("sourceDigest", StrictData.digest(source)); artifact.put("dcmDigest", dcmDigest);
-            artifact.put("dcm", dcm.root()); artifact.put("entrypoint", entryId);
-            artifact.put("descriptors", Base64.getEncoder().encodeToString(descriptors));
+            artifact.put("sourceDigest", StrictData.digest(source)); artifact.put("entrypoint", entryId);
+            if (generic) artifact.put("modelRef", Map.of("domainId", modelDomain.get("id"), "domainVersion", modelDomain.get("version"),
+                    "format", dcm.root().get("format"), "digest", dcmDigest, "descriptorRecipe", "keir-record-descriptors/1"));
+            else {
+                artifact.put("dcmDigest", dcmDigest); artifact.put("dcm", dcm.root());
+                artifact.put("descriptors", Base64.getEncoder().encodeToString(descriptors));
+            }
             artifact.put("expressions", expressions); artifact.put("steps", steps);
             artifact.put("return", Map.of("type", entry.output(), "fields", fields));
             byte[] bytes = StrictData.canonical(artifact);
@@ -135,7 +144,9 @@ public final class KeirCompiler {
         var binding = object(raw, path);
         if (binding.containsKey("literal")) {
             Object value = binding.get("literal");
-            String type = Expressions.literal(value, expected, dcm, path + "/literal");
+            String type = binding.containsKey("type")
+                    ? Expressions.nominalLiteral(value, binding.get("type"), expected, dcm, path)
+                    : Expressions.literal(value, expected, dcm, path + "/literal");
             return Map.of("literal", value, "type", type);
         }
         var parsed = Expressions.parse((String) binding.get("cel"), variables.keySet(), path + "/cel");
@@ -171,9 +182,10 @@ public final class KeirCompiler {
                 String capability = (String) step.get("call");
                 var definition = dcm.capabilities().get(capability);
                 if (definition == null) fail("CAPABILITY_UNKNOWN", path + "/call");
-                if (effect) {
+                if (effect || dcm.generic()) {
                     if (++totalCalls > 4) fail("BUDGET_EXCEEDED", "/source/steps");
                     if ("WRITE".equals(definition.effect())) {
+                        if (!effect) fail("ENTRY_GRANT_DENIED", path + "/call");
                         if (++writes > 1) fail("BUDGET_EXCEEDED", path + "/call");
                         if (writes > entry.effectGrant()) fail("ENTRY_GRANT_DENIED", path + "/call");
                     }
@@ -220,10 +232,13 @@ public final class KeirCompiler {
 
     private static void checkLiteral(Object raw, String expected, Dcm dcm, String path) {
         var value = object(raw, path);
-        if (value.containsKey("literal")) Expressions.literal(value.get("literal"), expected, dcm, path + "/literal");
+        if (value.containsKey("literal")) {
+            if (value.containsKey("type")) Expressions.nominalLiteral(value.get("literal"), value.get("type"), expected, dcm, path);
+            else Expressions.literal(value.get("literal"), expected, dcm, path + "/literal");
+        }
     }
 
-    private static Map<String, Object> sourceShape(Object parsed, boolean effect) {
+    private static Map<String, Object> sourceShape(Object parsed, boolean effect, boolean generic) {
         var source = object(parsed, "/source");
         shape(source, Set.of("language", "domain", "entrypoint", "name", "steps", "return"), "/source");
         if (!"keir/v0".equals(source.get("language"))) fail("PROFILE_UNSUPPORTED", "/source/language");
@@ -253,7 +268,7 @@ public final class KeirCompiler {
                 for (var arg : args.entrySet()) {
                     String argPath = pointer(path + "/args", arg.getKey());
                     identifier(arg.getKey(), "[A-Za-z][A-Za-z0-9]{0,63}", argPath);
-                    bindingShape(arg.getValue(), argPath);
+                    bindingShape(arg.getValue(), argPath, generic);
                 }
                 if (step.containsKey("when")) identifier(step.get("when"), "[A-Za-z][A-Za-z0-9]{0,63}", path + "/when");
                 if (step.containsKey("onError")) {
@@ -263,16 +278,16 @@ public final class KeirCompiler {
                     for (var handler : handlers.entrySet()) {
                         String handlerPath = pointer(path + "/onError", handler.getKey());
                         identifier(handler.getKey(), "[A-Z][A-Z0-9_]{0,63}", handlerPath);
-                        recordShape(handler.getValue(), handlerPath);
+                        recordShape(handler.getValue(), handlerPath, generic);
                     }
                 }
-            } else bindingShape(step.get("let"), path + "/let");
+            } else bindingShape(step.get("let"), path + "/let", generic);
         }
-        recordShape(source.get("return"), "/source/return");
+        recordShape(source.get("return"), "/source/return", generic);
         return source;
     }
 
-    private static void recordShape(Object value, String path) {
+    private static void recordShape(Object value, String path, boolean generic) {
         var returned = object(value, path);
         shape(returned, Set.of("record"), path);
         var fields = object(returned.get("record"), path + "/record");
@@ -280,14 +295,14 @@ public final class KeirCompiler {
         for (var field : fields.entrySet()) {
             String fieldPath = pointer(path + "/record", field.getKey());
             identifier(field.getKey(), "[A-Za-z][A-Za-z0-9]{0,63}", fieldPath);
-            bindingShape(field.getValue(), fieldPath);
+            bindingShape(field.getValue(), fieldPath, generic);
         }
     }
 
-    private static void bindingShape(Object raw, String path) {
+    private static void bindingShape(Object raw, String path, boolean generic) {
         var binding = object(raw, path);
         if (binding.containsKey("literal")) {
-            shape(binding, Set.of("literal"), path);
+            shape(binding, generic && binding.containsKey("type") ? Set.of("literal", "type") : Set.of("literal"), path);
             Object value = binding.get("literal");
             if (!(value instanceof String) && !(value instanceof Boolean)) fail("PROFILE_UNSUPPORTED", path + "/literal");
             if (value instanceof String) text(value, path + "/literal", 256);

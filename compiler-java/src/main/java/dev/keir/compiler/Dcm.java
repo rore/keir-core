@@ -67,10 +67,14 @@ final class Dcm {
     }
 
     static Dcm parse(Object value, boolean effectProfile) {
+        return parse(value, effectProfile, false);
+    }
+
+    static Dcm parse(Object value, boolean effectProfile, boolean generic) {
         var root = effectProfile
                 ? shape(value,"/dcm","format","domain","types","capabilities","entrypoints","hostKey","assurance")
                 : shape(value,"/dcm","format","domain","types","capabilities","entrypoints");
-        supported(root.get("format"),effectProfile ? "keir-dcm/effect-1" : "keir-dcm/read-1","/dcm/format");
+        supported(root.get("format"),"keir-dcm/" + (effectProfile ? "effect-" : "read-") + (generic ? "2" : "1"),"/dcm/format");
         if (effectProfile) {
             if (!"SIMULATION_ONLY".equals(root.get("assurance"))) throw invalid("/dcm/assurance");
             var key = shape(root.get("hostKey"),"/dcm/hostKey","source","type");
@@ -126,7 +130,7 @@ final class Dcm {
             var cap = shape(entry.getValue(),path,"version","parameters","result","effect","errors");
             String version = text(cap.get("version"),child(path,"version"));
             String effect = text(cap.get("effect"),child(path,"effect"));
-            if (!effect.equals("READ") && !(effectProfile && effect.equals("WRITE"))) throw unsupported(child(path,"effect"));
+            if (!effect.equals("READ") && !((effectProfile || generic) && effect.equals("WRITE"))) throw unsupported(child(path,"effect"));
             String result = reference(cap.get("result"),child(path,"result"));
             requireType(types,result,child(path,"result"),true);
             var parameters = new TreeMap<String,Parameter>();
@@ -147,7 +151,7 @@ final class Dcm {
         for (var entry : boundedMap(root.get("entrypoints"),"/dcm/entrypoints",4).entrySet()) {
             String path = child("/dcm/entrypoints",entry.getKey());
             identifier(entry.getKey(),path,true);
-            var ep = effectProfile
+            var ep = generic ? entryShape(entry.getValue(),path,effectProfile) : effectProfile
                     ? shape(entry.getValue(),path,"input","output","trigger","placement","consumer","grants","effectGrant","event")
                     : shape(entry.getValue(),path,"input","output","trigger","consumer","grants");
             String input = reference(ep.get("input"),child(path,"input"));
@@ -168,7 +172,7 @@ final class Dcm {
             int effectGrant = 0;
             if (effectProfile) {
                 String gp = child(path,"effectGrant");
-                Object n = ep.get("effectGrant");
+                Object n = generic && !ep.containsKey("effectGrant") ? 1L : ep.get("effectGrant");
                 if (!(n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long || n instanceof BigInteger)) throw invalid(gp);
                 var count = new BigInteger(n.toString());
                 if (count.signum() < 0 || count.compareTo(BigInteger.ONE) > 0) throw invalid(gp);
@@ -180,7 +184,8 @@ final class Dcm {
                 }
             }
             var grants = new TreeMap<String,Integer>();
-            for (var grant : boundedMap(ep.get("grants"),child(path,"grants"),8).entrySet()) {
+            if (generic) grants.putAll(policy(ep, capabilities, path));
+            else for (var grant : boundedMap(ep.get("grants"),child(path,"grants"),8).entrySet()) {
                 String gp = child(child(path,"grants"),grant.getKey());
                 if (!capabilities.containsKey(grant.getKey())) throw invalid(gp);
                 Object n = grant.getValue();
@@ -197,6 +202,7 @@ final class Dcm {
     }
 
     Map<String,Object> root() { return root; }
+    boolean generic() { return root.get("format").equals("keir-dcm/read-2") || root.get("format").equals("keir-dcm/effect-2"); }
     Map<String,Type> types() { return types; }
     Map<String,Capability> capabilities() { return capabilities; }
     Map<String,Entrypoint> entrypoints() { return entrypoints; }
@@ -215,6 +221,44 @@ final class Dcm {
         catch (IOException e) { throw invalid("/dcm/types"); }
         if (bytes.length > 65536) throw budget("/dcm/types");
         return bytes;
+    }
+
+    private static Map<String,Object> entryShape(Object value,String path,boolean effect) {
+        var ep = object(value,path);
+        var required = new TreeSet<>(List.of("input","output","trigger","consumer"));
+        if (effect) required.addAll(List.of("placement","event"));
+        var allowed = new TreeSet<>(required);
+        allowed.add("capabilityPolicy");
+        if (effect) allowed.add("effectGrant");
+        for (String key : ep.keySet()) if (!allowed.contains(key)) throw new CompileFailure("FIELD_UNKNOWN",child(path,key));
+        for (String key : required) if (!ep.containsKey(key)) throw invalid(child(path,key));
+        return ep;
+    }
+
+    private static Map<String,Integer> policy(Map<String,Object> ep,Map<String,Capability> capabilities,String path) {
+        var result = new TreeMap<String,Integer>();
+        capabilities.keySet().forEach(id -> result.put(id,4));
+        if (!ep.containsKey("capabilityPolicy")) return result;
+        String pp = child(path,"capabilityPolicy");
+        var policy = object(ep.get("capabilityPolicy"),pp);
+        for (String key : policy.keySet()) if (!Set.of("allow","deny","maxCalls").contains(key))
+            throw invalid(child(pp,key));
+        for (String key : List.of("allow","deny")) if (policy.containsKey(key)) {
+            String lp = child(pp,key);
+            var ids = strings(policy.get(key),lp,8,false,false);
+            for (int i=0;i<ids.size();i++) if (!capabilities.containsKey(ids.get(i))) throw invalid(child(lp,Integer.toString(i)));
+            for (String id : result.keySet()) if (key.equals("allow") ? !ids.contains(id) : ids.contains(id)) result.put(id,0);
+        }
+        if (policy.containsKey("maxCalls")) for (var quota : boundedMap(policy.get("maxCalls"),child(pp,"maxCalls"),8).entrySet()) {
+            String qp = child(child(pp,"maxCalls"),quota.getKey());
+            if (!capabilities.containsKey(quota.getKey())) throw invalid(qp);
+            Object n = quota.getValue();
+            if (!(n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long || n instanceof BigInteger)) throw invalid(qp);
+            var count = new BigInteger(n.toString());
+            if (count.signum()<0 || count.compareTo(BigInteger.valueOf(result.get(quota.getKey())))>0) throw invalid(qp);
+            result.put(quota.getKey(),count.intValue());
+        }
+        return result;
     }
 
     private static void requireType(Map<String,Type> types,String name,String path,boolean record) {
