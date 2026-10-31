@@ -10,7 +10,8 @@ const same = (left, right) => canonicalBytes(left).equals(canonicalBytes(right))
 export function bindModel(dcmBytes, approval, invokers) {
   let path = '/binding/approval';
   try {
-    const effect = approval?.profile === 'keir-effect/2';
+    const profile = approval && Object.getOwnPropertyDescriptor(approval, 'profile');
+    const effect = profile && Object.hasOwn(profile, 'value') && profile.value === 'keir-effect/2';
     shape(approval, ['scope', 'modelRef', 'profile', 'environment', 'mode', ...(effect ? ['keyBinding'] : [])], path);
     let keyValidator;
     for (const field of Object.keys(approval).sort()) {
@@ -23,11 +24,14 @@ export function bindModel(dcmBytes, approval, invokers) {
       } else if (field === 'mode') ok(effect ? approval.mode === 'simulation' : ['simulation', 'real'].includes(approval.mode), path);
       else if (field === 'modelRef') {
         shape(approval.modelRef, fields, path);
+        const modelRefPath = path;
         for (const part of [...fields].sort()) {
-          const at = path + '/' + part;
-          if (part === 'descriptorRecipe') { if (approval.modelRef[part] !== 'keir-record-descriptors/1') { path = at; throw new Fault('ADMISSION_INVALID', at); } }
-          else if (part === 'digest') ok(typeof approval.modelRef.digest === 'string' && /^sha256:[0-9a-f]{64}$/.test(approval.modelRef.digest), path);
-          else text(approval.modelRef[part], path, true);
+          const at = modelRefPath + '/' + part;
+          path = at;
+          if (part === 'descriptorRecipe') ok(approval.modelRef[part] === 'keir-record-descriptors/1', at);
+          else if (part === 'digest') ok(typeof approval.modelRef.digest === 'string' && /^sha256:[0-9a-f]{64}$/.test(approval.modelRef.digest), at);
+          else if (part === 'format') ok(approval.modelRef.format === (effect ? 'keir-dcm/effect-2' : 'keir-dcm/read-2'), at);
+          else text(approval.modelRef[part], at, true);
         }
       } else if (field === 'profile') ok(['keir-read/2', 'keir-effect/2'].includes(approval.profile), path);
       else text(approval.scope, path, true);

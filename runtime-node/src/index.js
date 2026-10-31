@@ -108,10 +108,7 @@ export function prepareProgram(artifactBytes, boundModel, admission) {
       else if (field === 'mode') ok(admission.mode === bound.mode, path);
     }
     path = '/artifact'; code = 'ARTIFACT_INVALID';
-    const plan = validatePlan(artifact, bound);
-    ok(artifact.steps.length <= limits.steps && plan.callCount <= limits.calls, '/artifact/steps', 'BUDGET_EXCEEDED');
-    for (const [id, count] of Object.entries(plan.calls)) ok(count <= grants[id], '/admission/capabilityPolicy', 'AUTHORITY_DENIED');
-    ok(plan.writeCount <= effectGrant, '/admission/effectGrant', 'AUTHORITY_DENIED');
+    const plan = validatePlan(artifact, bound, { limits, grants, effectGrant });
     const cel = prepareExpressions(artifact, plan.contexts, bound);
     ok(cel.totalNodes <= limits.totalAstNodes, '/artifact/expressions', 'BUDGET_EXCEEDED');
     const hostFields = Object.create(null);
@@ -231,18 +228,21 @@ async function execute(prepared, businessInput, trustedInvocation, version) {
     clock.remaining('');
     const { artifact, entrypoint, adapters, hostFields } = plan;
     const dcm = plan.dcm;
+    const grants = Object.create(null);
+    if (version === 2) {
+      try {
+        if (Object.hasOwn(trustedInvocation, 'capabilityPolicy')) ok(trustedInvocation.capabilityPolicy !== undefined, '');
+        Object.assign(grants, narrowPolicy(dcm, trustedInvocation.capabilityPolicy, plan.grants, ''));
+      } catch { throw new Fault('HOST_CONTEXT_INVALID', ''); }
+    }
     const state = Object.fromEntries([['input', validateValue(dcm, entrypoint.input, businessInput, '/input', 'INPUT_INVALID')]]);
     const bindings = Object.create(null);
     try {
       shape(trustedInvocation.bindings, Object.keys(hostFields), '/hostBindings');
       for (const [name, types] of Object.entries(hostFields)) for (const type of types) bindings[name] = validateValue(dcm, type, trustedInvocation.bindings[name], '/hostBindings', 'HOST_BINDING_INVALID');
     } catch (error) { throw new Fault(error instanceof Fault && error.code === 'BUDGET_EXCEEDED' ? error.code : 'HOST_BINDING_INVALID', '/hostBindings'); }
-    const grants = Object.create(null);
     try {
-      if (version === 2) {
-        if (Object.hasOwn(trustedInvocation, 'capabilityPolicy')) ok(trustedInvocation.capabilityPolicy !== undefined, '');
-        Object.assign(grants, narrowPolicy(dcm, trustedInvocation.capabilityPolicy, plan.grants, ''));
-      } else for (const id of keys(trustedInvocation.grants, '', 8)) {
+      if (version === 1) for (const id of keys(trustedInvocation.grants, '', 8)) {
         ok(Object.hasOwn(plan.grants, id), '', 'HOST_CONTEXT_INVALID');
         integer(trustedInvocation.grants[id], plan.grants[id], '');
         grants[id] = trustedInvocation.grants[id];
