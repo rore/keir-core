@@ -6,6 +6,7 @@ These records support Keir development. Public contracts and product guidance be
 - [Decisions](decisions/0001-repositories-and-runtimes.md): accepted decisions and rationale, including [product direction](decisions/0002-product-proposition-and-evaluation.md) and [restricted CEL/resources](decisions/0003-restricted-cel-resource-policy.md).
 - [Workflow](workflow/agent-workflow-bootstrap-summary.md): bootstrap history, advisory-policy proposal and CI setup. Historical excerpts retain their original paths; active repository configs determine current behavior.
 - [Development-plan architecture review](development-plan-review.md): full supplied-design coverage, component/dependency analysis, early gaps and reasoning behind the runnable sequence. Feature state and the accepted execution sequence live in the roadmap.
+- [Artifact/model sharing evaluation](artifact-model-sharing-evaluation.md): recommendation comparing embedded models with exact host-supplied immutable snapshots; not an implemented packaging change.
 
 Add supplied design specifications to `design-baseline/public/` and index them there. Do not create another draft-design directory. Keep implementation design and review rationale internal; publish agreed behavioral contracts in the maintained public specifications and identify the baseline sections they supersede.
 
