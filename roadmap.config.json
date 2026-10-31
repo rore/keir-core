@@ -2,7 +2,7 @@
   "roadmapPath": "roadmap",
   "defaultLens": "milestone",
   "appearance": {
-    "cardFields": ["status", "priority", "repo"],
+    "cardFields": ["status", "priority", "repo", "milestone"],
     "tagColors": {
       "repo": {
         "keir-core": "blue",
