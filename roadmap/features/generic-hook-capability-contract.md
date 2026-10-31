@@ -27,6 +27,7 @@ Reads may be composed and repeated within aggregate resource budgets. The defaul
 - Identify the exact compiler, Java, Node, artifact, host and fixture changes for a later bounded implementation assignment. Manager owns this feature and integration.
 - Capture the enduring product invariant in shared role guidance, with regression obligations that detect program-specific hook assumptions.
 - Establish one compact ownership model and audit the worked source-to-execution example against it: host-defined payload/catalog/adapters/authority, customer-authored logic/constants, compiler artifact, runtime bindings and both authoring-agent roles. Account for each value's origin; do not accept isolated field fixes while those boundaries remain ambiguous.
+- Treat internal service-to-service calls, including HTTP/RPC, as the normal capability integration. Define the adapter as a host-owned dispatch bridge, not a same-process business implementation requirement. Carry trusted identity, deadline and honest remote-failure/effect semantics through the final binding API without adding a transport framework.
 - Before implementation, finalize the adopted shared-model packaging: exact immutable host-held DCM references, reusable model preparation and version-compatible callable capability registrations. Define identity/trust, version coexistence, revocation and missing-model behavior without a registry service or network lookup. Preserve existing `/1` embedded packaging.
 
 ## Done when
