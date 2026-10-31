@@ -22,7 +22,7 @@
 - Customer ownership stays in source -> change project/title without changing hook/DCM/host code; generic creation arguments exclude follow-up-specific fields.
 - Compatibility remains stable -> all `/1` golden bytes and fast compiler/Java/Node/shared regressions pass.
 - Evidence and review are adequate -> independent technical plan/result review, recorded user scope authorization, current Work Record, public-content checks and exact delivery revisions.
-**Plan review:** Pending independent architect implementation-plan review against the accepted contracts.
+**Plan review:** Architect gap review found the product target sufficient with no new product decision. Concrete API/fixture freeze and separate clean-context technical plan review remain pending; no implementation readiness is claimed.
 **Approvals:** Approved by user 2026-10-31: "ok, so can we now align what deveoped so far?" Scope is implementation of the already reviewed design and user-corrected tour at revision 85733de; this does not approve new behavior or contract departures. Any uncovered product decision requires renewed approval before dependent implementation.
 **Exceptions:** —
 **State:** Blocked
@@ -31,7 +31,7 @@
 ## Implementation
 
 - User requested implementation alignment after reviewing the tour and correcting ownership, model binding, task creation and documentation/process scope. Current main is 85733de; working tree was clean before creating this record.
-- Planning checkpoint: architect explicitly accepted the bounded read-only review, verified its role/revision and reported no competing assignment. Developer availability checks are pending. No compiler/runtime edit or implementation assignment has begun.
+- Planning checkpoint: architect completed the bounded read-only gap review; one developer confirmed availability, with the other check pending. A read-only technical-freeze follow-up has been offered. No compiler/runtime edit or implementation assignment has begun.
 - Canonical owning feature: [generic hook/capability correction](../../roadmap/features/generic-hook-capability-contract.md). Manager alone updates its shared roadmap state.
 
 ## Evidence
@@ -40,7 +40,17 @@ Pending implementation. Existing `/1` results are regression input, not proof of
 
 ## Plan review
 
-Architect review accepted and in progress against the published target. Exact API/fixture freeze, developer file ownership and any uncovered decisions remain pending; this is not plan approval or implementation readiness.
+Architect reviewed the implementation seams and published contracts at 65a0cf4. It found no new product decision and retained High/Large classification. This design-author assessment does not replace the required independent clean-context plan review.
+
+Proposed disjoint ownership:
+
+- Developer A: compiler-java, runtime-java, Java host and all shared conformance fixtures, scenario formats, generated artifacts and verification scripts. Deliver the compiler/reference fixture checkpoint first. New generated fixtures belong under conformance/generic-hooks; legacy goldens remain unchanged.
+- Developer B: runtime-node and Node host, including package metadata and installed-package checks. Consume A's exact fixtures and request shared changes from A; do not independently generate conformance goldens.
+- Manager: canonical Work Record, roadmap, documentation/status reconciliation, selected-commit integration and combined verification/review.
+
+Sequence: freeze exact Java/Node API wrappers, closed fields, diagnostic precedence and data-only scenario formats; obtain independent plan review; deliver compiler/fixture checkpoint while Node starts contract-based unit work; implement both bound-model/plan-validation/execution paths by reusing existing safety algorithms; update packaged hosts and shared verifier; run focused then combined fast regression and independent result review. Every `/2` read/effect profile must pass, not only the task example.
+
+Technical freeze must specify finite host-harness capacity and lifecycle evidence without adding a runtime registry or revocation API. Fresh authorizers enforce revocation; existing approved snapshots remain usable. The follow-up is read-only and no developer may start against independently invented wire/API shapes.
 
 ## Result review
 
