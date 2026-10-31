@@ -26,6 +26,7 @@ Reads may be composed and repeated within aggregate resource budgets. The defaul
 - Publish a small coherent contract and concrete examples before compiler/runtime changes. Keep current implemented behavior distinct from the corrected target; changing documentation does not qualify implementation.
 - Identify the exact compiler, Java, Node, artifact, host and fixture changes for a later bounded implementation assignment. Manager owns this feature and integration.
 - Capture the enduring product invariant in shared role guidance, with regression obligations that detect program-specific hook assumptions.
+- Establish one compact ownership model and audit the worked source-to-execution example against it: host-defined payload/catalog/adapters/authority, customer-authored logic/constants, compiler artifact, runtime bindings and both authoring-agent roles. Account for each value's origin; do not accept isolated field fixes while those boundaries remain ambiguous.
 
 ## Done when
 
@@ -38,4 +39,4 @@ Reads may be composed and repeated within aggregate resource budgets. The defaul
 
 ## Current execution
 
-The architect is drafting the docs-only contract revision. The additional authored-constant requirement has been sent; adoption of that clarification is not yet confirmed. No compiler/runtime implementation is assigned. The earlier single-effect checkpoint remains historical passing evidence, not validation of the corrected default. Resolve this contract before using the old per-hook grants as the model for real host integration.
+The architect's first docs-only draft was received and reviewed, but is not accepted for integration. It addresses generic catalog composition and optional restrictions; a bounded follow-up must cover the subsequent authored-constant clarification and the complete ownership walkthrough. A focused compile probe replacing only the project comparison with a raw project literal fails with `NOMINAL_MISMATCH`; define intentional typed constants without weakening nominal types or moving customer choices into hook input. No compiler/runtime implementation is assigned. The earlier single-effect checkpoint remains historical passing evidence, not validation of the corrected product contract.
