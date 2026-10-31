@@ -55,6 +55,8 @@ Java diagnostic follow-up `2f2adcb` integrated as `9999766`, changing only the g
 
 Node shared-corpus checkpoint: exact dependency `476c5f5` adopted as local `1150f1b`, preserving owned edits and leaving shared fixtures unchanged. Developer reports all nine read/nineteen effect rows and harness negatives passing (37 tests including an owned consumer negative, 2.30 seconds), plus 17 real-reference/eight API tests. Wrong-origin matches the authoritative row: one READ, then WRITE authorization denial at `/steps/3`, without an effect. A protected-argument capture representation mismatch was fixed in the host; expectations were preserved. Final owned regression, installed-package checks, host review and selected Node source delivery remain pending. These reports do not replace manager verification of the integrated revision.
 
+Java timing correction `73c736b` integrated as `29bccb8`, changing only preparation order in the existing late-response test. The 150 ms deadline and all receipt/uncertainty assertions are unchanged. Manager reran the affected test successfully (8.755-second reactor build). All reported Java source corrections are now integrated; final combined verification and independent result review remain open. Node's host reviewer found a missing independent catalog/version check in the sample authorizer; its owner reproduced the regression and is correcting it before package qualification.
+
 ## Plan review
 
 Architect reviewed the implementation seams and published contracts at 65a0cf4. It found no new product decision and retained High/Large classification. This design-author assessment does not replace the required independent clean-context plan review.
