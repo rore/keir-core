@@ -3,6 +3,7 @@
 - bound-cel-execution
 - portable-core-first-slice
 - single-effect-followup
+- generic-hook-capability-contract
 - demo-task-integration
 - enrich-followup-expressions
 - host-integration-assistant

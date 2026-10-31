@@ -44,6 +44,8 @@ Core implementation and packaged samples are complete. Real persistence, authori
 
 ### Accepted contract
 
+Product review on 2026-10-31 identified mandatory per-hook capability grants as an incorrect default. The [generic contract correction](generic-hook-capability-contract.md) owns the revised design and implementation. The accepted checkpoint below records what passed, not acceptance of that assumption as the intended extensibility model.
+
 The [effect specification](../../docs/specs/single-effect.md) and [design rationale](../../docs/internal/single-effect-followup-design.md) define the supported delta: a separate profile, a prior Boolean guard, no guarded-result references, terminal business handlers, conservative one-write authority and retained receipts. Winning response evidence settles before completion checks; a prior timeout winner ignores late responses.
 
 The separate scalar model preserves the baseline and read compatibility identities. Project equality and title are business data; adapters independently enforce native authorization and protected origin. Both adapters receive the original typed host key outside CEL. Real admission is rejected; simulations certify no production adapter.
