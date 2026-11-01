@@ -25,7 +25,7 @@ Writes, a transaction guard, AI, public registry publication and a complete acti
 
 ## Done When
 
-- [ ] Design/spec: review scoped reads, current authorization, resource identity and the host result-consumer contract.
+- [x] Design/spec: review scoped reads, current authorization, resource identity and the host result-consumer contract.
 - [ ] Implementation: the same artifact classifies a real completed/open task and the app consumes the validated result.
 - [ ] Verification: wrong-resource, cross-user selection/data access, denied, revoked, missing and malformed-result cases fail safely; two demo users show different configured behavior at the same hook and native CRUD remains usable.
 
@@ -33,6 +33,6 @@ Writes, a transaction guard, AI, public registry publication and a complete acti
 
 **Dependencies:** [native-task-app](../features/native-task-app.md); [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
-**Current work:** Architecture consultation confirms the existing read/2 API and scoped native service support this increment. [The implementation plan](../../.agent-workflow/tasks/real-task-reads.md) covers standalone integrity-pinned packaging, trusted per-user selection, projected task reads, advisory result consumption and a minimal native task-detail action. Independent technical plan review is active; implementation preparation is assigned. Source changes wait for that internal review, independently of deferred Studio UX. Keep existing runtime semantics, native ownership checks, Studio presentation, AI and writes outside the change.
+**Current work:** Architecture consultation and independent technical plan review approved the scoped read/consumer contract. The developer committed candidate `45499ae` in an isolated checkout: pinned runtime archive/provenance, two compiled programs, real scoped reads and native task-detail advice. Initial evidence reports 18 fast checks, two new Chromium journeys and eight Java artifact probe combinations passing. Final regression/standalone qualification is running; independent code review is requested against the committed candidate. [The Work Record](../../.agent-workflow/tasks/real-task-reads.md) retains measured evidence and remaining acceptance. This checkpoint does not complete or deliver the feature; Studio review, live AI and extension writes are outside the increment.
 
 **Design input:** [Task catalog, section 3](../../docs/internal/design-baseline/public/task-management-poc.md); [Host consumption and conformance, sections 4 and 12](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md).
