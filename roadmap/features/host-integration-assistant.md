@@ -10,25 +10,25 @@ repo: "keir-demo-app"
 
 ## Summary
 
-Demonstrate the host-design persona proposing a real domain/hook/capability change, validating it and submitting an exact revision to the host owner.
+Package the host-design persona as a skill for the visitor's own coding agent: inspect the native app, propose DCM/hooks/capabilities/adapters, validate them and submit an exact revision to the host owner. The demo does not need a second in-app host-design assistant.
 
 ## In Scope
 
 - Offer authorized interface/catalog inspection, typed drafting/validation tools and host conformance evidence.
 - Separate proposed definitions from publication; customer credentials and the assistant cannot certify or publish their own proposal.
-- Choose provider, credentials and spend bounds before live calls; keep the integration host-owned and guided by current schemas/docs.
+- Package concise coding-agent instructions, discovery/validation commands and examples against current schemas/docs. Host design-time uses the visitor's coding agent and its own model/authentication; the demo's extension-authoring provider configuration is separate.
 - Provide a future `pre-design-time` branch/checkpoint with the same working native app before Keir host configuration. A visitor's coding agent uses the host-design guidance to define the DCM, hooks, invokers and conformance evidence; the host owner reviews the result.
 - Keep `main` as the eventually configured customer-customization demo. Back the named starting branch with an immutable commit/tag, pinned setup/core compatibility and a deliberate checkpoint refresh procedure; do not continually merge completed integration into it or create it before the native baseline exists.
 
 ## Out of Scope
 
-An agent in core, automatic certification, mandatory API importers or a separate full chat product.
+An agent runtime in core, automatic certification, mandatory API importers or a separate in-app host-design chat product.
 
 ## Done When
 
-- [ ] Design/spec: define tool schemas, scope/effects, the host-owner publication boundary and a small supported integration-change scenario.
-- [ ] Implementation: a live developer request produces a validated, reviewable proposal and a separately approved published revision.
-- [ ] Verification: missing evidence, forbidden publication, customer credentials and budget exhaustion fail safely; approved definitions become discoverable by customer authoring.
+- [ ] Design/spec: define the skill's inputs, supported commands/tools, scope/effects, host-owner publication boundary and a small supported integration-change scenario.
+- [ ] Implementation: a developer loads the skill in their coding agent and produces a validated, reviewable host integration and a separately approved published revision.
+- [ ] Verification: missing evidence, forbidden publication and customer credentials fail safely; approved definitions become discoverable by customer authoring. The skill reuses the coding agent's credentials and requires no embedded demo host-design provider.
 - [ ] Walkthrough: document the pre-design-time checkout, native startup, coding-agent task and expected integration checks; verify it from a clean checkout using a compatible pinned core release. Main retains the configured customer journey.
 
 ## Notes

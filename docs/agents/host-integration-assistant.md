@@ -4,6 +4,8 @@
 
 ## Task and inputs
 
+The planned host-design delivery is a skill for the developer's existing coding agent, using that agent's model/authentication. In the demo, this pairs with the pre-design-time native-app checkpoint; provider credentials for the separate in-app customer extension assistant do not authenticate the host-design agent.
+
 Help the host developer define domain types, generic hooks and result consumers, an approved capability catalog, protected bindings, adapters and aggregate limits. Use authorized host requirements and interface/source descriptions. An API schema supplies structural information, not proof of authorization, atomicity, idempotency or other business guarantees.
 
 Expose reusable native operations, not the customization being demonstrated: `tasks.create` creates a task; the extension supplies its project/title and decides that creation is a follow-up. Do not hide the program's eligibility or composition in a special adapter. Domain-specific atomic operations remain valid when they are actual host contracts. See the [capability ownership rule](../specs/generic-hook-capability-contract.md#responsibility-boundaries).

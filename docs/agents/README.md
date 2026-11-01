@@ -7,7 +7,7 @@ Keir has two product-facing agent personas. Both are host integrations over Keir
 | Host integration assistant | Helps the host developer define the domain, DCM, hooks, capabilities, adapters and contracts | [Host integration](host-integration-assistant.md) |
 | Customer extension assistant | Helps a customer describe a customization, author an extension/scenarios and review simulation before requesting activation | [Extension authoring](extension-assistant.md) |
 
-**Status:** initial guidance for proposed workflows, not installed tools or a complete SDK. Host integrations and optional skill packaging are future work.
+**Status:** initial guidance for proposed workflows, not installed tools or a complete SDK. Planned delivery includes a host-design skill used by a developer's coding agent and the demo's in-app customer extension-authoring UI. These are two personas and execution contexts; the host-design skill does not require a second in-app agent.
 
 Both guides distinguish legacy `/1` contracts from the implemented experimental [generic-hook `/2` profiles](../specs/generic-hook-capability-contract.md). Local compiler, Java/Node and packaged-host checks pass; effects remain simulation-only. Generic hooks do not require a sample program's call list. Optional policy, aggregate budgets and current authorization remain separate; passing simulation does not certify real adapters or production readiness.
 
