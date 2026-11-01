@@ -23,11 +23,13 @@ The [delivered core](features/generic-hook-capability-contract.md) passes local 
 
 ## First deliveries
 
-1. [Native task app](features/native-task-app.md): persisted create/list/edit/complete with extensions and AI disabled. Choose the smallest UI/storage approach in that feature's design review; no implementation is assigned by this planning update.
+1. [Native task app](features/native-task-app.md): a polished clone-and-run local web app with persisted create/list/edit/complete and three seeded demo logins, with extensions and AI disabled. Each user represents a SaaS customer's isolated data/customization scope. Choose the smallest UI/storage approach in that feature's design review; no implementation is assigned by this planning update.
 2. [Packaged real reads](features/real-task-reads.md): use current read/2 with actual scoped task data and a host consumer. No richer language, public registry or AI is required.
 3. Mature [real-effect admission](features/real-effect-admission.md) alongside requirements from [native event/effect integration](features/demo-task-integration.md). Accept real writes only after the assurance gate; do not flip the simulation flag or substitute fake success for native evidence.
 
 The [core guard](features/pre-operation-guard.md) can be designed independently; [native guard enforcement](features/task-create-guard.md) follows the app and contract. Rich search/time work does not block the scalar path. Minimal trusted operator-selected artifacts are enough initially; the full [approval lifecycle](features/extension-approval-lifecycle.md) remains a separate outcome.
+
+The demo must visibly support different extensions at the same hook for different users, with service-enforced scope and independent activation. The [host-design assistant](features/host-integration-assistant.md) also owns a future `pre-design-time` starting branch/checkpoint for a visitor's coding agent to configure the host; `main` becomes the configured customer-customization journey. Preserve one native app and a reproducible checkpoint rather than two independently maintained products.
 
 ## Decomposition of earlier broad cards
 

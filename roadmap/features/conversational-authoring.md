@@ -15,6 +15,7 @@ Add the customer persona on top of the manual exact-revision review/activation f
 ## In Scope
 
 - Discover only the approved scoped catalog, clarify intent and generate/repair source using compiler diagnostics.
+- Bind conversations, tool access, scenarios and activation requests to the signed-in demo user; switching users must not expose another user's customization or conversation state.
 - Propose scenarios but keep expected outcomes independently reviewable; explain artifact-derived behavior and simulation differences.
 - Request exact activation through host policy, with bounded calls/cost and renewed approval after changes.
 

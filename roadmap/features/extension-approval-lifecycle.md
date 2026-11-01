@@ -17,6 +17,7 @@ Provide a manual source-to-simulation-to-approval-to-activation workflow before 
 - Retain linked source/artifact/model/environment/adapter/consumer/scenario identities and independent expected outcomes.
 - Choose trustworthy selection storage or signing from an explicit threat model; content hashes alone are not authority.
 - Add scoped active selection, disable/revoke, rollback for new invocations and retention of approved dependencies/in-flight selections.
+- Keep sources, scenarios, approvals and active bindings isolated per demo user. Show the same hook with different customizations for two users; disabling or rolling back one user's binding must leave the other's behavior intact.
 
 ## Out of Scope
 
@@ -26,7 +27,7 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 
 - [ ] Design/spec: define approval authority, invalidation/reapproval and lifecycle behavior, including selection versus event admission.
 - [ ] Implementation: manually compile, simulate, inspect actual behavior, approve and activate an exact revision; disable and roll back it.
-- [ ] Verification: tampering, self/unauthorized approval, edits after review, restart, revoked dependencies and old snapshot coexistence behave as specified.
+- [ ] Verification: tampering, unauthorized/cross-user approval or selection, edits after review, restart, revoked dependencies and old snapshot coexistence behave as specified. The owning demo user may approve their own extension where host policy permits; the agent cannot self-approve.
 
 ## Notes
 
