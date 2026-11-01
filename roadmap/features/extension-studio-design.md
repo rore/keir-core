@@ -12,6 +12,8 @@ repo: "keir-demo-app"
 
 The Extension Studio is the centerpiece of the demo. Produce a detailed product, interaction and visual design that makes Keir's value and complete customization process understandable to a business user before implementing the Studio UI.
 
+The designer owns UX/UI: a purposeful, polished application with clear hierarchy, usable density and realistic interactions, not a generic AI template. The architect owns technical constraints; the manager coordinates acceptance. The current prototype is a proposal to assess, not an approved visual direction or a production UI contract.
+
 ## In Scope
 
 - Map intent, clarification, proposed behavior, compilation/repair, scenario design, simulation, review, exact activation, observed application behavior and later revision/disable/rollback. Define how users move back and forth without losing work.
