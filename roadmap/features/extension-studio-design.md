@@ -40,4 +40,4 @@ A generic agent builder, a second host-design chat, implementation of the comple
 
 Design may start before backend completion. This card owns the reviewed experience; the related features own executable behavior and verification. Keep the first native task slice small while reserving deliberate design effort for the Studio.
 
-Current work: UX specification and interactive prototype under [the core-owned task record](../../.agent-workflow/tasks/extension-studio-prototype.md). Design and implementation evidence are pending; user prototype review has not occurred.
+Current work: an initial [UX specification](https://github.com/rore/keir-demo-app/blob/main/docs/extension-studio-design.md) and scripted interactive prototype are available under [the core-owned task record](../../.agent-workflow/tasks/extension-studio-prototype.md). Ten focused Node checks pass; actual browser walkthrough and desktop/narrow inspection cover the first journey and mismatch recovery. User prototype review, the full conversation/progress/cancellation design and remaining feedback are pending. This contribution does not complete the feature or certify live AI/native behavior.
