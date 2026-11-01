@@ -1,37 +1,38 @@
 ---
-id: enrich-followup-expressions
-title: Add bounded tags, search and due dates to the follow-up example
-status: queued
-priority: medium
-commitment: committed
-milestone: Customize a real task application
-repo: keir-core
+id: "enrich-followup-expressions"
+title: "Add bounded tags, search and due dates to the follow-up example"
+status: "queued"
+priority: "medium"
+commitment: "committed"
+milestone: "Extend host behavior safely"
+repo: "keir-core"
 ---
 
 ## Summary
 
-Extend the working scalar follow-up to the baseline invoice scenario: bounded get/search results, an invoice-sent tag condition, and a follow-up due 168 elapsed hours later. Keep the same program portable across Java and Node.
-
-## Why
-
-New language capabilities should extend an already runnable example. Collections and time add real semantic/resource work and are not prerequisites for seeing the first guarded effect.
+Extend the existing scalar program to the selected invoice example: get/search, tag membership, conditional create and a due date 168 elapsed hours later.
 
 ## In Scope
 
-Specify and measure bounded lists, required optional encodings, size, one non-nested exists, timestamps and literal elapsed durations. Admit only the constructs used by this scenario, including precision/range/overflow and enum/presence rules. Preserve actual call/data dependencies and immutable source-controlled conditions; do not replace composition with a task-specific policy adapter.
+- Mature only the required bounded list, presence/optional, size, one non-nested exists, timestamp and elapsed-duration semantics.
+- Expose the work across language/DCM schemas, parser/type overlay, checked CEL/descriptor and wire-value encodings, compiler and both runtime validators/evaluators.
+- Measure worst-case no-match scans, string/intermediate allocations, aggregate costs, precision/range/overflow and incomplete query results before admitting constructs.
 
 ## Out of Scope
 
-General sorting, nested comprehensions, unrestricted maps, all/filter/map unless another feature needs them, timezone calendars, multi-effects or treating search as atomic duplicate prevention.
+General sorting, nested comprehensions, arbitrary maps, calendar/timezone scheduling, multi-effects and search as atomic duplicate prevention.
 
 ## Done When
 
-- The maintained get -> search -> conditional create example runs identical compiled bytes in both runtimes, with the original call order visible.
-- Qualifying tag, no-match scan, existing follow-up, absent/oversized/incomplete result, time overflow and adapter failure cases have shared expected outcomes.
-- Actual CEL evidence supports the newly admitted collection/time bounds, including worst-case no-match scans and aggregate costs. Unsupported shapes fail closed.
-- Same-artifact simulation, structured diagnostics, public specs and both agent examples cover the additions; the simpler read-only and scalar-effect corpora still pass.
-- The host's real uniqueness/idempotency guarantee remains a separately tested adapter obligation.
+- [ ] Design/spec: publish exact selected type/value/absence/time rules, diagnostics, bounded CEL operations and accepted/rejected examples; no whole-language freeze.
+- [ ] Implementation: compiler and both runtimes execute identical get -> search -> guarded-create artifact bytes with the source-owned condition and 168-hour arithmetic.
+- [ ] Verification: tags, existing matches, absent values, oversized/incomplete lists, time overflow and adapter failures have shared outcomes; adversarial CEL costs are measured and unsupported forms rejected.
+- [ ] Documentation: schemas and both persona examples match support; all simpler scalar and legacy regressions remain passing.
 
 ## Notes
 
-Depends on [the scalar effect path](single-effect-followup.md). Coordinate with [real task integration](demo-task-integration.md), but do not delay a real scalar host integration merely to complete this enhancement. This carries the original baseline example forward without making it the minimum first-write implementation.
+**Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md); [bound-cel-execution](../features/bound-cel-execution.md).
+
+**Design input:** [Language/dataflow/CEL, sections 3-5 and 10-12](../../docs/internal/design-baseline/public/keir-language-v0.md); [Selected types and query contracts, sections 2-3](../../docs/internal/design-baseline/public/domain-model-v0.md); [Baseline invoice scenario, section 4A](../../docs/internal/design-baseline/public/task-management-poc.md).
+
+Preserves the existing runnable enhancement outcome. The native richer-query/due-date integration is rich-task-customizations. Selected type/schema/compiler/runtime/resource work is explicit here; broader type families remain a separate proposal. This card does not block native CRUD, real reads or the first scalar effect. Production containment claims still require runtime-resource-qualification.
