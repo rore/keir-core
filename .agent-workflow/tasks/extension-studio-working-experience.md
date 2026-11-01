@@ -26,7 +26,7 @@ Canonical task: `agent-workflow:extension-studio-working-experience`. Owning fea
 **Plan review:** Routine self-review: reuse the model and two-asset server; keep evidence snapshots inspectable but historical controls read-only. No new dependencies or production abstractions. Proposal assumptions do not block this bounded exploration or constitute acceptance.
 **Approvals:** Not required at this risk level. The manager assigned the concrete local prototype within the user-authorized interaction direction; user design review remains pending.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -34,11 +34,21 @@ Canonical task: `agent-workflow:extension-studio-working-experience`. Owning fea
 - Initial recovery context: core main at `f7fa4ce`, demo main at `b6f2b03`; both clean at pickup. Scope reserved to this task. No worktree created.
 - Classification directly applies the current policy: demo documentation paths BLUE, Work Record excluded; no boundary, contract, dependency or real-effect changes.
 - Existing desktop assessment reused. Native working-screen source inspected for project/user structure and control vocabulary; native application stays unchanged.
+- Recovery plan committed as `3a582c3` before prototype changes. Implementation reuses the two-asset server and pure state model; no dependencies or production files changed.
+- Implemented compact application shell, populated continuing conversation, visible draft/active selection, immutable evidence receipts and held-canvas offers. Unsubmitted field values survive arriving results. Current-review guards reject stale controls; keyboard approval moves focus to the separate activation control.
+- Added scripted delayed run, pause/resume, reload interruption, draft supersession and user-switch interruption. Late results cannot cross users or apply to a changed draft. Production cancellation and durable history remain outside this increment.
+- Verification checkpoint: focused Node suite and actual desktop/narrow interaction checks are in progress; public design document records assumptions and the representative journey. Existing isolated workflow tooling was located and reused without installation or configuration changes.
 
 ## Evidence
 
-Pending implementation and focused verification.
+- Demo implementation: `b3d226b` on main. Only the four reserved documentation/prototype files changed; the existing allowlisted server and native source are unchanged. Core recovery commit `3a582c3` preceded all product edits.
+- `node --test docs/extension-studio/studio.test.mjs`: 25 checks pass, zero failures/skips, 0.228 seconds including the runner. Existing sixteen checks remain. Added checks cover immutable evidence, held-canvas offers, stale review, separate activation, paused/late completion, reload, user isolation and interruption-state accuracy. The sandbox blocked the loopback test connection; unchanged checks passed with isolated loopback access. Inline browser module and state-module syntax checks pass.
+- Actual Chrome desktop walkthrough: populated clarification; running -> paused -> resumed mismatch; unsent canvas title preserved while fresh evidence is offered; explicit expectation correction; exact review; keyboard Space/Tab/Enter through both confirmations and approval, then focus on separate activation; active r2 remains selected while draft r3 changes. Reopening r1 evidence shows its original title/results with no approval control. Reload during a run displays Interrupted and requires Resume.
+- Actual 390-pixel narrow layout: 375-pixel document content width, no horizontal overflow; both working areas remain available with keyboard-focusable links between them. Temporary viewport override reset. Saved desktop screenshot is retained in ignored task evidence. One browser asynchronous-listener channel error was observed without an application stack or failed interaction; these checks do not diagnose browser extensions or constitute a full accessibility audit.
+- Fresh complete-path Redline reports BLUE for demo and core record, no boundary violations. Changed-content privacy and whitespace checks pass. No private paths or routing details were added to tracked content. Explicit Work Record validation is clean for both path sets, with no failed predicates. The core task diff starts at `c3cbead7`, the parent of the recovery commit; that earlier manager-owned roadmap update is excluded from this task's changes.
 
 ## Result review
 
-Pending. This contribution will remain a proposal until actual user interaction review; manager retains feature reconciliation.
+Routine self-review at demo `b3d226b`: completion criteria are met for this bounded scripted proposal. Existing behavior tests remain intact; new checks exercise actual transition entry points, and rendered checks cover state/focus continuity that pure model tests cannot establish. Historical evidence remains inspectable without granting current approval authority. Two public assets and the existing transition model remain sufficient; no dependency or production abstraction was added.
+
+The conversation lifetime and canvas attention behavior remain proposal assumptions. Production provider operations, durable history, real execution, full accessibility and user design acceptance remain unverified. Native app, runtime semantics and environment were untouched. No changes were pushed. Manager owns roadmap reconciliation, integration and user review; the feature remains active. No worktree was created or requires cleanup. The existing preview service is retained without restart for review.
