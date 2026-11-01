@@ -48,7 +48,7 @@ Final implementation: `933c5c8c2ac587d588a9ee83052905b9e6b2d024`, locally verifi
 | Package integrity | All seven Node source/archive/installed files equal; archive/metadata/lock SHA-512 matches; registry pins unchanged. 21,476 packed/79,140 unpacked bytes. All 51 packaged Java runtime/host classes match; compiler/parser exclusion and legacy manifest pass. |
 | Compatibility | Existing `/1` golden bytes unchanged; explicit `/2` source/profile/reference fixtures deterministic. Project/title changes remain source-only; generic create arguments remain projectId/title. |
 
-Coverage: compiler 848/893 lines and 724/835 branches; Java runtime 1117/1129 lines and 1043/1223 branches; Java host 490/494 lines and 678/784 branches. Coverage and simulation do not certify real authorization, native idempotency, remote cancellation, decoded-heap containment or production readiness. Effects remain simulation-only. New alignment CI has not run; earlier CI links certify only the prior `/1` checkpoint.
+Coverage: compiler 848/893 lines and 724/835 branches; Java runtime 1117/1129 lines and 1043/1223 branches; Java host 490/494 lines and 678/784 branches. Coverage and simulation do not certify real authorization, native idempotency, remote cancellation, decoded-heap containment or production readiness. Effects remain simulation-only. Main-push [product CI](https://github.com/rore/keir-core/actions/runs/41280457363) and [workflow CI](https://github.com/rore/keir-core/actions/runs/41280457420) pass on `55c0f27`.
 
 Selected source deltas and attributable integration:
 
@@ -97,4 +97,4 @@ Verification adequacy: **APPROVED**. All earlier Java and Node findings are reso
 
 Human result review: approved by user on 2026-11-01: "You can merge". This approves delivery of reviewed implementation `933c5c8` and reconciled documentation `18eee0a` on main under the existing no-PR instruction. Public status documentation describes measured experimental local support; no real-write or production guarantee is claimed.
 
-Delivery is in progress: verify remote ancestry, push main, check CI and recoverably clean completed task worktrees. Retain needed ignored evidence until cleanup; the manager retains delivery ownership.
+Delivery: approved implementation and documentation pushed to main at `55c0f27`; product and workflow CI both passed. Both completed contributor worktrees were recoverably archived after verifying clean state, recovery references, a complete Git bundle and checksummed preservation of needed ignored evidence. The owning feature is complete; broader production and native-host qualification remain outside this task.

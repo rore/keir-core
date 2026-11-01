@@ -1,7 +1,7 @@
 ---
 id: generic-hook-capability-contract
 title: Decouple hook contracts from capability selection
-status: active
+status: done
 priority: high
 commitment: committed
 milestone: Execute extensions in Java and Node
@@ -45,8 +45,8 @@ Reads may be composed and repeated within aggregate resource budgets. The defaul
 
 Implementation is locally verified at `933c5c8`: explicit `/2` compilation, nominal source constants, generic `tasks.create(projectId,title)`, reference artifacts, complete host-bound DCM/invoker registration and fresh scoped execution in Java/Node. The [worked example](../../docs/specs/generic-hook-example.md) and [three-stage tour](../../docs/guided-tour.md) keep host payload/authority separate from customer logic/constants. Two models support six compiled programs, including alternate/repeated reads and source-only project/title variants. Existing `/1` APIs and goldens remain unchanged.
 
-The [alignment Work Record](../../.agent-workflow/tasks/align-generic-hook-runtime.md) is Ready for review. Final checks pass: 216 Java tests, 367 Node tests, three installed-host tests, complete legacy corpora and all nine generic read/nineteen generic effect rows through sixteen compiler processes/eight host batches. Package byte/integrity checks pass. Independent final technical review approves the source and verification adequacy after all findings were corrected with regressions; see [testing evidence](../../docs/testing.md).
+The [alignment Work Record](../../.agent-workflow/tasks/align-generic-hook-runtime.md) records accepted delivery. Final checks pass: 216 Java tests, 367 Node tests, three installed-host tests, complete legacy corpora and all nine generic read/nineteen generic effect rows through sixteen compiler processes/eight host batches. Package byte/integrity checks pass. Independent final technical review and human result review approved the result; see [testing evidence](../../docs/testing.md).
 
-Effects remain simulation-only. Real service authorization, native idempotency, transport guarantees, decoded-heap containment, production qualification and release remain open. No registry/activation service, multi-write execution or demo application was added. Existing CI results certify the earlier `/1` checkpoint; the new alignment has not run in CI.
+Effects remain simulation-only. Real service authorization, native idempotency, transport guarantees, decoded-heap containment, production qualification and release remain open. No registry/activation service, multi-write execution or demo application was added.
 
-Human result review was approved on 2026-11-01. Delivery on main, CI verification and recoverable cleanup of completed task worktrees are in progress; keep this feature active until delivery is confirmed. Specifications and both product-assistant guides describe measured `/2` support. Separate independently progressing deliveries will use distinct records; this task retains one manager-owned acceptance boundary.
+Human result review approved delivery on 2026-11-01. Main contains the change at `55c0f27`; [product CI](https://github.com/rore/keir-core/actions/runs/41280457363) and [workflow CI](https://github.com/rore/keir-core/actions/runs/41280457420) pass. Both completed contributor worktrees are recoverably archived with required evidence preserved. Specifications and both product-assistant guides describe measured `/2` support. This feature is complete; subsequent independently progressing deliveries use distinct records under their owning features.
