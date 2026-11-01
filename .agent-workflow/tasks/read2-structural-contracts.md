@@ -1,0 +1,49 @@
+# Read/2 structural contracts
+
+Canonical task: `agent-workflow:read2-structural-contracts`. Owning feature: [machine-readable-contracts](../../roadmap/features/machine-readable-contracts.md). This is the first read/2 increment; broader profiles, simulation, discovery and diagnostic tooling remain on the feature.
+
+<!-- agent-workflow:start -->
+**Outcome:** Authoring tools can inspect and structurally validate the supported read/2 source, DCM and reference artifact using three explicit schemas and examples, while native parsing, semantics and execution authority remain enforced by Keir and the host.
+**Target:** keir-core
+**Scope:** Three schemas under schemas/read-2; a compact normative index and links from both product-agent guides; conformance fixtures, a dev-only schema runner/dependency, focused compiler/Java/Node cross-check tests and existing product CI integration; this Work Record. Manager owns the roadmap.
+**Constraints:** Decoded read/2 instances only. Preserve runtime/compiler production code, public APIs, admitted semantics, older profiles and existing golden bytes. Add no schema/profile fields to customer payloads, serialized host binding or new semantic validator. Schema success grants no approval or execution authority. No YAML decoder in Python, remote reference retrieval, runtime schema dependency, global tooling/configuration, license/release/publication or preview/data changes.
+**Completion criteria:** The three Draft 2020-12 schemas cover actual read/2 closed shapes, local bounds and variants; existing supported positives and meaningful boundary/invalid fixtures validate as expected. Focused native cross-checks demonstrate selected schema-pass/native-fail residual parsing/semantic/authority cases without dispatch. Both persona guides reference the same maintained definitions. The dev-only check is reproducible, measured fast and included in product CI; older profiles and golden artifacts remain unchanged.
+**Requirement baseline:**
+{"source":"https://github.com/rore/keir-core/blob/6b9a6f0/roadmap/features/machine-readable-contracts.md","outcome":"Authoring tools can inspect and structurally validate the supported read/2 source, DCM and reference artifact using three explicit schemas and examples, while native parsing, semantics and execution authority remain enforced by Keir and the host.","scope":"Three schemas under schemas/read-2; a compact normative index and links from both product-agent guides; conformance fixtures, a dev-only schema runner/dependency, focused compiler/Java/Node cross-check tests and existing product CI integration; this Work Record. Manager owns the roadmap.","constraints":"Decoded read/2 instances only. Preserve runtime/compiler production code, public APIs, admitted semantics, older profiles and existing golden bytes. Add no schema/profile fields to customer payloads, serialized host binding or new semantic validator. Schema success grants no approval or execution authority. No YAML decoder in Python, remote reference retrieval, runtime schema dependency, global tooling/configuration, license/release/publication or preview/data changes.","completion_criteria":"The three Draft 2020-12 schemas cover actual read/2 closed shapes, local bounds and variants; existing supported positives and meaningful boundary/invalid fixtures validate as expected. Focused native cross-checks demonstrate selected schema-pass/native-fail residual parsing/semantic/authority cases without dispatch. Both persona guides reference the same maintained definitions. The dev-only check is reproducible, measured fast and included in product CI; older profiles and golden artifacts remain unchanged."}
+**Relationships:**
+{"schema_version":1,"sources":[{"provider":"minimap","scope_ref":"roadmap:v1:git:github.com/rore/keir-core#roadmap","local_ref":"item:v1:machine-readable-contracts"}],"pull_requests":[]}
+**Risk:** Elevated
+**Complexity:** Moderate
+**Reason:** Schema/test/script/CI paths have a GRAY floor with no boundary/checkpoint. This adds structural tooling and verification without changing native security/semantic contracts; three related definitions, fixtures and cross-runtime test seams require Moderate complexity.
+**Discovery:** Read-only core-developer inventory identifies current sourceShape/bindingShape and Dcm parsers, reference-artifact validators, generic-hook fixtures and both runtime boundaries. Historical draft schema is incompatible with current limits and literal syntax; preserve it as history and add current files. Draft202012Validator already exists in isolated development tooling; no runtime engine is needed. Numeric token rules, UTF-8 byte limits, strict YAML, CEL/types, hashes, reference resolution, policy inheritance and current authority exceed ordinary JSON Schema.
+**Material assumptions:** Current supported parser/validator behavior is coherent enough for structural definitions; report an actual discrepancy instead of changing production semantics. Existing jsonschema 4.26.0 can be pinned as dev/test-only and run from isolated tooling; if portability/setup fails, propose an isolated supported correction. Ordinary schema success must not be described as native or host acceptance.
+**Plan:** Use schemas/read-2/{source,dcm,artifact}.schema.json with Draft 2020-12, local definitions and proposed stable IDs urn:keir:schema:read-2:source:1 / dcm:1 / artifact:1. IDs version the schema documents, not payload formats or a public release. Source keeps language keir/v0 and external read/2 selection; DCM/artifact retain existing formats/modelRef. Artifact schema describes the current qualified environment tuple exactly (0.14.0/0.6.1/4.35.1/2.6.2); native environment/pin checks still govern execution. Derive closed shapes, local identifier/hash/base64 forms, variant exclusivity, map/array ceilings and mathematical quotas from actual current parsers; permit legitimate unused WRITE catalog definitions and optional policy without inventing grants. Do not duplicate references, CEL/type validation, canonicalization, policy composition or authority. Add a compact index/residual-check matrix and one link from each persona guide. Reuse unchanged generic read fixtures; use JSON source equivalents cross-checked through native StrictData/source digests, never a second YAML parser. Add boundary/overflow and shape-negative fixtures plus explicitly separate schema-pass/native-fail cases through current compiler and both runtime test seams. Any new executable positive artifact comes from the real compiler; existing goldens remain untouched. Implement a small dev-only Python check using pinned jsonschema 4.26.0, offline local references and no remote retrieval. Document isolated setup and measured fast command. Extend existing keir-contract CI trigger paths for schemas/tool/requirements and add the fast schema step without changing job identity, permissions, timeouts or protection; preserve Java/Node regressions. Independent technical plan review precedes implementation; recheck semantic/API assumptions rather than widening scope.
+**Verification plan:**
+- Structural contracts -> schema self-validation plus table-driven positive, boundary and negative fixtures for every closed record/variant/local ceiling; positive unused WRITE catalog and explicit nominal literals retained.
+- Residual boundaries -> selected structural-pass unknown references/protected args/WRITE call/policy/call-count/pin/checked-metadata/UTF-8 cases fail through native compiler/Java/Node boundaries with no callbacks; schema failures never replace native diagnostics.
+- Compatibility -> unchanged current fixture digests/golden bytes and focused existing validator tests; compile new executable positives once and consume identical bytes in both runtimes.
+- Tooling/CI -> dev-only pinned validator, explicit no-remote retrieval, JSON decoded-instance scope, portable isolated setup, measured fast command and existing product CI execution; no new runtime dependency.
+- Delivery -> complete-path Redline/Work Record checks, private-content/identity/whitespace inspection, independent result review and recoverable task-worktree cleanup.
+**Plan review:** Pending independent non-implementer review, including schema identity/environment treatment and verification adequacy.
+**Approvals:** Not required at the declared Elevated risk. This implements the bounded second slice discussed with the user; Studio UX is independent. Any actual production-semantic or authority change returns the task to planning.
+**Exceptions:** —
+**State:** Blocked or returned to planning
+<!-- agent-workflow:end -->
+
+## Implementation
+
+- Context and baseline recorded before edits. Core baseline `b2c55fe`; read-only scoping was completed against unchanged production parser/runtime trees. No implementation worktree is assigned yet.
+- Initial intended-path Redline is GRAY, with no boundary violation or required checkpoint. Proposed publication IDs and exact qualified-environment treatment await plan review; no claim of existing schemas or native parity is made.
+- Manager owns this record during planning. The prospective developer made no edits, installs or tests in the read-only inventory and ended its investigation association.
+
+## Plan review
+
+Pending independent architectural/technical review of the concrete scope, supported-shape fidelity, residual boundaries, schema IDs/environment treatment and test/CI plan.
+
+## Evidence
+
+Planning only. No new schema, fixture runner or cross-runtime result exists yet.
+
+## Result review
+
+Pending implementation and measured evidence.
