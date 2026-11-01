@@ -45,7 +45,7 @@ Agent technical review: independent non-implementer approved exact plan `48b33b0
 
 ## Evidence
 
-Implementation revision: demo `45499aea1631fa4b578f54d5eb1abc216e88b5dd` on its assigned task branch, based on `33d5c4e`. The worker is clean; independent technical result review and manager integration remain pending. No push, canonical preview/data changes, core source changes or production qualification are claimed.
+Implementation revision: demo `45499aea1631fa4b578f54d5eb1abc216e88b5dd`, based on `33d5c4e`. Independent technical review approved this exact revision; manager fast-forwarded canonical demo main without changing its bytes. Final delivery and cleanup follow the verification below. Existing previews/data, core source and production guarantees remain unchanged.
 
 - Packaging/authoring checkpoint: archived exact clean source `0e7d44c05c188631892278fc838f3d89146fe028` into isolated tooling; current core runtime/compiler trees equal that revision. Fresh offline compiler package succeeded in 11.630 seconds with tests deliberately skipped (unchanged core conformance reused). Runtime archive contains exactly seven manifest/README/source files, 21,476 compressed bytes; SHA-512 integrity and per-file SHA-256 are retained in demo provenance. Local dependency installation succeeded; distribution qualification remains pending. Two real YAML sources compile under one minimal read/2 DCM to distinct pinned artifacts. Initial consumer ID failed supported-name validation; corrected before compilation, without changing runtime semantics.
 
@@ -62,5 +62,10 @@ Implementation revision: demo `45499aea1631fa4b578f54d5eb1abc216e88b5dd` on its 
 
 ## Result review
 
-Pending independent non-implementer review of demo `45499ae` and this recorded evidence. Manager owns acceptance, canonical integration/push and roadmap closure. Retain the isolated task checkout and own exact work participation until acceptance; then coordinate recoverable cleanup. No extra role-guidance changes were needed.
+Agent technical review: independent non-implementer approved exact demo `45499ae` for local demo integration with no blocking findings. Review covered packaged source/provenance/lock and artifact pins, scoped reads and current authorization, result validation, API/client stale-response handling and the final measured evidence. The reviewer ended its participation; no code changes or broad suites were repeated.
 
+Reviewed revision: `45499aea1631fa4b578f54d5eb1abc216e88b5dd` versus `33d5c4e`.
+
+Verification adequacy: 21 Node regression tests, nine Chromium journeys, eight exact-artifact Java probes, a standalone locked install/build/server check without Java or a core checkout, exact archive/source/install/pin checks and the independent code review cover this bounded real-read integration. Manager inspected the saved rendered advice screen, read the final logs and verified canonical main equals the reviewed commit. No production identity, broader runtime containment, live AI or real extension-write qualification is inferred.
+
+Integration checkpoint: canonical demo main is exactly the reviewed candidate. Existing previews were not restarted and their data was preserved. A verified source recovery bundle and 35 private evidence files are retained before cleanup. Final workflow checks, push/CI and owner release are manager-owned; the worker is retained until those handoff conditions are met. No new role-guidance changes were needed.
