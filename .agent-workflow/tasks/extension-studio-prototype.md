@@ -25,19 +25,26 @@ Canonical task: `agent-workflow:extension-studio-prototype`. Owning feature: [ex
 **Plan review:** Self-review for Routine risk: the plan preserves explicit scripted status, isolates all prototype files under docs/extension-studio and provides transition checks plus actual browser review. User approval of the experience remains pending and is required before production Studio UI implementation.
 **Approvals:** Not required at this risk level. User authorized the described two-track start: "ok, so let's go" (2026-11-01); prototype UI review remains a separate future checkpoint.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 - Initial context recorded before implementation. Core owns this record; app artifacts and tests stay in demo. Direct-main integration remains manager-owned; no PR requirement.
 - Baselines: core `341448d`, demo `0b47b3e`. Prototype targets: `docs/extension-studio-design.md`, `docs/extension-studio/index.html`, `docs/extension-studio/studio.mjs`, `docs/extension-studio/studio.test.mjs`. These are manager-owned and disjoint from native app implementation. Use a small pure state model with Node transition tests and a static browser UI; no dependencies or production component API are introduced.
+- Implementation checkpoint: first model and actual browser journey cover describe/behavior/scenario review/approval/separate activation/illustrative outcomes, mismatch blocking and user switching. The prototype retains tab-local state and labels every effect scripted. Add the bounded `docs/extension-studio/serve.mjs` static launcher so a visitor needs only Node rather than a separate Python installation; serve two allowlisted public assets on loopback and check routes with the existing Node test file. This supports the same runnable-prototype scope; it is not the application server or a new backend abstraction.
 
 ## Evidence
 
-Pending. No test, working UI, real AI or native guarantee is claimed.
+Verified prototype source: demo `ba467f7`, with customer-copy-only refinement `49f6030`. Ten Node checks pass (nine state-transition checks and an allowlisted static-server check), zero failures/skips, 0.289 seconds including the runner. The loopback test required ordinary isolated execution outside the sandbox after sandbox EACCES; the unchanged test then passed. This is an execution limitation, not a product failure bypass.
+
+Actual browser walkthrough verified describe -> behavior -> scenarios -> separate approval/activation -> illustrative task outcome, plus deliberate mismatch blocking and user-corrected recovery, different user drafts, tab-local reload resume and keyboard Tab progression. Desktop 1440-pixel and narrow 390-pixel viewport checks were inspected; narrow layout reported 375-pixel content width with no horizontal overflow. Temporary viewport override was reset. This is focused interaction/visual evidence, not a full accessibility audit or native/AI verification.
+
+Prototype server is task-owned and loopback-only; it serves only the two public prototype assets. Native app source remains separate. Current prototype has scripted immediate transitions; complete live clarification, progress/cancellation/interruption states and user feedback remain open design work.
+
+Fresh demo Redline is BLUE with no checkpoint/boundary violation. Explicit record checking passes all structural, baseline, relationship, risk, review and evidence predicates; one nonblocking commit-order advisory remains because the initial core commit contains both task records and a roadmap update. Source inspection confirms that heuristic counts any path other than this record as code. Actual history places the committed recovery record at core `484c5b3` before prototype code at demo `ba467f7`; no history rewrite or rule waiver is needed. Field-feedback trigger 6 dropped: the documented advisory heuristic is not a failed gate and recovery evidence is intact.
 
 ## Result review
 
-Pending implementation and verification.
+Routine self-review: bounded state model preserves draft/active snapshots, approval prerequisites and mismatch integrity; repeated activation does not invent another rollback entry. Static launcher exposes only its two assets and rejects other routes/methods. Copy keeps architectural detail in the design document rather than mandatory customer interaction. User review of the actual experience is still pending, so the full Studio design feature remains active and production Studio UI implementation is not authorized by this contribution.
 
