@@ -11,6 +11,7 @@
 - pre-operation-guard
 - task-create-guard
 - task-organization
+- extension-studio-design
 - machine-readable-contracts
 - reusable-simulation
 - extension-approval-lifecycle

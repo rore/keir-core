@@ -2,7 +2,7 @@
 id: "conversational-authoring"
 title: "Author customer extensions through a bounded AI workflow"
 status: "queued"
-priority: "medium"
+priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
 repo: "keir-demo-app"
@@ -15,6 +15,7 @@ Deliver the in-app AI-driven extension creation UI on top of the manual exact-re
 ## In Scope
 
 - Discover only the approved scoped catalog, clarify intent and generate/repair source using compiler diagnostics.
+- Implement the reviewed Extension Studio experience, including structured behavior/scenario review and clear draft/active status. The demo must expose the process and value, with recoverable interactions rather than only a chat transcript.
 - Bind conversations, tool access, scenarios and activation requests to the signed-in demo user; switching users must not expose another user's customization or conversation state.
 - Propose scenarios but keep expected outcomes independently reviewable; explain artifact-derived behavior and simulation differences.
 - Request exact activation through host policy, with bounded calls/cost and renewed approval after changes.
@@ -34,7 +35,7 @@ Generated UI, agent certification, automatic approval, endpoint registration and
 
 ## Notes
 
-**Dependencies:** [extension-approval-lifecycle](../features/extension-approval-lifecycle.md); [machine-readable-contracts](../features/machine-readable-contracts.md); [reusable-simulation](../features/reusable-simulation.md).
+**Dependencies:** [extension-studio-design](extension-studio-design.md); [extension-approval-lifecycle](../features/extension-approval-lifecycle.md); [machine-readable-contracts](../features/machine-readable-contracts.md); [reusable-simulation](../features/reusable-simulation.md).
 
 **Design input:** [Customer authoring and approval, sections 1 and 6-7](../../docs/internal/design-baseline/public/simulation-and-authoring-v0.md); [Application authoring UX, section 5](../../docs/internal/design-baseline/public/task-management-poc.md).
 
