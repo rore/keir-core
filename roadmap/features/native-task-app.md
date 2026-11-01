@@ -1,7 +1,7 @@
 ---
 id: "native-task-app"
 title: "Use a persistent task app without extensions"
-status: "active"
+status: "done"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -27,8 +27,8 @@ AI, Keir activation, deployment infrastructure, collaboration and a scheduling e
 ## Done When
 
 - [x] Design/spec: settle the minimal task model, user ownership/sign-in, persistence lifecycle and visual direction; document local prerequisites and the later per-user customization boundary.
-- [ ] Implementation: documented pinned setup/seed/start opens the web app from a clean clone; sign in as any of three seeded users, create a project, add/edit/list/complete tasks, sign out and restart with data retained. Document a deliberate data reset and keep runtime data/credentials untracked.
-- [ ] Verification: fast service/persistence and UI journeys cover invalid input, missing records, direct cross-user API/resource access, stale client state and pending requests during sign-out/switching. Verify clean local startup and persistence for all users with extensions disabled and without authoring services. Review representative desktop/mobile and empty/error screens against the visual direction.
+- [x] Implementation: documented pinned setup/seed/start opens the web app from a clean clone; sign in as any of three seeded users, create a project, add/edit/list/complete tasks, sign out and restart with data retained. Document a deliberate data reset and keep runtime data/credentials untracked.
+- [x] Verification: fast service/persistence and UI journeys cover invalid input, missing records, direct cross-user API/resource access, stale client state and pending requests during sign-out/switching. Verify clean local startup and persistence for all users with extensions disabled and without authoring services. Review representative desktop/mobile and empty/error screens against the visual direction.
 
 ## Notes
 
@@ -36,4 +36,4 @@ AI, Keir activation, deployment infrastructure, collaboration and a scheduling e
 
 **Design input:** [Task app MVP, sections 1-2](../../docs/internal/design-baseline/public/task-management-poc.md).
 
-Current work: the reviewed [native design](https://github.com/rore/keir-demo-app/blob/main/docs/native-task-app-design.md) is implemented in a tested candidate. Eleven Node groups and four Chromium journeys pass. Independent result review reproduced two same-user UI races; focused fixes/regressions are underway under [the core-owned task record](../../.agent-workflow/tasks/native-task-app.md). Integration, final verification and feature completion remain pending.
+Delivered: the reviewed [native design](https://github.com/rore/keir-demo-app/blob/main/docs/native-task-app-design.md) is integrated on demo main at `e3a4335`, with setup/prototype links at `b6f2b03`. Both independently reproduced UI races are fixed and approved. Eleven Node groups and seven Chromium journeys pass; canonical locked installation/build and actual browser smoke pass. [Linux CI passes](https://github.com/rore/keir-demo-app/actions/runs/41297780394). The developer released the assignment and the task-created checkout was recoverably removed. [The core-owned record](../../.agent-workflow/tasks/native-task-app.md) retains verification/review evidence. Keir integration, live AI and production authentication are not part of this completed native slice.

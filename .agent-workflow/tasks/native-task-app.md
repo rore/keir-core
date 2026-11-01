@@ -27,7 +27,7 @@ Canonical task: `agent-workflow:native-task-app`. Owning feature: [native-task-a
 **Plan review:** Agent technical review: approved revised plan; see Plan review below. Five initial findings are resolved in demo docs/native-task-app-design.md at 6973a19. Independent confirmation covers scope, risk and verification adequacy; no further broad plan review is needed for unchanged implementation of that contract.
 **Approvals:** Not required at this risk level. User authorized the described two-track start: "ok, so let's go" (2026-11-01); prototype UI review remains a separate future checkpoint.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -44,11 +44,23 @@ Agent technical review: independent clean-context non-implementer reviewed the i
 
 ## Evidence
 
+Integrated source: demo `3c194bd` plus focused fixes `e3a4335`; README-only addition `b6f2b03` links the separate Studio proposal. Native source/config/tests match reviewed candidate `d3bb1b5` exactly (Git comparison is empty for those paths). The canonical repository independently installs from the locked offline cache (97 packages, zero audit vulnerabilities), passes TypeScript/Vite build (387 ms bundling) and all 11 Node groups (zero failures/skips, 1.630 seconds). Reused candidate browser evidence: seven Chromium journeys pass, zero failures/skips, 17.0 seconds warm. The three new delayed-response regressions failed before the fixes and pass afterward, including same-task reopening.
+
+Canonical browser smoke: actual sign-in, task creation and completion work against isolated persisted preview data. The approved visual direction is visible in real desktop/mobile screenshots. A task-owned loopback preview uses separate local data; no user installation, global configuration or preexisting service was modified. [Native CI](https://github.com/rore/keir-demo-app/actions/runs/41297780394) passes on `b6f2b03`, including clean installation/build, Node regression and all seven Chromium journeys on the disposable Linux runner.
+
 Initial review candidate: demo `5d17a9895cfb04ea351c84d905a32d2dba314502`, clean isolated worker. Developer verified pinned offline clean install (97 packages, zero audit vulnerabilities), TypeScript/Vite build, 11 Node groups (zero failures/skips, 2.472 seconds) and four real Chromium journeys (11.6 seconds warm). Coverage includes three-user CRUD/restart, desktop/mobile/keyboard/errors, partial-body revocation, delayed data and cross-tab delayed auth cookies. Real temporary SQLite/reset backup and exclusive-startup checks pass. These results are candidate evidence, not final acceptance.
 
 Fresh complete-path Redline validates policy and finds GRAY with no boundary/checkpoint; change-size advisory remains (26 paths, 5,065 changed lines including a 2,233-line package lock). No rule relaxation or artificial split was made to hide it. Workflow checker in plan state is not a completed result review.
 
 ## Result review
 
-Agent technical review: independent clean-context review of candidate `5d17a98` found two reproduced P2 UI races requiring fixes: delayed save A closes a newer B detail draft, and a delayed initial project list overwrites a newly created project's navigation/selection. Developer is continuing the same task with focused regressions; final result acceptance remains pending. Reviewer found no other blocking issue in the reviewed native/session/persistence/reset boundaries or representative visual direction. Alternate engines, physical devices and CI remain unverified at this checkpoint.
+Agent technical review: independent clean-context non-implementer approved the corrected candidate `d3bb1b5` after reviewing only the two-file delta and new regressions against the earlier complete review.
+
+Reviewed revision: `d3bb1b51e2c23f488dcfef944b94e29e956389f4`, integrated without native source changes as `e3a4335`.
+
+Verification adequacy: per-opening detail-instance checks preserve newer drafts even when the same task is reopened; all project-creation entry points wait for initial navigation. Eleven real SQLite/API/startup/reset Node groups, seven Chromium journeys, exact source equivalence, canonical clean installation/build, an actual browser smoke and passing Linux CI cover the native slice. Earlier backend/security/persistence review remains applicable. No remaining blocking findings; experimental SQLite, local impersonation, Chromium-only qualification and unverified physical devices remain documented limits.
+
+Delivery: demo main `b6f2b03` is pushed and its native CI passes. The roadmap feature is complete. The developer ended participation and released the clean task checkout; after verifying a recovery history bundle and 14 required proof files, the manager removed only that task-created checkout through ordinary Git removal without force. Canonical preview and historical/shared checkouts were preserved. Final complete demo diff is GRAY with no boundary/checkpoint, a visible size advisory (32 paths/5,548 lines including the separate Studio contribution), and explicit Work Record validation passes with no failed predicates. No policy relaxation, PR gate bypass or global environment change was made.
+
+Initial review (resolved): independent clean-context review of candidate `5d17a98` reproduced two P2 UI races: delayed save A closed a newer B detail draft, and a delayed initial project list overwrote a newly created project's navigation/selection. Both are resolved and approved in the follow-up above. That review found no other blocking issue in the reviewed native/session/persistence/reset boundaries or representative visual direction.
 
