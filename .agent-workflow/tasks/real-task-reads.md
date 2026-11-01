@@ -32,6 +32,8 @@ Canonical task: `agent-workflow:real-task-reads`. Owning feature: [real-task-rea
 
 ## Implementation
 
+- Implementation handoff adopted after plan approval `ae35c63`. Intended demo surfaces: `package.json`, `package-lock.json`, `vendor/` archive/provenance, `extensions/task-read/` model/sources/artifacts/pins, `src/task-read.mjs`, `src/app.mjs`, `src/web/main.tsx` (existing styles if sufficient), focused `tests/task-read.test.mjs`, API/session and task-detail browser tests, and setup/regeneration documentation. No core source, database schema, startup or Studio changes. Assigned worker starts from `33d5c4e`; canonical app and data remain untouched. Existing intended-path GRAY/Elevated assessment applies; complete-path reporting follows verification.
+
 - Context and baseline recorded before source changes. Demo baseline `33d5c4e`; core `5dbfd42`. Initial intended-path Redline is GRAY with no boundary/checkpoint. Isolated implementation checkout is to be assigned after plan review; current previews and canonical data remain untouched.
 - Architect completed a bounded read-only consultation: existing API/native read are sufficient; the plan incorporates exact per-user selection, projected task records, safe consumer output, current authority and standalone distribution. No code or tests were changed by that consultation.
 - Independent plan review approved the recorded scope. Demo developer accepted prospective ownership and completed read-only preparation with no core API blocker. An isolated demo checkout is reserved at the recorded base; implementation may start under the reviewed contract. Studio UX is not a prerequisite.
