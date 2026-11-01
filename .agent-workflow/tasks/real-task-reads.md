@@ -1,0 +1,50 @@
+# Packaged real task reads
+
+Canonical task: `agent-workflow:real-task-reads`. Owning feature: [real-task-reads](../../roadmap/features/real-task-reads.md). Studio UX review is deferred and does not gate this increment.
+
+<!-- agent-workflow:start -->
+**Outcome:** The native task app runs packaged Keir read/2 programs against actual user-owned tasks and displays validated advisory results, with different configured behavior for two demo users.
+**Target:** keir-demo-app
+**Scope:** Demo runtime archive/integrity provenance and dependency lock; task-read DCM, authored sources and compiled artifacts; scoped adapter, trusted selection, result consumer, endpoint and minimal native task-detail action; focused tests/setup docs. Core-owned Work Record; manager owns the roadmap.
+**Constraints:** Preserve native CRUD, session/resource ownership and existing runtime semantics. No Studio prototype/layout changes, live AI, writes by extensions, dynamic activation UI, public registry publication, global tools or user preview/data changes. Customer rules stay in source; host facts, authority and immutable selection stay host-owned. Consume the packaged runtime without sibling runtime imports; standalone app execution requires no core checkout or Java.
+**Completion criteria:** A standalone demo checkout installs the integrity-pinned runtime and runs the same approved artifact bytes in separately bound simulation and real modes. Two users at one hook show genuinely different configured advisory behavior over actual open/completed task data. Invalid identity/selection/resource/result, denied/revoked sessions and stale user-switch responses produce no unauthorized read or misleading display; native CRUD remains usable.
+**Requirement baseline:**
+{"source":"https://github.com/rore/keir-core/blob/5dbfd42/roadmap/features/real-task-reads.md","outcome":"The native task app runs packaged Keir read/2 programs against actual user-owned tasks and displays validated advisory results, with different configured behavior for two demo users.","scope":"Demo runtime archive/integrity provenance and dependency lock; task-read DCM, authored sources and compiled artifacts; scoped adapter, trusted selection, result consumer, endpoint and minimal native task-detail action; focused tests/setup docs. Core-owned Work Record; manager owns the roadmap.","constraints":"Preserve native CRUD, session/resource ownership and existing runtime semantics. No Studio prototype/layout changes, live AI, writes by extensions, dynamic activation UI, public registry publication, global tools or user preview/data changes. Customer rules stay in source; host facts, authority and immutable selection stay host-owned. Consume the packaged runtime without sibling runtime imports; standalone app execution requires no core checkout or Java.","completion_criteria":"A standalone demo checkout installs the integrity-pinned runtime and runs the same approved artifact bytes in separately bound simulation and real modes. Two users at one hook show genuinely different configured advisory behavior over actual open/completed task data. Invalid identity/selection/resource/result, denied/revoked sessions and stale user-switch responses produce no unauthorized read or misleading display; native CRUD remains usable."}
+**Relationships:**
+{"schema_version":1,"sources":[{"provider":"minimap","scope_ref":"roadmap:v1:git:github.com/rore/keir-core#roadmap","local_ref":"item:v1:real-task-reads"}],"pull_requests":[]}
+**Risk:** Elevated
+**Complexity:** Moderate
+**Reason:** Intended dependency, native endpoint/UI and adapter paths have a GRAY floor with no boundary/checkpoint. This adds read-only integration across existing authority boundaries without changing authentication, persistence or runtime contracts; connected packaging/adapter/UI checks require Moderate complexity.
+**Discovery:** Read-only architect consultation found no current core API blocker: bindModel/prepareProgram/invokeProgram support real read/2; native getTask is owner-scoped. Existing example consumers are fixture harnesses. Native statuses need explicit enum translation and projection to id/status; full rows can exceed Keir value limits. The alternate conformance fixture does not show different customer behavior. Version 0.0.0 alone cannot identify the qualified private runtime build.
+**Material assumptions:** Existing core produces the needed DCM/artifacts with no semantic change; otherwise stop affected implementation and report required core work. A small repository-held runtime tarball plus lock integrity/provenance provides standalone consumption without registry publication; verify installation, archive contents and exact source build. Existing native session guard is reusable; any weakened or changed security contract requires reassessment.
+**Plan:** Pin a local runtime archive under demo vendor/ using npm pack of a recorded core revision, locked integrity and public provenance; inspect archive/privacy and verify standalone install. Publish the minimal read/2 catalog with only genuine tasks.get; compile two source-authored classifiers under one output schema (e.g. open maps to PENDING for one user and NEEDS_ATTENTION for another), retaining sources, exact artifacts/model digests and regeneration instructions. Bind complete catalogs separately per user; operator-held immutable selection supplies artifact/model/consumer, never request parameters. Fresh authorization verifies live captured session, current selection and exact hook/capability/version before dispatch. Adapter verifies protected actor, uses owner-qualified getTask, checks returned ID, translates status and returns only the declared record. Missing/foreign IDs share the declared not-found mapping; permission failures remain denied. A pinned host DISPLAY consumer accepts only valid COMPLETED advisory results; failures clear earlier display. Recheck session after awaited work and suppress stale client responses. Add one on-demand action/result in existing native task detail, reusing its styling/client guard; leave Studio untouched. Verify real SQLite/package consumption, same-artifact simulation/real parity, two-user behavior and rejection/race cases. Independent plan review precedes source changes; manager accepts result and direct-main delivery.
+**Verification plan:**
+- Standalone distribution -> pinned tarball source/integrity/content inspection, clean locked install/build without sibling runtime imports or Java at app execution.
+- Real behavior -> actual SQLite open/completed tasks through installed package to validated consumer; two source-authored programs at the same hook; same artifact bytes under separate simulation/real bindings with expected consumption.
+- Authority/failures -> foreign/missing/wrong-resource, submitted selection/owner tampering, denied/revoked session, invalid/extra/oversized record and malformed consumer output all prevent unauthorized read/display; switching during pending invocation cannot leak prior scope.
+- Native continuity -> focused existing service/session regressions and affected task-detail browser journey, including failed checks clearing stale results; measure fast suite, keep slow browser setup separate.
+- Delivery -> complete-path Redline and explicit Work Record validation for both repositories, public-content/identity/whitespace checks, independent result review and task checkout cleanup.
+**Plan review:** Pending independent non-implementer technical review. Architect consultation is design input, not plan approval.
+**Approvals:** Not required at the declared Elevated risk. User requested continuing independent development while UX review is deferred. Reassess actual scope and risk before implementation; no permission to change global environment or publish packages.
+**Exceptions:** —
+**State:** Blocked or returned to planning
+<!-- agent-workflow:end -->
+
+## Implementation
+
+- Context and baseline recorded before source changes. Demo baseline `33d5c4e`; core `5dbfd42`. Initial intended-path Redline is GRAY with no boundary/checkpoint. Isolated implementation checkout is to be assigned after plan review; current previews and canonical data remain untouched.
+- Architect completed a bounded read-only consultation: existing API/native read are sufficient; the plan incorporates exact per-user selection, projected task records, safe consumer output, current authority and standalone distribution. No code or tests were changed by that consultation.
+- Implementation is awaiting independent technical plan review. This is an internal planning step; Studio UX and a new human go-ahead are not prerequisites at the current risk.
+
+## Plan review
+
+Pending independent assessment of scope/risk, distribution choice, authority boundaries and verification adequacy.
+
+## Evidence
+
+Planning only. No real adapter, new package distribution or app result is implemented or certified by this record.
+
+## Result review
+
+Pending implementation and measured evidence.
+
