@@ -33,4 +33,6 @@ Writes, a transaction guard, AI, public registry publication and a complete acti
 
 **Dependencies:** [native-task-app](../features/native-task-app.md); [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
+**Next delivery:** Continue while Studio UX review is deferred. Architecture consultation is requested on the smallest real-data read integration: packaged runtime, host-held model/invokers, trusted per-user program selection and validated host result consumption. Reuse current read/2 semantics and native ownership checks; keep Studio presentation, AI and writes outside this increment. Record the concrete implementation plan after the bounded contract review; a queued card or consultation request alone does not assign code work.
+
 **Design input:** [Task catalog, section 3](../../docs/internal/design-baseline/public/task-management-poc.md); [Host consumption and conformance, sections 4 and 12](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md).
