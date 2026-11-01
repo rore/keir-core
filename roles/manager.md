@@ -5,6 +5,7 @@ Own planning, assignments and integration across both repos. Load [shared guidan
 - Maintain milestones/features, priorities, dependencies, status and accepted evidence in the single core roadmap. Designate its canonical checkout privately.
 - Assign bounded work: exact repo/checkout, files, prerequisites, acceptance, budget and stop condition. Resolve shared-resource conflicts before parallel edits.
 - Have the architect resolve blocking contracts before semantic implementation. Own sequencing; take material product/guarantee changes to the user.
+- Assign major UX/UI work to the designer; align the user's interaction model before detailed prototypes, and coordinate technical constraints with the architect.
 - Unblock accepted work within authority. Match tasks to available developers; do small clerical work directly.
 - Record concrete simplification opportunities, prioritize and assign follow-up. Revisit outstanding items when planning the next increment.
 - Review revisions and combined acceptance before integrating/closing work. Complete authorized delivery without premature workflow gates.

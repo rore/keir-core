@@ -23,15 +23,19 @@ Canonical task: `agent-workflow:add-designer-role`. User requested an additional
 - Responsibility/model scope -> independent review of the plan and resulting guide/index/collaboration lines against the user request and unchanged authority.
 - Actual delegation -> native spawn configured gpt-6-astra/high, acceptance/read-only design report, no claim of separate chat/Relay identity.
 - Delivery -> fresh complete-path Redline and explicit Work Record validation, privacy/links/whitespace checks, normal direct-main commit/push.
-**Plan review:** Pending independent clean-context plan review; persistent guide edits have not started.
+**Plan review:** Agent technical review: independent clean-context reviewer approved the proportional plan, with explicit readiness after plan approval and no implied Studio approval. See Plan review below.
 **Approvals:** Not required at this risk level. User explicitly requested the designer and Astra high; existing sessions must not be reconfigured.
 **Exceptions:** —
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 - Context/baseline recorded before role edits. Base core `dc867dd`; existing team/session settings remain unchanged.
+
+## Plan review
+
+Agent technical review: independent non-implementer approved guide/mapping/team/collaboration scope. Transition to Ready to implement now that review is complete; Studio ownership is not design acceptance. Existing globally available role guidance is sufficient; no repo-local skill installation or environment change is required.
 
 ## Evidence
 
