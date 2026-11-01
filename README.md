@@ -4,7 +4,7 @@ Keir enables SaaS applications to offer safe, AI-assisted customization to busin
 
 The hosting application defines extension points and exposes approved capabilities. Keir provides a constrained programming language, compiler, simulation and runtimes that let customers compose those capabilities into new application behavior without executing arbitrary generated code. A host-integrated AI agent helps business users express requirements, clarify intended behavior, generate extensions, test scenarios and review results before activation. Keir's core remains usable without an agent.
 
-**Status: experimental `/1` and `/2` read and single-effect profiles run in Java and Node with independent packaged hosts.** Local combined verification passes, including generic hooks, source-authored constants and shared model binding. Effects remain simulation-only. Existing [product CI](https://github.com/rore/keir-core/actions/runs/41113166355) covers the earlier `/1` checkpoint; the new alignment has not yet run in CI. Workflow-level test protection, production qualification, broader language support and release remain open.
+**Status: experimental `/1` and `/2` read and single-effect profiles run in Java and Node with independent packaged hosts.** Local combined verification and [product CI](https://github.com/rore/keir-core/actions/runs/41280457363) pass, including generic hooks, source-authored constants and shared model binding. Effects remain simulation-only. Workflow-level test protection, production qualification, broader language support and release remain open.
 
 ## Components
 
