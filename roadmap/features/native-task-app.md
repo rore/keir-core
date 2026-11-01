@@ -1,7 +1,7 @@
 ---
 id: "native-task-app"
 title: "Use a persistent task app without extensions"
-status: "queued"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -35,3 +35,5 @@ AI, Keir activation, deployment infrastructure, collaboration and a scheduling e
 **Dependencies:** No unfinished core prerequisite.
 
 **Design input:** [Task app MVP, sections 1-2](../../docs/internal/design-baseline/public/task-management-poc.md).
+
+Current work: architecture/discovery is complete; the concrete implementation plan is under independent review in [the core-owned task record](../../.agent-workflow/tasks/native-task-app.md). Implementation and native verification remain pending.
