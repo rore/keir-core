@@ -44,9 +44,11 @@ Agent technical review: independent clean-context non-implementer reviewed the i
 
 ## Evidence
 
-Pending. No test, working UI, real AI or native guarantee is claimed.
+Initial review candidate: demo `5d17a9895cfb04ea351c84d905a32d2dba314502`, clean isolated worker. Developer verified pinned offline clean install (97 packages, zero audit vulnerabilities), TypeScript/Vite build, 11 Node groups (zero failures/skips, 2.472 seconds) and four real Chromium journeys (11.6 seconds warm). Coverage includes three-user CRUD/restart, desktop/mobile/keyboard/errors, partial-body revocation, delayed data and cross-tab delayed auth cookies. Real temporary SQLite/reset backup and exclusive-startup checks pass. These results are candidate evidence, not final acceptance.
+
+Fresh complete-path Redline validates policy and finds GRAY with no boundary/checkpoint; change-size advisory remains (26 paths, 5,065 changed lines including a 2,233-line package lock). No rule relaxation or artificial split was made to hide it. Workflow checker in plan state is not a completed result review.
 
 ## Result review
 
-Pending implementation and verification.
+Agent technical review: independent clean-context review of candidate `5d17a98` found two reproduced P2 UI races requiring fixes: delayed save A closes a newer B detail draft, and a delayed initial project list overwrites a newly created project's navigation/selection. Developer is continuing the same task with focused regressions; final result acceptance remains pending. Reviewer found no other blocking issue in the reviewed native/session/persistence/reset boundaries or representative visual direction. Alternate engines, physical devices and CI remain unverified at this checkpoint.
 
