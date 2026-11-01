@@ -24,21 +24,22 @@ Canonical task: `agent-workflow:real-task-reads`. Owning feature: [real-task-rea
 - Authority/failures -> foreign/missing/wrong-resource, submitted selection/owner tampering, denied/revoked session, invalid/extra/oversized record and malformed consumer output all prevent unauthorized read/display; switching during pending invocation cannot leak prior scope.
 - Native continuity -> focused existing service/session regressions and affected task-detail browser journey, including failed checks clearing stale results; measure fast suite, keep slow browser setup separate.
 - Delivery -> complete-path Redline and explicit Work Record validation for both repositories, public-content/identity/whitespace checks, independent result review and task checkout cleanup.
-**Plan review:** Pending independent non-implementer technical review. Architect consultation is design input, not plan approval.
+**Plan review:** Agent technical review: independent core developer approved plan `48b33b0`, including Elevated/Moderate classification, pinned distribution, authority boundaries and verification adequacy. No blocking correction; see Plan review below.
 **Approvals:** Not required at the declared Elevated risk. User requested continuing independent development while UX review is deferred. Reassess actual scope and risk before implementation; no permission to change global environment or publish packages.
 **Exceptions:** —
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 - Context and baseline recorded before source changes. Demo baseline `33d5c4e`; core `5dbfd42`. Initial intended-path Redline is GRAY with no boundary/checkpoint. Isolated implementation checkout is to be assigned after plan review; current previews and canonical data remain untouched.
 - Architect completed a bounded read-only consultation: existing API/native read are sufficient; the plan incorporates exact per-user selection, projected task records, safe consumer output, current authority and standalone distribution. No code or tests were changed by that consultation.
-- Implementation is awaiting independent technical plan review. This is an internal planning step; Studio UX and a new human go-ahead are not prerequisites at the current risk.
+- Independent plan review approved the recorded scope. Demo developer accepted prospective ownership and completed read-only preparation with no core API blocker. An isolated demo checkout is reserved at the recorded base; implementation may start under the reviewed contract. Studio UX is not a prerequisite.
+- Preparation confirms the adapter needs a live session check immediately before the native read as well as reauthorization after awaited invocation. Reuse client context/generation/detail-instance guards; clear stale advice while preserving unsaved task edits. No native data schema, startup, Studio or core runtime source change is planned.
 
 ## Plan review
 
-Pending independent assessment of scope/risk, distribution choice, authority boundaries and verification adequacy.
+Agent technical review: independent non-implementer approved exact plan `48b33b0`. Owner-qualified lookup, current session dispatch/consumption authority, immutable per-user selection and content-pinned standalone distribution are proportionate. The existing 0.0.0 version alone is not trusted provenance. Actual archive installation, adapter/consumer behavior and negative/race cases remain implementation obligations. No real-adapter or production guarantee is inferred from plan review.
 
 ## Evidence
 
