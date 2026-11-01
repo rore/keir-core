@@ -6,6 +6,9 @@ on:
       - compiler-java/**
       - runtime-java/**
       - runtime-node/**
+      - schemas/**
+      - scripts/check-read2-contracts.py
+      - scripts/requirements-read2-contracts.txt
       - conformance/**
       - examples/**
       - docs/specs/**
@@ -19,6 +22,9 @@ on:
       - compiler-java/**
       - runtime-java/**
       - runtime-node/**
+      - schemas/**
+      - scripts/check-read2-contracts.py
+      - scripts/requirements-read2-contracts.txt
       - conformance/**
       - examples/**
       - docs/specs/**
@@ -42,6 +48,9 @@ jobs:
       MAVEN_USER_HOME: ${{ github.workspace }}/.tools/maven
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -50,6 +59,10 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install pinned schema-check dependency
+        run: python -m pip install -r scripts/requirements-read2-contracts.txt
+      - name: Check read/2 structural contracts
+        run: python scripts/check-read2-contracts.py
       - uses: actions/cache@v6
         with:
           path: |

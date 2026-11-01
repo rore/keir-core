@@ -1,0 +1,43 @@
+{
+  "language": "keir/v0",
+  "domain": {
+    "id": "sample.tasks",
+    "version": "2",
+    "fingerprint": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73"
+  },
+  "entrypoint": "ClassifyTask",
+  "name": "classify-completed-task",
+  "steps": [
+    {
+      "id": "source",
+      "call": "tasks.get",
+      "args": {
+        "taskId": {
+          "cel": "input.taskId"
+        }
+      }
+    },
+    {
+      "id": "second",
+      "call": "tasks.get",
+      "args": {
+        "taskId": {
+          "cel": "input.taskId"
+        }
+      }
+    },
+    {
+      "id": "completed",
+      "let": {
+        "cel": "source.status == \"COMPLETED\" && second.status == \"COMPLETED\""
+      }
+    }
+  ],
+  "return": {
+    "record": {
+      "classification": {
+        "cel": "completed ? \"DONE\" : \"PENDING\""
+      }
+    }
+  }
+}

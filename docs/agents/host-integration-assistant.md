@@ -2,6 +2,8 @@
 
 **Status:** initial assistant guidance over the implemented read and simulation-only effect profiles. Host-integrated discovery, approval and activation tools remain future host work. Read the [agent overview](README.md) and [specification status](../specs/README.md).
 
+For decoded read/2 structural checks, use the shared [schema index](../../schemas/read-2/README.md); schema success does not grant host approval or execution authority.
+
 ## Task and inputs
 
 The planned host-design delivery is a skill for the developer's existing coding agent, using that agent's model/authentication. In the demo, this pairs with the pre-design-time native-app checkpoint; provider credentials for the separate in-app customer extension assistant do not authenticate the host-design agent.

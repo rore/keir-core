@@ -1,0 +1,1272 @@
+[
+  {
+    "id": "unknown-source-call",
+    "stage": "compile",
+    "schema": "source",
+    "document": {
+      "language": "keir/v0",
+      "domain": {
+        "id": "sample.tasks",
+        "version": "2",
+        "fingerprint": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73"
+      },
+      "entrypoint": "ClassifyTask",
+      "name": "classify-completed-task",
+      "steps": [
+        {
+          "id": "source",
+          "call": "tasks.missing",
+          "args": {
+            "taskId": {
+              "cel": "input.taskId"
+            }
+          }
+        },
+        {
+          "id": "completed",
+          "let": {
+            "cel": "source.status == \"COMPLETED\""
+          }
+        }
+      ],
+      "return": {
+        "record": {
+          "classification": {
+            "cel": "completed ? \"DONE\" : \"PENDING\""
+          }
+        }
+      }
+    },
+    "expected": {
+      "code": "CAPABILITY_UNKNOWN",
+      "path": "/source/steps/0/call"
+    }
+  },
+  {
+    "id": "protected-source-argument",
+    "stage": "compile",
+    "schema": "source",
+    "document": {
+      "language": "keir/v0",
+      "domain": {
+        "id": "sample.tasks",
+        "version": "2",
+        "fingerprint": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73"
+      },
+      "entrypoint": "ClassifyTask",
+      "name": "classify-completed-task",
+      "steps": [
+        {
+          "id": "source",
+          "call": "tasks.get",
+          "args": {
+            "taskId": {
+              "cel": "input.taskId"
+            },
+            "actorId": {
+              "literal": "user1",
+              "type": "UserId"
+            }
+          }
+        },
+        {
+          "id": "completed",
+          "let": {
+            "cel": "source.status == \"COMPLETED\""
+          }
+        }
+      ],
+      "return": {
+        "record": {
+          "classification": {
+            "cel": "completed ? \"DONE\" : \"PENDING\""
+          }
+        }
+      }
+    },
+    "expected": {
+      "code": "HOST_BINDING_OVERRIDE",
+      "path": "/source/steps/0/args/actorId"
+    }
+  },
+  {
+    "id": "read-write-call",
+    "stage": "compile",
+    "schema": "source",
+    "document": {
+      "language": "keir/v0",
+      "domain": {
+        "id": "sample.tasks",
+        "version": "2",
+        "fingerprint": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73"
+      },
+      "entrypoint": "ClassifyTask",
+      "name": "classify-completed-task",
+      "steps": [
+        {
+          "id": "source",
+          "call": "tasks.create",
+          "args": {
+            "projectId": {
+              "literal": "project1",
+              "type": "ProjectId"
+            },
+            "title": {
+              "literal": "Follow up"
+            }
+          }
+        },
+        {
+          "id": "completed",
+          "let": {
+            "cel": "source.status == \"COMPLETED\""
+          }
+        }
+      ],
+      "return": {
+        "record": {
+          "classification": {
+            "cel": "completed ? \"DONE\" : \"PENDING\""
+          }
+        }
+      }
+    },
+    "expected": {
+      "code": "ENTRY_GRANT_DENIED",
+      "path": "/source/steps/0/call"
+    }
+  },
+  {
+    "id": "fifth-source-call",
+    "stage": "compile",
+    "schema": "source",
+    "document": {
+      "language": "keir/v0",
+      "domain": {
+        "id": "sample.tasks",
+        "version": "2",
+        "fingerprint": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73"
+      },
+      "entrypoint": "ClassifyTask",
+      "name": "classify-completed-task",
+      "steps": [
+        {
+          "id": "call0",
+          "call": "tasks.get",
+          "args": {
+            "taskId": {
+              "literal": "task1",
+              "type": "TaskId"
+            }
+          }
+        },
+        {
+          "id": "call1",
+          "call": "tasks.get",
+          "args": {
+            "taskId": {
+              "literal": "task1",
+              "type": "TaskId"
+            }
+          }
+        },
+        {
+          "id": "call2",
+          "call": "tasks.get",
+          "args": {
+            "taskId": {
+              "literal": "task1",
+              "type": "TaskId"
+            }
+          }
+        },
+        {
+          "id": "call3",
+          "call": "tasks.get",
+          "args": {
+            "taskId": {
+              "literal": "task1",
+              "type": "TaskId"
+            }
+          }
+        },
+        {
+          "id": "call4",
+          "call": "tasks.get",
+          "args": {
+            "taskId": {
+              "literal": "task1",
+              "type": "TaskId"
+            }
+          }
+        }
+      ],
+      "return": {
+        "record": {
+          "classification": {
+            "literal": "DONE"
+          }
+        }
+      }
+    },
+    "expected": {
+      "code": "BUDGET_EXCEEDED",
+      "path": "/source/steps"
+    }
+  },
+  {
+    "id": "utf8-byte-overflow",
+    "stage": "compile",
+    "schema": "source",
+    "document": {
+      "language": "keir/v0",
+      "domain": {
+        "id": "sample.tasks",
+        "version": "2",
+        "fingerprint": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73"
+      },
+      "entrypoint": "ClassifyTask",
+      "name": "literal-values",
+      "steps": [
+        {
+          "id": "project",
+          "let": {
+            "literal": "ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+            "type": "ProjectId"
+          }
+        },
+        {
+          "id": "flag",
+          "let": {
+            "literal": false
+          }
+        },
+        {
+          "id": "title",
+          "let": {
+            "literal": ""
+          }
+        }
+      ],
+      "return": {
+        "record": {
+          "classification": {
+            "literal": "DONE"
+          }
+        }
+      }
+    },
+    "expected": {
+      "code": "BUDGET_EXCEEDED",
+      "path": "/source/steps/0/let/literal"
+    }
+  },
+  {
+    "id": "unknown-artifact-call",
+    "stage": "prepare",
+    "schema": "artifact",
+    "document": {
+      "compiler": "keir-compiler-java/0.1.0-SNAPSHOT",
+      "entrypoint": "ClassifyTask",
+      "environment": {
+        "celJava": "0.14.0",
+        "celNode": "0.6.1",
+        "protobufJava": "4.35.1",
+        "protobufNode": "2.6.2"
+      },
+      "expressions": {
+        "e0": {
+          "checked": "EgsIARIHCgVpbnB1dBodCAESGUoXa2Vpci5yZWFkLkNsYXNzaWZ5SW5wdXQaBggCEgIYBSIZEAIqFQoLEAEiBwoFaW5wdXQSBnRhc2tJZCocEgtrZWlyLXJlYWQvMRoBDSIECAEQACIECAIQBQ==",
+          "resultType": "TaskId",
+          "variables": {
+            "input": "ClassifyInput"
+          }
+        },
+        "e1": {
+          "checked": "EgwIARIICgZzb3VyY2USDAgDEggaBmVxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYBRoGCAMSAhgBGgYIBBICGAUiNxADMjMSBF89PV8aGhACKhYKDBABIggKBnNvdXJjZRIGc3RhdHVzGg8QBBoLMglDT01QTEVURUQqKBILa2Vpci1yZWFkLzEaAR0iBAgBEAAiBAgCEAYiBAgDEA4iBAgEEBE=",
+          "resultType": "Boolean",
+          "variables": {
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        },
+        "e2": {
+          "checked": "Eg8IARILCgljb21wbGV0ZWQSEQgCEg0aC2NvbmRpdGlvbmFsGgYIARICGAEaBggCEgIYBRoGCAMSAhgFGgYIBBICGAUiNxACMjMSBV8/XzpfGg8QASILCgljb21wbGV0ZWQaChADGgYyBERPTkUaDRAEGgkyB1BFTkRJTkcqKBILa2Vpci1yZWFkLzEaAR8iBAgBEAAiBAgCEAoiBAgDEAwiBAgEEBU=",
+          "resultType": "Classification",
+          "variables": {
+            "completed": "Boolean",
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        }
+      },
+      "format": "keir-artifact/read-2",
+      "modelRef": {
+        "descriptorRecipe": "keir-record-descriptors/1",
+        "digest": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73",
+        "domainId": "sample.tasks",
+        "domainVersion": "2",
+        "format": "keir-dcm/read-2"
+      },
+      "profile": "keir-read/2",
+      "return": {
+        "fields": {
+          "classification": {
+            "expr": "e2",
+            "type": "Classification"
+          }
+        },
+        "type": "ClassifyResult"
+      },
+      "sourceDigest": "sha256:cb4d74c8fdc13d6ce392a22337a84f61667ffde4cbc68e90d42bbf059e2d8084",
+      "steps": [
+        {
+          "args": {
+            "taskId": {
+              "expr": "e0",
+              "type": "TaskId"
+            }
+          },
+          "capability": "tasks.missing",
+          "id": "source",
+          "op": "CALL",
+          "resultType": "Task",
+          "version": "1"
+        },
+        {
+          "id": "completed",
+          "op": "BIND",
+          "resultType": "Boolean",
+          "value": {
+            "expr": "e1",
+            "type": "Boolean"
+          }
+        }
+      ]
+    },
+    "expected": {
+      "code": "CAPABILITY_UNKNOWN",
+      "path": "/artifact/steps/0"
+    }
+  },
+  {
+    "id": "forged-checked-metadata",
+    "stage": "prepare",
+    "schema": "artifact",
+    "document": {
+      "compiler": "keir-compiler-java/0.1.0-SNAPSHOT",
+      "entrypoint": "ClassifyTask",
+      "environment": {
+        "celJava": "0.14.0",
+        "celNode": "0.6.1",
+        "protobufJava": "4.35.1",
+        "protobufNode": "2.6.2"
+      },
+      "expressions": {
+        "e0": {
+          "checked": "IgA=",
+          "resultType": "TaskId",
+          "variables": {
+            "input": "ClassifyInput"
+          }
+        },
+        "e1": {
+          "checked": "EgwIARIICgZzb3VyY2USDAgDEggaBmVxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYBRoGCAMSAhgBGgYIBBICGAUiNxADMjMSBF89PV8aGhACKhYKDBABIggKBnNvdXJjZRIGc3RhdHVzGg8QBBoLMglDT01QTEVURUQqKBILa2Vpci1yZWFkLzEaAR0iBAgBEAAiBAgCEAYiBAgDEA4iBAgEEBE=",
+          "resultType": "Boolean",
+          "variables": {
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        },
+        "e2": {
+          "checked": "Eg8IARILCgljb21wbGV0ZWQSEQgCEg0aC2NvbmRpdGlvbmFsGgYIARICGAEaBggCEgIYBRoGCAMSAhgFGgYIBBICGAUiNxACMjMSBV8/XzpfGg8QASILCgljb21wbGV0ZWQaChADGgYyBERPTkUaDRAEGgkyB1BFTkRJTkcqKBILa2Vpci1yZWFkLzEaAR8iBAgBEAAiBAgCEAoiBAgDEAwiBAgEEBU=",
+          "resultType": "Classification",
+          "variables": {
+            "completed": "Boolean",
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        }
+      },
+      "format": "keir-artifact/read-2",
+      "modelRef": {
+        "descriptorRecipe": "keir-record-descriptors/1",
+        "digest": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73",
+        "domainId": "sample.tasks",
+        "domainVersion": "2",
+        "format": "keir-dcm/read-2"
+      },
+      "profile": "keir-read/2",
+      "return": {
+        "fields": {
+          "classification": {
+            "expr": "e2",
+            "type": "Classification"
+          }
+        },
+        "type": "ClassifyResult"
+      },
+      "sourceDigest": "sha256:cb4d74c8fdc13d6ce392a22337a84f61667ffde4cbc68e90d42bbf059e2d8084",
+      "steps": [
+        {
+          "args": {
+            "taskId": {
+              "expr": "e0",
+              "type": "TaskId"
+            }
+          },
+          "capability": "tasks.get",
+          "id": "source",
+          "op": "CALL",
+          "resultType": "Task",
+          "version": "1"
+        },
+        {
+          "id": "completed",
+          "op": "BIND",
+          "resultType": "Boolean",
+          "value": {
+            "expr": "e1",
+            "type": "Boolean"
+          }
+        }
+      ]
+    },
+    "expected": {
+      "code": "ARTIFACT_INVALID",
+      "path": "/artifact/expressions"
+    }
+  },
+  {
+    "id": "wrong-model-reference",
+    "stage": "prepare",
+    "schema": "artifact",
+    "document": {
+      "compiler": "keir-compiler-java/0.1.0-SNAPSHOT",
+      "entrypoint": "ClassifyTask",
+      "environment": {
+        "celJava": "0.14.0",
+        "celNode": "0.6.1",
+        "protobufJava": "4.35.1",
+        "protobufNode": "2.6.2"
+      },
+      "expressions": {
+        "e0": {
+          "checked": "EgsIARIHCgVpbnB1dBodCAESGUoXa2Vpci5yZWFkLkNsYXNzaWZ5SW5wdXQaBggCEgIYBSIZEAIqFQoLEAEiBwoFaW5wdXQSBnRhc2tJZCocEgtrZWlyLXJlYWQvMRoBDSIECAEQACIECAIQBQ==",
+          "resultType": "TaskId",
+          "variables": {
+            "input": "ClassifyInput"
+          }
+        },
+        "e1": {
+          "checked": "EgwIARIICgZzb3VyY2USDAgDEggaBmVxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYBRoGCAMSAhgBGgYIBBICGAUiNxADMjMSBF89PV8aGhACKhYKDBABIggKBnNvdXJjZRIGc3RhdHVzGg8QBBoLMglDT01QTEVURUQqKBILa2Vpci1yZWFkLzEaAR0iBAgBEAAiBAgCEAYiBAgDEA4iBAgEEBE=",
+          "resultType": "Boolean",
+          "variables": {
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        },
+        "e2": {
+          "checked": "Eg8IARILCgljb21wbGV0ZWQSEQgCEg0aC2NvbmRpdGlvbmFsGgYIARICGAEaBggCEgIYBRoGCAMSAhgFGgYIBBICGAUiNxACMjMSBV8/XzpfGg8QASILCgljb21wbGV0ZWQaChADGgYyBERPTkUaDRAEGgkyB1BFTkRJTkcqKBILa2Vpci1yZWFkLzEaAR8iBAgBEAAiBAgCEAoiBAgDEAwiBAgEEBU=",
+          "resultType": "Classification",
+          "variables": {
+            "completed": "Boolean",
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        }
+      },
+      "format": "keir-artifact/read-2",
+      "modelRef": {
+        "descriptorRecipe": "keir-record-descriptors/1",
+        "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "domainId": "sample.tasks",
+        "domainVersion": "2",
+        "format": "keir-dcm/read-2"
+      },
+      "profile": "keir-read/2",
+      "return": {
+        "fields": {
+          "classification": {
+            "expr": "e2",
+            "type": "Classification"
+          }
+        },
+        "type": "ClassifyResult"
+      },
+      "sourceDigest": "sha256:cb4d74c8fdc13d6ce392a22337a84f61667ffde4cbc68e90d42bbf059e2d8084",
+      "steps": [
+        {
+          "args": {
+            "taskId": {
+              "expr": "e0",
+              "type": "TaskId"
+            }
+          },
+          "capability": "tasks.get",
+          "id": "source",
+          "op": "CALL",
+          "resultType": "Task",
+          "version": "1"
+        },
+        {
+          "id": "completed",
+          "op": "BIND",
+          "resultType": "Boolean",
+          "value": {
+            "expr": "e1",
+            "type": "Boolean"
+          }
+        }
+      ]
+    },
+    "expected": {
+      "code": "ARTIFACT_INVALID",
+      "path": "/artifact/modelRef"
+    }
+  },
+  {
+    "id": "narrow-admission-policy",
+    "stage": "prepare",
+    "schema": "artifact",
+    "document": {
+      "compiler": "keir-compiler-java/0.1.0-SNAPSHOT",
+      "entrypoint": "ClassifyTask",
+      "environment": {
+        "celJava": "0.14.0",
+        "celNode": "0.6.1",
+        "protobufJava": "4.35.1",
+        "protobufNode": "2.6.2"
+      },
+      "expressions": {
+        "e0": {
+          "checked": "EgsIARIHCgVpbnB1dBodCAESGUoXa2Vpci5yZWFkLkNsYXNzaWZ5SW5wdXQaBggCEgIYBSIZEAIqFQoLEAEiBwoFaW5wdXQSBnRhc2tJZCocEgtrZWlyLXJlYWQvMRoBDSIECAEQACIECAIQBQ==",
+          "resultType": "TaskId",
+          "variables": {
+            "input": "ClassifyInput"
+          }
+        },
+        "e1": {
+          "checked": "EgwIARIICgZzb3VyY2USDAgDEggaBmVxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYBRoGCAMSAhgBGgYIBBICGAUiNxADMjMSBF89PV8aGhACKhYKDBABIggKBnNvdXJjZRIGc3RhdHVzGg8QBBoLMglDT01QTEVURUQqKBILa2Vpci1yZWFkLzEaAR0iBAgBEAAiBAgCEAYiBAgDEA4iBAgEEBE=",
+          "resultType": "Boolean",
+          "variables": {
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        },
+        "e2": {
+          "checked": "Eg8IARILCgljb21wbGV0ZWQSEQgCEg0aC2NvbmRpdGlvbmFsGgYIARICGAEaBggCEgIYBRoGCAMSAhgFGgYIBBICGAUiNxACMjMSBV8/XzpfGg8QASILCgljb21wbGV0ZWQaChADGgYyBERPTkUaDRAEGgkyB1BFTkRJTkcqKBILa2Vpci1yZWFkLzEaAR8iBAgBEAAiBAgCEAoiBAgDEAwiBAgEEBU=",
+          "resultType": "Classification",
+          "variables": {
+            "completed": "Boolean",
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        }
+      },
+      "format": "keir-artifact/read-2",
+      "modelRef": {
+        "descriptorRecipe": "keir-record-descriptors/1",
+        "digest": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73",
+        "domainId": "sample.tasks",
+        "domainVersion": "2",
+        "format": "keir-dcm/read-2"
+      },
+      "profile": "keir-read/2",
+      "return": {
+        "fields": {
+          "classification": {
+            "expr": "e2",
+            "type": "Classification"
+          }
+        },
+        "type": "ClassifyResult"
+      },
+      "sourceDigest": "sha256:cb4d74c8fdc13d6ce392a22337a84f61667ffde4cbc68e90d42bbf059e2d8084",
+      "steps": [
+        {
+          "args": {
+            "taskId": {
+              "expr": "e0",
+              "type": "TaskId"
+            }
+          },
+          "capability": "tasks.get",
+          "id": "source",
+          "op": "CALL",
+          "resultType": "Task",
+          "version": "1"
+        },
+        {
+          "id": "completed",
+          "op": "BIND",
+          "resultType": "Boolean",
+          "value": {
+            "expr": "e1",
+            "type": "Boolean"
+          }
+        }
+      ]
+    },
+    "expected": {
+      "code": "AUTHORITY_DENIED",
+      "path": "/admission/capabilityPolicy"
+    },
+    "admission": {
+      "capabilityPolicy": {
+        "maxCalls": {
+          "tasks.get": 0
+        }
+      }
+    }
+  },
+  {
+    "id": "narrow-call-budget",
+    "stage": "prepare",
+    "schema": "artifact",
+    "document": {
+      "compiler": "keir-compiler-java/0.1.0-SNAPSHOT",
+      "entrypoint": "ClassifyTask",
+      "environment": {
+        "celJava": "0.14.0",
+        "celNode": "0.6.1",
+        "protobufJava": "4.35.1",
+        "protobufNode": "2.6.2"
+      },
+      "expressions": {
+        "e0": {
+          "checked": "EgsIARIHCgVpbnB1dBodCAESGUoXa2Vpci5yZWFkLkNsYXNzaWZ5SW5wdXQaBggCEgIYBSIZEAIqFQoLEAEiBwoFaW5wdXQSBnRhc2tJZCocEgtrZWlyLXJlYWQvMRoBDSIECAEQACIECAIQBQ==",
+          "resultType": "TaskId",
+          "variables": {
+            "input": "ClassifyInput"
+          }
+        },
+        "e1": {
+          "checked": "EgwIARIICgZzb3VyY2USDAgDEggaBmVxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYBRoGCAMSAhgBGgYIBBICGAUiNxADMjMSBF89PV8aGhACKhYKDBABIggKBnNvdXJjZRIGc3RhdHVzGg8QBBoLMglDT01QTEVURUQqKBILa2Vpci1yZWFkLzEaAR0iBAgBEAAiBAgCEAYiBAgDEA4iBAgEEBE=",
+          "resultType": "Boolean",
+          "variables": {
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        },
+        "e2": {
+          "checked": "Eg8IARILCgljb21wbGV0ZWQSEQgCEg0aC2NvbmRpdGlvbmFsGgYIARICGAEaBggCEgIYBRoGCAMSAhgFGgYIBBICGAUiNxACMjMSBV8/XzpfGg8QASILCgljb21wbGV0ZWQaChADGgYyBERPTkUaDRAEGgkyB1BFTkRJTkcqKBILa2Vpci1yZWFkLzEaAR8iBAgBEAAiBAgCEAoiBAgDEAwiBAgEEBU=",
+          "resultType": "Classification",
+          "variables": {
+            "completed": "Boolean",
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        }
+      },
+      "format": "keir-artifact/read-2",
+      "modelRef": {
+        "descriptorRecipe": "keir-record-descriptors/1",
+        "digest": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73",
+        "domainId": "sample.tasks",
+        "domainVersion": "2",
+        "format": "keir-dcm/read-2"
+      },
+      "profile": "keir-read/2",
+      "return": {
+        "fields": {
+          "classification": {
+            "expr": "e2",
+            "type": "Classification"
+          }
+        },
+        "type": "ClassifyResult"
+      },
+      "sourceDigest": "sha256:cb4d74c8fdc13d6ce392a22337a84f61667ffde4cbc68e90d42bbf059e2d8084",
+      "steps": [
+        {
+          "args": {
+            "taskId": {
+              "expr": "e0",
+              "type": "TaskId"
+            }
+          },
+          "capability": "tasks.get",
+          "id": "source",
+          "op": "CALL",
+          "resultType": "Task",
+          "version": "1"
+        },
+        {
+          "id": "completed",
+          "op": "BIND",
+          "resultType": "Boolean",
+          "value": {
+            "expr": "e1",
+            "type": "Boolean"
+          }
+        }
+      ]
+    },
+    "expected": {
+      "code": "BUDGET_EXCEEDED",
+      "path": "/artifact/steps"
+    },
+    "admission": {
+      "limits": {
+        "calls": 0
+      }
+    }
+  },
+  {
+    "id": "external-pin-mismatch",
+    "stage": "prepare",
+    "schema": "artifact",
+    "document": {
+      "compiler": "keir-compiler-java/0.1.0-SNAPSHOT",
+      "entrypoint": "ClassifyTask",
+      "environment": {
+        "celJava": "0.14.0",
+        "celNode": "0.6.1",
+        "protobufJava": "4.35.1",
+        "protobufNode": "2.6.2"
+      },
+      "expressions": {
+        "e0": {
+          "checked": "EgsIARIHCgVpbnB1dBodCAESGUoXa2Vpci5yZWFkLkNsYXNzaWZ5SW5wdXQaBggCEgIYBSIZEAIqFQoLEAEiBwoFaW5wdXQSBnRhc2tJZCocEgtrZWlyLXJlYWQvMRoBDSIECAEQACIECAIQBQ==",
+          "resultType": "TaskId",
+          "variables": {
+            "input": "ClassifyInput"
+          }
+        },
+        "e1": {
+          "checked": "EgwIARIICgZzb3VyY2USDAgDEggaBmVxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYBRoGCAMSAhgBGgYIBBICGAUiNxADMjMSBF89PV8aGhACKhYKDBABIggKBnNvdXJjZRIGc3RhdHVzGg8QBBoLMglDT01QTEVURUQqKBILa2Vpci1yZWFkLzEaAR0iBAgBEAAiBAgCEAYiBAgDEA4iBAgEEBE=",
+          "resultType": "Boolean",
+          "variables": {
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        },
+        "e2": {
+          "checked": "Eg8IARILCgljb21wbGV0ZWQSEQgCEg0aC2NvbmRpdGlvbmFsGgYIARICGAEaBggCEgIYBRoGCAMSAhgFGgYIBBICGAUiNxACMjMSBV8/XzpfGg8QASILCgljb21wbGV0ZWQaChADGgYyBERPTkUaDRAEGgkyB1BFTkRJTkcqKBILa2Vpci1yZWFkLzEaAR8iBAgBEAAiBAgCEAoiBAgDEAwiBAgEEBU=",
+          "resultType": "Classification",
+          "variables": {
+            "completed": "Boolean",
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        }
+      },
+      "format": "keir-artifact/read-2",
+      "modelRef": {
+        "descriptorRecipe": "keir-record-descriptors/1",
+        "digest": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73",
+        "domainId": "sample.tasks",
+        "domainVersion": "2",
+        "format": "keir-dcm/read-2"
+      },
+      "profile": "keir-read/2",
+      "return": {
+        "fields": {
+          "classification": {
+            "expr": "e2",
+            "type": "Classification"
+          }
+        },
+        "type": "ClassifyResult"
+      },
+      "sourceDigest": "sha256:cb4d74c8fdc13d6ce392a22337a84f61667ffde4cbc68e90d42bbf059e2d8084",
+      "steps": [
+        {
+          "args": {
+            "taskId": {
+              "expr": "e0",
+              "type": "TaskId"
+            }
+          },
+          "capability": "tasks.get",
+          "id": "source",
+          "op": "CALL",
+          "resultType": "Task",
+          "version": "1"
+        },
+        {
+          "id": "completed",
+          "op": "BIND",
+          "resultType": "Boolean",
+          "value": {
+            "expr": "e1",
+            "type": "Boolean"
+          }
+        }
+      ]
+    },
+    "expected": {
+      "code": "PIN_MISMATCH",
+      "path": "/artifact"
+    },
+    "badPin": true
+  },
+  {
+    "id": "current-authorization-denied",
+    "stage": "invoke",
+    "schema": "artifact",
+    "document": {
+      "compiler": "keir-compiler-java/0.1.0-SNAPSHOT",
+      "entrypoint": "ClassifyTask",
+      "environment": {
+        "celJava": "0.14.0",
+        "celNode": "0.6.1",
+        "protobufJava": "4.35.1",
+        "protobufNode": "2.6.2"
+      },
+      "expressions": {
+        "e0": {
+          "checked": "EgsIARIHCgVpbnB1dBodCAESGUoXa2Vpci5yZWFkLkNsYXNzaWZ5SW5wdXQaBggCEgIYBSIZEAIqFQoLEAEiBwoFaW5wdXQSBnRhc2tJZCocEgtrZWlyLXJlYWQvMRoBDSIECAEQACIECAIQBQ==",
+          "resultType": "TaskId",
+          "variables": {
+            "input": "ClassifyInput"
+          }
+        },
+        "e1": {
+          "checked": "EgwIARIICgZzb3VyY2USDAgDEggaBmVxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYBRoGCAMSAhgBGgYIBBICGAUiNxADMjMSBF89PV8aGhACKhYKDBABIggKBnNvdXJjZRIGc3RhdHVzGg8QBBoLMglDT01QTEVURUQqKBILa2Vpci1yZWFkLzEaAR0iBAgBEAAiBAgCEAYiBAgDEA4iBAgEEBE=",
+          "resultType": "Boolean",
+          "variables": {
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        },
+        "e2": {
+          "checked": "Eg8IARILCgljb21wbGV0ZWQSEQgCEg0aC2NvbmRpdGlvbmFsGgYIARICGAEaBggCEgIYBRoGCAMSAhgFGgYIBBICGAUiNxACMjMSBV8/XzpfGg8QASILCgljb21wbGV0ZWQaChADGgYyBERPTkUaDRAEGgkyB1BFTkRJTkcqKBILa2Vpci1yZWFkLzEaAR8iBAgBEAAiBAgCEAoiBAgDEAwiBAgEEBU=",
+          "resultType": "Classification",
+          "variables": {
+            "completed": "Boolean",
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        }
+      },
+      "format": "keir-artifact/read-2",
+      "modelRef": {
+        "descriptorRecipe": "keir-record-descriptors/1",
+        "digest": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73",
+        "domainId": "sample.tasks",
+        "domainVersion": "2",
+        "format": "keir-dcm/read-2"
+      },
+      "profile": "keir-read/2",
+      "return": {
+        "fields": {
+          "classification": {
+            "expr": "e2",
+            "type": "Classification"
+          }
+        },
+        "type": "ClassifyResult"
+      },
+      "sourceDigest": "sha256:cb4d74c8fdc13d6ce392a22337a84f61667ffde4cbc68e90d42bbf059e2d8084",
+      "steps": [
+        {
+          "args": {
+            "taskId": {
+              "expr": "e0",
+              "type": "TaskId"
+            }
+          },
+          "capability": "tasks.get",
+          "id": "source",
+          "op": "CALL",
+          "resultType": "Task",
+          "version": "1"
+        },
+        {
+          "id": "completed",
+          "op": "BIND",
+          "resultType": "Boolean",
+          "value": {
+            "expr": "e1",
+            "type": "Boolean"
+          }
+        }
+      ]
+    },
+    "expected": {
+      "code": "AUTHORITY_DENIED",
+      "path": ""
+    }
+  },
+  {
+    "id": "duplicate-artifact-key",
+    "stage": "prepare",
+    "schema": "artifact",
+    "document": {
+      "compiler": "keir-compiler-java/0.1.0-SNAPSHOT",
+      "entrypoint": "ClassifyTask",
+      "environment": {
+        "celJava": "0.14.0",
+        "celNode": "0.6.1",
+        "protobufJava": "4.35.1",
+        "protobufNode": "2.6.2"
+      },
+      "expressions": {
+        "e0": {
+          "checked": "EgsIARIHCgVpbnB1dBodCAESGUoXa2Vpci5yZWFkLkNsYXNzaWZ5SW5wdXQaBggCEgIYBSIZEAIqFQoLEAEiBwoFaW5wdXQSBnRhc2tJZCocEgtrZWlyLXJlYWQvMRoBDSIECAEQACIECAIQBQ==",
+          "resultType": "TaskId",
+          "variables": {
+            "input": "ClassifyInput"
+          }
+        },
+        "e1": {
+          "checked": "EgwIARIICgZzb3VyY2USDAgDEggaBmVxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYBRoGCAMSAhgBGgYIBBICGAUiNxADMjMSBF89PV8aGhACKhYKDBABIggKBnNvdXJjZRIGc3RhdHVzGg8QBBoLMglDT01QTEVURUQqKBILa2Vpci1yZWFkLzEaAR0iBAgBEAAiBAgCEAYiBAgDEA4iBAgEEBE=",
+          "resultType": "Boolean",
+          "variables": {
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        },
+        "e2": {
+          "checked": "Eg8IARILCgljb21wbGV0ZWQSEQgCEg0aC2NvbmRpdGlvbmFsGgYIARICGAEaBggCEgIYBRoGCAMSAhgFGgYIBBICGAUiNxACMjMSBV8/XzpfGg8QASILCgljb21wbGV0ZWQaChADGgYyBERPTkUaDRAEGgkyB1BFTkRJTkcqKBILa2Vpci1yZWFkLzEaAR8iBAgBEAAiBAgCEAoiBAgDEAwiBAgEEBU=",
+          "resultType": "Classification",
+          "variables": {
+            "completed": "Boolean",
+            "input": "ClassifyInput",
+            "source": "Task"
+          }
+        }
+      },
+      "format": "keir-artifact/read-2",
+      "modelRef": {
+        "descriptorRecipe": "keir-record-descriptors/1",
+        "digest": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73",
+        "domainId": "sample.tasks",
+        "domainVersion": "2",
+        "format": "keir-dcm/read-2"
+      },
+      "profile": "keir-read/2",
+      "return": {
+        "fields": {
+          "classification": {
+            "expr": "e2",
+            "type": "Classification"
+          }
+        },
+        "type": "ClassifyResult"
+      },
+      "sourceDigest": "sha256:cb4d74c8fdc13d6ce392a22337a84f61667ffde4cbc68e90d42bbf059e2d8084",
+      "steps": [
+        {
+          "args": {
+            "taskId": {
+              "expr": "e0",
+              "type": "TaskId"
+            }
+          },
+          "capability": "tasks.get",
+          "id": "source",
+          "op": "CALL",
+          "resultType": "Task",
+          "version": "1"
+        },
+        {
+          "id": "completed",
+          "op": "BIND",
+          "resultType": "Boolean",
+          "value": {
+            "expr": "e1",
+            "type": "Boolean"
+          }
+        }
+      ]
+    },
+    "expected": {
+      "code": "ARTIFACT_INVALID",
+      "path": "/artifact"
+    },
+    "raw": "{\"compiler\":\"ignored\",\"compiler\":\"keir-compiler-java/0.1.0-SNAPSHOT\",\"entrypoint\":\"ClassifyTask\",\"environment\":{\"celJava\":\"0.14.0\",\"celNode\":\"0.6.1\",\"protobufJava\":\"4.35.1\",\"protobufNode\":\"2.6.2\"},\"expressions\":{\"e0\":{\"checked\":\"EgsIARIHCgVpbnB1dBodCAESGUoXa2Vpci5yZWFkLkNsYXNzaWZ5SW5wdXQaBggCEgIYBSIZEAIqFQoLEAEiBwoFaW5wdXQSBnRhc2tJZCocEgtrZWlyLXJlYWQvMRoBDSIECAEQACIECAIQBQ==\",\"resultType\":\"TaskId\",\"variables\":{\"input\":\"ClassifyInput\"}},\"e1\":{\"checked\":\"EgwIARIICgZzb3VyY2USDAgDEggaBmVxdWFscxoUCAESEEoOa2Vpci5yZWFkLlRhc2saBggCEgIYBRoGCAMSAhgBGgYIBBICGAUiNxADMjMSBF89PV8aGhACKhYKDBABIggKBnNvdXJjZRIGc3RhdHVzGg8QBBoLMglDT01QTEVURUQqKBILa2Vpci1yZWFkLzEaAR0iBAgBEAAiBAgCEAYiBAgDEA4iBAgEEBE=\",\"resultType\":\"Boolean\",\"variables\":{\"input\":\"ClassifyInput\",\"source\":\"Task\"}},\"e2\":{\"checked\":\"Eg8IARILCgljb21wbGV0ZWQSEQgCEg0aC2NvbmRpdGlvbmFsGgYIARICGAEaBggCEgIYBRoGCAMSAhgFGgYIBBICGAUiNxACMjMSBV8/XzpfGg8QASILCgljb21wbGV0ZWQaChADGgYyBERPTkUaDRAEGgkyB1BFTkRJTkcqKBILa2Vpci1yZWFkLzEaAR8iBAgBEAAiBAgCEAoiBAgDEAwiBAgEEBU=\",\"resultType\":\"Classification\",\"variables\":{\"completed\":\"Boolean\",\"input\":\"ClassifyInput\",\"source\":\"Task\"}}},\"format\":\"keir-artifact/read-2\",\"modelRef\":{\"descriptorRecipe\":\"keir-record-descriptors/1\",\"digest\":\"sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73\",\"domainId\":\"sample.tasks\",\"domainVersion\":\"2\",\"format\":\"keir-dcm/read-2\"},\"profile\":\"keir-read/2\",\"return\":{\"fields\":{\"classification\":{\"expr\":\"e2\",\"type\":\"Classification\"}},\"type\":\"ClassifyResult\"},\"sourceDigest\":\"sha256:cb4d74c8fdc13d6ce392a22337a84f61667ffde4cbc68e90d42bbf059e2d8084\",\"steps\":[{\"args\":{\"taskId\":{\"expr\":\"e0\",\"type\":\"TaskId\"}},\"capability\":\"tasks.get\",\"id\":\"source\",\"op\":\"CALL\",\"resultType\":\"Task\",\"version\":\"1\"},{\"id\":\"completed\",\"op\":\"BIND\",\"resultType\":\"Boolean\",\"value\":{\"expr\":\"e1\",\"type\":\"Boolean\"}}]}"
+  },
+  {
+    "id": "unknown-model-reference",
+    "stage": "bind",
+    "schema": "dcm",
+    "document": {
+      "capabilities": {
+        "tasks.create": {
+          "effect": "WRITE",
+          "errors": [
+            "CREATE_REJECTED",
+            "ACCESS_DENIED"
+          ],
+          "parameters": {
+            "actorId": {
+              "binding": "host",
+              "type": "UserId"
+            },
+            "projectId": {
+              "binding": "agent",
+              "type": "ProjectId"
+            },
+            "title": {
+              "binding": "agent",
+              "type": "String"
+            }
+          },
+          "result": "Task",
+          "version": "1"
+        },
+        "tasks.get": {
+          "effect": "READ",
+          "errors": [
+            "TASK_NOT_FOUND",
+            "ACCESS_DENIED"
+          ],
+          "parameters": {
+            "actorId": {
+              "binding": "host",
+              "type": "UserId"
+            },
+            "taskId": {
+              "binding": "agent",
+              "type": "TaskId"
+            }
+          },
+          "result": "Task",
+          "version": "1"
+        },
+        "tasks.lookup": {
+          "effect": "READ",
+          "errors": [
+            "TASK_NOT_FOUND",
+            "ACCESS_DENIED"
+          ],
+          "parameters": {
+            "actorId": {
+              "binding": "host",
+              "type": "UserId"
+            },
+            "taskId": {
+              "binding": "agent",
+              "type": "TaskId"
+            }
+          },
+          "result": "Task",
+          "version": "1"
+        }
+      },
+      "domain": {
+        "id": "sample.tasks",
+        "version": "2"
+      },
+      "entrypoints": {
+        "ClassifyTask": {
+          "consumer": {
+            "id": "sample.classification",
+            "kind": "DISPLAY",
+            "version": "1"
+          },
+          "input": "ClassifyInput",
+          "output": "ClassifyResult",
+          "trigger": "REQUEST"
+        }
+      },
+      "format": "keir-dcm/read-2",
+      "types": {
+        "Classification": {
+          "kind": "enum",
+          "values": [
+            "DONE",
+            "PENDING"
+          ]
+        },
+        "ClassifyInput": {
+          "fields": {
+            "taskId": "Unknown"
+          },
+          "kind": "record"
+        },
+        "ClassifyResult": {
+          "fields": {
+            "classification": "Classification"
+          },
+          "kind": "record"
+        },
+        "ProjectId": {
+          "base": "String",
+          "kind": "nominal"
+        },
+        "Task": {
+          "fields": {
+            "id": "TaskId",
+            "status": "TaskStatus"
+          },
+          "kind": "record"
+        },
+        "TaskId": {
+          "base": "String",
+          "kind": "nominal"
+        },
+        "TaskStatus": {
+          "kind": "enum",
+          "values": [
+            "OPEN",
+            "COMPLETED"
+          ]
+        },
+        "UserId": {
+          "base": "String",
+          "kind": "nominal"
+        }
+      }
+    },
+    "expected": {
+      "code": "ADMISSION_INVALID",
+      "path": "/binding/dcm"
+    },
+    "compilerExpected": {
+      "code": "DCM_INVALID",
+      "path": "/dcm/types/ClassifyInput/fields/taskId"
+    }
+  },
+  {
+    "id": "integer-token-spelling",
+    "stage": "bind",
+    "schema": "dcm",
+    "document": {
+      "capabilities": {
+        "tasks.create": {
+          "effect": "WRITE",
+          "errors": [
+            "CREATE_REJECTED",
+            "ACCESS_DENIED"
+          ],
+          "parameters": {
+            "actorId": {
+              "binding": "host",
+              "type": "UserId"
+            },
+            "projectId": {
+              "binding": "agent",
+              "type": "ProjectId"
+            },
+            "title": {
+              "binding": "agent",
+              "type": "String"
+            }
+          },
+          "result": "Task",
+          "version": "1"
+        },
+        "tasks.get": {
+          "effect": "READ",
+          "errors": [
+            "TASK_NOT_FOUND",
+            "ACCESS_DENIED"
+          ],
+          "parameters": {
+            "actorId": {
+              "binding": "host",
+              "type": "UserId"
+            },
+            "taskId": {
+              "binding": "agent",
+              "type": "TaskId"
+            }
+          },
+          "result": "Task",
+          "version": "1"
+        },
+        "tasks.lookup": {
+          "effect": "READ",
+          "errors": [
+            "TASK_NOT_FOUND",
+            "ACCESS_DENIED"
+          ],
+          "parameters": {
+            "actorId": {
+              "binding": "host",
+              "type": "UserId"
+            },
+            "taskId": {
+              "binding": "agent",
+              "type": "TaskId"
+            }
+          },
+          "result": "Task",
+          "version": "1"
+        }
+      },
+      "domain": {
+        "id": "sample.tasks",
+        "version": "2"
+      },
+      "entrypoints": {
+        "ClassifyTask": {
+          "consumer": {
+            "id": "sample.classification",
+            "kind": "DISPLAY",
+            "version": "1"
+          },
+          "input": "ClassifyInput",
+          "output": "ClassifyResult",
+          "trigger": "REQUEST",
+          "capabilityPolicy": {
+            "maxCalls": {
+              "tasks.get": 1
+            }
+          }
+        }
+      },
+      "format": "keir-dcm/read-2",
+      "types": {
+        "Classification": {
+          "kind": "enum",
+          "values": [
+            "DONE",
+            "PENDING"
+          ]
+        },
+        "ClassifyInput": {
+          "fields": {
+            "taskId": "TaskId"
+          },
+          "kind": "record"
+        },
+        "ClassifyResult": {
+          "fields": {
+            "classification": "Classification"
+          },
+          "kind": "record"
+        },
+        "ProjectId": {
+          "base": "String",
+          "kind": "nominal"
+        },
+        "Task": {
+          "fields": {
+            "id": "TaskId",
+            "status": "TaskStatus"
+          },
+          "kind": "record"
+        },
+        "TaskId": {
+          "base": "String",
+          "kind": "nominal"
+        },
+        "TaskStatus": {
+          "kind": "enum",
+          "values": [
+            "OPEN",
+            "COMPLETED"
+          ]
+        },
+        "UserId": {
+          "base": "String",
+          "kind": "nominal"
+        }
+      }
+    },
+    "raw": "{\"capabilities\":{\"tasks.create\":{\"effect\":\"WRITE\",\"errors\":[\"CREATE_REJECTED\",\"ACCESS_DENIED\"],\"parameters\":{\"actorId\":{\"binding\":\"host\",\"type\":\"UserId\"},\"projectId\":{\"binding\":\"agent\",\"type\":\"ProjectId\"},\"title\":{\"binding\":\"agent\",\"type\":\"String\"}},\"result\":\"Task\",\"version\":\"1\"},\"tasks.get\":{\"effect\":\"READ\",\"errors\":[\"TASK_NOT_FOUND\",\"ACCESS_DENIED\"],\"parameters\":{\"actorId\":{\"binding\":\"host\",\"type\":\"UserId\"},\"taskId\":{\"binding\":\"agent\",\"type\":\"TaskId\"}},\"result\":\"Task\",\"version\":\"1\"},\"tasks.lookup\":{\"effect\":\"READ\",\"errors\":[\"TASK_NOT_FOUND\",\"ACCESS_DENIED\"],\"parameters\":{\"actorId\":{\"binding\":\"host\",\"type\":\"UserId\"},\"taskId\":{\"binding\":\"agent\",\"type\":\"TaskId\"}},\"result\":\"Task\",\"version\":\"1\"}},\"domain\":{\"id\":\"sample.tasks\",\"version\":\"2\"},\"entrypoints\":{\"ClassifyTask\":{\"consumer\":{\"id\":\"sample.classification\",\"kind\":\"DISPLAY\",\"version\":\"1\"},\"input\":\"ClassifyInput\",\"output\":\"ClassifyResult\",\"trigger\":\"REQUEST\",\"capabilityPolicy\":{\"maxCalls\":{\"tasks.get\":1.0}}}},\"format\":\"keir-dcm/read-2\",\"types\":{\"Classification\":{\"kind\":\"enum\",\"values\":[\"DONE\",\"PENDING\"]},\"ClassifyInput\":{\"fields\":{\"taskId\":\"TaskId\"},\"kind\":\"record\"},\"ClassifyResult\":{\"fields\":{\"classification\":\"Classification\"},\"kind\":\"record\"},\"ProjectId\":{\"base\":\"String\",\"kind\":\"nominal\"},\"Task\":{\"fields\":{\"id\":\"TaskId\",\"status\":\"TaskStatus\"},\"kind\":\"record\"},\"TaskId\":{\"base\":\"String\",\"kind\":\"nominal\"},\"TaskStatus\":{\"kind\":\"enum\",\"values\":[\"OPEN\",\"COMPLETED\"]},\"UserId\":{\"base\":\"String\",\"kind\":\"nominal\"}}}",
+    "expected": {
+      "code": "ADMISSION_INVALID",
+      "path": "/binding/dcm"
+    },
+    "compilerExpected": {
+      "code": "DCM_INVALID",
+      "path": "/dcm/entrypoints/ClassifyTask/capabilityPolicy/maxCalls/tasks.get"
+    }
+  }
+]
