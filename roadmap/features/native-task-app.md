@@ -14,7 +14,7 @@ Deliver a polished local web app: projects and task create/list/edit/complete, r
 
 ## In Scope
 
-- Choose the smallest local web stack, persistence and demo sign-in model. Visitors clone this repo and run it without a sibling checkout, cloud account or AI credentials.
+- Choose the smallest local web stack, persistence and demo sign-in model. Visitors clone this repo and run native task management without a sibling checkout, hosted infrastructure or AI credentials. The complete AI extension-authoring demo later requires the visitor's own configured provider.
 - Seed three fictional users with separate projects/tasks. Each represents one SaaS customer customization scope; enforce ownership in services, not only in the UI. This demonstrates isolation without building a production identity platform.
 - Establish a distinctive visual direction before implementation: coherent typography, spacing and color, polished task interactions, responsive layouts, keyboard access and intentional loading/empty/error states. Verify actual rendered screens; a generic generated dashboard is insufficient.
 - Implement native task services, projects, stable IDs, validation and a usable completion flow; preserve a clean service boundary for later adapters.

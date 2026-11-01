@@ -15,7 +15,7 @@ This is the single roadmap for `keir-core` and `keir-demo-app`: delivered featur
 | --- | --- |
 | **Execute extensions in Java and Node** | Delivered experimental core: initial language/DCM, restricted CEL, read/decide, scalar effects and generic `/2` model binding. Same artifacts run in both hosts; customer constants stay in source and effect evidence remains honest. The five completed cards retain their evidence. |
 | **Customize a real task application** | Useful native app/organization; packaged real reads; explicitly qualified real single-effect admission plus native event/key/persistence evidence; a core guard contract and actual host enforcement. |
-| **Author and activate customizations through AI** | First manual exact-revision review/simulation/approval/activation, then two separate live assistants. Supporting work includes machine-readable contracts and reusable scenario/conformance tools. Optional API import is not a prerequisite. |
+| **Author and activate customizations through AI** | Manual exact-revision review/simulation/approval/activation, a host-design skill for the visitor's coding agent and an in-app customer extension-authoring UI using their configured AI provider. Supporting work includes machine-readable contracts and reusable scenario/conformance tools. Optional API import is not a prerequisite. |
 | **Extend host behavior safely** | Selected search/tag/168-hour language enhancement and real app integration. Broader types, projections, patches, multiple bindings, tenant endpoints and multiple effects remain individually visible proposals. |
 | **Release an embeddable Keir library** | Current schemas/API/compatibility references, clean consumers, authorized licensing/publication, measured resource containment, many-extension performance and safe operational evidence. Experimental release need not wait for AI or all optional features. |
 
@@ -30,6 +30,8 @@ The [delivered core](features/generic-hook-capability-contract.md) passes local 
 The [core guard](features/pre-operation-guard.md) can be designed independently; [native guard enforcement](features/task-create-guard.md) follows the app and contract. Rich search/time work does not block the scalar path. Minimal trusted operator-selected artifacts are enough initially; the full [approval lifecycle](features/extension-approval-lifecycle.md) remains a separate outcome.
 
 The demo must visibly support different extensions at the same hook for different users, with service-enforced scope and independent activation. The [host-design assistant](features/host-integration-assistant.md) also owns a future `pre-design-time` starting branch/checkpoint for a visitor's coding agent to configure the host; `main` becomes the configured customer-customization journey. Preserve one native app and a reproducible checkpoint rather than two independently maintained products.
+
+The complete demo includes [AI-driven extension creation](features/conversational-authoring.md), with operator-supplied provider/model/credentials and at least two qualified provider configurations. Native task management and execution of existing extensions do not require AI calls; that fallback is not the complete authoring demonstration. Host design-time uses the coding-agent skill and its existing authentication, independently of the demo server's provider setup. Ship no private keys.
 
 ## Decomposition of earlier broad cards
 
