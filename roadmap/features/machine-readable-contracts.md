@@ -32,4 +32,6 @@ A second language specification in prompts, an agent framework in core or an aut
 
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
+**First increment preparation:** Scope the supported read/2 source, DCM and artifact structural schemas with valid/invalid examples and checks against existing validators. Read-only developer preparation is requested; runtime/compiler semantics, older profiles and artifact bytes stay unchanged. This bounded increment can proceed alongside real task reads without Studio UX decisions. It does not complete the broader simulation, diagnostics and all-profile guidance obligations on this card.
+
 **Design input:** [Structural schema boundaries](../../docs/internal/design-baseline/public/schemas/extension-ir-v0.schema.json); [Discovery, section 3.3](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md); [Types and validation, sections 2 and 7](../../docs/internal/design-baseline/public/domain-model-v0.md).
