@@ -1,37 +1,37 @@
 ---
-id: host-integration-assistant
-title: Help a host developer define and approve an integration
-status: queued
-priority: medium
-commitment: committed
-milestone: Customize a real task application
-repo: keir-demo-app
+id: "host-integration-assistant"
+title: "Help a host developer define and approve an integration"
+status: "queued"
+priority: "medium"
+commitment: "committed"
+milestone: "Author and activate customizations through AI"
+repo: "keir-demo-app"
 ---
 
 ## Summary
 
-Demonstrate the host-design assistant helping the task-app developer propose a domain/hook/capability contract, validate it, inspect host conformance evidence and submit an exact revision for host-owner approval.
-
-## Why
-
-Host integration design and customer extension authoring are distinct tasks and authority levels. Both need usable Keir contracts; the developer-facing workflow should not be hidden inside the later customer chat feature.
+Demonstrate the host-design persona proposing a real domain/hook/capability change, validating it and submitting an exact revision to the host owner.
 
 ## In Scope
 
-A bounded host-owned developer integration using the public host-agent guide and core model validation/diagnostics. Inspect authorized definitions, propose DCM and adapter-binding changes, identify missing evidence and run approved conformance tools. Demonstrate a real proposal/validation/review loop against the task host; a scripted walkthrough is preparation, not proof of live agent behavior.
+- Offer authorized interface/catalog inspection, typed drafting/validation tools and host conformance evidence.
+- Separate proposed definitions from publication; customer credentials and the assistant cannot certify or publish their own proposal.
+- Choose provider, credentials and spend bounds before live calls; keep the integration host-owned and guided by current schemas/docs.
 
 ## Out of Scope
 
-An autonomous agent in core, automatic certification/publication, general API importers, arbitrary source execution, customer permission to edit the catalog, and a separate chat product just for this developer workflow.
+An agent in core, automatic certification, mandatory API importers or a separate full chat product.
 
 ## Done When
 
-- A host developer requests a supported integration change and receives a typed, reviewable proposed revision with explicit assumptions and certification obligations.
-- Tools expose schemas, scope, effects, limits and diagnostics; proposals can be validated without publication.
-- Host-owner approval applies to the exact revision and real adapter evidence. Schema validity and assistant statements do not certify guarantees.
-- Customer credentials cannot publish the model; the host assistant cannot approve its own publication or extension activation.
-- The approved revision can be discovered by customer authoring without copying internal designs into prompts.
+- [ ] Design/spec: define tool schemas, scope/effects, the host-owner publication boundary and a small supported integration-change scenario.
+- [ ] Implementation: a live developer request produces a validated, reviewable proposal and a separately approved published revision.
+- [ ] Verification: missing evidence, forbidden publication, customer credentials and budget exhaustion fail safely; approved definitions become discoverable by customer authoring.
 
 ## Notes
 
-Core supplies reusable contracts, validation and conformance; host-specific tools and agent integration live in the demo. Provider, credentials and spend bounds require the normal owner decision before live calls. Both guides start in the first core increment; this feature delivers the host persona's live workflow.
+**Dependencies:** [real-task-reads](../features/real-task-reads.md); [machine-readable-contracts](../features/machine-readable-contracts.md).
+
+**Design input:** [Host discovery and ownership, sections 1-3](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md); [Agent integration, section 5](../../docs/internal/design-baseline/public/hooks-and-tenant-capabilities.md).
+
+Preserves the existing queued feature and its acceptance obligations. Reuse the simulation/conformance seam as useful; a scripted transcript is preparation, not proof of a live assistant.

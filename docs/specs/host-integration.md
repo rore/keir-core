@@ -1,12 +1,12 @@
 # Read-and-decide host contract and acceptance
 
-For new integration design, use the [generic hook responsibility boundaries](generic-hook-capability-contract.md#responsibility-boundaries): publish the approved catalog separately from hook input/output/lifecycle and optional restrictions. The `/2` contract is proposed; the executable `/1` sample and its required grant-map tests below remain unchanged. Do not generate sample-specific grants as the default design for a generic hook.
+For new integration design, use the implemented experimental [generic hook responsibility boundaries](generic-hook-capability-contract.md#responsibility-boundaries): publish the approved catalog separately from hook input/output/lifecycle and optional restrictions. The `/1` sample and its required grant-map tests below remain compatibility evidence. Do not generate sample-specific grants as the default design for a generic hook.
 
 Status: implemented local REQUEST/read/classify/display checkpoint. Both packaged hosts exercise completed/open/missing/wrong-resource cases. A full task application, transactional guard, activation system and live agent integration remain later work.
 
 ## Definition, invocation and consumption
 
-For the corrected target, the [complete TaskCompleted walkthrough](generic-hook-example.md) separates host payload/catalog/adapters/authority from customer logic/constants, compiler output and runtime invocation. It is proposed `/2`, not a replacement for the implemented `/1` example below. Host payload is defined by the application independently of each extension; a customer's project choice does not require a new hook field.
+The implemented [TaskCompleted walkthrough](generic-hook-example.md) separates host payload/catalog/adapters/authority from customer logic/constants, compiler output and runtime invocation. Its `/2` fixtures pass shared Java/Node and packaged-host verification; the `/1` example below is retained unchanged. Host payload is defined by the application independently of each extension; a customer's project choice does not require a new hook field.
 
 Host owner approves the [DCM](domain-model.md), adapter registration, caller scope and DISPLAY consumer. Host constructs trusted input and protected bindings, selects the artifact through an independently held digest, prepares once, and invokes through the [runtime API](runtime.md). Only a validated COMPLETED result is displayed. Failure displays a safe error, not a default classification. No result grants permission to perform a native operation.
 
