@@ -23,7 +23,7 @@ The [delivered core](features/generic-hook-capability-contract.md) passes local 
 
 ## First deliveries
 
-1. [Native task app](features/native-task-app.md): a polished clone-and-run local web app with persisted create/list/edit/complete and three seeded demo logins, with extensions and AI disabled. Each user represents a SaaS customer's isolated data/customization scope. Choose the smallest UI/storage approach in that feature's design review; no implementation is assigned by this planning update.
+1. [Native task app](features/native-task-app.md), delivered: a polished clone-and-run local web app with persisted create/list/edit/complete and three seeded demo logins, with extensions and AI disabled. Each user represents a SaaS customer's isolated scope. The feature records the selected stack, measured checks, independent review and passing CI.
 2. [Packaged real reads](features/real-task-reads.md): use current read/2 with actual scoped task data and a host consumer. No richer language, public registry or AI is required.
 3. Mature [real-effect admission](features/real-effect-admission.md) alongside requirements from [native event/effect integration](features/demo-task-integration.md). Accept real writes only after the assurance gate; do not flip the simulation flag or substitute fake success for native evidence.
 
@@ -80,6 +80,6 @@ The architect and bounded source readers covered all **17 supplied baseline file
 
 ## Working process
 
-Use the existing architect, two core developers and dedicated demo developer when assigned concrete work. Design review resolves the next increment's gaps; developers maintain conformance and feed discoveries back into the contract; the manager accepts combined outcomes and updates this roadmap. This planning update assigns no implementation or runtime change.
+Use the existing architect, two core developers and dedicated demo developer when assigned concrete work. Design review resolves the next increment's gaps; developers maintain conformance and feed discoveries back into the contract; the manager accepts combined outcomes and updates this roadmap. Concrete assignments and acceptance use the owning feature and core-owned task record; queued cards do not assign work by themselves.
 
 Code/mixed/governance tasks use [Agent Workflow](../docs/internal/workflow/current-process.md), with core-owned records for both repos and direct-main delivery without required PRs. Documentation/roadmap-only work is exempt. Keep [fast regression and explicit slow qualification](../docs/testing.md), private operational evidence outside tracked content, and recoverable cleanup of completed task worktrees.
