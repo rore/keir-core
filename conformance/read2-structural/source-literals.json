@@ -1,0 +1,38 @@
+{
+  "language": "keir/v0",
+  "domain": {
+    "id": "sample.tasks",
+    "version": "2",
+    "fingerprint": "sha256:bec47e5ee080e3294518c8b504c0f2cc604135b281ddc4bc2b7b3b6e968d7a73"
+  },
+  "entrypoint": "ClassifyTask",
+  "name": "literal-values",
+  "steps": [
+    {
+      "id": "project",
+      "let": {
+        "literal": "project1",
+        "type": "ProjectId"
+      }
+    },
+    {
+      "id": "flag",
+      "let": {
+        "literal": false
+      }
+    },
+    {
+      "id": "title",
+      "let": {
+        "literal": ""
+      }
+    }
+  ],
+  "return": {
+    "record": {
+      "classification": {
+        "literal": "DONE"
+      }
+    }
+  }
+}

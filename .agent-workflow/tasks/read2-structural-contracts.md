@@ -27,12 +27,14 @@ Canonical task: `agent-workflow:read2-structural-contracts`. Owning feature: [ma
 **Plan review:** Agent technical review: independent architect approved exact `ca0f12f`, including proposed schema IDs/current environment tuple, with adopted decoded-instance, targeted-negative, legitimate-variant and offline-retrieval verification clarifications. See Plan review below.
 **Approvals:** Not required at the declared Elevated risk. This implements the bounded second slice discussed with the user; Studio UX is independent. Any actual production-semantic or authority change returns the task to planning.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 - Implementation pickup: adopted approved readiness revision `180353b` in the assigned clean feature checkout. Resolver selected this exact Work Record; exact feature participation is active. Scope classification remains GRAY / Elevated / Moderate. No helper initially. Production sources, old goldens, policy/role files and manager-owned roadmap remain excluded. Build the three structural documents and offline checker first, then pair fixture checks with native diagnostics and integrate only the approved product CI step.
+- Structural checkpoint: three Draft 2020-12 documents and the pinned offline development checker are implemented. A bounded mechanical helper supplied the index, two guide links and product-CI wiring after the initial source work; the developer reviewed and completed those edits. Explicit retrieval denial, closed records, legitimate literal/policy/unused-WRITE variants and boundary/overflow tests are covered. Pattern qualification caught and corrected terminal-newline acceptance. Native-derived JSON source examples reproduce existing artifacts; a literal-only source was compiled into one new artifact consumed unchanged by both runtimes. No historical fixture changed.
+- Native checkpoint: shared residual fixtures distinguish schema acceptance from native parsing, model/reference, protected-argument, WRITE, aggregate-call, policy, pin, checked-metadata, UTF-8 and current-authorization rejection. Fixture-controlled pins reach deeper checks; explicit bad-pin cases remain separate. Preflight callbacks remain zero; authorization rejection allows the authorizer and dispatches nothing. The literal-only program uses an empty host-binding map because it calls no capability. Production implementation and dependencies remain unchanged.
 
 - Context and baseline recorded before edits. Core baseline `b2c55fe`; read-only scoping was completed against unchanged production parser/runtime trees. An isolated implementation checkout is assigned after the reviewed readiness commit.
 - Initial intended-path Redline is GRAY, with no boundary violation or required checkpoint. Independent plan review approved publication IDs and exact qualified-environment treatment; schema/native parity remains an implementation obligation.
@@ -46,8 +48,15 @@ Adopted verification clarifications: schema checks consume decoded JSON instance
 
 ## Evidence
 
-Planning only. No new schema, fixture runner or cross-runtime result exists yet.
+- Ten schema tests pass in 1.161 seconds including self-validation, closed/required records, local boundary/overflow cases, lexical forms, legitimate variants, explicit denied retrieval and a redacted CLI. Source JSON examples reproduce the three unchanged generic read compiler artifacts; the new literal-only artifact is compiler-produced and byte-identical for both runtimes.
+- Focused Java checks pass three compiler tests and one runtime test in a 9.529-second warm reactor run. Fifteen shared schema-pass/native-fail residuals exercise source semantics, DCM references/token spelling and runtime admission/authority, with exact diagnostics and callback assertions. The final focused Node checks pass two tests in 0.440 seconds. Default Node coverage passes all 369 tests without failure/skip in 2.887 seconds: 100% source lines/functions and 97.74% branches. Existing production implementations are unchanged; previously accepted full Java and packaged-host qualification remains applicable rather than being claimed as new schema evidence.
+- Bootstrap is separate: project-local offline Node install used the existing cache and took eight seconds; schema validation reused an existing isolated pinned interpreter without installation. Product CI adds the fast schema check and both trigger-path sets. A parsed before/after comparison confirms existing job identity, permissions, timeout, concurrency, environment and regression steps are preserved. The added setup action's supported major was checked against its official upstream documentation.
+- Private ignored logs retain the initial pattern/test-fixture failures and final checks. The 21-path fresh Redline report is GRAY without checkpoints or boundary violations; privacy and whitespace inspection pass. The task checker initially waited only for the required independent result-review entry, which is now recorded below. All 13 lexical patterns also compile under JavaScript and reject terminal-newline aliases; staged literal artifact bytes equal tested bytes. No production source/API/dependency, old golden, roadmap, role/policy, other Work Record or live environment setting changed.
 
 ## Result review
 
-Pending implementation and measured evidence.
+Agent technical review: independent clean-context non-implementer approved the bounded implementation and verification adequacy with no actionable implementation defects.
+
+Reviewed revision: staged working diff against `180353b611fdce935462d019161f0846baeeb294`, HEAD `a2dda9be5510c091849fab8939432f741f90dbd4`; exact diff fingerprint `3f8231ccb51214c94634632fac5dc6402c75de65` from binary staged diff hashed with Git. This identifies the inspected diff, not a later commit. The developer verified that fingerprint before adding these review/evidence notes; implementation source remains unchanged.
+
+Verification adequacy: sufficient for this bounded increment. Reviewer compared all three schemas with current native validators/contracts, inspected legitimate variants and residual boundaries, newline-safe patterns, denied local-registry retrieval, pinned dev tooling, targeted native diagnostics/pins/callbacks, source equivalence and shared literal bytes, CI trigger coverage and preservation, and the retained passing evidence. Reviewer reran no suites and made no edits. Hosted CI and manager integration remain pending. The manager must reconcile the owning feature's stale plan-review sentence while retaining the broader unfinished feature scope.
