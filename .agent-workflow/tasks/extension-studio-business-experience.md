@@ -26,7 +26,7 @@ Canonical task: `agent-workflow:extension-studio-business-experience`. Owning fe
 **Plan review:** Routine self-review: presentation and bounded scripted routes change, existing model and authority remain. Task-shaped preview replaces a technical diagram; user can ask for help or change intent throughout. No new abstraction or dependency needed.
 **Approvals:** Not required at this risk level. User explicitly requested the whole look be reconsidered for usability and visibility, following the nontechnical agent-led direction. Production implementation remains out of scope.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -52,3 +52,11 @@ Routine self-review at demo `f2513e7`: the bounded prototype meets the iteration
 This remains a scripted proposal with tab-local history, one supported task-follow-up pattern and no live agent or real task effects. Full accessibility audit, production execution and business-user acceptance are not established. Native app tests were not rerun because native files did not change. User review determines acceptance of the visual direction; the broader feature remains open.
 
 The designer has not pushed. Manager owns roadmap reconciliation, integration and delivery. No worktree was created. The existing preview server remains available without restart.
+
+Manager review: inspected the actual rendered screen and verified exact four-file demo scope, clean checkouts, public commit identity, privacy/whitespace and the saved BLUE Redline/clean workflow reports for both path sets. The demo developer is reviewing only the changed chat routes, visible controls and review/status wording; earlier state-integrity review remains applicable to unchanged model behavior. User design acceptance remains pending.
+
+Independent delta review found one P2 at `f2513e7`: broad turn-on matching intercepts explicit turn-off phrases such as "Turn off this automation" and "Turn it off in Operations", leaving the simulated setup on. Targeted comparison confirms the earlier proposal turned it off. The designer is assigned the narrow route/word-boundary correction and opposite-intent regression checks in the same task; delivery is held for fix verification. Other unchanged model/browser evidence remains applicable.
+
+Designer correction: constrained the turn-on alternative to whole words, retaining the existing turn-off route and all other UI/model behavior. The regression failed against the reviewed implementation before the fix. After correction, both reported turn-off phrases disable the setup; a subsequent "Turn this on" opens review without approving or enabling it. The full prototype suite passes 29 checks, zero failures/skips, in 0.220 seconds. Whitespace check passes. No parser expansion, native test rerun or browser rerun was needed for this one-line route correction; existing rendered evidence remains applicable. Manager review paragraphs and pending roadmap edits were preserved. Narrow independent recheck and user visual acceptance remain pending.
+
+Correction revision: demo `2982f18`, limited to the route and regression test. Refreshed complete-path Redline is BLUE and explicit workflow validation is clean for both core and demo, with no failed predicates. Changed-content privacy checks pass. The manager-owned roadmap edit was included in read-only qualification but is left uncommitted for its owner; this record retains the manager's review notes.
