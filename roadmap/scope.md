@@ -24,7 +24,7 @@ The [delivered core](features/generic-hook-capability-contract.md) passes local 
 ## First deliveries
 
 1. [Native task app](features/native-task-app.md), delivered: a polished clone-and-run local web app with persisted create/list/edit/complete and three seeded demo logins, with extensions and AI disabled. Each user represents a SaaS customer's isolated scope. The feature records the selected stack, measured checks, independent review and passing CI.
-2. [Packaged real reads](features/real-task-reads.md): use current read/2 with actual scoped task data and a host consumer. No richer language, public registry or AI is required.
+2. [Packaged real reads](features/real-task-reads.md), delivered: installed read/2 programs classify actual scoped tasks, with two user-specific programs, validated advisory display and standalone clone/run evidence. Native writes and Studio/AI integration remain separate work.
 3. Mature [real-effect admission](features/real-effect-admission.md) alongside requirements from [native event/effect integration](features/demo-task-integration.md). Accept real writes only after the assurance gate; do not flip the simulation flag or substitute fake success for native evidence.
 
 The [core guard](features/pre-operation-guard.md) can be designed independently; [native guard enforcement](features/task-create-guard.md) follows the app and contract. Rich search/time work does not block the scalar path. Minimal trusted operator-selected artifacts are enough initially; the full [approval lifecycle](features/extension-approval-lifecycle.md) remains a separate outcome.
