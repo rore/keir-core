@@ -33,6 +33,8 @@ The demo must visibly support different extensions at the same hook for differen
 
 The complete demo includes [AI-driven extension creation](features/conversational-authoring.md), with operator-supplied provider/model/credentials and at least two qualified provider configurations. Native task management and execution of existing extensions do not require AI calls; that fallback is not the complete authoring demonstration. Host design-time uses the coding-agent skill and its existing authentication, independently of the demo server's provider setup. Ship no private keys.
 
+The **Extension Studio is the demo's centerpiece**. Its [dedicated design/prototype feature](features/extension-studio-design.md) owns detailed UX, interactions, visual design and a user-reviewed end-to-end walkthrough before Studio UI implementation. Design can begin before backend completion; native CRUD stays a small foundation. Authoring/lifecycle features own the later executable behavior, not a competing experience design.
+
 ## Decomposition of earlier broad cards
 
 | Existing card | Explicit owners of its obligations |

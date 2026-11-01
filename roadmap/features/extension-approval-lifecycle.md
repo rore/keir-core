@@ -12,6 +12,8 @@ repo: "keir-demo-app"
 
 Provide a manual source-to-simulation-to-approval-to-activation workflow before adding an AI author.
 
+Backend lifecycle work can proceed independently; its customer-facing UI follows the reviewed [Extension Studio design](extension-studio-design.md), including clear draft/active identities, approval invalidation and recoverable navigation.
+
 ## In Scope
 
 - Retain linked source/artifact/model/environment/adapter/consumer/scenario identities and independent expected outcomes.
