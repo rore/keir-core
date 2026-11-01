@@ -32,6 +32,8 @@ Canonical task: `agent-workflow:read2-structural-contracts`. Owning feature: [ma
 
 ## Implementation
 
+- Implementation pickup: adopted approved readiness revision `180353b` in the assigned clean feature checkout. Resolver selected this exact Work Record; exact feature participation is active. Scope classification remains GRAY / Elevated / Moderate. No helper initially. Production sources, old goldens, policy/role files and manager-owned roadmap remain excluded. Build the three structural documents and offline checker first, then pair fixture checks with native diagnostics and integrate only the approved product CI step.
+
 - Context and baseline recorded before edits. Core baseline `b2c55fe`; read-only scoping was completed against unchanged production parser/runtime trees. An isolated implementation checkout is assigned after the reviewed readiness commit.
 - Initial intended-path Redline is GRAY, with no boundary violation or required checkpoint. Independent plan review approved publication IDs and exact qualified-environment treatment; schema/native parity remains an implementation obligation.
 - Manager owns this record during planning. The prospective developer made no edits, installs or tests in the read-only inventory and ended its investigation association.
