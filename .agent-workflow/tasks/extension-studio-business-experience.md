@@ -26,18 +26,29 @@ Canonical task: `agent-workflow:extension-studio-business-experience`. Owning fe
 **Plan review:** Routine self-review: presentation and bounded scripted routes change, existing model and authority remain. Task-shaped preview replaces a technical diagram; user can ask for help or change intent throughout. No new abstraction or dependency needed.
 **Approvals:** Not required at this risk level. User explicitly requested the whole look be reconsidered for usability and visibility, following the nontechnical agent-led direction. Production implementation remains out of scope.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 - Baselines: core `a5dc545`, demo `70a8583`; clean at pickup. Scope limited to the Studio proposal and this record.
 - Prior research reused from the design brief; no repeated product audit, helper or worktree needed.
+- Recovery plan committed as `73e953f` before product edits. The manager's intervening roadmap commit `ba08f29` is the actual core task parent; it is not part of this task's changes.
+- Reworked the complete Studio presentation: wider conversation, quieter navigation, larger text, stronger contrast, familiar completed-task/follow-up preview and ordinary-language status, choices and review. Editing fields and technical identities are secondary disclosures. Reused the existing model and allowlisted server without dependencies.
+- Added bounded routes for project scope, example checking, explaining/editing a preview, confirmation requests and continue. All-project requests explain the prototype limit without changing intent. Approval remains an explicit human control, followed by separate turn-on.
 
 ## Evidence
 
-Pending implementation.
+- Demo implementation: `f2513e7`, four reserved design/prototype files only, on main. Native source, dependencies, services and environment are unchanged. Prior design direction commit `70a8583` remains part of the handoff.
+- `node --test docs/extension-studio/studio.test.mjs`: 28 checks pass, zero failures/skips, 0.193 seconds. Existing safety checks remain; three added checks cover plain-language scope and review, visible conversation prompts/pause/continue, and unsupported all-project intent. The canvas receipt assertion now checks the customer-facing word preview; the edit invalidation and current-setup assertions are unchanged. Both state-module and inline-browser-module syntax checks pass.
+- Actual desktop browser: reviewed the task-shaped preview, progress and pause; selected Only Launch, inspected the review, confirmed both checkboxes with Space and approval with Enter; focus moved to the separate Turn this on control. Current setup stayed unchanged until that action. Earlier examples reopen their original contents without approval/turn-on controls. An unsent task-name edit remained intact while a new preview was offered.
+- Actual 390-pixel narrow view: document width 375 pixels, no horizontal overflow; 15px conversation text and direct links between chat and preview. Rendered task preview inspected; temporary viewport override reset. Final desktop and narrow screenshots retained in ignored local evidence. No console errors were reported for the final task tab.
+- Complete changed-path privacy and whitespace checks pass. Fresh core and demo Redline reports are BLUE, with no boundary violations. The core report excludes the Work Record as configured. No private paths or session details appear in tracked additions. Explicit Work Record validation is clean for both path sets, with no failed predicates, using the actual task parent `ba08f29`.
 
 ## Result review
 
-Pending; broader feature and user design acceptance remain open.
+Routine self-review at demo `f2513e7`: the bounded prototype meets the iteration criteria. Main decisions use work language, the canvas shows recognizable task outcomes, and the conversation guides choices without changing approval authority. Tests exercise real transition entry points; rendered checks cover visual hierarchy, keyboard review, narrow navigation and unsent-field preservation. No production abstraction or dependency was needed.
+
+This remains a scripted proposal with tab-local history, one supported task-follow-up pattern and no live agent or real task effects. Full accessibility audit, production execution and business-user acceptance are not established. Native app tests were not rerun because native files did not change. User review determines acceptance of the visual direction; the broader feature remains open.
+
+The designer has not pushed. Manager owns roadmap reconciliation, integration and delivery. No worktree was created. The existing preview server remains available without restart.
