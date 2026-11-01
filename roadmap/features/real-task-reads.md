@@ -1,7 +1,7 @@
 ---
 id: "real-task-reads"
 title: "Run packaged read extensions against real task data"
-status: "queued"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -33,6 +33,6 @@ Writes, a transaction guard, AI, public registry publication and a complete acti
 
 **Dependencies:** [native-task-app](../features/native-task-app.md); [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
-**Next delivery:** Continue while Studio UX review is deferred. Architecture consultation is requested on the smallest real-data read integration: packaged runtime, host-held model/invokers, trusted per-user program selection and validated host result consumption. Reuse current read/2 semantics and native ownership checks; keep Studio presentation, AI and writes outside this increment. Record the concrete implementation plan after the bounded contract review; a queued card or consultation request alone does not assign code work.
+**Current work:** Architecture consultation confirms the existing read/2 API and scoped native service support this increment. [The implementation plan](../../.agent-workflow/tasks/real-task-reads.md) covers standalone integrity-pinned packaging, trusted per-user selection, projected task reads, advisory result consumption and a minimal native task-detail action. Independent technical plan review is active; implementation preparation is assigned. Source changes wait for that internal review, independently of deferred Studio UX. Keep existing runtime semantics, native ownership checks, Studio presentation, AI and writes outside the change.
 
 **Design input:** [Task catalog, section 3](../../docs/internal/design-baseline/public/task-management-poc.md); [Host consumption and conformance, sections 4 and 12](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md).
