@@ -1,7 +1,7 @@
 ---
 id: "extension-studio-design"
 title: "Design and prototype the Extension Studio experience"
-status: "queued"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -39,3 +39,5 @@ A generic agent builder, a second host-design chat, implementation of the comple
 **Related deliveries:** [Authoring workflow](conversational-authoring.md), [approval lifecycle](extension-approval-lifecycle.md), [simulation tools](reusable-simulation.md) and [native app](native-task-app.md).
 
 Design may start before backend completion. This card owns the reviewed experience; the related features own executable behavior and verification. Keep the first native task slice small while reserving deliberate design effort for the Studio.
+
+Current work: UX specification and interactive prototype under [the core-owned task record](../../.agent-workflow/tasks/extension-studio-prototype.md). Design and implementation evidence are pending; user prototype review has not occurred.
