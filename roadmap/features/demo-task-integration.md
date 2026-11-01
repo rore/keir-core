@@ -16,6 +16,7 @@ Connect an explicitly admitted scalar extension to native TaskCompleted events a
 
 - Commit native completion before admitting a reaction; pin artifact/model/consumer selection once and preserve the original event/key.
 - Define durable admission, restart/redelivery, event ordering, current authorization, causation/re-entry and old-version retention.
+- Select bindings within the originating user's scope. Persist trusted event ownership independently of the current browser login, so switching users cannot change an admitted event's scope or selected program.
 - Keep tasks.create generic: project/title come from source. Test real persistence and operation-key idempotency, with any business uniqueness specified separately.
 
 ## Out of Scope
@@ -27,6 +28,7 @@ Multiple writes, implicit source-task relationships, derived downstream keys, au
 - [ ] Design/spec: settle native event/key/dedupe/retention and selection contracts against the core real-effect admission requirements.
 - [ ] Implementation: a reviewed scalar program creates or skips a task against actual services using pinned packages; native completion survives reaction failure.
 - [ ] Verification: concurrent duplicates, payload mismatch, revoked access, restart, changed selection, lost response and UNKNOWN have correct persistent outcomes; no blind replay.
+- [ ] User scope: queue an event for user A, switch the browser to B, then process/redeliver A's event. It retains A's pinned selection and current dispatch authorization, cannot select B's customization and cannot access B's data.
 
 ## Notes
 

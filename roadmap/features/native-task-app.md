@@ -10,11 +10,13 @@ repo: "keir-demo-app"
 
 ## Summary
 
-Deliver the first useful application path: projects and task create/list/edit/complete, retained across restarts, with Keir and AI disabled.
+Deliver a polished local web app: projects and task create/list/edit/complete, retained across restarts, with three seeded demo users and Keir/AI disabled.
 
 ## In Scope
 
-- Choose the smallest UI, persistence and identity model in a bounded design review; local/single-user use is sufficient initially.
+- Choose the smallest local web stack, persistence and demo sign-in model. Visitors clone this repo and run it without a sibling checkout, cloud account or AI credentials.
+- Seed three fictional users with separate projects/tasks. Each represents one SaaS customer customization scope; enforce ownership in services, not only in the UI. This demonstrates isolation without building a production identity platform.
+- Establish a distinctive visual direction before implementation: coherent typography, spacing and color, polished task interactions, responsive layouts, keyboard access and intentional loading/empty/error states. Verify actual rendered screens; a generic generated dashboard is insufficient.
 - Implement native task services, projects, stable IDs, validation and a usable completion flow; preserve a clean service boundary for later adapters.
 - Use isolated project tooling and test storage. Keep extensions out of native CRUD correctness.
 
@@ -24,9 +26,9 @@ AI, Keir activation, deployment infrastructure, collaboration and a scheduling e
 
 ## Done When
 
-- [ ] Design/spec: settle the minimal task model, native validation, identity boundary and persistence lifecycle in demo scope.
-- [ ] Implementation: create a project, add/edit a task, list and complete it through the UI; restart and retain the data.
-- [ ] Verification: fast service/persistence and one UI journey cover invalid input, missing records and normal completion with extensions disabled.
+- [ ] Design/spec: settle the minimal task model, user ownership/sign-in, persistence lifecycle and visual direction; document local prerequisites and the later per-user customization boundary.
+- [ ] Implementation: documented pinned setup/seed/start opens the web app from a clean clone; sign in as any of three seeded users, create a project, add/edit/list/complete tasks, sign out and restart with data retained. Document a deliberate data reset and keep runtime data/credentials untracked.
+- [ ] Verification: fast service/persistence and UI journeys cover invalid input, missing records, direct cross-user API/resource access, stale client state and pending requests during sign-out/switching. Verify clean local startup and persistence for all users with extensions disabled and without authoring services. Review representative desktop/mobile and empty/error screens against the visual direction.
 
 ## Notes
 
