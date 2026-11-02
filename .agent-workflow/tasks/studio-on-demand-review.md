@@ -25,13 +25,15 @@ Canonical task: `agent-workflow:studio-on-demand-review`. Owning feature: [Exten
 - Scope, recovery and native continuity -> Off/Unavailable with draft, failed/stale evidence, uncertainty readback, disable/restore, pending owner-switch and native unsaved return reuse real server fixtures and meaningful regressions.
 - Responsive quality -> internal rendered walkthrough and focused desktop/phone/short keyboard, scroll, hidden-focus and Send-reachability checks; no participant-recruitment prerequisite.
 - Delivery integrity -> complete-path risk/workflow/privacy/identity/whitespace, unchanged dependency checks, independent reviews, hosted CI and archived task evidence.
-**Plan review:** Pending concrete implementation plan against the integrated Daymark foundation; no source implementation authorized.
+**Plan review:** Returned to planning for the user's general-product workflow correction. Pending designer revision, bounded architectural feasibility advice, updated Task Context and concrete implementation plan against the integrated Daymark foundation. No adaptive source implementation is authorized under the earlier example-specific plan.
 **Approvals:** Not required at Elevated risk. User directly authorized continuing the redesign and specified no external product/company names in features/designs.
 **Exceptions:** —
 **State:** Blocked or returned to planning
 <!-- agent-workflow:end -->
 
 ## Implementation
+
+User product correction: the app must follow its intended general customization usage rather than be tailored to one use case. Relevant unavailable actions belong in that workflow with clear disabled or To be implemented states. Task advice remains a real working example; preserve its working lifecycle and do not present unsupported execution as available. The designer is offered a concise revision of the latest brief and the architect a read-only supported-versus-unavailable contract assessment. Manager owns this record and will revise Task Context with the exact authorized change chain after that design is concrete; the original baseline stays immutable. Adaptive implementation remains blocked on that revised plan, not on another human approval of this already-requested direction. Current CI and branding corrections continue independently.
 
 Latest design handoff: `f279df6b57fe0558ad6fa883420a2eac0cc6041d` adds to the original `cd343be` brief and is integrated before adaptive implementation. Explain a surprising sample beside its own expected/actual result. Use recorded-owner wording only when evidence binds that person's choice to the reviewed revision; otherwise use neutral wording or omit attribution. Earlier runs retain their original explanation and cannot acquire later choices. Include this in the concrete plan, historical-evidence browser journey and rendered review. No new backend, attribution storage, visual theme or task logic is requested. The original requirement baseline remains unchanged. The current Daymark CI/branding correction continues separately; adaptive source still awaits its concrete reviewed plan.
 
