@@ -44,3 +44,5 @@ Preserves the existing feature ID. Manual immutable approval, activation/disable
 Qualify a provider-neutral adapter against the supported configurations before selecting a dependency.
 
 **Authorized sequence:** First deliver [real authored drafts](../../.agent-workflow/tasks/authored-extension-drafts.md) through compilation, simulation and exact activation; then connect bounded AI tools and provider configuration to the accepted conversation/review experience. Continue to another useful increment if the completed dependencies support it. Deterministic provider fixtures qualify offline behavior; real provider compatibility requires explicit configured models and bounded live calls. No AI implementation is claimed yet.
+
+**Implementation underway:** The [bounded AI authoring record](../../.agent-workflow/tasks/bounded-ai-authoring.md) has an independently approved plan. New provider/configuration/tool-loop modules are being implemented against the shared immutable-revision contract; host and Studio integration follows acceptance of the authored-draft foundation. No live-provider compatibility or completed AI journey is claimed.
