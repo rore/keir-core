@@ -1,5 +1,9 @@
 # Task-app identity and customization experience
 
+## Delivery
+
+Reviewed source `7d9663642bc98d59d238f2317141900cc21754c3` is integrated on demo main at `b27846eef24ca98890cada39a6213bffb541f857`. The later merge adds only the two reviewed design documents from `cd343be`; application code remains identical to the approved source. Core integrates the approved record at `10df6646b2c2f0343d876497148b615bd5b205f7`. Final local workflow checks pass, privacy/identity/whitespace checks pass, and the full-diff size warning remains advisory in shadow mode. Push and hosted CI are pending. The broader feature remains active; the next conversation-first iteration has its own Work Record.
+
 Canonical task: `agent-workflow:demo-customization-experience`. Owning feature: [Extension Studio design](../../roadmap/features/extension-studio-design.md).
 
 <!-- agent-workflow:start -->
