@@ -28,7 +28,7 @@ Canonical task: `agent-workflow:read2-reusable-simulation`. Owning feature: [reu
 **Plan review:** Original native-API approach was independently approved at `71540e3343837705c0058a4a2e9b097982d799f1`; reuse that review for unchanged runtime/authority boundaries. Independent clean-context non-implementer targeted technical plan review approved exact `21d2348e71517cace261935f75584db36421922b` with no blockers; the compact-expectation, safe native-summary, BOM and explicit denial delta is authorized for implementation.
 **Approvals:** Not required at declared Elevated risk. User approved this bounded slice with "Ok, go". A material requirement or native authority change returns to planning.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -92,3 +92,9 @@ Agent technical review: independent clean-context non-implementer APPROVED exact
 - Actual installed Node and rebuilt Java package reports match byte-for-byte for 19 vectors, including compact success/failure, both denial paths, private original-code mismatch despite identical public fallback, consumer failures, and case/DCM BOM rejection. Offline schemas validate ten cases and nineteen actual reports, plus trace/cause/unsafe-summary and prior authority/bounds/retrieval negatives. Both unchanged sources recompile to the exact selected artifact bytes and the raw exported source pin agrees.
 - All eight corrected archive/source/installed runtime files agree and the regenerated example lock matches exact SHA-512. Five pinned host packages install offline in three seconds. Standalone copied corrected package/jar and compact data execute without source/compiler checkout, with Node PATH empty, in 1.350 seconds; actual native summary is checked. Original candidate proof is retained. Unchanged native production code, old goldens, fixed legacy harnesses and previous expensive conformance evidence are reused as independently assessed; no weakening or new native authority occurred.
 - Complete correction/full-contribution diff, public-content/identity/whitespace checks, exact source/proof hashes and final review transition follow. This evidence is for targeted result review; it is not independent result approval or main delivery.
+
+Corrected source is `8c63aa0ba23e0cd072b1506e2efb22c7d3990597`. Complete staged correction Redline is GRAY with no boundary or checkpoint; the implementation-ready Work Record check is clean. Staged privacy, exact Node archive/source/installed bytes, Java packaged runtime class identity and compiler/parser exclusion checks pass. The corrected artifact/model/source pins and native/golden surfaces remain unchanged. This final transition changes only the record.
+
+## Corrective result review
+
+Pending targeted independent non-implementer review of corrected source `8c63aa0ba23e0cd072b1506e2efb22c7d3990597` and the final record. The original rejection remains historical; the four identified obligations are now covered by corrected code and passing focused/full/package/schema evidence. Manager owns acceptance, canonical integration, hosted CI and recoverable archive. No push, merge or task-tree removal occurred; retain original and corrective ignored proof until acceptance.
