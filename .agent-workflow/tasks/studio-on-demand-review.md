@@ -2,7 +2,7 @@
 
 ## Delivery
 
-Corrected candidate 5d3cb19036b38b0b2d660fcc388d79cf01883c69 passes build and all 37 browser journeys. The independently approved technical baseline is 6ffa32e; its unchanged backend/fast qualification remains 39/39. The four-file correction addresses the designer's phone re-entry and short-screen reading findings, with failing-before/passing-after regressions. Focused designer recheck, independent delta review and manager delivery remain pending. Existing user previews remain unchanged.
+Corrected candidate 5d3cb19036b38b0b2d660fcc388d79cf01883c69 passes build and all 37 browser journeys. The independently approved technical baseline is 6ffa32e; its unchanged backend/fast qualification remains 39/39. The designer approves the corrected rendered result, closing both remaining findings. Independent delta review and manager delivery remain pending. Both task-owned review fixtures are normally closed and their synthetic data removed. Existing user previews remain unchanged.
 
 Canonical task: `agent-workflow:studio-on-demand-review`. Owning feature: [Extension Studio design](../../roadmap/features/extension-studio-design.md). Design input: [the accepted general customization brief](https://github.com/rore/keir-demo-app/blob/c01746a282d9addd11b271968181f0d40c47ec4e/docs/studio-on-demand-review.md).
 
@@ -111,4 +111,8 @@ Implementation attention: separate review visibility from confirmation identity;
 
 ## Result review
 
-The task owner reports independent technical approval of exact baseline 6ffa32e with no findings, including an independently exercised conversation-position check. The designer completed all five functional journeys and found only the two presentation issues now addressed. Preserve that baseline review and unchanged backend/runtime evidence. Current source 5d3cb19 still awaits independent review of its four-file delta and focused designer recheck of phone approved re-entry and short-screen results; this implementer's inspection does not substitute. Manager owns canonical roadmap/record integration, hosted CI, live-preview qualification within approved environment scope, delivery acceptance and cleanup closure.
+The task owner reports independent technical approval of exact baseline 6ffa32e with no findings, including an independently exercised conversation-position check. Preserve that baseline review and unchanged backend/runtime evidence. Current source 5d3cb19 awaits independent review of its four-file delta; this implementer's inspection does not substitute. Manager owns canonical roadmap/record integration, hosted CI, live-preview qualification within approved environment scope, delivery acceptance and cleanup closure.
+
+## Rendered design review
+
+The designer approves exact source 5d3cb19036b38b0b2d660fcc388d79cf01883c69 after the focused actual-app recheck. At phone and short sizes, saved entry shows In use · Pending and Approved · Needs attention, with Use first and fully visible without scrolling; Pending remains in use until explicit activation. At 683x384, task situation, expected advice and actual advice fit together as a complete row. This closes both presentation findings and retains the completed five-journey functional review of the unchanged baseline. It does not claim a participant usability study. Both isolated review processes exited normally and removed only their own synthetic data; recovery evidence and source/record worktrees remain retained for this accepted assignment.
