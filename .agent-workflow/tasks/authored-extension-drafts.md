@@ -151,9 +151,13 @@ Pre-edit planned-path classification used the current shared policy over all 28 
 
 ## Result review
 
-Independent clean-context non-implementer technical result review APPROVED exact source `4c8d54a16d4c9db225140b9ba5e01ae74d9de361`, reusing the completed backend/compiler review and checking the focused corrections, build, three new regressions and complete 44-case browser evidence. Verification adequacy: sufficient; no remaining technical findings. The rendered designer recheck APPROVED the same source: exact saved source/examples stay separate from unsaved buffers, failed or mismatched reads block approval, and advice labels remain separate from native task status in both directions. The original exact-review and advice-copy findings are resolved.
+Agent technical review: independent clean-context non-implementer result review APPROVED exact source `4c8d54a16d4c9db225140b9ba5e01ae74d9de361`, reusing the completed backend/compiler review and checking the focused corrections, build, three new regressions and complete 44-case browser evidence. No remaining technical findings.
 
-Manager integrated that exact source with the eight unchanged accepted AI module files at demo `45a56e061cc2192e8c62fce7381d3b22fe952541` and pushed main. The combined build and complete fast suite pass: 97/97, zero failures/skips, 7,774.8699 ms. A sandbox-restricted first run was stopped and retained; the same suite passes with the scoped localhost/child-process permissions used in qualification. Exact merged blobs, whitespace, public-content privacy and commit identity were checked. Hosted qualification remains pending; no live provider compatibility or completed AI journey is claimed.
+Reviewed revision: `4c8d54a16d4c9db225140b9ba5e01ae74d9de361`, against Work Record `a9b44413c2109e9f406295cdc9b17c023935c3f4`. The focused correction preserves the completed broader review.
+
+Verification adequacy: sufficient for the bounded read-only authored increment. The rendered designer recheck APPROVED the same source: exact saved source/examples stay separate from unsaved buffers, failed or mismatched reads block approval, and advice labels remain separate from native task status in both directions. The original exact-review and advice-copy findings are resolved.
+
+Manager integrated that exact source with the eight unchanged accepted AI module files at demo `45a56e061cc2192e8c62fce7381d3b22fe952541` and pushed main. The combined build and complete fast suite pass: 97/97, zero failures/skips, 7,774.8699 ms. A sandbox-restricted first run was stopped and retained; the same suite passes with the scoped localhost/child-process permissions used in qualification. Exact merged blobs, whitespace, public-content privacy and commit identity were checked. [Hosted qualification passes](https://github.com/rore/keir-demo-app/actions/runs/41519984857) on that exact integration. No live provider compatibility or completed AI journey is claimed. Recoverable task cleanup is coordinated before closing the handoff; the next Studio contribution uses the existing AI Work Record.
 
 
 ## Plan review
