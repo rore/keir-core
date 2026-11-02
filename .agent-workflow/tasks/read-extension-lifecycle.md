@@ -31,7 +31,7 @@ Canonical task: `agent-workflow:read-extension-lifecycle`. Owning feature: [exte
 **Plan review:** Agent technical review: independent clean-context non-implementer APPROVED exact revised plan `17ed6f3cf6416b588d2b7d3d7ed44f8144456b25`, with no remaining blockers. The three clarifications requested at `de11ba5` are incorporated below. See Plan review.
 **Approvals:** Not required at provisional Elevated risk. User approved this bounded slice with "ok, go". A material requirement, authority or live-environment change returns to planning.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -46,6 +46,10 @@ Canonical task: `agent-workflow:read-extension-lifecycle`. Owning feature: [exte
 - Delayed contract-adoption clarification reconciled after implementation handoff: documentation-only demo `9d25f86` adds the exact evidence DTO semantics to `docs/read-extension-lifecycle.md`. `expected.classification` is the native category; its compact `code` denotes successful advisory value or original failure diagnostic according to that category. Independent case bytes separately pin `expect.outcome` and safe `expect.consumption`; actual `report.native` and `report.consumption` remain separate. Eligibility compares the exact expected safe receipt, never a native category against a receipt status. The state `approved` boolean is presentation only: approval rechecks current draft/evidence; activation additionally rechecks eligible approval and expected generation transactionally. Neither template has a customer project filter or follow-up controls. No source/API/fixture/asset behavior changed; implementation remains `b1f3181`, and its verification is reused.
 
 ## Evidence
+
+Latest correction source: `df0684301ff4a3909d7b71d019e5c63d93d23193` over `9d25f86`. Independent result review found one confirmed P2: a frozen simulation clock admitted synchronous authorization work beyond the stated one-second checked deadline. The new actual installed-simulator regression failed before the fix with native `COMPLETED`; after switching each case to `performance.now()` and `expiresAtMs = clock.nowMs() + 1000`, it observes `LIMIT_EXCEEDED/BUDGET_EXCEEDED`, ineligible evidence and approval 409. Remaining cases get fresh deadlines, and a later suite passes after the original suite actually settles. Slot release remains in the existing awaited-suite `finally`; no cancellation or hard synchronous preemption is claimed.
+
+Correction verification: focused regression 1/1 passed in 1.734 seconds (including the deliberate 1.1-second blocking callback); full fast regression 38/38 passed in 3.732 seconds, zero failures/skips. Catalog/lifecycle/read coverage remains 100% lines/functions with 86.36%/94.63%/97.01% branches. Only `src/extension-lifecycle.mjs` and its regression changed (28 insertions, one deletion); exact Git comparison confirms UI/browser tests, package/dependency pins and curated source/model/artifact assets are unchanged. Re-ran eight-file archive/source/installed identity, root/simulation export, privacy and whitespace checks successfully. Reuse the recorded browser, standalone/package and unchanged core/Java evidence below; no duplicate browser or core runs, helpers, live migrations/previews, settings changes or push. Fresh complete/correction NUL path/numstat/unified-diff evidence is retained; targeted independent re-review is pending.
 
 Demo implementation: `b1f3181965e6f4b19edeabb251c782f36e543369` on the assigned isolated source branch, based on `9256b66`. Source checkout is clean; no push or canonical integration occurred. This record is maintained only in its assigned isolated core checkout. Frozen plan, baseline and operation/suite/limit matrix remain unchanged.
 
@@ -68,7 +72,7 @@ Full explicit workflow validation ran against the complete demo path set and sep
 
 ## Result review
 
-Pending independent non-implementer technical result review of demo `b1f3181` and verification adequacy. The UI helper implemented part of this outcome and must not serve as its independent result reviewer. Manager owns final acceptance, canonical source/record integration, roadmap/hosted-CI verification and recoverable removal of both assigned checkouts. Retain source/record/evidence and own exact work participation until acceptance. No further implementation is underway; no role-guidance change was needed.
+Independent non-implementer result review found other inspected behavior/verification adequate and one confirmed clock P2 at `9d25f86`. That correction is implemented and fast-verified at `df06843`; pending targeted independent re-review of the corrected exact source and verification adequacy. The UI helper implemented part of this outcome and must not serve as its independent result reviewer. Manager owns final acceptance, canonical source/record integration, roadmap/hosted-CI verification and recoverable removal of both assigned checkouts. Retain source/record/evidence and own exact work participation until acceptance. No further implementation is underway; no role-guidance change was needed.
 
 - Context and immutable baseline recorded before code discovery. Core baseline `4e9c961`; demo baseline `9256b66`. Planning phase only; no implementation, live data or preview changes. Manager owns this record until the reviewed implementation handoff.
 - Demo inventory completed read-only with exact role/feature participation verified and then detached. Existing native/simulation APIs suffice; findings above are inputs to architecture, not an approved lifecycle contract or new test result. Architect and designer are receiving bounded contract/interaction assignments through the existing team; no source edits are authorized.
