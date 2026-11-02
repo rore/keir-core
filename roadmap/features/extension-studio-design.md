@@ -39,6 +39,8 @@ A generic agent builder, a second host-design chat, implementation of the comple
 
 **Current user correction:** The working app must present customization as a general host-app feature, rather than a task-specific advice scenario. Review the whole functional experience: independent host-app branding with secondary Powered by Keir attribution, coherent but distinct Studio identity, discoverable customization navigation, desktop/narrow layouts and correct scroll ownership so content does not drag the sidebar. The previous visual baseline is superseded where this feedback conflicts. Preserve the actual lifecycle underneath and label currently supported examples honestly. The [correction Work Record](../../.agent-workflow/tasks/demo-customization-experience.md) owns design discovery, implementation, regression and independent review; no correction result is claimed yet.
 
+**Correction plan:** The designer's Daymark working identity, persistent Tasks/Customizations shell and dedicated chat/canvas Studio are defined in the owning record. Native modal return/drafts, owner lifetime, exact lifecycle actions and independent scroll regions remain explicit obligations. Independent technical review approved plan aa5ae22 with no blockers; implementation and rendered review follow. Currently supported read-only examples remain honest, and broader AI authoring is unfinished.
+
 **Dependencies:** No unfinished runtime prerequisite for design/prototyping. Use maintained specifications; record unsupported behavior rather than invent implementation.
 
 **Related deliveries:** [Authoring workflow](conversational-authoring.md), [approval lifecycle](extension-approval-lifecycle.md), [simulation tools](reusable-simulation.md) and [native app](native-task-app.md).
