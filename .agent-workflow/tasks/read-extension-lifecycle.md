@@ -28,10 +28,10 @@ Canonical task: `agent-workflow:read-extension-lifecycle`. Owning feature: [exte
 - Already-produced browser response -> delay a real advice HTTP response after server consumption, complete a selection transition in Studio, then release that old response. A client advice/lifecycle epoch must prevent stale success or failure from restoring old advice; unsaved fields remain intact.
 - Aggregate bounds -> exercise the eight-live-read ceiling, one simulation per owner/two globally with rejection and no queue, six sequential cases, bounded owner/template/dependency preparation cache, evidence/history/response bounds and slot release on actual settlement or error.
 - Distribution and delivery -> verify eight-file pinned archive/source/installed bytes and smoke the actual installed root+simulation subpath without a sibling checkout or compiler; reuse unchanged artifact/Java/core conformance evidence. Run fast native/read/lifecycle regressions and focused browser suites, measure bootstrap separately, inspect complete diff/numstat workflow/privacy/identity/whitespace, then independently review result and verify hosted CI before cleanup.
-**Plan review:** Independent non-implementer review of `de11ba5` requested three clarifications: exact per-template suite, aggregate limits and the browser response-after-consumption race. These are recorded below; targeted re-review is pending. No implementation source edits are authorized yet.
+**Plan review:** Agent technical review: independent clean-context non-implementer APPROVED exact revised plan `17ed6f3cf6416b588d2b7d3d7ed44f8144456b25`, with no remaining blockers. The three clarifications requested at `de11ba5` are incorporated below. See Plan review.
 **Approvals:** Not required at provisional Elevated risk. User approved this bounded slice with "ok, go". A material requirement, authority or live-environment change returns to planning.
 **Exceptions:** —
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -39,9 +39,9 @@ Canonical task: `agent-workflow:read-extension-lifecycle`. Owning feature: [exte
 - Context and immutable baseline recorded before code discovery. Core baseline `4e9c961`; demo baseline `9256b66`. Planning phase only; no implementation, live data or preview changes. Manager owns this record until the reviewed implementation handoff.
 - Demo inventory completed read-only with exact role/feature participation verified and then detached. Existing native/simulation APIs suffice; findings above are inputs to architecture, not an approved lifecycle contract or new test result. Architect and designer are receiving bounded contract/interaction assignments through the existing team; no source edits are authorized.
 
-## Frozen lifecycle contract for plan review
+## Lifecycle contract
 
-The architect's bounded consultation and explicit activation/rollback clarification support Elevated risk and Moderate complexity. The designer mapped this real read-only flow to the accepted baseline. No implementation or new tests have run.
+The architect's bounded consultation and explicit activation/rollback clarification support Elevated risk and Moderate complexity. The designer mapped this real read-only flow to the accepted baseline. Independent technical plan review approved the frozen contract and verification. No implementation or new tests have run yet.
 
 | Operation | Required server behavior |
 | --- | --- |
@@ -82,7 +82,7 @@ The live prepared cache is capped at six entries for the three demo owners and t
 
 Client selection transitions also advance an advice/lifecycle epoch before the mutation request, clear old displayed advice and invalidate pending handlers without resetting task edits. A captured advice response may update the UI only when owner/session, workspace/detail lifetime and epoch still match. Reconcile unexpected server generations on state refresh the same way. This closes the already-produced-response race that server-side generation checks alone cannot cover; test it through a delayed actual response after server consumption, not only a delayed adapter call.
 
-## Frozen functional UX mapping for plan review
+## Functional UX mapping
 
 - Add "Customize my advice" beside native "Check task advice". Studio has a way back to the same task and preserves unsaved fields. The shared server catalog offers "Pending" or "Needs attention" for an open task; completed tasks show "Done" in both. Sam may start with no active advice.
 - Keep chat as guidance with explicit curated/manual choices, and the resizable canvas for the real server-reported "In use" versus "Proposed" comparison. First functionality is read-only task advice, not the prototype's fictional follow-up creation. No live agent or arbitrary source generation is claimed.
@@ -91,3 +91,11 @@ Client selection transitions also advance an advice/lifecycle epoch before the m
 - Returning to the native task and checking advice uses saved task status and real scoped reads. Clear old advice after a selection change without losing task edits. "Turn off my advice" or a named previous-choice review acts only on this owner's selection. Show restore target/provenance/outcome before confirmation.
 - Loading disables duplicate consequential actions. Conflicts refresh state and explain what changed. On timeout read back server state before offering retry. On user switch clear prior-owner state immediately and reject late responses, including switch-away-and-back. Restart restores persisted lifecycle state; durable free-form chat and cancellation guarantees remain outside this increment.
 - Keep model/artifact/environment/consumer/scenario identities and reasons in secondary inspection. Domain-native wording and actual sample/live labels lead. No new standalone visual proposal is requested.
+
+## Plan review
+
+Agent technical review: independent clean-context non-implementer APPROVED exact `17ed6f3cf6416b588d2b7d3d7ed44f8144456b25`. Initial review at `de11ba5` requested a concrete passing suite, aggregate limits and browser response-after-consumption coverage; targeted review found all three resolved with no remaining blocker. Elevated risk and Moderate complexity remain appropriate for this local read-only feature.
+
+Verification adequacy: sufficient for the bounded increment. The six-case per-template expectations and exact suite manifest preserve independent evidence; fixed concurrency/cache/response bounds prevent unbounded preparation or queues. Transaction-time ownership, current draft/version, approval and generation checks cover stale activation and rollback. A client epoch advanced before selection mutation plus the delayed already-produced-response browser test closes the gap beyond server consumption checks without losing task edits. Native code, existing package dependencies and current root/simulation APIs require no semantic change.
+
+Only this record changed during plan review; demo remains at `9256b66`. Suites, implementation and live environments were not exercised by reviewers. Implementation correctness, migration/reset/backup preservation, actual package identity and full result verification remain obligations. The local-demo trust model does not imply production IAM or protection against a malicious database owner.
