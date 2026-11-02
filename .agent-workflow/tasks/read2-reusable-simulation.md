@@ -27,7 +27,7 @@ Canonical task: `agent-workflow:read2-reusable-simulation`. Owning feature: [reu
 **Plan review:** Agent technical review: independent clean-context non-implementer approved exact `71540e3343837705c0058a4a2e9b097982d799f1`, with no blockers or required plan corrections. See Plan review below.
 **Approvals:** Not required at declared Elevated risk. User approved this bounded slice with "Ok, go". A material requirement or native authority change returns to planning.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -61,4 +61,9 @@ Limits: native deadlines do not establish hard preemption of synchronous work. T
 - Packaged verification: all eight packed/installed runtime files match reviewed source bytes and the archive SHA-512 matches the updated example lock. Offline installation adds five pinned packages in two seconds. Fifteen simulation reports match byte-for-byte across installed Node and packaged Java, after removing Java command line framing. Both fixture sources recompile to the committed exact artifact bytes; exported Maya raw source hash matches public provenance. Three installed-host tests pass in 1.500 seconds.
 - Preserved conformance: 61 legacy read cases/52 invocations, 25 legacy effect scenarios, nine generic read/nineteen generic effect rows, sixteen fresh compiler processes and eight packaged host batches pass unchanged. The existing ten structural tests pass; offline new schema checks pass for eight cases and fifteen actual reports, plus authority/bounds/null/report/retrieval negatives.
 - Standalone copied package/jar and data-only bundle execute successfully in 1.147 seconds without source/compiler checkouts; Node also runs with an empty process PATH. Native production code, profiles and existing goldens remain unchanged. Hosting/production qualification, trusted callback containment and real adapters are outside this increment.
-- Final complete diff-based Redline/Workflow, public-content/identity/whitespace checks and exact candidate revision are recorded at the final review handoff. Manager owns independent result review, canonical roadmap, integration, hosted CI and recoverable retention/cleanup; no push, merge or removal is part of this contribution.
+- Qualified implementation source is `a58efb7f8b8e0296d565891b3bcb3b6225db6478`, based on the approved `faa6cfa` handoff. Complete 36-file staged Redline is GRAY with no boundary violation or checkpoint; implementation-ready Workflow check, public-content/identity/whitespace and unchanged native/golden checks pass. The final transition changes only this record. The fixture binding snapshot uses the existing 1 MiB canonical encoder bound before exact native field/type checks; raw scalar bounds alone do not bound aggregate escaped JSON size.
+- Manager owns independent result review, canonical roadmap, integration, hosted CI and recoverable retention/cleanup. This contribution is ready for that review; no push, merge or removal occurred. Broader reusable-simulation roadmap scope remains open.
+
+## Result review
+
+Pending independent non-implementer review of the qualified source and final record. Product verification above passes; plan approval is not result approval. Retain the task checkout and ignored verification/package proof until manager acceptance and recoverable archival.
