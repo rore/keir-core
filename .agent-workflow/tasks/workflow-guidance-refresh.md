@@ -25,13 +25,14 @@ Canonical task: `agent-workflow:workflow-guidance-refresh`. This is a bounded re
 **Plan review:** Agent technical review: reuse the exact independent upstream plan/result reviews for unchanged application, as permitted by installed operating-mode, Clean-context delegation. Reviewed file groups are unchanged at the target from `a87de2378b68b8808878076c5454574620bda215` (PR 62 ownership), `268b302a62e7146d8be66479b24f0b99bdd1e0a4` (PR 63 handoff) and `e1003351a169e1bf8ce350dd964e8d1cd49b8a73` (PR 61 privacy/checker carryforward, including prior reviewed changes). Primary PR metadata confirms merged identity and tested final heads. Destination keeps the existing documentation exemption, advisory policy, task-specific identity and absence of live hooks; optional migration support grants no migration approval. This is review reuse, not a new independent consumer review. See Plan review.
 **Approvals:** The task owner verified the user's consumer-refresh request and authorized this isolated repository scope. Not required at Elevated risk; no live-environment change is authorized.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 - Context and immutable baseline recorded before distribution discovery or refresh. Isolated branch starts at `951676197bae975c348bf782604501ec4affc51c`; only the two installed mirror trees and this record are writable task sources. Inventory and review-reuse evidence are the next checkpoint. No package files have changed.
 - Inventory completed against committed Git archives. All ten stale files per mirror match the prior upstream package exactly; the new checkpoint is absent in both. Refresh the complete reviewed package delta, including its optional checker/decoder support and size manifest, without invoking bootstrap or changing deployed root tooling. No customization needs merging. A baseline privacy receipt would require separately bound human approval; no receipt or existing task record is changed here. The local shared-record instruction remains applicable to same-task contributors; the refreshed ownership guidance distinguishes independently delivered tasks without changing the local task's owner.
+- Applied the exact reviewed package delta to both mirrors. Focused verification passes: all 78 files per mirror match upstream bytes, all 77 manifest entries have exact sizes, all 39 local Markdown file references per mirror resolve, both passive decoders preserve this task's explicit identity/relationships, and both existing root and refreshed packaged checkers report clean implementation readiness. No integration or migration was executed. An initial private audit assertion used an inexact ownership phrase and decoder status name; corrected the audit to the actual published wording/API without changing package content.
 
 ## Plan review
 
@@ -42,3 +43,19 @@ Canonical task: `agent-workflow:workflow-guidance-refresh`. This is a bounded re
 ## Evidence
 
 - Upstream PR 62 is merged as `29c508a350942d2127c337655907fb02cc8cfdb0`; PR 63 is merged as `c0d69150ca05cdfab7951f741c16f7a477c7630a`. Primary repository metadata identifies their reviewed source and final tested heads. Detailed applicability and installation evidence follow after inventory.
+- Exact package target: `c0d69150ca05cdfab7951f741c16f7a477c7630a`. Both size-manifest SHA-256 values: `213d12f172b09df4f21e671c91f8ed140786f1a7eb1f4c0c9a74ed5d942ea2d0`. Both sorted package-inventory SHA-256 values: `df9d72eeb1bcb303792f8dd79eadd11bf88b5aa8a1807c6cd536c4fd3d94d3a3` (relative path, NUL, content SHA-256, newline for each sorted package file).
+- Fresh pre-edit Redline: GRAY, no boundary violation or checkpoint. Existing root checker and refreshed bundled checker each report clean readiness; passive decoder results agree across mirrors. The final complete committed diff and result-state checks follow at handoff. No broad product tests or repeat upstream feature tests are needed for these byte-identical reviewed artifacts.
+
+## Result review
+
+Agent technical review: reused the independent non-implementer technical result reviews identified under Plan review for unchanged installation. Each final deployed payload group is byte-identical to its accepted upstream source; no new independent consumer review is claimed.
+
+Reviewed revision: `c0d69150ca05cdfab7951f741c16f7a477c7630a`, carrying the unchanged reviewed file groups from PRs 61–63 and the prior reviewed behavior-preservation guidance.
+
+Verification adequacy: exact package and mirror equality, manifest coverage/sizes, local file references, both passive decoder smoke checks, old/new readiness checks and scoped risk evidence are adequate for the bounded installation. This does not certify live adoption, approve a baseline migration or refresh deployed root scripts. Final task-owner integration/delivery remains pending.
+
+## Consumer adoption and recovery
+
+- The canonical checkout receives these mirrors only through task-owner integration. The separately frozen active record checkout retains the older package; its guidance adoption is deferred until its owner opens a safe integration window. No frozen source or record was edited.
+- The deployed root checker remains unchanged and older than the newly bundled checker. Ordinary existing records continue to pass; new optional migration receipts require separately authorized adoption of compatible deployed tooling. Do not generate or apply such receipts based on this installation alone.
+- This task's isolated branch and prior context/readiness commits retain the original installation for recovery. Keep the task checkout for review/integration and its ignored audit evidence; remove it only after owner-verified delivery and recovery archival. No roadmap item was assigned, so no guessed relationship, participation reference or parallel tracker was created.
