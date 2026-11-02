@@ -41,4 +41,4 @@ Arbitrary generated application UI/code, agent certification, automatic approval
 
 Preserves the existing feature ID. Manual immutable approval, activation/disable/rollback and its storage tests are owned by extension-approval-lifecycle; reusable scenario/report tooling is owned by reusable-simulation. This card owns the additional live AI behavior, not duplicate completion promises.
 
-Feasibility input: [AI SDK providers](https://ai-sdk.dev/docs/foundations/providers-and-models) and [provider management](https://ai-sdk.dev/docs/ai-sdk-core/provider-management) document a shared interface and provider selection. This is an implementation candidate, not a dependency decision or proof of our workflow's compatibility.
+Qualify a provider-neutral adapter against the supported configurations before selecting a dependency.
