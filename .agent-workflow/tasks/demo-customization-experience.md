@@ -15,7 +15,7 @@ Canonical task: `agent-workflow:demo-customization-experience`. Owning feature: 
 **Risk:** Elevated
 **Complexity:** Moderate
 **Reason:** Pre-edit complete intended presentation/browser/documentation paths are GRAY with no boundary/checkpoint finding. Navigation, nested scrolling, responsive Studio and preserved lifecycle/unsaved state require several coordinated components and independent review.
-**Discovery:** Initial scope inspection found Customize my advice embedded in task details, Studio inside the native task dialog, separate CSS scroll containers and host branding under Keir. The user rejected the scenario-specific entry and current design quality, including sidebar scrolling. Designer review and bounded developer discovery follow; no implementation is authorized yet.
+**Discovery:** Initial scope inspection found Customize my advice embedded in task details, Studio inside the native task dialog, separate CSS scroll containers and host branding under Keir. The designer reproduced a 520-pixel task-list wheel scroll moving the left navigation by the same distance. Developer discovery confirms GET /api/extensions already supplies owner-qualified selection/draft/evidence/history, while TaskDetail owns Studio and the native shell remains in document scroll flow. A general customization destination and dedicated Studio appear possible without server/runtime changes; concrete interaction/scroll/return rules and the implementation plan remain under review. No implementation is authorized yet.
 **Material assumptions:** The current server lifecycle can support a general customization destination without new backend semantics. If multiple active customizations, new hooks, AI authoring or new authority/persistence is needed, stop affected work and return to planning. The existing chat/canvas direction is a reference, not visual acceptance of the current implementation.
 **Plan:** Planning phase: the standing designer reviews the actual host app and Studio, proposes one coherent working host identity and concrete information architecture, layout/scroll/focus rules and supported-state design. The existing demo developer inventories the smallest safe integration and affected callers/tests read-only. Manager records the consolidated implementation plan; clean-context technical review precedes source edits. One implementation owner then builds the functional correction, designer inspects rendered desktop/narrow states, fast/affected browser checks verify it, and independent result review precedes main delivery and recoverable cleanup.
 **Verification plan:**
@@ -34,6 +34,8 @@ Canonical task: `agent-workflow:demo-customization-experience`. Owning feature: 
 ## Implementation
 
 Initial task context and requirement baseline recorded for the user-requested correction. Demo base `df0684301ff4a3909d7b71d019e5c63d93d23193`; core base `deb9a6086d7d2dd2c974f10a23386c6079f7996c`. Manager owns this record and canonical roadmap during discovery. Source edits await a concrete reviewed plan; no implementation or new qualification result is claimed.
+
+Read-only discovery is active with the standing designer and demo developer. The scrolling defect is reproduced and the existing API appears sufficient; manager awaits the concrete design brief and technical inventory before consolidated plan review. No source edits, live data changes or preview restarts are part of discovery.
 
 ## User review requirements
 
