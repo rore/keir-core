@@ -1,7 +1,7 @@
 ---
 id: "conversational-authoring"
 title: "Author customer extensions through a bounded AI workflow"
-status: "queued"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -42,3 +42,5 @@ Arbitrary generated application UI/code, agent certification, automatic approval
 Preserves the existing feature ID. Manual immutable approval, activation/disable/rollback and its storage tests are owned by extension-approval-lifecycle; reusable scenario/report tooling is owned by reusable-simulation. This card owns the additional live AI behavior, not duplicate completion promises.
 
 Qualify a provider-neutral adapter against the supported configurations before selecting a dependency.
+
+**Authorized sequence:** First deliver [real authored drafts](../../.agent-workflow/tasks/authored-extension-drafts.md) through compilation, simulation and exact activation; then connect bounded AI tools and provider configuration to the accepted conversation/review experience. Continue to another useful increment if the completed dependencies support it. Deterministic provider fixtures qualify offline behavior; real provider compatibility requires explicit configured models and bounded live calls. No AI implementation is claimed yet.

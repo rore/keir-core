@@ -44,3 +44,5 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 **Result review:** Independent review reproduced and then verified correction of the simulation fixture's frozen clock. Each case now receives a real monotonic one-second checked deadline; an actual-simulator regression proves overdue work cannot produce approvable evidence. No core semantic change or hard-preemption guarantee was introduced.
 
 The first scalar host integrations may use reviewed operator configuration for exact selection. A full customer approval UI is not a prerequisite to that early demonstration.
+
+**Next accepted increment:** User authorized real authored drafts followed by AI authoring. The [authored-draft Work Record](../../.agent-workflow/tasks/authored-extension-drafts.md) owns planning: actual compilation, immutable source/artifact identities, independent scenarios, exact approval/activation and visible saved-task behavior. Preserve the existing read-only hook and prepared examples; the current template-specific lifecycle is not yet a general authoring implementation.
