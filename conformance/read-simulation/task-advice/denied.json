@@ -12,18 +12,7 @@
       "error": {
         "code": "AUTHORITY_DENIED",
         "path": ""
-      },
-      "trace": [
-        {
-          "sequence": 0,
-          "event": "INVOCATION_START"
-        },
-        {
-          "sequence": 1,
-          "event": "TERMINATED",
-          "code": "AUTHORITY_DENIED"
-        }
-      ]
+      }
     },
     "consumption": {
       "status": "NOT_DISPLAYED"

@@ -27,14 +27,14 @@ class ReadSimulationTest {
     static void code(Map<String,Object> report,String code) { assertTrue(list(report.get("mismatches"),"").stream().anyMatch(item->code.equals(obj(item).get("code"))),()->report.toString()); }
 
     @Test void exactDemoCasesAndIndependentMismatch() throws Exception {
-        for(String name:List.of("open","completed","missing","denied","transient")) status("PASS",run(selection(),fixture(!name.equals("denied"),ReadSimulationTest::consume),load(name+".json")));
+        for(String name:List.of("open","completed","missing","business-denied","denied","transient")) status("PASS",run(selection(),fixture(!name.equals("denied"),ReadSimulationTest::consume),load(name+".json")));
         var wrong=run(selection(),fixture(true,ReadSimulationTest::consume),load("mismatch.json")); status("MISMATCH",wrong); code(wrong,"OUTCOME_MISMATCH"); code(wrong,"CONSUMPTION_MISMATCH");
     }
     @Test void strictStubMatchingAndLedgerSurviveCaughtNativeFailure() throws Exception {
         for(String mutation:List.of("missing","extra","args","step")) {
             var row=row("open");
             switch(mutation) {
-                case "missing" -> { stubs(row).clear(); obj(row.get("expect")).put("outcome",Map.of("classification","FAILED","error",Map.of("code","ADAPTER_EXCEPTION","path","/steps/0"),"trace",List.of(Map.of("sequence",0,"event","INVOCATION_START"),Map.of("sequence",1,"event","STEP_START","step","source"),Map.of("sequence",2,"event","CALL_DISPATCHED","step","source","capability","tasks.get"),Map.of("sequence",3,"event","TERMINATED","code","ADAPTER_EXCEPTION")))); obj(row.get("expect")).put("consumption",Map.of("status","NOT_DISPLAYED")); }
+                case "missing" -> { stubs(row).clear(); obj(row.get("expect")).put("outcome",Map.of("classification","FAILED","error",Map.of("code","ADAPTER_EXCEPTION","path","/steps/0"))); obj(row.get("expect")).put("consumption",Map.of("status","NOT_DISPLAYED")); }
                 case "extra" -> stubs(row).add(stubs(row).getFirst());
                 case "args" -> obj(stubs(row).getFirst()).put("args",Map.of("taskId","other"));
                 default -> obj(stubs(row).getFirst()).put("step","other");
@@ -66,10 +66,13 @@ class ReadSimulationTest {
         byte[] boundary=Arrays.copyOf(raw,65_536); Arrays.fill(boundary,raw.length,boundary.length,(byte)' ');
         status("PASS",run(selection(),f,boundary)); status("INVALID_SCENARIO",run(selection(),f,Arrays.copyOf(boundary,65_537)));
         for(byte[] bad:List.of(new byte[]{(byte)0xff},"{\"id\":\"a\",\"id\":\"b\"}".getBytes(StandardCharsets.UTF_8),("[".repeat(17)+"0"+"]".repeat(17)).getBytes(StandardCharsets.UTF_8))) status("INVALID_SCENARIO",run(selection(),f,bad));
+        byte[] bom=new byte[raw.length+3]; bom[0]=(byte)0xef; bom[1]=(byte)0xbb; bom[2]=(byte)0xbf; System.arraycopy(raw,0,bom,3,raw.length);
+        status("INVALID_SCENARIO",run(selection(),f,bom));
     }
     @Test void consumersFailClosedAndAllowlistIsSetupValidated() throws Exception {
         for(ReadSimulation.Consumer consumer:List.<ReadSimulation.Consumer>of(outcome->{throw new IllegalStateException("PRIVATE_CANARY");},outcome->Map.of("status","DISPLAYED","code","UNLISTED"),outcome->Map.of("status","DISPLAYED","code","DONE","secret","PRIVATE_CANARY"))) {
             var report=run(selection(),fixture(true,consumer),load("open.json")); status("CONSUMER_ERROR",report); assertFalse(report.containsKey("consumption")); assertFalse(new String(canonical(report),StandardCharsets.UTF_8).contains("PRIVATE_CANARY"));
+            assertEquals(Map.of("classification","COMPLETED"),report.get("native"));
         }
         status("MISMATCH",run(selection(),fixture(true,outcome->Map.of("status","DISPLAYED","code","DONE")),load("open.json")));
         var f=fixture(true,ReadSimulationTest::consume);
@@ -124,8 +127,25 @@ class ReadSimulationTest {
         var selected=new ReadSimulation.Selection(model,artifact,digest(canonical(dcm)),digest(artifact),(String)nativeArtifact.get("compiler"),"ClassifyTask",obj(obj(obj(dcm.get("entrypoints")).get("ClassifyTask")).get("consumer")));
         var old=obj(list(parseJson(corpus,1_048_576),"").getFirst()); var stubs=new ArrayList<Object>(); var calls=new ArrayList<Object>();
         for(var item:list(old.get("stubs"),"")) { var stub=new LinkedHashMap<>(obj(item)); stub.remove("protectedArgs"); stubs.add(stub); var call=new LinkedHashMap<>(stub); call.remove("response"); calls.add(call); }
-        var nativeOutcome=obj(obj(old.get("expect")).get("outcome"));
+        var nativeOutcome=new LinkedHashMap<>(obj(obj(old.get("expect")).get("outcome"))); nativeOutcome.remove("trace");
         var row=Map.of("format","keir-read-simulation/1","id","complete-catalog","input",obj(old.get("given")).get("input"),"stubs",stubs,"expect",Map.of("calls",calls,"outcome",nativeOutcome,"consumption",Map.of("status","DISPLAYED","code",obj(nativeOutcome.get("result")).get("classification"))));
         status("PASS",run(selected,fixture(true,ReadSimulationTest::consume),canonical(row)));
+    }
+    @Test void compactExpectedOutcomesAndSafeSummaryPreservePrivateErrorComparison() throws Exception {
+        var f=fixture(true,ReadSimulationTest::consume);
+        var missing=run(selection(),f,load("missing.json")); status("PASS",missing); assertEquals(Map.of("classification","BUSINESS_REJECTION","code","NATIVE_ERROR"),missing.get("native"));
+        assertFalse(new String(canonical(missing),StandardCharsets.UTF_8).contains("TASK_NOT_FOUND"));
+        var wrong=run(selection(),f,load("wrong-error.json")); status("MISMATCH",wrong); code(wrong,"OUTCOME_MISMATCH"); assertEquals(missing.get("native"),wrong.get("native"));
+        var business=row("business-denied"); assertEquals(1,stubs(business).size()); assertEquals(1,list(obj(business.get("expect")).get("calls"),"").size());
+        var denied=run(selection(),f,canonical(business)); status("PASS",denied); assertEquals(missing.get("native"),denied.get("native"));
+        var host=row("denied"); assertTrue(stubs(host).isEmpty()); assertTrue(list(obj(host.get("expect")).get("calls"),"").isEmpty());
+        var rejected=run(selection(),fixture(false,ReadSimulationTest::consume),canonical(host)); status("PASS",rejected); assertEquals(Map.of("classification","FAILED","code","AUTHORITY_DENIED"),rejected.get("native"));
+        obj(host.get("expect")).put("outcome",Map.of("classification","LIMIT_EXCEEDED","error",Map.of("code","BUDGET_EXCEEDED","path","")));
+        var expired=new ReadSimulation.Fixture(f.scope(),f.bindings(),new KeirRuntime.Deadline(()->0,0),f.authorize(),f.consume(),f.allowedReceipts(),null);
+        var limited=run(selection(),expired,canonical(host)); status("PASS",limited); assertEquals(Map.of("classification","LIMIT_EXCEEDED","code","BUDGET_EXCEEDED"),limited.get("native"));
+        var bad=row("open"); obj(obj(bad.get("expect")).get("outcome")).put("trace",List.of()); status("INVALID_SCENARIO",run(selection(),f,canonical(bad)));
+        bad=row("missing"); obj(obj(obj(bad.get("expect")).get("outcome")).get("error")).put("cause",Map.of("code","PRIVATE","path","")); status("INVALID_SCENARIO",run(selection(),f,canonical(bad)));
+        var s=selection(); byte[] bom=new byte[s.dcmBytes().length+3]; bom[0]=(byte)0xef; bom[1]=(byte)0xbb; bom[2]=(byte)0xbf; System.arraycopy(s.dcmBytes(),0,bom,3,s.dcmBytes().length);
+        status("SETUP_ERROR",run(new ReadSimulation.Selection(bom,s.artifactBytes(),s.modelDigest(),s.artifactDigest(),s.compiler(),s.entrypoint(),s.consumer()),f,load("open.json")));
     }
 }

@@ -77,8 +77,7 @@
               "additionalProperties": false,
               "required": [
                 "classification",
-                "result",
-                "trace"
+                "result"
               ],
               "properties": {
                 "classification": {
@@ -86,9 +85,6 @@
                 },
                 "result": {
                   "$ref": "#/$defs/args"
-                },
-                "trace": {
-                  "$ref": "#/$defs/trace"
                 }
               }
             },
@@ -97,8 +93,7 @@
               "additionalProperties": false,
               "required": [
                 "classification",
-                "error",
-                "trace"
+                "error"
               ],
               "properties": {
                 "classification": {
@@ -108,14 +103,8 @@
                     "LIMIT_EXCEEDED"
                   ]
                 },
-                "result": {
-                  "$ref": "#/$defs/args"
-                },
                 "error": {
                   "$ref": "#/$defs/error"
-                },
-                "trace": {
-                  "$ref": "#/$defs/trace"
                 }
               }
             }
@@ -278,225 +267,6 @@
         }
       ]
     },
-    "trace": {
-      "type": "array",
-      "items": {
-        "oneOf": [
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "sequence",
-              "event"
-            ],
-            "properties": {
-              "sequence": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 63
-              },
-              "event": {
-                "const": "INVOCATION_START"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "sequence",
-              "event",
-              "step"
-            ],
-            "properties": {
-              "sequence": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 63
-              },
-              "event": {
-                "const": "STEP_START"
-              },
-              "step": {
-                "type": "string",
-                "maxLength": 256
-              }
-            }
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "sequence",
-              "event",
-              "step"
-            ],
-            "properties": {
-              "sequence": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 63
-              },
-              "event": {
-                "const": "VALUE_BOUND"
-              },
-              "step": {
-                "type": "string",
-                "maxLength": 256
-              }
-            }
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "sequence",
-              "event",
-              "step",
-              "capability"
-            ],
-            "properties": {
-              "sequence": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 63
-              },
-              "event": {
-                "const": "CALL_DISPATCHED"
-              },
-              "step": {
-                "type": "string",
-                "maxLength": 256
-              },
-              "capability": {
-                "type": "string",
-                "maxLength": 256
-              }
-            }
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "sequence",
-              "event",
-              "step",
-              "capability"
-            ],
-            "properties": {
-              "sequence": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 63
-              },
-              "event": {
-                "const": "CALL_SUCCEEDED"
-              },
-              "step": {
-                "type": "string",
-                "maxLength": 256
-              },
-              "capability": {
-                "type": "string",
-                "maxLength": 256
-              }
-            }
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "sequence",
-              "event"
-            ],
-            "properties": {
-              "sequence": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 63
-              },
-              "event": {
-                "const": "RETURNED"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "sequence",
-              "event",
-              "step"
-            ],
-            "properties": {
-              "sequence": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 63
-              },
-              "event": {
-                "const": "STEP_SKIPPED"
-              },
-              "step": {
-                "type": "string",
-                "maxLength": 256
-              }
-            }
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "sequence",
-              "event",
-              "step",
-              "taken"
-            ],
-            "properties": {
-              "sequence": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 63
-              },
-              "event": {
-                "const": "GUARD_EVALUATED"
-              },
-              "step": {
-                "type": "string",
-                "maxLength": 256
-              },
-              "taken": {
-                "type": "boolean"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "sequence",
-              "event"
-            ],
-            "properties": {
-              "sequence": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 63
-              },
-              "event": {
-                "const": "TERMINATED"
-              },
-              "code": {
-                "type": "string",
-                "pattern": "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
-              }
-            }
-          }
-        ]
-      },
-      "maxItems": 64,
-      "minItems": 2
-    },
     "error": {
       "type": "object",
       "additionalProperties": false,
@@ -512,24 +282,6 @@
         "path": {
           "type": "string",
           "maxLength": 1024
-        },
-        "cause": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "code",
-            "path"
-          ],
-          "properties": {
-            "code": {
-              "type": "string",
-              "pattern": "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
-            },
-            "path": {
-              "type": "string",
-              "maxLength": 1024
-            }
-          }
         }
       }
     }

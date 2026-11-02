@@ -30,6 +30,12 @@ def main():
         assert not validators["scenario"].is_valid(dict(example, **{field: {}}))
     for change in ({"extra": True}, {"stubs": [{}] * 5}, {"input": {"taskId": None}}):
         assert not validators["scenario"].is_valid(dict(example, **change))
+    internal = json.loads(json.dumps(example))
+    internal["expect"]["outcome"]["trace"] = []
+    assert not validators["scenario"].is_valid(internal)
+    internal = json.loads((ROOT / "conformance/read-simulation/task-advice/missing.json").read_bytes())
+    internal["expect"]["outcome"]["error"]["cause"] = {"code": "PRIVATE", "path": ""}
+    assert not validators["scenario"].is_valid(internal)
     reports = list((ROOT / ".tools/read-simulation-reports").glob("[0-9]*.json"))
     if not reports:
         raise ValueError("Run packaged parity before report schema qualification")
@@ -38,6 +44,8 @@ def main():
         validators["report"].validate(report)
         for change in ({"args": {}}, {"mismatches": [{}] * 9}, {"status": "OTHER"}, {"identity": {"modelDigest": "private"}}):
             assert not validators["report"].is_valid(dict(report, **change))
+        for native in ({"classification": "OTHER"}, {"classification": "FAILED", "code": "PRIVATE_CANARY"}, {"classification": "FAILED", "code": "NATIVE_ERROR", "path": "private"}):
+            assert not validators["report"].is_valid(dict(report, native=native))
         count += 1
     try:
         validators["scenario"].evolve(schema={"$ref": "https://invalid.example/blocked"}).validate({})

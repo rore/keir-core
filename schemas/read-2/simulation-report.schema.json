@@ -124,6 +124,38 @@
           }
         }
       ]
+    },
+    "native": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classification"
+      ],
+      "properties": {
+        "classification": {
+          "enum": [
+            "COMPLETED",
+            "BUSINESS_REJECTION",
+            "FAILED",
+            "LIMIT_EXCEEDED"
+          ]
+        },
+        "code": {
+          "enum": [
+            "AUTHORITY_DENIED",
+            "AUTHORITY_CHECK_FAILED",
+            "HOST_CONTEXT_INVALID",
+            "HOST_BINDING_INVALID",
+            "INPUT_INVALID",
+            "ADAPTER_EXCEPTION",
+            "ADAPTER_INVALID",
+            "ADAPTER_TRANSIENT",
+            "EXPRESSION_FAILED",
+            "BUDGET_EXCEEDED",
+            "NATIVE_ERROR"
+          ]
+        }
+      }
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
