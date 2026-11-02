@@ -80,6 +80,26 @@ Verification adequacy: sufficient for this bounded increment. Actual installed-s
 
 Manager owns canonical integration, final workflow/hosted-CI verification and recoverable cleanup. No further implementation is underway; no role-guidance change was needed. Delivery is recorded separately after actual integration.
 
+## Delivery
+
+Approved demo source `df0684301ff4a3909d7b71d019e5c63d93d23193` is integrated and pushed on main. [Hosted Native app CI](https://github.com/rore/keir-demo-app/actions/runs/41432168250) passes the locked install, build, fast regression and complete browser suite. Core integrated the reviewed record at `a2bd74b95e5e60209427bc23520679d1c5d4a540`. Both explicit full-path workflow checks are clean; immutable task-context/baseline equality and current public content were checked directly. Final demo risk is GRAY with no boundary/checkpoint finding and the visible 23-file/1,479-line size advisory; no check or policy was weakened.
+
+The roadmap records the delivered prepared-program read-only increment and preserves broader authored/AI/effect scope as unfinished. Runtime/package semantics are unchanged from reviewed core; no redundant Java/core conformance run was required. After the owner released both clean checkouts and confirmed no process/lock holds, source/record recovery bundles and 78 proof files were verified by Git, archive CRC and SHA-256. Both task worktrees and fully merged branches were removed normally; unrelated worktrees remain intact. Core closure CI is checked after this update and accompanies the delivery report. No running operator app, database, preview or global configuration was changed.
+
+## Skill feedback (unsent)
+
+**Affected surface:** Upstream `agent-workflow-check.py` Redline-verdict validation.
+
+**Expected:** A reporter error envelope cannot satisfy `risk.redline_findings_available` or produce a clean workflow result.
+
+**Actual:** With an otherwise valid approved record, an error-only JSON envelope was parsed as available findings and the checker returned clean. Delivery used a separately regenerated valid verdict.
+
+**Minimal reproduction:** Supply `{"error":"invalid diff evidence","exitCode":2}` through `--redline-verdict` with a valid Ready-for-review record and complete changed paths.
+
+**Evidence:** Checker exit0; `risk.redline_findings_available=true`, detail `redline verdict parsed`. Upstream destination was verified and a sanitized duplicate search found no matching issue. No public issue was submitted; reporting approval is absent.
+
+**Suggested owner:** `rore/agent-workflow`, validation of reporter-result structure and error/exit status before risk predicates.
+
 - Initial context and immutable baseline were recorded before code discovery: core baseline `4e9c961`, demo baseline `9256b66`. No live data or preview changes were authorized.
 - Initial demo inventory completed read-only with exact role/feature participation verified and then detached. Architect and designer subsequently supplied the contract/interaction decisions used by the approved implementation plan.
 
