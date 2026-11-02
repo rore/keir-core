@@ -33,29 +33,7 @@
       "error": {
         "code": "ADAPTER_TRANSIENT",
         "path": "/steps/0"
-      },
-      "trace": [
-        {
-          "sequence": 0,
-          "event": "INVOCATION_START"
-        },
-        {
-          "sequence": 1,
-          "event": "STEP_START",
-          "step": "source"
-        },
-        {
-          "sequence": 2,
-          "event": "CALL_DISPATCHED",
-          "step": "source",
-          "capability": "tasks.get"
-        },
-        {
-          "sequence": 3,
-          "event": "TERMINATED",
-          "code": "ADAPTER_TRANSIENT"
-        }
-      ]
+      }
     },
     "consumption": {
       "status": "NOT_DISPLAYED"

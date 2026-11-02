@@ -38,5 +38,5 @@ export async function runExample(bundleDir, fixtureId, caseFile) {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const report = process.argv.length === 5 ? await runExample(...process.argv.slice(2)) : await runReadSimulation(null, null, new Uint8Array());
   // Closed reports contain only ASCII tokens, pins and bounded integers.
-  process.stdout.write(JSON.stringify(report, ['artifactDigest', 'code', 'consumption', 'format', 'identity', 'mismatches', 'modelDigest', 'ordinal', 'stage', 'status']));
+  process.stdout.write(JSON.stringify(report, ['artifactDigest', 'classification', 'code', 'consumption', 'format', 'identity', 'mismatches', 'modelDigest', 'native', 'ordinal', 'stage', 'status']));
 }

@@ -6,6 +6,10 @@ const own = (value, name) => Object.hasOwn(value, name);
 const same = (left, right) => canonicalBytes(left).equals(canonicalBytes(right));
 const token = value => ok(typeof value === 'string' && /^[A-Z][A-Z0-9_]{0,63}(?![\s\S])/.test(value), '');
 const stepName = value => ok(typeof value === 'string' && /^[A-Za-z][A-Za-z0-9]{0,63}(?![\s\S])/.test(value), '');
+const classifications = ['COMPLETED', 'BUSINESS_REJECTION', 'FAILED', 'LIMIT_EXCEEDED'];
+const safeCodes = new Set(['AUTHORITY_DENIED', 'AUTHORITY_CHECK_FAILED', 'HOST_CONTEXT_INVALID', 'HOST_BINDING_INVALID', 'INPUT_INVALID',
+  'ADAPTER_EXCEPTION', 'ADAPTER_INVALID', 'ADAPTER_TRANSIENT', 'EXPRESSION_FAILED', 'BUDGET_EXCEEDED']);
+const noBom = bytes => ok(!(bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf), '');
 function closed(value, required, optional = []) {
   const names = keys(value, '', required.length + optional.length);
   ok(required.every(name => own(value, name)) && names.every(name => required.includes(name) || optional.includes(name)), '');
@@ -37,9 +41,10 @@ function receipt(value) {
   else ok(value.status === 'NOT_DISPLAYED', '');
   return data(value);
 }
-function report(status, identity, mismatches, consumption) {
+function report(status, identity, mismatches, consumption, native) {
   const value = { format: 'keir-read-simulation-report/1', status, identity, mismatches };
   if (consumption !== undefined) value.consumption = consumption;
+  if (native !== undefined) value.native = native;
   ok(canonicalBytes(value).length <= 16384, '');
   return freeze(value);
 }
@@ -66,32 +71,20 @@ function call(value, dcm, stub) {
 
 function outcome(value, dcm, entry) {
   const completed = value?.classification === 'COMPLETED';
-  ok(['COMPLETED', 'BUSINESS_REJECTION', 'FAILED', 'LIMIT_EXCEEDED'].includes(value?.classification), '');
-  closed(value, ['classification', 'trace', completed ? 'result' : 'error'],
-    value.classification === 'BUSINESS_REJECTION' ? ['result'] : []);
-  if (own(value, 'result')) validateValue(dcm, entry.output, value.result, '', 'INPUT_INVALID');
+  ok(classifications.includes(value?.classification), '');
+  shape(value, ['classification', completed ? 'result' : 'error'], '');
+  if (completed) validateValue(dcm, entry.output, value.result, '', 'INPUT_INVALID');
   if (!completed) {
-    closed(value.error, ['code', 'path'], ['cause']); token(value.error.code); text(value.error.path, '', false, 1024);
-    if (own(value.error, 'cause')) {
-      shape(value.error.cause, ['code', 'path'], ''); token(value.error.cause.code); text(value.error.cause.path, '', false, 1024);
-    }
+    shape(value.error, ['code', 'path'], ''); token(value.error.code); text(value.error.path, '', false, 1024);
   }
-  array(value.trace, 64, 2);
-  const fields = { INVOCATION_START: [], STEP_START: ['step'], VALUE_BOUND: ['step'], CALL_DISPATCHED: ['step', 'capability'],
-    CALL_SUCCEEDED: ['step', 'capability'], GUARD_EVALUATED: ['step', 'taken'], STEP_SKIPPED: ['step'], RETURNED: [], TERMINATED: [] };
-  value.trace.forEach((event, sequence) => {
-    ok(event && typeof event.event === 'string' && own(fields, event.event), '');
-    closed(event, ['sequence', 'event', ...fields[event.event]], event.event === 'TERMINATED' ? ['code'] : []);
-    ok(event.sequence === sequence, '');
-    if (own(event, 'step')) stepName(event.step);
-    if (own(event, 'capability')) ok(typeof event.capability === 'string' && own(dcm.capabilities, event.capability), '');
-    if (own(event, 'taken')) ok(typeof event.taken === 'boolean', '');
-    if (own(event, 'code')) token(event.code);
-    if (event.event === 'INVOCATION_START') ok(sequence === 0, '');
-    if (event.event === 'TERMINATED') ok(sequence === value.trace.length - 1, '');
-  });
-  ok(value.trace[0].event === 'INVOCATION_START' && value.trace.at(-1).event === 'TERMINATED', '');
-  ok(completed ? !own(value.trace.at(-1), 'code') : value.trace.at(-1).code === value.error.code, '');
+}
+function projectedOutcome(value) {
+  return value.classification === 'COMPLETED' ? { classification: value.classification, result: value.result }
+    : { classification: value.classification, error: { code: value.error.code, path: value.error.path } };
+}
+function nativeSummary(value) {
+  return value.classification === 'COMPLETED' ? { classification: value.classification }
+    : { classification: value.classification, code: safeCodes.has(value.error.code) ? value.error.code : 'NATIVE_ERROR' };
 }
 
 export async function runReadSimulation(selection, fixture, caseBytes) {
@@ -115,6 +108,7 @@ export async function runReadSimulation(selection, fixture, caseBytes) {
     ok(selection.dcmBytes instanceof Uint8Array && selection.dcmBytes.byteLength <= 65536, '');
     ok(selection.artifactBytes instanceof Uint8Array && selection.artifactBytes.byteLength <= 1048576, '');
     const dcmBytes = Buffer.from(selection.dcmBytes), artifactBytes = Buffer.from(selection.artifactBytes);
+    noBom(dcmBytes);
     dcm = parseModelJson(dcmBytes); ok(dcm.format === 'keir-dcm/read-2', '');
     const invokers = Object.fromEntries(Object.entries(dcm.capabilities).map(([capability, cap]) => [capability, {
       version: cap.version, mode: 'simulation',
@@ -154,7 +148,8 @@ export async function runReadSimulation(selection, fixture, caseBytes) {
   } catch { return failed('SETUP_ERROR', 'SETUP'); }
   try {
     ok(caseBytes instanceof Uint8Array && caseBytes.byteLength <= 65536, '');
-    row = parseModelJson(Buffer.from(caseBytes));
+    const raw = Buffer.from(caseBytes); noBom(raw);
+    row = parseModelJson(raw);
     shape(row, ['format', 'id', 'input', 'stubs', 'expect'], ''); ok(row.format === 'keir-read-simulation/1', '');
     ok(typeof row.id === 'string' && /^[A-Za-z][A-Za-z0-9_.-]{0,63}(?![\s\S])/.test(row.id), '');
     validateValue(dcm, entry.input, row.input, '', 'INPUT_INVALID');
@@ -164,10 +159,11 @@ export async function runReadSimulation(selection, fixture, caseBytes) {
     const expectedReceipt = receipt(row.expect.consumption); ok(allowed.some(value => same(value, expectedReceipt)), '');
     freeze(row);
   } catch { return failed('INVALID_SCENARIO', 'SCENARIO', identity); }
-  let actual;
+  let actual, projected, native;
   try {
     actual = await invokeProgram(prepared, row.input, { scope: fixture.scope, bindings, deadline, authorize });
-    outcome(actual, dcm, entry);
+    projected = projectedOutcome(actual);
+    outcome(projected, dcm, entry); native = nativeSummary(projected);
   } catch { return failed('SETUP_ERROR', 'SETUP'); }
   if (used !== row.stubs.length) add('STUB', 'EXTRA_STUB', used + 1);
   const dispatches = actual.trace.filter(event => event.event === 'CALL_DISPATCHED');
@@ -178,12 +174,12 @@ export async function runReadSimulation(selection, fixture, caseBytes) {
     return { step: event?.step ?? '', ...capture };
   });
   if (!same(calls, row.expect.calls)) add('CALLS', 'CALLS_MISMATCH');
-  if (!same(actual, row.expect.outcome)) add('OUTCOME', 'OUTCOME_MISMATCH');
+  if (!same(projected, row.expect.outcome)) add('OUTCOME', 'OUTCOME_MISMATCH');
   let consumption;
   try {
     consumption = receipt(synchronous(consume(actual)));
     ok(allowed.some(value => same(value, consumption)), '');
-  } catch { add('CONSUMER', 'CONSUMER_ERROR'); return report('CONSUMER_ERROR', identity, mismatches); }
+  } catch { add('CONSUMER', 'CONSUMER_ERROR'); return report('CONSUMER_ERROR', identity, mismatches, undefined, native); }
   if (!same(consumption, row.expect.consumption)) add('CONSUMER', 'CONSUMPTION_MISMATCH');
-  return report(mismatches.length ? 'MISMATCH' : 'PASS', identity, mismatches, consumption);
+  return report(mismatches.length ? 'MISMATCH' : 'PASS', identity, mismatches, consumption, native);
 }

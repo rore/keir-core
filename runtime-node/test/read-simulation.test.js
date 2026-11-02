@@ -23,9 +23,19 @@ function fixture(overrides = {}) {
 }
 const run = (row = scenario(), host = fixture(), selected = selection()) => runReadSimulation(selected, host, bytes(row));
 function bounded(report) {
-  assert.deepEqual(Object.keys(report).sort(), ['format', 'identity', 'mismatches', 'status', ...(Object.hasOwn(report, 'consumption') ? ['consumption'] : [])].sort());
+  assert.deepEqual(Object.keys(report).sort(), ['format', 'identity', 'mismatches', 'status',
+    ...(Object.hasOwn(report, 'consumption') ? ['consumption'] : []), ...(Object.hasOwn(report, 'native') ? ['native'] : [])].sort());
   assert.equal(report.format, 'keir-read-simulation-report/1'); assert.ok(Object.isFrozen(report));
   assert.ok(canonicalBytes(report).length <= 16384); assert.ok(report.mismatches.length <= 8);
+  if (['SETUP_ERROR', 'INVALID_SCENARIO'].includes(report.status)) assert.equal(Object.hasOwn(report, 'native'), false);
+  else {
+    assert.ok(['COMPLETED', 'BUSINESS_REJECTION', 'FAILED', 'LIMIT_EXCEEDED'].includes(report.native.classification));
+    assert.deepEqual(Object.keys(report.native).sort(), report.native.classification === 'COMPLETED' ? ['classification'] : ['classification', 'code']);
+    if (report.native.classification !== 'COMPLETED') assert.ok([
+      'AUTHORITY_DENIED', 'AUTHORITY_CHECK_FAILED', 'HOST_CONTEXT_INVALID', 'HOST_BINDING_INVALID', 'INPUT_INVALID',
+      'ADAPTER_EXCEPTION', 'ADAPTER_INVALID', 'ADAPTER_TRANSIENT', 'EXPRESSION_FAILED', 'BUDGET_EXCEEDED', 'NATIVE_ERROR',
+    ].includes(report.native.code));
+  }
   for (const mismatch of report.mismatches) {
     assert.deepEqual(Object.keys(mismatch).sort(), ['code', 'ordinal', 'stage']);
     assert.ok(Number.isInteger(mismatch.ordinal) && mismatch.ordinal >= 0 && mismatch.ordinal <= 4);
@@ -35,12 +45,13 @@ const has = (report, code, ordinal) => report.mismatches.some(item => item.code 
 
 test('opt-in subpath preserves root API and all independently authored task-advice cases', async () => {
   for (const name of ['bindModel', 'prepareProgram', 'invokeProgram', 'prepare', 'invoke']) assert.equal(typeof runtime[name], 'function');
-  for (const name of ['open', 'completed', 'missing', 'denied', 'mismatch']) {
+  for (const name of ['open', 'completed', 'missing', 'denied', 'business-denied', 'wrong-error', 'transient', 'mismatch']) {
     const host = fixture(name === 'denied' ? { authorize: async () => false } : {});
     const report = await run(scenario(name), host); bounded(report);
-    assert.equal(report.status, name === 'mismatch' ? 'MISMATCH' : 'PASS', name);
+    const mismatch = ['mismatch', 'wrong-error'].includes(name);
+    assert.equal(report.status, mismatch ? 'MISMATCH' : 'PASS', name);
     assert.deepEqual(report.identity, { modelDigest: selection().modelDigest, artifactDigest: selection().artifactDigest });
-    if (name === 'mismatch') assert.ok(has(report, 'OUTCOME_MISMATCH'));
+    if (mismatch) assert.ok(has(report, 'OUTCOME_MISMATCH'));
   }
 });
 
@@ -62,9 +73,8 @@ test('all unused stubs, argument/result types and expectations fail before callb
     row => { row.stubs[0].response = { kind: 'UNKNOWN_COMMIT', effect: 'UNKNOWN' }; },
     row => { row.expect.calls[0].args.taskId = 1; }, row => { row.expect.outcome.result.classification = 'UNKNOWN'; },
     row => { row.expect.consumption = { status: 'DISPLAYED', code: 'UNLISTED' }; },
-    row => { row.expect.outcome.effects = []; }, row => { row.expect.outcome.trace[0].sequence = 1; },
-    row => { row.expect.outcome.trace[1].step = 'bad\n'; }, row => { row.id = '9invalid'; },
-    row => { row.expect.outcome.trace = []; },
+    row => { row.expect.outcome.effects = []; }, row => { row.expect.outcome.trace = []; },
+    row => { row.expect.outcome.error = { code: 'INPUT_INVALID', path: '' }; }, row => { row.id = '9invalid'; },
   ];
   let callbacks = 0;
   const host = fixture({ authorize: () => { callbacks++; return true; }, consume: () => { callbacks++; return { status: 'NOT_DISPLAYED' }; },
@@ -105,12 +115,12 @@ test('setup pin/model/fixture failures are redacted and never expose an identity
 
 test('caught adapter mismatch cannot pass even when expected native failure exactly agrees', async () => {
   const row = scenario(); row.stubs = [];
-  row.expect.outcome = { classification: 'FAILED', error: { code: 'ADAPTER_EXCEPTION', path: '/steps/0' },
-    trace: [...row.expect.outcome.trace.slice(0, 3), { sequence: 3, event: 'TERMINATED', code: 'ADAPTER_EXCEPTION' }] };
+  row.expect.outcome = { classification: 'FAILED', error: { code: 'ADAPTER_EXCEPTION', path: '/steps/0' } };
   row.expect.consumption = { status: 'NOT_DISPLAYED' };
   const report = await run(row); bounded(report);
   assert.equal(report.status, 'MISMATCH'); assert.ok(has(report, 'MISSING_STUB', 1));
   assert.equal(has(report, 'OUTCOME_MISMATCH'), false);
+  assert.deepEqual(report.native, { classification: 'FAILED', code: 'ADAPTER_EXCEPTION' });
 });
 
 test('leftovers, mismatching arguments and trace step labels have independent ordered ledger entries', async () => {
@@ -164,10 +174,10 @@ test('optional response checks are host-owned synchronous relationships, never i
 test('a declared transient read is consumed and compared as the native failure', async () => {
   const row = scenario();
   row.stubs[0].response = { kind: 'TRANSIENT_FAILURE' };
-  row.expect.outcome = { classification: 'FAILED', error: { code: 'ADAPTER_TRANSIENT', path: '/steps/0' },
-    trace: [...row.expect.outcome.trace.slice(0, 3), { sequence: 3, event: 'TERMINATED', code: 'ADAPTER_TRANSIENT' }] };
+  row.expect.outcome = { classification: 'FAILED', error: { code: 'ADAPTER_TRANSIENT', path: '/steps/0' } };
   row.expect.consumption = { status: 'NOT_DISPLAYED' };
   const report = await run(row); bounded(report); assert.equal(report.status, 'PASS');
+  assert.deepEqual(report.native, { classification: 'FAILED', code: 'ADAPTER_TRANSIENT' });
 });
 
 test('fresh current authorization is enforced on reused host fixtures', async () => {
@@ -186,7 +196,8 @@ test('report redaction excludes scenario IDs, business facts, protected values a
   row.expect.calls[0].args.taskId = secret;
   const report = await run(row, fixture({ scope: secret, bindings: { actorId: secret } }));
   bounded(report); assert.equal(report.status, 'MISMATCH');
-  assert.doesNotMatch(JSON.stringify(report), /CANARY|actorId|taskId|source|classification|scope/);
+  assert.doesNotMatch(JSON.stringify(report), /CANARY|actorId|taskId|source|scope/);
+  assert.deepEqual(report.native, { classification: 'COMPLETED' });
 });
 
 test('raw case limits, duplicate keys, depth and non-data inputs reject before callbacks', async () => {
@@ -207,18 +218,12 @@ test('raw case limits, duplicate keys, depth and non-data inputs reject before c
   }
 });
 
-test('four stub/call bounds and trace bounds remain distinct from reached native work', async () => {
+test('four stub/call and receipt bounds remain distinct from reached native work', async () => {
   for (const count of [4, 5]) {
     const row = scenario(); row.stubs = Array.from({ length: count }, () => clone(row.stubs[0]));
     const report = await run(row); bounded(report); assert.equal(report.status, count === 4 ? 'MISMATCH' : 'INVALID_SCENARIO');
     row.stubs = [row.stubs[0]]; row.expect.calls = Array.from({ length: count }, () => clone(row.expect.calls[0]));
     assert.equal((await run(row)).status, count === 4 ? 'MISMATCH' : 'INVALID_SCENARIO');
-  }
-  for (const count of [64, 65]) {
-    const row = scenario();
-    row.expect.outcome.trace.splice(-1, 0, ...Array.from({ length: count - row.expect.outcome.trace.length }, () => ({ event: 'RETURNED' })));
-    row.expect.outcome.trace.forEach((event, sequence) => { event.sequence = sequence; });
-    assert.equal((await run(row)).status, count === 64 ? 'MISMATCH' : 'INVALID_SCENARIO');
   }
   assert.equal((await run(scenario('missing'), fixture({ allowedReceipts: [{ status: 'NOT_DISPLAYED' }] }))).status, 'PASS');
   const receipts = fixture().allowedReceipts;
@@ -237,14 +242,18 @@ test('scope, bindings, callbacks, allowlist and selection snapshots survive pend
   release(); const report = await pending; bounded(report); assert.equal(report.status, 'PASS');
 });
 
-test('full native expectation forms include guards, skipped steps, business result and error cause', async () => {
-  const row = scenario();
-  row.expect.outcome.trace.splice(1, 0, { event: 'GUARD_EVALUATED', step: 'source', taken: false }, { event: 'STEP_SKIPPED', step: 'source' });
-  row.expect.outcome.trace.forEach((event, sequence) => { event.sequence = sequence; });
-  row.expect.outcome.classification = 'BUSINESS_REJECTION';
-  row.expect.outcome.error = { code: 'TASK_NOT_FOUND', path: '/steps/0', cause: { code: 'ACCESS_DENIED', path: '/steps/0' } };
-  row.expect.outcome.trace.at(-1).code = 'TASK_NOT_FOUND';
-  const report = await run(row); bounded(report); assert.equal(report.status, 'MISMATCH'); assert.ok(has(report, 'OUTCOME_MISMATCH'));
+test('compact expectations reject trace and nested native details before invocation', async () => {
+  let callbacks = 0;
+  const host = fixture({ authorize: () => { callbacks++; return true; }, consume: () => { callbacks++; return { status: 'NOT_DISPLAYED' }; } });
+  for (const mutate of [
+    row => { row.expect.outcome.trace = []; },
+    row => { row.expect.outcome.error.cause = { code: 'ACCESS_DENIED', path: '/steps/0' }; },
+    row => { row.expect.outcome.result = { classification: 'DONE' }; },
+    row => { row.expect.outcome.error.secret = 'PRIVATE_DETAIL'; },
+  ]) {
+    const row = scenario('missing'); mutate(row);
+    const report = await run(row, host); bounded(report); assert.equal(report.status, 'INVALID_SCENARIO'); assert.equal(callbacks, 0);
+  }
 });
 
 test('complete catalogs including unused WRITE bind without exposing WRITE stubs', async () => {
@@ -254,10 +263,59 @@ test('complete catalogs including unused WRITE bind without exposing WRITE stubs
   const fields = call => ({ step: call.step, capability: call.capability, version: call.version, args: call.args });
   const row = { format: 'keir-read-simulation/1', id: 'Catalog', input: source.given.input,
     stubs: source.stubs.map(stub => ({ ...fields(stub), response: stub.response })),
-    expect: { calls: source.expect.calls.map(fields), outcome: source.expect.outcome, consumption: { status: 'DISPLAYED', code: 'DONE' } } };
+    expect: { calls: source.expect.calls.map(fields), outcome: { classification: source.expect.outcome.classification, result: source.expect.outcome.result },
+      consumption: { status: 'DISPLAYED', code: 'DONE' } } };
   const selected = { dcmBytes: f.dcmBytes, artifactBytes: f.bytes, modelDigest: f.dcmPin, artifactDigest: f.pin,
     compiler: 'keir-compiler-java/0.1.0-SNAPSHOT', entrypoint: 'ClassifyTask', consumer: f.dcm.entrypoints.ClassifyTask.consumer };
   assert.equal((await run(row, fixture(), selected)).status, 'PASS');
   row.stubs.push({ step: 'unused', capability: 'tasks.create', version: '1', args: { projectId: 'p', title: 't' }, response: { kind: 'SUCCESS', value: {} } });
   assert.equal((await run(row, fixture(), selected)).status, 'INVALID_SCENARIO');
+});
+
+test('public summaries preserve fixed runtime codes but never domain codes or diagnostic paths', async () => {
+  const missing = await run(scenario('missing')); bounded(missing); assert.equal(missing.status, 'PASS');
+  assert.deepEqual(missing.native, { classification: 'BUSINESS_REJECTION', code: 'NATIVE_ERROR' });
+  assert.doesNotMatch(JSON.stringify(missing), /TASK_NOT_FOUND|steps|error|path/);
+  const denied = await run(scenario('denied'), fixture({ authorize: async () => false }));
+  assert.deepEqual(denied.native, { classification: 'FAILED', code: 'AUTHORITY_DENIED' });
+  const consumer = await run(scenario('missing'), fixture({ consume: () => { throw new Error('PRIVATE_ERROR'); } }));
+  bounded(consumer); assert.equal(consumer.status, 'CONSUMER_ERROR');
+  assert.deepEqual(consumer.native, { classification: 'BUSINESS_REJECTION', code: 'NATIVE_ERROR' });
+  assert.equal(Object.hasOwn(consumer, 'consumption'), false);
+  assert.doesNotMatch(JSON.stringify(consumer), /PRIVATE|TASK_NOT_FOUND|path/);
+  const limitedCase = scenario('denied'); limitedCase.expect.outcome = { classification: 'LIMIT_EXCEEDED', error: { code: 'BUDGET_EXCEEDED', path: '' } };
+  const limited = await run(limitedCase, fixture({ deadline: { clock: { nowMs: () => 0 }, expiresAtMs: 0 } }));
+  bounded(limited); assert.equal(limited.status, 'PASS'); assert.deepEqual(limited.native, { classification: 'LIMIT_EXCEEDED', code: 'BUDGET_EXCEEDED' });
+});
+
+test('private outcome comparison distinguishes domain codes that share the same public fallback', async () => {
+  const row = scenario('missing'); row.expect.outcome.error.code = 'ACCESS_DENIED';
+  const wrong = await run(row); bounded(wrong);
+  assert.equal(wrong.status, 'MISMATCH'); assert.ok(has(wrong, 'OUTCOME_MISMATCH'));
+  assert.deepEqual(wrong.native, { classification: 'BUSINESS_REJECTION', code: 'NATIVE_ERROR' });
+  assert.doesNotMatch(JSON.stringify(wrong), /TASK_NOT_FOUND|ACCESS_DENIED/);
+});
+
+test('business ACCESS_DENIED consumes one dispatched stub; host denial dispatches none', async () => {
+  let checked = 0, authorized = 0;
+  const host = fixture({ authorize: async () => { authorized++; return true; }, responseCheck: () => { checked++; return true; } });
+  const row = scenario('missing'); row.stubs[0].response.code = 'ACCESS_DENIED'; row.expect.outcome.error.code = 'ACCESS_DENIED';
+  const business = await run(row, host); bounded(business); assert.equal(business.status, 'PASS');
+  assert.equal(checked, 1); assert.equal(authorized, 2);
+  assert.deepEqual(business.native, { classification: 'BUSINESS_REJECTION', code: 'NATIVE_ERROR' });
+  checked = 0; authorized = 0;
+  const rejected = await run(scenario('denied'), { ...host, authorize: async () => { authorized++; return false; } });
+  bounded(rejected); assert.equal(rejected.status, 'PASS'); assert.equal(checked, 0); assert.equal(authorized, 1);
+  assert.deepEqual(rejected.native, { classification: 'FAILED', code: 'AUTHORITY_DENIED' });
+});
+
+test('case and DCM UTF-8 BOMs reject locally without invoking any host callbacks', async () => {
+  let callbacks = 0;
+  const host = fixture({ authorize: () => { callbacks++; return true; }, consume: () => { callbacks++; return { status: 'NOT_DISPLAYED' }; } });
+  const bom = Buffer.from([0xef, 0xbb, 0xbf]);
+  const invalid = await runReadSimulation(selection(), host, Buffer.concat([bom, bytes(scenario())]));
+  bounded(invalid); assert.equal(invalid.status, 'INVALID_SCENARIO'); assert.equal(callbacks, 0);
+  const selected = selection(); selected.dcmBytes = Buffer.concat([bom, selected.dcmBytes]);
+  const setup = await run(scenario(), host, selected); bounded(setup); assert.equal(setup.status, 'SETUP_ERROR');
+  assert.deepEqual(setup.identity, {}); assert.equal(callbacks, 0);
 });

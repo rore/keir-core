@@ -7,6 +7,9 @@ import static dev.keir.runtime.RuntimeData.*;
 /** Offline read/2 tooling. Authority and callbacks belong to the embedding host. */
 public final class ReadSimulation {
     private ReadSimulation() {}
+    private static final Set<String> CLASSIFICATIONS=Set.of("COMPLETED","BUSINESS_REJECTION","FAILED","LIMIT_EXCEEDED");
+    private static final Set<String> SAFE_CODES=Set.of("AUTHORITY_DENIED","AUTHORITY_CHECK_FAILED","HOST_CONTEXT_INVALID","HOST_BINDING_INVALID",
+        "INPUT_INVALID","ADAPTER_EXCEPTION","ADAPTER_INVALID","ADAPTER_TRANSIENT","EXPRESSION_FAILED","BUDGET_EXCEEDED");
     public record Selection(byte[] dcmBytes, byte[] artifactBytes, String modelDigest, String artifactDigest,
                             String compiler, String entrypoint, Map<String,Object> consumer) {}
     @FunctionalInterface public interface Consumer { Object consume(Map<String,Object> outcome); }
@@ -59,36 +62,27 @@ public final class ReadSimulation {
     }
     private static void outcome(Map<String,Object> dcm,Map<String,Object> entry,Object value) {
         var row=object(value); var classification=row.get("classification");
-        check(Set.of("COMPLETED","BUSINESS_REJECTION","FAILED","LIMIT_EXCEEDED").contains(classification));
-        if("COMPLETED".equals(classification)) { fields(row,"classification","result","trace"); value(dcm,entry.get("output"),row.get("result")); }
-        else { check(!row.containsKey("result") || "BUSINESS_REJECTION".equals(classification)); fields(row,row.containsKey("result")?new String[]{"classification","error","trace","result"}:new String[]{"classification","error","trace"});
-            if(row.containsKey("result")) value(dcm,entry.get("output"),row.get("result")); error(row.get("error")); }
-        var trace=list(row.get("trace"),""); check(trace.size()>=2 && trace.size()<=64);
-        var eventFields=Map.of("INVOCATION_START",List.<String>of(),"STEP_START",List.of("step"),"VALUE_BOUND",List.of("step"),
-            "CALL_DISPATCHED",List.of("step","capability"),"CALL_SUCCEEDED",List.of("step","capability"),"RETURNED",List.<String>of(),"TERMINATED",List.<String>of(),
-            "STEP_SKIPPED",List.of("step"),"GUARD_EVALUATED",List.of("step","taken"));
-        for(int i=0;i<trace.size();i++) {
-            var event=object(trace.get(i)); var names=eventFields.get(event.get("event")); check(names!=null);
-            var expected=new HashSet<>(names); expected.addAll(Set.of("sequence","event"));
-            if("TERMINATED".equals(event.get("event")) && event.containsKey("code")) expected.add("code");
-            check(event.keySet().equals(expected)); check(number(event.get("sequence"),0,63,"")==i);
-            for(String name:names) {
-                if(name.equals("taken")) check(event.get(name) instanceof Boolean);
-                else if(name.equals("step")) check(event.get(name) instanceof String s && s.matches("[A-Za-z][A-Za-z0-9]{0,63}"));
-                else check(object(dcm.get("capabilities")).containsKey(event.get(name)));
-            }
-            if(event.containsKey("code")) check(event.get("code") instanceof String s && s.matches("[A-Z][A-Z0-9_]{0,63}"));
-            if("INVOCATION_START".equals(event.get("event"))) check(i==0);
-            if("TERMINATED".equals(event.get("event"))) check(i==trace.size()-1);
-        }
-        check("INVOCATION_START".equals(object(trace.getFirst()).get("event")) && "TERMINATED".equals(object(trace.getLast()).get("event")));
-        check("COMPLETED".equals(classification) ? !object(trace.getLast()).containsKey("code")
-            : Objects.equals(object(trace.getLast()).get("code"),object(row.get("error")).get("code")));
+        check(CLASSIFICATIONS.contains(classification));
+        if("COMPLETED".equals(classification)) { fields(row,"classification","result"); value(dcm,entry.get("output"),row.get("result")); }
+        else { fields(row,"classification","error"); error(row.get("error")); }
     }
     private static void error(Object value) {
-        var row=object(value); fields(row,row.containsKey("cause")?new String[]{"code","path","cause"}:new String[]{"code","path"});
+        var row=object(value); fields(row,"code","path");
         check(row.get("code") instanceof String s && s.matches("[A-Z][A-Z0-9_]{0,63}")); text(row.get("path"),"",false,1024);
-        if(row.containsKey("cause")) { fields(row.get("cause"),"code","path"); error(row.get("cause")); }
+    }
+    private static Map<String,Object> projection(Map<String,Object> outcome) {
+        if("COMPLETED".equals(outcome.get("classification"))) return Map.of("classification",outcome.get("classification"),"result",outcome.get("result"));
+        var error=object(outcome.get("error"));
+        return Map.of("classification",outcome.get("classification"),"error",Map.of("code",error.get("code"),"path",error.get("path")));
+    }
+    private static Map<String,Object> nativeSummary(Map<String,Object> outcome) {
+        var classification=outcome.get("classification"); check(CLASSIFICATIONS.contains(classification));
+        var result=new LinkedHashMap<String,Object>(); result.put("classification",classification);
+        if(outcome.containsKey("error")) {
+            Object code=object(outcome.get("error")).get("code");
+            result.put("code",code instanceof String && SAFE_CODES.contains(code)?code:"NATIVE_ERROR");
+        }
+        return result;
     }
     private static Map<String,Object> scenario(byte[] bytes,Map<String,Object> dcm,Map<String,Object> entry,List<Object> receipts) {
         var row=object(parseJson(bytes,65_536)); canonical(row); fields(row,"format","id","input","stubs","expect");
@@ -104,8 +98,12 @@ public final class ReadSimulation {
         void add(String stage,String code,int ordinal) { if(mismatches.size()<8) mismatches.add(Map.of("stage",stage,"code",code,"ordinal",ordinal)); }
     }
     private static byte[] report(String status,Map<String,Object> identity,Ledger ledger,Object consumption) {
+        return report(status,identity,ledger,consumption,null);
+    }
+    private static byte[] report(String status,Map<String,Object> identity,Ledger ledger,Object consumption,Map<String,Object> nativeSummary) {
         var row=new LinkedHashMap<String,Object>(); row.put("format","keir-read-simulation-report/1"); row.put("status",status);
         row.put("identity",identity); row.put("mismatches",ledger.mismatches); if(consumption!=null) row.put("consumption",consumption);
+        if(nativeSummary!=null) row.put("native",nativeSummary);
         byte[] bytes=canonical(row); check(bytes.length<=16_384); return bytes;
     }
     /** Each call owns one fresh binding and run-local mismatch ledger; no live adapter is accepted. */
@@ -128,7 +126,7 @@ public final class ReadSimulation {
             receipts.forEach(ReadSimulation::receipt); check(new HashSet<>(receipts).size()==receipts.size());
         } catch(RuntimeException failure) { ledger.add("SETUP","SETUP_ERROR",0); return report("SETUP_ERROR",Map.of(),ledger,null); }
         identity=Map.of("modelDigest",selection.modelDigest(),"artifactDigest",selection.artifactDigest());
-        var stubs=new ArrayList<Object>(); var captures=new ArrayList<Map<String,Object>>(); int[] used={0}; boolean[] active={true};
+        var stubs=new ArrayList<Object>(); var captures=new ArrayList<Map<String,Object>>(); int[] used={0}; boolean[] active={true}; Map<String,Object> summary=null;
         try {
             var invokers=new LinkedHashMap<String,Object>();
             for(var capability:object(dcm.get("capabilities")).entrySet()) {
@@ -170,6 +168,7 @@ public final class ReadSimulation {
             try { row=scenario(caseBytes,dcm,entry,receipts); stubs.addAll(list(row.get("stubs"),"")); }
             catch(RuntimeException failure) { ledger.add("SCENARIO","INVALID_SCENARIO",0); return report("INVALID_SCENARIO",identity,ledger,null); }
             var nativeOutcome=KeirRuntime.invokeProgram(prepared.prepared(),row.get("input"),new KeirRuntime.Invocation2(scope,bindings,fixture.deadline(),fixture.authorize(),Optional.empty())).toCompletableFuture().get(3,TimeUnit.SECONDS);
+            summary=nativeSummary(nativeOutcome.toMap());
             var calls=new ArrayList<Map<String,Object>>();
             synchronized(captures) {
                 active[0]=false;
@@ -184,15 +183,15 @@ public final class ReadSimulation {
             }
             var expected=object(row.get("expect"));
             if(!same(calls,expected.get("calls"))) ledger.add("CALLS","CALLS_MISMATCH",0);
-            if(!same(nativeOutcome.toMap(),expected.get("outcome"))) ledger.add("OUTCOME","OUTCOME_MISMATCH",0);
+            if(!same(projection(nativeOutcome.toMap()),expected.get("outcome"))) ledger.add("OUTCOME","OUTCOME_MISMATCH",0);
             Object consumption;
             try { consumption=copy(fixture.consume().consume(nativeOutcome.toMap())); receipt(consumption); check(receipts.contains(consumption)); }
-            catch(RuntimeException failure) { ledger.add("CONSUMER","CONSUMER_ERROR",0); return report("CONSUMER_ERROR",identity,ledger,null); }
+            catch(RuntimeException failure) { ledger.add("CONSUMER","CONSUMER_ERROR",0); return report("CONSUMER_ERROR",identity,ledger,null,summary); }
             if(!same(consumption,expected.get("consumption"))) ledger.add("CONSUMER","CONSUMPTION_MISMATCH",0);
-            return report(ledger.mismatches.isEmpty()?"PASS":"MISMATCH",identity,ledger,consumption);
+            return report(ledger.mismatches.isEmpty()?"PASS":"MISMATCH",identity,ledger,consumption,summary);
         } catch(Exception failure) {
             if(ledger.mismatches.isEmpty()) { ledger.add("SETUP","SETUP_ERROR",0); return report("SETUP_ERROR",Map.of(),ledger,null); }
-            return report("MISMATCH",identity,ledger,null);
+            return report("MISMATCH",identity,ledger,null,summary);
         } finally { synchronized(captures) { active[0]=false; } }
     }
 }
