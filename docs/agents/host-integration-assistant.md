@@ -34,16 +34,31 @@ With developer authorization, propose or edit integration artifacts in the assig
 
 The host integration surface needs authorized interface inspection, definition drafting, model validation and host conformance checks. These are intended operations, not implemented API names. Each tool must expose its schemas, scope, side effects and diagnostics. Report unavailable tools and unresolved host choices; do not invent results.
 
-## First worked integration: read and classify
+## Walkthrough: design and verify a read/2 host integration
 
-Use the [complete worked example](../specs/generic-hook-example.md) and its runnable `/2` fixtures to check ownership: host definitions/authority, customer logic/constants, compiler artifact and fresh runtime invocation.
+Ask your coding agent to inspect an authorized native read and propose the smallest integration that lets a customer classify a saved task. Its deliverable is a reviewable host proposal: hook placement and input, catalog and consumer versions, protected context, adapter failure mapping, and the evidence needed before the host owner approves the exact revision. Use the [task-advice bundle](../../conformance/read-simulation/task-advice/) as a worked answer.
 
-The examples below are legacy checkpoints. Corrected hooks admit other published reads and repeated reads without hook changes, subject to current authorization and aggregate limits. At most one WRITE is supported; future idempotent adapters do not imply atomic multi-write or automatic recovery.
+1. **Define the hook and catalog.** In [the DCM](../../conformance/read-simulation/task-advice/dcm.json), `ClassifyTask` is an on-demand REQUEST with a task ID as input and a DISPLAY result. The host publishes `tasks.get`, supplies the authenticated actor separately and defines which validated classifications the consumer can display. The adapter checks current resource access and that the returned task matches the requested ID. It may call a local service or HTTP/RPC with the remaining deadline. The [customer program](../../conformance/read-simulation/task-advice/source.yaml) chooses the rule: an open task yields PENDING and a completed task yields DONE. Keep those choices in source.
+2. **Review the selected bytes.** Inspect the [selection pins](../../conformance/read-simulation/task-advice/selection.json). Compile against the trusted DCM with explicit `--profile=keir-read/2`. Bind that model and its complete versioned invoker set together, then prepare the exact artifact against independently held pins. Supply fresh scope, protected actor, deadline and current authorization on each invocation. The [binding contract](../specs/host-model-binding.md) defines these checks; the [schemas](../../schemas/read-2/README.md) describe decoded structure.
+3. **Predict what the host will observe.** Read the cases before running them. Open and completed tasks should produce different display receipts. A `tasks.get` business denial consumes one dispatch and yields `ACCESS_DENIED`; host entry denial consumes zero dispatches and yields `AUTHORITY_DENIED`. Both suppress display. The [deliberately wrong expectation](../../conformance/read-simulation/task-advice/mismatch.json) must produce MISMATCH even though the read completes. The [two-read example](../../conformance/read-simulation/repeated/) checks ordered dispatch without requiring a new hook for each program.
 
-The [single-effect sample](../specs/single-effect.md) is implemented for [controlled simulation](../../conformance/single-effect/README.md). Its native key/event, handler and receipt behavior remains regression evidence; its fixture-injected project/title and required named grants are legacy limitations. Preserve original key identity, protected origin and honest CONFIRMED/NONE/UNKNOWN evidence. It rejects real admission; passing fakes cannot certify real host guarantees.
+### Run the packaged hosts
 
-Use the complete [sample DCM](../specs/domain-model.md#sample-model) and [extension example](../specs/language.md#source-and-example). Propose a REQUEST hook `ClassifyTask` with input `taskId`, a read `tasks.get`, and a DISPLAY consumer. Its business result is DONE or PENDING; it is not permission to update a task. Propose the actorId host binding and a scoped adapter that returns the requested task or a declared error. Do not derive actorId from customer source.
+From the core repository root, use JDK 21, Node 24 and npm. The first setup needs access to the pinned dependencies or populated caches. These PowerShell commands use project-local caches. For an existing qualified project cache, substitute its directories and use Maven `-o` and npm `--offline` when populated. Stop if a command fails.
 
-Ask the host owner to review that exact definition and real access-control obligations. The host computes the approved DCM digest and separately retains the expected compiler-output artifact digest. Neither a model's self-description nor passing simulation publishes a trusted catalog. For the controlled sample, test task status COMPLETED -> DONE and OPEN -> PENDING, plus inaccessible task -> no display. Fake adapter results establish only simulated behavior.
+```powershell
+$env:MAVEN_USER_HOME = "$PWD/.tools/maven"
+.\mvnw.cmd -B -ntp "-Dmaven.repo.local=$PWD/.tools/maven/repository" -pl compiler-java,examples/java-host -am -DskipTests package
+New-Item -Force -ItemType Directory .tools/packages | Out-Null
+npm.cmd pack ./runtime-node --pack-destination .tools/packages --cache .tools/npm-cache --ignore-scripts
+npm.cmd ci --prefix examples/node-host --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
+node conformance/read-simulation/verify.mjs
+```
 
-The read profile `keir-read/1` excludes writes, guards/error handlers, collections, optional fields, numbers and time. If the requested integration needs them, report unsupported scope rather than inventing fields or hiding policy in a new task-specific eligibility adapter. See the [host tool boundaries](../specs/host-integration.md#two-product-assistant-surfaces); no live tools are claimed implemented here.
+The verifier rebuilds the two fixture artifacts with the [standalone compiler](../../compiler-java/README.md), compares them byte for byte with the pinned artifacts, then compares the Java and Node hosts' canonical reports. It writes reports under `.tools/read-simulation-reports/`; its success line gives the number of reports and exact compiled artifacts. A deliberately mismatching case contributes to a successful verification only when both hosts report the expected mismatch.
+
+Optionally, with the [pinned schema dependency](../../scripts/requirements-read2-contracts.txt) installed in an isolated Python environment, run `python conformance/read-simulation/check_schemas.py` separately after the verifier. This checks report and scenario structure offline. See the [simulation operator guide](read-simulation.md) for the report contract.
+
+### Hand the proposal to the host owner
+
+Record the selected model and artifact identities, the proposed consumer and adapter versions, the observed simulator results, and the native checks still owed. For example, ask for an owner-scoped real-service test using another user's task ID and a revocation test between entry and dispatch. Simulation exercised the fixture invokers. Only the host can demonstrate actual service permissions, resource identity and deadline behavior, then decide whether to publish the proposed catalog. A later model change requires explicit review of the new identity and recompilation for programs adopting it.
