@@ -28,8 +28,8 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 ## Done When
 
 - [ ] Design/spec: define approval authority, invalidation/reapproval and lifecycle behavior, including selection versus event admission.
-- [ ] Implementation: manually compile, simulate, inspect actual behavior, approve and activate an exact revision; disable and roll back it.
-- [ ] Verification: tampering, unauthorized/cross-user approval or selection, edits after review, restart, revoked dependencies and old snapshot coexistence behave as specified. The owning demo user may approve their own extension where host policy permits; the agent cannot self-approve.
+- [x] Implementation: manually compile, simulate, inspect actual behavior, approve and activate an exact revision; disable and roll back it.
+- [x] Verification: tampering, unauthorized/cross-user approval or selection, edits after review, restart, revoked dependencies and old snapshot coexistence behave as specified. The owning demo user may approve their own extension where host policy permits; the agent cannot self-approve.
 
 ## Notes
 
@@ -37,7 +37,7 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 
 **First increment delivered:** Demo [df06843](https://github.com/rore/keir-demo-app/commit/df0684301ff4a3909d7b71d019e5c63d93d23193) adds the actual read-only Studio lifecycle: choose a prepared program, run six-case simulation, inspect exact evidence, explicitly approve and activate it for one user, observe real task advice, then disable or restore a named previous choice. Native tasks and other users remain unaffected. Transactional migration, operator provenance, owner-scoped evidence/approval, selection generations, stale-response suppression and bounded execution are implemented. Independent result review approved the corrected source; 38 fast checks, nine native browser journeys, eight lifecycle journeys and the standalone smoke pass. [Hosted CI passes](https://github.com/rore/keir-demo-app/actions/runs/41432168250). See the [Work Record](../../.agent-workflow/tasks/read-extension-lifecycle.md) and [usage/contract guide](https://github.com/rore/keir-demo-app/blob/main/docs/read-extension-lifecycle.md).
 
-**Remaining:** This feature stays active for authored source revisions and the broader approval lifecycle. The delivered increment deliberately uses prepared read-only programs; live AI, arbitrary source authoring and real effects are not implemented by it. Continue with functional slices from the accepted chat/canvas direction, rather than another standalone prototype pass.
+**Remaining:** The implemented and verified scope is the local read-only host, including prepared and newly authored revisions. This feature stays active for a normative approval contract covering selection versus event admission and broader hosts. Real effects belong to later milestones. AI authoring is tracked separately in [conversational authoring](conversational-authoring.md).
 
 **Design input:** [Review and immutable activation, sections 1 and 6](../../docs/internal/design-baseline/public/simulation-and-authoring-v0.md); [Selection/lifecycle, sections 5, 7 and 11](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md).
 
