@@ -39,4 +39,6 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 
 **Design input:** [Review and immutable activation, sections 1 and 6](../../docs/internal/design-baseline/public/simulation-and-authoring-v0.md); [Selection/lifecycle, sections 5, 7 and 11](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md).
 
+**Result review:** One correction remains before acceptance: the simulation fixture must use a real per-case monotonic clock so synchronous work exceeding the checked one-second deadline cannot produce approvable evidence. Independent review reproduced the defect through the actual simulator; the remaining inspected behavior and verification are adequate for this bounded increment. The existing implementation owner has been offered the focused fix and regression under the same Work Record. No core semantic change is needed.
+
 The first scalar host integrations may use reviewed operator configuration for exact selection. A full customer approval UI is not a prerequisite to that early demonstration.
