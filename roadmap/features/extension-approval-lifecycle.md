@@ -1,7 +1,7 @@
 ---
 id: "extension-approval-lifecycle"
 title: "Review, activate, disable and roll back exact extension revisions"
-status: "queued"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -34,6 +34,8 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 ## Notes
 
 **Dependencies:** [real-task-reads](../features/real-task-reads.md); [reusable-simulation](../features/reusable-simulation.md).
+
+**First increment:** The user approved a read-only lifecycle slice using existing compiled example programs: simulate a candidate, review and approve exact evidence, activate it for Maya, observe actual task advice, then disable or roll back while Leo stays unchanged. Contract/code and feature-specific UX discovery precede implementation; see the [Work Record](../../.agent-workflow/tasks/read-extension-lifecycle.md). The accepted chat/canvas is the working direction. The delivered read/2 simulation increment is sufficient input; the unfinished broader simulation kit is not a gate. Live AI, arbitrary source authoring and real effects are outside this slice.
 
 **Design input:** [Review and immutable activation, sections 1 and 6](../../docs/internal/design-baseline/public/simulation-and-authoring-v0.md); [Selection/lifecycle, sections 5, 7 and 11](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md).
 
