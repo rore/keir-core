@@ -22,6 +22,8 @@ These contracts narrow baseline language/DCM/compiler/simulation drafts for this
 
 ## Maintaining a contract
 
+The [read/2 simulation contract](read-simulation.md) defines bounded data-only scenarios and redacted reports over the same native Java/Node artifact. See the [operator guide](../agents/read-simulation.md) and [shared examples](../../conformance/read-simulation/README.md); simulated success does not establish real adapter or host guarantees.
+
 The separately versioned [single-effect profile](single-effect.md) is an **implemented experimental checkpoint** for [one guarded follow-up](../../roadmap/features/single-effect-followup.md). Local combined verification compares 25 scenarios through Java, Node and both packaged hosts; [effect-host CI](https://github.com/rore/keir-core/actions/runs/41113166355) passes. It adds guards, terminal business handlers, original native host-key forwarding, retained effect receipts and simulation-only admission. It does not widen the read profile or establish real write guarantees. See the [design and acceptance vectors](../internal/single-effect-followup-design.md).
 
 For each affected feature: review the draft, specify the supported behavior, add accepted/rejected conformance examples, implement it, and reconcile discoveries. A maintained contract identifies status, supported scope, unresolved decisions, compatibility consequences, verification evidence and superseded baseline sections.

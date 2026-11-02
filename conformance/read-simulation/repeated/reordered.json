@@ -1,0 +1,69 @@
+{
+  "format": "keir-read-simulation/1",
+  "id": "reordered",
+  "input": {
+    "taskId": "task1"
+  },
+  "stubs": [
+    {
+      "step": "second",
+      "capability": "tasks.get",
+      "version": "1",
+      "args": {
+        "taskId": "task2"
+      },
+      "response": {
+        "kind": "SUCCESS",
+        "value": {
+          "id": "task2",
+          "status": "OPEN"
+        }
+      }
+    },
+    {
+      "step": "source",
+      "capability": "tasks.get",
+      "version": "1",
+      "args": {
+        "taskId": "task1"
+      },
+      "response": {
+        "kind": "SUCCESS",
+        "value": {
+          "id": "task1",
+          "status": "COMPLETED"
+        }
+      }
+    }
+  ],
+  "expect": {
+    "calls": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        }
+      },
+      {
+        "step": "second",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task2"
+        }
+      }
+    ],
+    "outcome": {
+      "classification": "COMPLETED",
+      "result": {
+        "classification": "DONE"
+      }
+    },
+    "consumption": {
+      "status": "DISPLAYED",
+      "code": "DONE"
+    }
+  }
+}
