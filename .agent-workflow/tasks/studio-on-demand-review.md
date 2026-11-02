@@ -1,6 +1,6 @@
 # Conversation with review on demand
 
-Canonical task: `agent-workflow:studio-on-demand-review`. Owning feature: [Extension Studio design](../../roadmap/features/extension-studio-design.md). Design input: [the next-iteration brief](https://github.com/rore/keir-demo-app/blob/cd343beab3f762e96b72d7601c95ea72662558bb/docs/studio-on-demand-review.md).
+Canonical task: `agent-workflow:studio-on-demand-review`. Owning feature: [Extension Studio design](../../roadmap/features/extension-studio-design.md). Design input: [the latest next-iteration brief](https://github.com/rore/keir-demo-app/blob/f279df6b57fe0558ad6fa883420a2eac0cc6041d/docs/studio-on-demand-review.md).
 
 <!-- agent-workflow:start -->
 **Outcome:** Studio opens as a readable conversation with inline choices and consequences; the person opens an optional resizable review workspace when needed while current and proposed advice remain clear.
@@ -32,6 +32,8 @@ Canonical task: `agent-workflow:studio-on-demand-review`. Owning feature: [Exten
 <!-- agent-workflow:end -->
 
 ## Implementation
+
+Latest design handoff: `f279df6b57fe0558ad6fa883420a2eac0cc6041d` adds to the original `cd343be` brief and is integrated before adaptive implementation. Explain a surprising sample beside its own expected/actual result. Use recorded-owner wording only when evidence binds that person's choice to the reviewed revision; otherwise use neutral wording or omit attribution. Earlier runs retain their original explanation and cannot acquire later choices. Include this in the concrete plan, historical-evidence browser journey and rendered review. No new backend, attribution storage, visual theme or task logic is requested. The original requirement baseline remains unchanged. The current Daymark CI/branding correction continues separately; adaptive source still awaits its concrete reviewed plan.
 
 Initial context/baseline recorded before adaptive implementation. Current dependency is the accepted Daymark foundation plus its pending targeted reading-continuity correction. The designer's documentation is isolated from the developer's source/record checkout; manager owns this record and the shared roadmap. Existing isolated developer tooling may be retained for this concrete next assignment after clean integration/branch handoff. No completed adaptive implementation or validation is claimed.
 
