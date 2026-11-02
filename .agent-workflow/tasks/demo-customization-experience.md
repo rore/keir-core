@@ -25,17 +25,25 @@ Canonical task: `agent-workflow:demo-customization-experience`. Owning feature: 
 - Preserved native and lifecycle behavior -> fast native/backend regression plus actual browser simulation, separate approval/use, disable/restore, owner-switch, delayed-response and unsaved-edit paths.
 - Honest supported scope -> inspect UI states/copy and docs; unavailable authoring/effects are not represented as working tools.
 - Delivery integrity -> complete-path risk/workflow/privacy/whitespace checks, independent plan/result review, hosted CI and recoverable task-worktree cleanup.
-**Plan review:** Designer brief and developer discovery are complete; pending clean-context technical review of this concrete plan. Source implementation must not start until recorded readiness.
+**Plan review:** Agent technical review: independent clean-context non-implementer APPROVED concrete plan at core aa5ae223a5a5b7a596c830a186e52d83fcd6eb07 against demo df06843, with no blocking corrections. See Plan review below. Designer brief and developer discovery are incorporated; readiness precedes the bounded implementation handoff.
 **Approvals:** Not required at Elevated risk. User requested this product/design correction; no live-environment change is authorized.
 **Exceptions:** —
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 Initial task context and requirement baseline recorded for the user-requested correction. Demo base `df0684301ff4a3909d7b71d019e5c63d93d23193`; core base `deb9a6086d7d2dd2c974f10a23386c6079f7996c`. Manager owns this record and canonical roadmap during discovery. Source edits await a concrete reviewed plan; no implementation or new qualification result is claimed.
 
-Read-only discovery completed with the standing designer and demo developer at demo df06843. Both confirmed the existing API is sufficient and no architecture blocker remains for the bounded presentation scope. The designer used a separate synthetic rendered session; developer findings are source inspection. Both retained existing settings, verified their mapped roles/feature and returned ownership without source edits, builds/installs or changes to user previews/data. This plan integrates their findings; independent technical review remains before implementation.
+Read-only discovery completed with the standing designer and demo developer at demo df06843. Both confirmed the existing API is sufficient and no architecture blocker remains for the bounded presentation scope. The designer used a separate synthetic rendered session; developer findings are source inspection. Both retained existing settings, verified their mapped roles/feature and returned ownership without source edits, builds/installs or changes to user previews/data. This plan integrates their findings and received the independent technical approval below before implementation.
+
+Readiness blocking predicates pass. The nonblocking commit-order advisory counts the owning roadmap update in context commit35f1964 as code; that commit contains only this record and feature metadata, and demo source remains clean at df06843. The baseline and plan preceded source implementation; no history or policy was changed to suppress the advisory.
+
+## Plan review
+
+Agent technical review: independent clean-context non-implementer APPROVED aa5ae223a5a5b7a596c830a186e52d83fcd6eb07 against demo df0684301ff4a3909d7b71d019e5c63d93d23193, without blocking corrections. Review inspected Workspace lifetime/session/generation/epoch guards, native draft/dialog/focus behavior, Studio exact lifecycle/readback/history, styles, the owner-scoped read model/API and all three browser suites/isolated fixtures. Elevated risk and Moderate complexity remain appropriate; no additional human plan gate applies.
+
+Verification adequacy: sufficient. Real scrollTop/geometry and keyboard assertions complement designer rendered review. Implementation must distinguish modal suspension from discard, retain native drafts, keep session/advice invalidation above destinations and avoid displacing someone reading earlier transcript/evidence. An approved draft already selected is In use rather than Awaiting use; unavailable is distinct from Off. Return focus goes to the actual invoker, so the old title-focus assertion changes while unsaved-edit obligations remain. No backend/persistence/authorization/runtime expansion is needed. Approval covers plan readiness, not implementation correctness or visual acceptance.
 
 ## Concrete design and interaction brief
 
