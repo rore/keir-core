@@ -1,0 +1,21 @@
+{
+  "format": "keir-read-simulation/1",
+  "id": "denied",
+  "input": {
+    "taskId": "task1"
+  },
+  "stubs": [],
+  "expect": {
+    "calls": [],
+    "outcome": {
+      "classification": "FAILED",
+      "error": {
+        "code": "AUTHORITY_DENIED",
+        "path": ""
+      }
+    },
+    "consumption": {
+      "status": "NOT_DISPLAYED"
+    }
+  }
+}

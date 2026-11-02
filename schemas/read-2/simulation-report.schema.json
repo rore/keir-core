@@ -1,0 +1,165 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "status",
+    "identity",
+    "mismatches"
+  ],
+  "properties": {
+    "format": {
+      "const": "keir-read-simulation-report/1"
+    },
+    "status": {
+      "enum": [
+        "PASS",
+        "MISMATCH",
+        "INVALID_SCENARIO",
+        "SETUP_ERROR",
+        "CONSUMER_ERROR"
+      ]
+    },
+    "identity": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "modelDigest",
+            "artifactDigest"
+          ],
+          "properties": {
+            "modelDigest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+            },
+            "artifactDigest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+            }
+          }
+        }
+      ]
+    },
+    "mismatches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stage",
+          "code",
+          "ordinal"
+        ],
+        "properties": {
+          "stage": {
+            "enum": [
+              "SETUP",
+              "SCENARIO",
+              "STUB",
+              "CALLS",
+              "OUTCOME",
+              "CONSUMER"
+            ]
+          },
+          "code": {
+            "enum": [
+              "SETUP_ERROR",
+              "INVALID_SCENARIO",
+              "MISSING_STUB",
+              "STUB_MISMATCH",
+              "EXTRA_STUB",
+              "TRACE_MISMATCH",
+              "CALLS_MISMATCH",
+              "OUTCOME_MISMATCH",
+              "CONSUMPTION_MISMATCH",
+              "CONSUMER_ERROR"
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4
+          }
+        }
+      },
+      "maxItems": 8
+    },
+    "consumption": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "code"
+          ],
+          "properties": {
+            "status": {
+              "const": "DISPLAYED"
+            },
+            "code": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "const": "NOT_DISPLAYED"
+            }
+          }
+        }
+      ]
+    },
+    "native": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classification"
+      ],
+      "properties": {
+        "classification": {
+          "enum": [
+            "COMPLETED",
+            "BUSINESS_REJECTION",
+            "FAILED",
+            "LIMIT_EXCEEDED"
+          ]
+        },
+        "code": {
+          "enum": [
+            "AUTHORITY_DENIED",
+            "AUTHORITY_CHECK_FAILED",
+            "HOST_CONTEXT_INVALID",
+            "HOST_BINDING_INVALID",
+            "INPUT_INVALID",
+            "ADAPTER_EXCEPTION",
+            "ADAPTER_INVALID",
+            "ADAPTER_TRANSIENT",
+            "EXPRESSION_FAILED",
+            "BUDGET_EXCEEDED",
+            "NATIVE_ERROR"
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:keir:schema:read-simulation:report:1",
+  "title": "Bounded redacted read simulation report",
+  "description": "Native canonical report bound is 16384 UTF-8 bytes. Identity and consumption come from trusted validated host selection/allowlist."
+}

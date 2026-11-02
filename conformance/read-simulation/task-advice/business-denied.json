@@ -1,0 +1,43 @@
+{
+  "format": "keir-read-simulation/1",
+  "id": "business-denied",
+  "input": {
+    "taskId": "task1"
+  },
+  "stubs": [
+    {
+      "step": "source",
+      "capability": "tasks.get",
+      "version": "1",
+      "args": {
+        "taskId": "task1"
+      },
+      "response": {
+        "kind": "BUSINESS_REJECTION",
+        "code": "ACCESS_DENIED"
+      }
+    }
+  ],
+  "expect": {
+    "calls": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        }
+      }
+    ],
+    "outcome": {
+      "classification": "BUSINESS_REJECTION",
+      "error": {
+        "code": "ACCESS_DENIED",
+        "path": "/steps/0"
+      }
+    },
+    "consumption": {
+      "status": "NOT_DISPLAYED"
+    }
+  }
+}

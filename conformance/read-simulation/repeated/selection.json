@@ -1,0 +1,11 @@
+{
+  "modelDigest": "sha256:8919c93684f13d58fe70070d0dc90aac0c5259e7d7f87358b20b932c997726b8",
+  "artifactDigest": "sha256:761d993125d47499e6736dd82164bfd30ed89cdf48d0671e7d1928f0b21ee460",
+  "compiler": "keir-compiler-java/0.1.0-SNAPSHOT",
+  "entrypoint": "ClassifyTask",
+  "consumer": {
+    "id": "demo.taskadvice",
+    "version": "1",
+    "kind": "DISPLAY"
+  }
+}

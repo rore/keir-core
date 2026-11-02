@@ -1,0 +1,42 @@
+{
+  "format": "keir-read-simulation/1",
+  "id": "transient",
+  "input": {
+    "taskId": "task1"
+  },
+  "stubs": [
+    {
+      "step": "source",
+      "capability": "tasks.get",
+      "version": "1",
+      "args": {
+        "taskId": "task1"
+      },
+      "response": {
+        "kind": "TRANSIENT_FAILURE"
+      }
+    }
+  ],
+  "expect": {
+    "calls": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        }
+      }
+    ],
+    "outcome": {
+      "classification": "FAILED",
+      "error": {
+        "code": "ADAPTER_TRANSIENT",
+        "path": "/steps/0"
+      }
+    },
+    "consumption": {
+      "status": "NOT_DISPLAYED"
+    }
+  }
+}

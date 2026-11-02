@@ -1,0 +1,18 @@
+language: keir/v0
+domain: {id: demo.tasks, version: '1', fingerprint: 'sha256:8919c93684f13d58fe70070d0dc90aac0c5259e7d7f87358b20b932c997726b8'}
+entrypoint: ClassifyTask
+name: distinguish-ordered-reads
+steps:
+  - id: source
+    call: tasks.get
+    args:
+      taskId: {cel: input.taskId}
+  - id: second
+    call: tasks.get
+    args:
+      taskId: {literal: task2, type: TaskId}
+  - id: completed
+    let: {cel: 'source.status == "COMPLETED" && second.status == "OPEN"'}
+return:
+  record:
+    classification: {cel: 'completed ? "DONE" : "PENDING"'}

@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/rore/keir-demo-app",
+  "revision": "45499aea1631fa4b578f54d5eb1abc216e88b5dd",
+  "files": {
+    "dcm.json": "extensions/task-read/dcm.json",
+    "artifact.json": "extensions/task-read/maya.json",
+    "source.yaml": "extensions/task-read/maya.yaml"
+  },
+  "rawSourceDigest": "sha256:8375a7a02b6529c978e210f774dcde63bc64cca1d9de32add935dfb8ef646cfd"
+}
