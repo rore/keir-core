@@ -36,6 +36,8 @@ Canonical task: `agent-workflow:read-extension-lifecycle`. Owning feature: [exte
 
 ## Implementation
 
+- Implementation accepted against frozen plan `17ed6f3` and readiness `d4a1086`, with isolated demo baseline `9256b66`. Only this record is writable in its separate core checkout. Intended source paths: `src/data.mjs`, `src/extension-lifecycle.mjs`, `src/task-read.mjs`, `src/app.mjs`, `src/web/main.tsx`, new `src/web/Studio.tsx` and scoped CSS; curated suite assets under `extensions/task-read/`; vendor/provenance/package lock and distribution test; focused lifecycle/data/API/advice/browser tests; compact lifecycle/running/test documentation. GRAY/Elevated/Moderate assessment remains applicable. No canonical repositories, live databases or previews are changed. Implementation owns the complete frozen operation/suite/limit/client-epoch matrix; architect and designer decisions are preserved above.
+
 - Context and immutable baseline recorded before code discovery. Core baseline `4e9c961`; demo baseline `9256b66`. Planning phase only; no implementation, live data or preview changes. Manager owns this record until the reviewed implementation handoff.
 - Demo inventory completed read-only with exact role/feature participation verified and then detached. Existing native/simulation APIs suffice; findings above are inputs to architecture, not an approved lifecycle contract or new test result. Architect and designer are receiving bounded contract/interaction assignments through the existing team; no source edits are authorized.
 
