@@ -37,6 +37,8 @@ A generic agent builder, a second host-design chat, implementation of the comple
 
 ## Notes
 
+**Product structure:** Build Daymark around the intended general customization workflow: discover and manage customizations, create or revise through conversation, inspect examples, approve and put a revision into use. The current task-advice behavior is one working example. Expose relevant planned actions in their intended place with a clear disabled or To be implemented state; preserve working actions and never imply unsupported execution. Do not let one prepared example determine the app's navigation or Studio structure. The designer and architect are revising the next increment before implementation; existing CI and branding corrections continue separately.
+
 **Latest branding direction:** Show `Daymark` with `A KEIR Demo` directly beneath it in the shared app-name lockup, including welcome, desktop navigation and narrow header. This replaces the separate Powered by Keir attribution. The existing correction task includes this user-requested refinement; implementation and same-preview readback remain pending.
 
 **Latest redesign handoff:** Demo `f279df6` extends the on-demand-review brief: explain a sample beside its expected/actual result, use personal attribution only for an evidenced choice on that revision, and preserve the original explanation when reopening historical evidence. The next task's plan and acceptance checks must use this updated brief. This is design input; adaptive implementation remains pending.
