@@ -1,0 +1,127 @@
+{
+  "format": "keir-read-simulation/1",
+  "id": "reordered",
+  "input": {
+    "taskId": "task1"
+  },
+  "stubs": [
+    {
+      "step": "second",
+      "capability": "tasks.get",
+      "version": "1",
+      "args": {
+        "taskId": "task2"
+      },
+      "response": {
+        "kind": "SUCCESS",
+        "value": {
+          "id": "task2",
+          "status": "OPEN"
+        }
+      }
+    },
+    {
+      "step": "source",
+      "capability": "tasks.get",
+      "version": "1",
+      "args": {
+        "taskId": "task1"
+      },
+      "response": {
+        "kind": "SUCCESS",
+        "value": {
+          "id": "task1",
+          "status": "COMPLETED"
+        }
+      }
+    }
+  ],
+  "expect": {
+    "calls": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        }
+      },
+      {
+        "step": "second",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task2"
+        }
+      }
+    ],
+    "outcome": {
+      "classification": "COMPLETED",
+      "result": {
+        "classification": "DONE"
+      },
+      "trace": [
+        {
+          "sequence": 0,
+          "event": "INVOCATION_START"
+        },
+        {
+          "sequence": 1,
+          "event": "STEP_START",
+          "step": "source"
+        },
+        {
+          "sequence": 2,
+          "event": "CALL_DISPATCHED",
+          "step": "source",
+          "capability": "tasks.get"
+        },
+        {
+          "sequence": 3,
+          "event": "CALL_SUCCEEDED",
+          "step": "source",
+          "capability": "tasks.get"
+        },
+        {
+          "event": "STEP_START",
+          "step": "second",
+          "sequence": 4
+        },
+        {
+          "event": "CALL_DISPATCHED",
+          "step": "second",
+          "capability": "tasks.get",
+          "sequence": 5
+        },
+        {
+          "event": "CALL_SUCCEEDED",
+          "step": "second",
+          "capability": "tasks.get",
+          "sequence": 6
+        },
+        {
+          "sequence": 7,
+          "event": "STEP_START",
+          "step": "completed"
+        },
+        {
+          "sequence": 8,
+          "event": "VALUE_BOUND",
+          "step": "completed"
+        },
+        {
+          "sequence": 9,
+          "event": "RETURNED"
+        },
+        {
+          "sequence": 10,
+          "event": "TERMINATED"
+        }
+      ]
+    },
+    "consumption": {
+      "status": "DISPLAYED",
+      "code": "DONE"
+    }
+  }
+}

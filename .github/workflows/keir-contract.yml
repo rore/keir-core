@@ -84,3 +84,7 @@ jobs:
           node --experimental-test-coverage --test-coverage-include=examples/node-host/run.mjs --test examples/node-host/test.mjs
       - name: Compare artifacts, runtimes and packaged hosts
         run: node conformance/read-and-decide/verify.mjs
+      - name: Compare packaged read simulation and offline schemas
+        run: |
+          node conformance/read-simulation/verify.mjs
+          python conformance/read-simulation/check_schemas.py

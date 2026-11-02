@@ -3,7 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "exports": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./read-simulation": "./src/read-simulation.js"
+  },
   "files": ["src", "README.md"],
   "scripts": {
     "test": "node --test test/*.test.js ../conformance/read-and-decide/node.test.mjs ../conformance/single-effect/node.test.mjs ../conformance/generic-hooks/node.test.mjs ../examples/node-host/effect-consumer.test.mjs ../examples/node-host/generic-capacity.test.mjs ../examples/node-host/generic-simulation.test.mjs",
