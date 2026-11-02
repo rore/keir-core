@@ -22,12 +22,22 @@ Canonical task: `agent-workflow:bounded-ai-authoring`. Owning feature: [Conversa
 **Plan review:** Agent technical review: independent clean-context non-implementer APPROVED exact plan ff0047100537a2bb8ba13d5ae64b40b34ebefb15; see Plan review below. No remaining blocking findings; Elevated/Moderate and verification adequate.
 **Approvals:** The existing direct user authorization covers the presented AI slice and necessary delivery. No additional human plan approval is required at Elevated risk. Any material behavioral departure or increase to High risk returns affected work to its required approval gate.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Blocked
 <!-- agent-workflow:end -->
 
 ## Implementation
 
-Planning only. The task owner may update this record. The reserved source checkout remains unchanged; the manager sequences all shared-file writes after authored-draft integration and independent plan review. Retain both task checkouts for that active follow-up; do not remove them at the planning handoff.
+Phase 1 implementation released after independent approval of plan `ff0047100537a2bb8ba13d5ae64b40b34ebefb15` recorded at `5e7583041e53bc4e9e3a41bee53e7154e59c053d`. Initial source base is demo `0e91eba079e34a764545771798424a25ee446d9b`. Edit only the approved new `src/authoring-agent.mjs`, `src/authoring-provider.mjs`, `src/authoring-config.mjs`, `tests/authoring-agent.test.mjs`, `tests/authoring-provider.test.mjs`, `tests/authoring-config.test.mjs`, `tests/authoring-loop.test.mjs` and `scripts/check-authoring-provider.mjs`, plus this record and ignored evidence. Shared-file integration remains sequenced after authored-draft acceptance. No live provider calls or credentials are needed for this phase. Retain both task checkouts for the concrete integrated follow-up; module-only completion does not complete this task.
+
+Phase 1 boundary: the loop receives host-bound callbacks and a live `context.current()` owner/session/run fence; the host supplies persisted state plus a shared integer-microUSD reservation object. Input operation IDs and expected conversation version fence duplicate/stale continuation. Six tools consume exact returned draft handles; no provider can supply evidence identity to review. Two native HTTP adapters retain protocol-specific continuation internally and expose only validated calls, safe text and token counts. Configuration reads only the intentionally selected key, keeps it non-enumerable and validates the exact support matrix. Helper contributions are limited to the new configuration files and provider protocol tests; the task owner reviews them and owns record/integration. No shared application file has changed.
+
+Phase 1 verified at demo `debb222722b671adeeaa523a174216f928e369b1`: all eight authorized new files are implemented and committed. The standalone loop uses bound host callbacks; it does not implement or certify persistence, actual compilation, lifecycle CAS or Studio. A separate non-implementer review found a late text-only draft-fence defect; the correction validates the authoritative draft before adopting any provider continuation or displaying text, and its regression passes. Other boundary checks include unread HTTP-body cancellation, malformed Unicode and identity tokens, exact returned handles, and no model-owned review identity. No source change to the fixed model, language or existing application was needed.
+
+Integration contract: `createAuthoringState` creates private serializable state from host owner/session/conversation/run identities; `runAuthoringTurn` takes that state, bound callbacks and `input:{id,text,expectedVersion}`. `context.current()` is a synchronous live owner/session/run check. The shared `context.budget.remainingMicros` object and state counters are host-owned; the integration must durably retain reservations and the in-flight run before outbound work and recover interrupted runs without replay. Phase 1 proves in-process atomic reservation and pause/reload behavior using injected objects, not crash-safe application spend storage. The host bridge must settle that persistence boundary in the shared integration review before paid application use. Compiler callbacks remain responsible for commit-time authority/CAS, child cancellation and reaping.
+
+The opt-in script is dry by default. Its explicit operator-only `--live --host <project-local-module.mjs>` path loads an isolated qualification host exporting `createQualificationHost()`; that fixture must connect the actual packaged compiler and simulator. No fixture or real credentials are shipped, selected or executed in phase 1. The harness reports exact safe identities/counters; fake transport does not qualify real provider access or compiler behavior.
+
+Current blocker/next action: manager acceptance of phase 1 and release of the shared integration window after authored-draft acceptance. Then connect the real host callbacks and durable owner-scoped state, verify full A/B/approval/Use/restore/restart behavior and Studio, run affected regression/build/browser/hosted checks, and perform explicitly configured bounded live checks for both models. Missing credentials remain unqualified live compatibility, never a scope reduction. Both task checkouts and exact feature participation stay retained for this concrete follow-up.
 
 ## Scope clarifications
 
@@ -141,7 +151,15 @@ Planning handoff: record branch `feat/ai-authoring-record`, initial committed ba
 
 ## Result review
 
-Pending implementation and independent review.
+Phase 1 independent clean-context non-implementer review: no remaining actionable defects in the standalone modules. Reviewed connected source and all four test files. Confirmed the stale text-response fix and its focused regression, response-body cleanup and non-assistant message rejection. Source reviewed before commit is retained in `debb222722b671adeeaa523a174216f928e369b1` (staged diff fingerprint `effa0ea488b091ffd4cf64033ccc91bfe7a494f3`). Protocol/call continuity, closed tools, counters, owner/run/draft guards and resource checks have meaningful fake coverage. Manager acceptance remains pending. Full compiler, persistence/CAS, lifecycle, Studio and live-provider acceptance is still required; this is not whole-task result approval.
+
+Phase 1 verification, 2026-11-02:
+
+- `node --test tests/authoring-agent.test.mjs tests/authoring-config.test.mjs tests/authoring-provider.test.mjs tests/authoring-loop.test.mjs`: 30 passed, zero failures/cancellations/skips, 351.7373 ms. Ignored demo log: `.tools/ai-authoring/focused.log`.
+- Both native wire adapters drive the actual loop through clarification, serialization/reload, compiler-diagnostic repair, independent scenario proposal, exact simulation handles and trusted review using injected host doubles. A deliberately mismatching expectation remains ineligible and active A is unchanged. These fixtures do not run the actual compiler, database or live provider.
+- Actual complete source diff: exactly eight approved new files, no shared application, dependency or lockfile changes. Redline: eight GRAY paths, no red/checkpoints/boundary findings; Elevated/Moderate retained. Privacy, whitespace and generic public commit identity checks pass. Source checkout is clean at the cited commit; record changes are confined to this file. Ignored risk/path evidence is under demo `.tools/ai-authoring/`.
+- Standard core resolver and Workflow checks pass all predicates using the existing qualified tooling and actual source path set; this is record/risk validation, not application acceptance. No tooling installation or persistent environment changes were made.
+- Existing app suites/build/browser checks were not rerun: shared application files are untouched and this isolated source checkout has no installed dependencies. Full regression and real compiler/lifecycle/UI checks remain required in the integration phase; no pass is inferred. No real credentials, paid calls or live compatibility result exists.
 
 
 ## Plan review
