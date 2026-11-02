@@ -1,0 +1,537 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "id",
+    "input",
+    "stubs",
+    "expect"
+  ],
+  "properties": {
+    "format": {
+      "const": "keir-read-simulation/1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}(?![\\s\\S])"
+    },
+    "input": {
+      "$ref": "#/$defs/args"
+    },
+    "stubs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "step",
+          "capability",
+          "version",
+          "args",
+          "response"
+        ],
+        "properties": {
+          "step": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9]{0,63}(?![\\s\\S])"
+          },
+          "capability": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "args": {
+            "$ref": "#/$defs/args"
+          },
+          "response": {
+            "$ref": "#/$defs/response"
+          }
+        }
+      },
+      "maxItems": 4
+    },
+    "expect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "calls",
+        "outcome",
+        "consumption"
+      ],
+      "properties": {
+        "calls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/call"
+          },
+          "maxItems": 4
+        },
+        "outcome": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "classification",
+                "result",
+                "trace"
+              ],
+              "properties": {
+                "classification": {
+                  "const": "COMPLETED"
+                },
+                "result": {
+                  "$ref": "#/$defs/args"
+                },
+                "trace": {
+                  "$ref": "#/$defs/trace"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "classification",
+                "error",
+                "trace"
+              ],
+              "properties": {
+                "classification": {
+                  "enum": [
+                    "BUSINESS_REJECTION",
+                    "FAILED",
+                    "LIMIT_EXCEEDED"
+                  ]
+                },
+                "result": {
+                  "$ref": "#/$defs/args"
+                },
+                "error": {
+                  "$ref": "#/$defs/error"
+                },
+                "trace": {
+                  "$ref": "#/$defs/trace"
+                }
+              }
+            }
+          ]
+        },
+        "consumption": {
+          "$ref": "#/$defs/receipt"
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:keir:schema:read-simulation:scenario:1",
+  "title": "Read simulation case structure",
+  "description": "Decoded structure only; native validation additionally enforces UTF-8 byte/depth bounds, DCM types, declared responses and host receipt membership.",
+  "$defs": {
+    "data": {
+      "oneOf": [
+        {
+          "type": "string",
+          "maxLength": 256
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/data"
+          }
+        },
+        {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": {
+            "$ref": "#/$defs/data"
+          }
+        }
+      ]
+    },
+    "args": {
+      "type": "object",
+      "maxProperties": 16,
+      "additionalProperties": {
+        "$ref": "#/$defs/data"
+      }
+    },
+    "receipt": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "code"
+          ],
+          "properties": {
+            "status": {
+              "const": "DISPLAYED"
+            },
+            "code": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "const": "NOT_DISPLAYED"
+            }
+          }
+        }
+      ]
+    },
+    "call": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "step",
+        "capability",
+        "version",
+        "args"
+      ],
+      "properties": {
+        "step": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9]{0,63}(?![\\s\\S])"
+        },
+        "capability": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "version": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "args": {
+          "$ref": "#/$defs/args"
+        }
+      }
+    },
+    "response": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "value"
+          ],
+          "properties": {
+            "kind": {
+              "const": "SUCCESS"
+            },
+            "value": {
+              "$ref": "#/$defs/args"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "code"
+          ],
+          "properties": {
+            "kind": {
+              "const": "BUSINESS_REJECTION"
+            },
+            "code": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "const": "TRANSIENT_FAILURE"
+            }
+          }
+        }
+      ]
+    },
+    "trace": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "event"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              },
+              "event": {
+                "const": "INVOCATION_START"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "event",
+              "step"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              },
+              "event": {
+                "const": "STEP_START"
+              },
+              "step": {
+                "type": "string",
+                "maxLength": 256
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "event",
+              "step"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              },
+              "event": {
+                "const": "VALUE_BOUND"
+              },
+              "step": {
+                "type": "string",
+                "maxLength": 256
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "event",
+              "step",
+              "capability"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              },
+              "event": {
+                "const": "CALL_DISPATCHED"
+              },
+              "step": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "capability": {
+                "type": "string",
+                "maxLength": 256
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "event",
+              "step",
+              "capability"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              },
+              "event": {
+                "const": "CALL_SUCCEEDED"
+              },
+              "step": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "capability": {
+                "type": "string",
+                "maxLength": 256
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "event"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              },
+              "event": {
+                "const": "RETURNED"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "event",
+              "step"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              },
+              "event": {
+                "const": "STEP_SKIPPED"
+              },
+              "step": {
+                "type": "string",
+                "maxLength": 256
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "event",
+              "step",
+              "taken"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              },
+              "event": {
+                "const": "GUARD_EVALUATED"
+              },
+              "step": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "taken": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "event"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              },
+              "event": {
+                "const": "TERMINATED"
+              },
+              "code": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
+              }
+            }
+          }
+        ]
+      },
+      "maxItems": 64,
+      "minItems": 2
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "path"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
+        },
+        "path": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "cause": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "path"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
+            },
+            "path": {
+              "type": "string",
+              "maxLength": 1024
+            }
+          }
+        }
+      }
+    }
+  }
+}

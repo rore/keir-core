@@ -1,0 +1,65 @@
+{
+  "format": "keir-read-simulation/1",
+  "id": "missing",
+  "input": {
+    "taskId": "task1"
+  },
+  "stubs": [
+    {
+      "step": "source",
+      "capability": "tasks.get",
+      "version": "1",
+      "args": {
+        "taskId": "task1"
+      },
+      "response": {
+        "kind": "BUSINESS_REJECTION",
+        "code": "TASK_NOT_FOUND"
+      }
+    }
+  ],
+  "expect": {
+    "calls": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        }
+      }
+    ],
+    "outcome": {
+      "classification": "BUSINESS_REJECTION",
+      "error": {
+        "code": "TASK_NOT_FOUND",
+        "path": "/steps/0"
+      },
+      "trace": [
+        {
+          "sequence": 0,
+          "event": "INVOCATION_START"
+        },
+        {
+          "sequence": 1,
+          "event": "STEP_START",
+          "step": "source"
+        },
+        {
+          "sequence": 2,
+          "event": "CALL_DISPATCHED",
+          "step": "source",
+          "capability": "tasks.get"
+        },
+        {
+          "sequence": 3,
+          "event": "TERMINATED",
+          "code": "TASK_NOT_FOUND"
+        }
+      ]
+    },
+    "consumption": {
+      "status": "NOT_DISPLAYED"
+    }
+  }
+}
