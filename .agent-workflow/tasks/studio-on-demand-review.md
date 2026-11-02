@@ -102,4 +102,8 @@ Implementation attention: separate review visibility from confirmation identity;
 
 ## Result review
 
-Pending independent clean-context technical review of exact source 6ffa32e and actual functional designer review through the five c017 journeys. Passing local checks and this implementer's inspection do not substitute for either review. Manager owns canonical roadmap/record integration, hosted CI, stable preview refresh, delivery acceptance and cleanup closure.
+Agent technical review: the independent clean-context non-implementer APPROVED exact source `6ffa32eaee7d1091b00b0d404765be7a19b29c5e` against demo base `d116b1f`, with exact record `9076161efa66943113b39d3103a6dc10d975f5e3`. No actionable findings across all 15 changed paths and connected guards. Elevated risk and Moderate complexity remain appropriate.
+
+Verification adequacy: sufficient. Inspected logs support build, 15 affected backend tests, 39 fast tests and 35 browser journeys. The review checked independent approved/latest identity, null/invalid/operator/different-draft and owner guards, same-item discovery, non-mutation, separate approval/Use and preserved native/session/real late-receipt/scroll/focus assertions. A focused independent no-listener request-injection check retained a long transcript's visible message and offset through review open/close and restored its original scroll position. It did not alter source, the designer fixture or user previews.
+
+Functional designer review of the frozen candidate is still pending. Technical approval does not establish rendered acceptance, hosted CI success, integration or preview delivery. Manager retains those gates.
