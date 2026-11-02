@@ -27,7 +27,7 @@ Canonical task: `agent-workflow:read2-reusable-simulation`. Owning feature: [reu
 **Plan review:** Agent technical review: independent clean-context non-implementer approved exact `71540e3343837705c0058a4a2e9b097982d799f1`, with no blockers or required plan corrections. See Plan review below.
 **Approvals:** Not required at declared Elevated risk. User approved this bounded slice with "Ok, go". A material requirement or native authority change returns to planning.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Blocked or returned to planning
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -66,4 +66,12 @@ Limits: native deadlines do not establish hard preemption of synchronous work. T
 
 ## Result review
 
-Pending independent non-implementer review of the qualified source and final record. Product verification above passes; plan approval is not result approval. Retain the task checkout and ignored verification/package proof until manager acceptance and recoverable archival.
+Contract reconciliation found four incomplete obligations in the submitted candidate: expectations unnecessarily require internal native traces; reports omit the safe native classification/code summary; Node tooling accepts a UTF-8 BOM that Java rejects; and explicit one-call `ACCESS_DENIED` business rejection coverage is absent alongside the existing zero-call host denial. The manager holds integration. Prior test results remain evidence for the submitted source, not acceptance of these obligations. Source edits are held while the architect freezes the corrective contract and the manager arranges targeted independent review. The immutable requirement baseline and native production semantics remain unchanged.
+
+## Corrective plan pending targeted review
+
+- Keep expected outcomes compact: `COMPLETED` plus DCM-typed `result`, otherwise native classification plus stable `error.code` and `error.path`. Cases must not contain trace or nested native envelope details. Preserve actual native trace internally for ordered dispatch/step reconciliation and keep the independent mismatch ledger.
+- Add an optional closed `native` report summary once an actual outcome is available: allowlisted native classification and optional safe fixed diagnostic code. Use a static runtime-code allowlist and a fixed fallback for unknown or domain-controlled codes; never expose diagnostic paths, private values or exception text. Preserve the separate allowlisted actual consumer receipt, including when expectations deliberately mismatch. Exact fallback/mismatch tokens are awaiting architect confirmation.
+- Reject a UTF-8 BOM at the simulation tooling byte boundary, including case and DCM setup data, without modifying native production parsers. Add a shared negative through both packaged drivers and focused boundary regressions.
+- Add a separately authored `BUSINESS_REJECTION` / `ACCESS_DENIED` response case with one consumed stub and dispatch. Preserve the existing host-authorization-denied case with zero stubs/dispatches; both consume as `NOT_DISPLAYED`.
+- Update only affected wrapper code, schemas, new simulation fixtures/tests/drivers, compact documentation and this record. Reuse unchanged artifact/model/compiler pins and native/legacy conformance obligations. Verify focused correction cases, canonical packaged parity, offline schemas and final full regression/package integrity; preserve public-content and environment constraints. Do not integrate the prior candidate or claim acceptance until the corrected result is independently reviewed.
