@@ -31,10 +31,12 @@ Canonical task: `agent-workflow:studio-on-demand-review`. Owning feature: [Exten
 **Plan review:** Agent technical review: independent clean-context non-implementer APPROVED exact plan f6c0464e085fb8b7872fa0b502bb96de726137d8 against demo d116b1f79900acefa296198bd4736b825abade15, with no blocking findings. See Plan review below. Verification adequacy is sufficient for implementation readiness; source correctness and rendered acceptance remain unqualified.
 **Approvals:** Not required at Elevated risk. User directly authorized continuing the redesign and specified no external product/company names in features/designs.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
+
+Rendered review reopened the frozen candidate for two bounded presentation corrections. On phone re-entry, a saved draft/approved choice must resume its saved decision and show its appropriate primary action without horizontal discovery; initial choice controls belong behind explicit Change choice. At a short viewport, consolidate secondary review chrome so a complete ordinary sample situation, expected advice and actual advice can be read together. Preserve the existing evidence/approval/Use and reading/owner guards. Earlier technical review and passed functional journeys remain applicable; the corrected delta needs focused designer and technical re-review before delivery.
 
 Verified functional candidate 6ffa32eaee7d1091b00b0d404765be7a19b29c5e is frozen against accepted demo d116b1f79900acefa296198bd4736b825abade15. Build passes; all 39 fast tests pass in 2.880 seconds and the complete 35-journey browser suite passes in 1.3 minutes. This includes exact approved A/latest B/remount/reapproval, general same-item discovery and failed reads, on-demand review at desktop/phone/short sizes, retained native/owner/lifecycle/race/scroll contracts and real simulator results. Exactly the approved 15 source paths changed; dependency, runtime, schema, endpoint and mutation authority surfaces remain unchanged. Independent technical result and functional designer reviews are pending; no delivery or preview refresh is claimed.
 
@@ -106,4 +108,4 @@ Agent technical review: the independent clean-context non-implementer APPROVED e
 
 Verification adequacy: sufficient. Inspected logs support build, 15 affected backend tests, 39 fast tests and 35 browser journeys. The review checked independent approved/latest identity, null/invalid/operator/different-draft and owner guards, same-item discovery, non-mutation, separate approval/Use and preserved native/session/real late-receipt/scroll/focus assertions. A focused independent no-listener request-injection check retained a long transcript's visible message and offset through review open/close and restored its original scroll position. It did not alter source, the designer fixture or user previews.
 
-Functional designer review of the frozen candidate is still pending. Technical approval does not establish rendered acceptance, hosted CI success, integration or preview delivery. Manager retains those gates.
+Functional designer review requests the two bounded presentation corrections recorded above. The five actual lifecycle/discovery/review/native journeys otherwise passed, with browser-only negative presentation fixtures distinguished from real server paths. Technical approval of the initial candidate remains historical; targeted corrected-delta review, rendered acceptance, hosted CI, integration and preview delivery remain pending. Manager retains those gates.
