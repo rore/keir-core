@@ -45,3 +45,9 @@ Committed the recovery plan before editing the prototype. Demo revision `2a21c3e
 ## Result review
 
 Routine self-review at demo `2a21c3e`. The changes meet the bounded feedback request. Pointer handling, keyboard focus, tab-local width, read-only history and the decision flow were verified through the rendered interface. The prototype still uses scripted replies. User acceptance of the revised palette and visual clarity remains open. The manager owns roadmap reconciliation and delivery.
+
+## Manager integration
+
+Manager reviewed exact demo `2a21c3e22a3cc87e3b71e4dfc0a30637cc058a75`, the changed rendering and divider code, saved desktop/mobile screenshots and the isolated browser-check procedure. Verification is adequate for this bounded scripted proposal: actual drag/keyboard bounds, refresh persistence, unsent input, historical previews, separate confirmation/turn-on and mobile navigation are exercised. The unchanged 30-test prototype result and rendered evidence are reused; no visual acceptance or production behavior is inferred.
+
+Complete-path Redline is BLUE without checkpoints or boundary violations; the core-owned Work Record check is CLEAN. Scope, commit identity, privacy and whitespace checks pass. Exact source revision is published on demo main and [native-app CI passes](https://github.com/rore/keir-demo-app/actions/runs/41416186002), including build, native regression and browser journeys. Core planning/verification records and roadmap are reconciled. No task worktree was created for this revision; canonical repositories, preview and private evidence remain in place. The requested proposal iteration is delivered; user visual judgment remains open.
