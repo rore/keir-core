@@ -1,7 +1,7 @@
 ---
 id: "host-integration-assistant"
 title: "Help a host developer define and approve an integration"
-status: "queued"
+status: "active"
 priority: "medium"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -37,4 +37,6 @@ An agent runtime in core, automatic certification, mandatory API importers or a 
 
 **Design input:** [Host discovery and ownership, sections 1-3](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md); [Agent integration, section 5](../../docs/internal/design-baseline/public/hooks-and-tenant-capabilities.md).
 
-Preserves the existing queued feature and its acceptance obligations. Reuse the simulation/conformance seam as useful; a scripted transcript is preparation, not proof of a live assistant.
+Preserves the existing feature and its acceptance obligations. Reuse the simulation/conformance seam as useful; a scripted transcript is preparation, not proof of a live assistant.
+
+**Runnable guide increment delivered:** The [host-design walkthrough](../../docs/agents/host-integration-assistant.md) now gives one current read/2 path from generic hook/catalog and protected invokers through customer source, pinned compilation, independent scenarios and host-owner handoff. The documented isolated setup and verifier pass: 19 matching packaged Java/Node reports and two exact compiled artifacts. The guide distinguishes expected business error codes from redacted report codes, real-adapter obligations and the separately optional Python schema check. This is a verified guide increment; visitor skill/checkpoint distribution, an actual newly approved host integration and publication remain unfinished.
