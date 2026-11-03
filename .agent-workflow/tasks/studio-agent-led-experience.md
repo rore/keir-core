@@ -63,6 +63,10 @@ Context established before code discovery. Isolated implementation and record br
 
 Minimap resolved both exact source tuples and Pallium successfully attached both current-session participation references. No paid provider call or live preview/data change has occurred.
 
+### Live qualification allocation policy
+
+The manager owns actual original-data allocation, preview cutover and billable execution; workers make no paid calls. After offline checks, the manager confirms the existing preview is fully settled and normally closed for its authorized update, backs up the original database, verifies validated settings identity and the unchanged operator cap, and atomically reserves at most the smaller of $5 or the remaining allowance in the existing original ledger. Record a private allocation proof. Reservations remain nonrefundable; never restore a backup over held/spent credit or increase the operator cap. One isolated qualification database persists across all iterations, configured in memory at no more than that allocation, with existing reservation enforcement. Never reset/restore its ledger or create parallel fresh pools. Load credentials only through validated server-side settings; no key copies, argv, persistent environment edits, browser exposure or secret logs. Stop before paid calls if settings changed or available allowance is insufficient. The existing per-invocation qualification fixture creates a fresh database/allowance, so it cannot be used unchanged for these repeated live runs. Use a small task-local fixture rather than adding a production budget API or framework.
+
 ## Result review
 
 Pending implementation and combined verification.
