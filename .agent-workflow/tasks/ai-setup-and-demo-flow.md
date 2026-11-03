@@ -158,6 +158,8 @@ Reviewed revision: demo `9eb3a40358100085241bbb88869b1e765b915e6e`; original bac
 
 Verification adequacy: production build, 157 passing fast tests with one POSIX-only skip and zero failures, focused API/privacy regressions and exact clean-checkout store proof are adequate for the backend. This approval excludes unfinished UI, combined browser/rendered acceptance and real providers. State remains Ready to implement while the UI contribution and combined acceptance are unfinished.
 
+Manager component acceptance: exact backend `9eb3a40358100085241bbb88869b1e765b915e6e` accepted after a separate narrow review of the five-file correction and clean-checkout proof. Reuse unchanged backend reviews/checks. Combined acceptance additionally requires one actual missing-configuration popup save through the server/file, zero provider requests until explicit Send, then the scripted native-provider/compiler/simulator/exact review/Use journey. No setup-route mocks may replace that integration proof; UI/fixture ownership stays with the contributor until their frozen handoff.
+
 ## Recovery
 
 Retain both task checkouts for the active assignment. Backend and focused review fixes are committed, verified and independently approved; next action is integration of the reserved UI contributor's clean commit, combined build/fast/browser verification and independent result/rendered acceptance. Do not change the live preview or clean active task worktrees.
