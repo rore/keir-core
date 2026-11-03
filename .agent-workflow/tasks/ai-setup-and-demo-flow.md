@@ -182,6 +182,10 @@ Final static results: all 29 demo paths are included in fresh evidence (GRAY, no
 
 ## Recovery
 
+Manager delivery checkpoint: composed demo `4dca19af1ddfd4aa97ce0dc592058b401b1c19fc` and core guide/record are pushed. Core hosted CI passes. Demo [hosted CI](https://github.com/rore/keir-demo-app/actions/runs/41624040479) passes 67 browser cases but fails two short-landscape cases in the shared prepareChoice fixture while locating Manage. The UI contributor owns focused diagnosis/correction under this same task; local passes do not supersede this hosted failure. The manager has accepted the record handoff and owns subsequent canonical delivery notes.
+
+The existing task-owned preview now serves the exact qualified application build under the standing same-URL preview authorization. A closed recovery snapshot, full row digests for all 12 tables, exact served asset hashes and checks for all three demo users verify preservation. No settings were saved and no provider calls made on that preview. Operational paths, snapshots and process identities remain in ignored local evidence. Task checkouts remain temporarily retained for the hosted correction and recoverable archive; final cleanup is pending.
+
 Implementation and scoped verification are complete; the final source and this sole record are frozen for manager canonical integration, hosted CI, roadmap reconciliation and delivery. Retain the source/record checkouts and ignored qualification evidence for that handoff and recoverable cleanup; do not change the live preview or remove active task checkouts. Any requested correction remains under this same task.
 
 Both assigned branches are `feat/ai-setup-and-demo-flow` in their respective repositories. Final source is `4dca19af1ddfd4aa97ce0dc592058b401b1c19fc`, based on `435d509f0a6d77a28d47dbda4de742510a2ac76d`; record base is `5ebd36f03743547d8c0c57a3f91f5fe27cdee899`. Canonical roadmap/integration, hosted CI and any separately authorized preview delivery remain manager-owned; this record does not claim they have happened. Live provider qualification remains open on the owning feature.

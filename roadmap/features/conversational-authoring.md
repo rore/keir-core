@@ -31,13 +31,13 @@ Arbitrary generated application UI/code, agent certification, automatic approval
 ## Done When
 
 - [x] Design/spec: define discovery/compile/simulate/review tools, prompt/data trust boundaries and provider/spend policy; select a small provider/model support matrix and document local configuration, outbound AI data and limits.
-- [ ] Implementation: a live business-user request produces a candidate, simulation and approved exact activation; the manual path remains available.
+- [ ] Implementation: a live business-user request produces a candidate, simulation and approved exact activation; manual authoring remains available in the core tools example.
 - [x] Verification: prompt/data injection, forbidden catalog edits, self-approval, stale revisions and exhausted budgets are rejected; activation can be disabled or rolled back through the lifecycle flow.
 - [ ] Provider compatibility: the same create/clarify/compile-repair/simulate/review flow works with at least two explicitly qualified provider/model configurations. Fast fake-provider regression covers errors, invalid tool arguments, cancellation and absent/invalid credentials; live provider checks are opt-in with the operator's own keys and explicit spend limits. No provider code enters core.
 
 ## Notes
 
-**Current increment:** Implement the in-app local AI setup dialog and remove manual authoring from the customer Studio under one core-owned Work Record. The [core manual example](../../docs/manual-authoring.md) is delivered. The backend is independently accepted locally after request/privacy and clean-checkout fixes; 157 fast tests pass, with one platform-specific permission check skipped. Customer UI integration and combined browser/rendered verification remain in progress. This extends the read-only flow; it does not claim live-provider qualification or new runtime semantics.
+**Current increment:** The [core manual example](../../docs/manual-authoring.md) and demo [local AI setup and conversational-only creation](https://github.com/rore/keir-demo-app/commit/4dca19af1ddfd4aa97ce0dc592058b401b1c19fc) are pushed. Configure opens an explanatory dialog; settings stay in ignored server-side storage and Save makes no provider call. Technical and rendered reviews pass, with 157 fast passes, one platform-specific skip and 69 local browser passes. Hosted CI exposed two short-landscape test-fixture failures; diagnosis and correction remain before final closure. Existing saved behavior and data are preserved. This extends the read-only flow; live-provider qualification and new runtime semantics remain outside this increment.
 
 **Dependencies:** [extension-studio-design](extension-studio-design.md); [extension-approval-lifecycle](../features/extension-approval-lifecycle.md); [machine-readable-contracts](../features/machine-readable-contracts.md); [reusable-simulation](../features/reusable-simulation.md).
 
