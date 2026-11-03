@@ -65,6 +65,8 @@ Manager's context acceptance clarification identified a real re-entry gap: the o
 
 Backend component frozen at 072cd12090f78c01920830f2608833eda146a1c5 after f1793e5d2884063db5e42d8a43e3dbc64ab6b1fc. The exact dependency commits and DTO were sent to the UI contributor for integrated trials; no filesystem-copy source integration. Scoped independent backend result review is requested while UI implementation continues. This remains a full-delivery task, not a component completion handoff.
 
+Scoped backend review found that the summary omitted independently expected host consumption when the native classification was correct. Fixed at 67a7e81f35516a8a41e21fe4e446d5bb7f4c9f6e: expected.consumption comes from the exact saved original case, distinct from actual consumption. Situation metadata also stays unknown when a case contains several reads rather than collapsing them into an invented single task state. Exact fix supplied to UI and narrow independent re-review requested; no change to lifecycle semantics or approved scope.
+
 ## Evidence
 
 Minimap resolved both exact source tuples and Pallium successfully attached both current-session participation references. No paid provider call or live preview/data change has occurred.
@@ -75,6 +77,7 @@ Minimap resolved both exact source tuples and Pallium successfully attached both
 - Native helper's initial new context/example regressions passed 4/4, including real pinned compiler/Node simulation, wrong independent expectation retained/ineligible, exact separate approval/activation and inert unconfigured example access. Parent inspected the tests. Initial full backend regression: 162 total, 161 passed, one existing POSIX-only Windows skip, zero failures in 8.059 seconds. This precedes the re-entry context addition; affected verification will be repeated for that change.
 - Re-entry followup: parent inspected the helper's complete five-test file; focused elevated run passed 5/5. It checks exact custom Pending source and original independent cases (distinct from the attention example), clarification continuity, owner/session isolation and no source in the public transcript. Final backend component npm test: 163 total, 162 passed, one existing POSIX-only Windows skip, zero failures in 8.730 seconds. Private complete log: build/studio-agent-led/fast-reentry.log in the implementation checkout.
 - Fresh backend Redline: five GRAY source/test paths, one BLUE documentation path, no boundaries or required checkpoints. Initial workflow validation passes all blocking predicates; verification-method prose was clarified to its accepted criterion-to-method notation. Final combined checks remain due after UI integration.
+- Review-fix regression: five context tests pass in 1.821 seconds, including a real native-correct/consumer-only mismatch with unchanged original scenario bytes and rejected approval. Exact prior full backend run remains recorded; combined full regression will run after UI integration. Workflow validation is clean with no failed predicates.
 
 ## Plan review
 
@@ -88,4 +91,4 @@ The manager owns actual original-data allocation, preview cutover and billable e
 
 ## Result review
 
-Pending implementation and combined verification.
+Agent technical review: independent architect scoped backend review approved 67a7e81f35516a8a41e21fe4e446d5bb7f4c9f6e after the expected-consumption fix. The reviewer inspected the changed source and real mismatch regression and independently ran all five focused tests with the packaged compiler; all passed. The review confirms expected/actual display outcomes remain distinct, original expectations are retained and mismatches block approval. This accepts only the backend component. Combined UI, actual rendered interactions, full regression and manager-owned live qualification remain pending; task State stays Ready to implement.
