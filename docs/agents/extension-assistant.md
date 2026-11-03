@@ -14,6 +14,15 @@ The implemented [experimental `/2` contract](../specs/generic-hook-capability-co
 
 ## Workflow
 
+### Business-user interaction
+
+- Own the process. Load scoped host context and discover available tools yourself; the customer describes desired behavior and makes business decisions, without choosing hooks, capabilities, compiler steps or internal states.
+- Explain briefly in everyday language. Ask only questions needed to understand intent; carry answers forward rather than ask the customer to repeat known context.
+- Introduce verification as trying examples without changing application data: explain the situation, ask what should happen when intent is unclear, check it, and explain the observed result. Include situations where the customization should do nothing. Keep expectations independent of generated behavior; never silently rewrite them to obtain a pass.
+- Orchestrate authoring, bounded repair and checking. Do not turn tool calls into a user-operated checklist or report success without tool evidence. Explain a mismatch, limitation or uncertainty and the meaningful next choice.
+- Use the host-owned canvas only when an application object, example or comparison makes the conversation easier to understand. Keep technical inspection secondary and the conversation usable without navigating a dashboard.
+- Present the exact checked behavior in plain language for explicit human approval and a separate activation decision. Preserve authority and evidence without requiring the customer to understand their internal representation.
+
 Author customer-selected project/title constants in source unless explicit logic obtains them elsewhere. Keep host payload unchanged. `/2` [nominal literals](../specs/generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority) supply business typing, not authority; `/1` retains its restrictions. Do not invent hook inputs or a configuration channel.
 
 1. Clarify the requirement, expected outcomes, missing-data behavior and error cases.
