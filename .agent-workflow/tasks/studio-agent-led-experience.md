@@ -54,7 +54,7 @@ Stop affected work on identity/evidence/budget assumption failure, material inte
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -130,3 +130,7 @@ Live verification resumed against the unchanged reviewed source after the operat
 The resumed live run received provider responses and recovered the saved rule. After a fresh confirmation of unfinished/completed/unreadable expectations, it saved source but stopped with TOOL_FAILED during example preparation, before simulation. Paid execution is paused. Investigate scenario admission and the host-to-agent diagnostic/recovery path before another attempt; do not assume the former provider-limit blocker explains this failure or weaken independent expectations, limits or validation to force success. Existing offline acceptance remains historical; this new live assumption failure requires a focused fix proposal and review if code changes are needed.
 
 Read-only diagnosis confirms that strict malformed-case rejection is flattened into generic TOOL_FAILED and discovery exposes only a successful-read wire example. The rejected live arguments are unavailable; no exact malformed field is claimed. The independent architect approved the focused correction and exact allowlisted diagnostics shape. The manager retains this record, canonical roadmap and paid-run ownership; the developer owns an isolated demo correction contribution. Earlier reviewed application and rendered evidence remain applicable outside the new delta.
+
+Scenario-repair candidate ce6f664108228af26d4cb78fa239be7f960d9d1a implements the approved delta in three source files, three test files and operator documentation. Focused checks pass 78/78 in 6.108 seconds; full fast regression passes 172 with one existing platform skip in 8.389 seconds; production build passes with unchanged frontend assets. Both fake provider adapters exercise strict native rejection, bounded feedback with unchanged draft/suite, exact corrected originals, actual simulation and exact eligible review without approval. Public HTTP 400, terminal failures, stale fences, conservative counters and independent mismatch checks remain covered. Narrow independent result review is assigned; live success is not yet claimed.
+
+The independent architect approved exact correction ce6f664108228af26d4cb78fa239be7f960d9d1a with no blocking findings after inspecting the new boundaries and regressions. Reviewed application outside the delta and unchanged rendered assets retain their prior acceptance. Local governance Python dependencies are unavailable; no global installation or fabricated local pass is claimed. Hosted governance and regression checks will supply delivery evidence. The next actual interaction uses the retained isolated ledger and existing finite allocation; no full live success is claimed before observing it.
