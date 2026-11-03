@@ -37,7 +37,7 @@ Arbitrary generated application UI/code, agent certification, automatic approval
 
 ## Notes
 
-**Current increment:** Implement the in-app local AI setup dialog and remove manual authoring from the customer Studio. The backend/configuration contract and UI change are being planned under one core-owned Work Record. This extends the delivered read-only flow; it does not claim live-provider qualification or new runtime semantics.
+**Current increment:** Implement the in-app local AI setup dialog and remove manual authoring from the customer Studio under one core-owned Work Record. The [core manual example](../../docs/manual-authoring.md) is delivered. The backend is independently accepted locally after request/privacy and clean-checkout fixes; 157 fast tests pass, with one platform-specific permission check skipped. Customer UI integration and combined browser/rendered verification remain in progress. This extends the read-only flow; it does not claim live-provider qualification or new runtime semantics.
 
 **Dependencies:** [extension-studio-design](extension-studio-design.md); [extension-approval-lifecycle](../features/extension-approval-lifecycle.md); [machine-readable-contracts](../features/machine-readable-contracts.md); [reusable-simulation](../features/reusable-simulation.md).
 
