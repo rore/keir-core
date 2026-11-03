@@ -65,7 +65,7 @@ Target backend paths: src/authoring-config.mjs, new src/authoring-settings.mjs, 
 - Plan-only evidence -> fresh intended-demo Redline, actual record-only Redline/checker, exact relationship/baseline readback and privacy/diff checks. Pending review findings are recorded honestly; no runtime result is inferred from these checks.
 
 **Plan review:**
-Pending clean-context independent technical review of the concrete plan.
+Agent technical review: independent ai_setup_plan_review, APPROVED exact record 33598513458f1fbcdd1f5398f2c9cfc573fb0111 against unchanged demo 435d509f0a6d77a28d47dbda4de742510a2ac76d; no blockers, Elevated/Moderate and verification adequate. See Plan review below.
 
 **Approvals:**
 Not required at Elevated risk. Existing user authorization covers the requested in-app setup and removal of manual authoring from the customer demo, with the manual example retained in core. The explicit planning offer requires independent technical plan review before application edits. No live environment change is included.
@@ -73,7 +73,7 @@ Not required at Elevated risk. Existing user authorization covers the requested 
 **Exceptions:**
 —
 
-**State:** Blocked
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -81,6 +81,16 @@ Not required at Elevated risk. Existing user authorization covers the requested 
 Context established before source discovery. Source baseline is demo `435d509f0a6d77a28d47dbda4de742510a2ac76d`; record checkout baseline is core `5ebd36f03743547d8c0c57a3f91f5fe27cdee899`. Both assigned checkouts were clean. No application edits have begun. State is Blocked on the explicitly requested independent plan-review checkpoint, not on additional human permission.
 
 Discovery confirmed that replacing the whole authoring service would rerun startup interruption handling and complicate live-job settlement. Keep the service and change only its configuration when no job remains live. The existing parser-error response also needs a setup-specific privacy boundary. These findings are included in the plan and tests above.
+
+Implementation phase: backend/config/store/service/app/server and their tests/docs follow the target list above; UI/browser remain reserved to the separate contributor. A bounded helper owns only the new setup API test file and reports evidence here through the sole writer. Settings storage will verify the complete serialized 8 KiB limit before its rename commit. All fixtures use synthetic keys and temporary directories; no running operator app or global tooling is changed.
+
+The settings store and authenticated setup routes are implemented with bounded serialization, precommit readback, fixed-error parsing, real-location static-root rejection and narrow credential/temp ignores. The existing service now swaps configuration synchronously only when quiescent, preserving its ledger/recovery instance and fencing settings revisions in private transport state. Bounded helpers cover store/API tests and planned docs; the owner adds reconfiguration/settlement regression in tests/authoring-reconfiguration.test.mjs. Locked dependencies are installed only in the assigned checkout with its own npm cache. Initial sandbox temp rename/loopback restrictions require isolated test execution with the approved execution permission; no product guarantee is weakened.
+
+Focused setup API security/slow-body checks pass 5/5; reconfiguration, key-revision/restart/reset ledger tests pass 2/2; the production build passes. Store tests cover exact serialized escaped-key limits, private readback and alternate-directory ignore rules. Backend errors and current demo docs now point to AI configuration/saved advice; the manual example remains in the public core guide.
+
+Verification setup correction: the first full suite began before dist existed, causing the CLI fixture's 404 assertion. That failure exposed unsafe cleanup ordering; the fixture now closes its owned child before deleting its temporary data and checks signalCode as well as exitCode before waiting. A new real-start save/restart test uses closed HTTP connections to avoid reusing Undici's stale socket across deliberate restart. All four startup tests now pass. Only exact verified test child/process IDs were stopped; the operator preview and data were untouched.
+
+Backend and documentation committed at demo `7fbc5e654df126dbb1e6c5f06006411937728ba1`, clean assigned checkout. Complete fast regression after the fixture corrections: 156 tests, 155 pass, zero failures, one POSIX-mode-only skip on Windows, 9396.1866 ms. Elevated isolated execution also exercises the symlink/junction rejection checks; the skip makes no Windows ACL guarantee. Production build passes. Fresh full backend-path Redline is GRAY with no boundary violations; backend-path and record-path workflow checks both pass with no failed predicates. Public-content and commit-identity checks pass. Combined UI/browser verification and independent result/rendered acceptance are still outstanding.
 
 ## Settled setup contract
 
@@ -130,10 +140,14 @@ Record-only Redline has no boundary/checkpoint findings. The workflow checker pa
 
 ## Plan review
 
-Pending focused clean-context independent review of the committed plan. Specifically assess request/parser privacy, local-demo authority proportionality, storage commit/failure boundaries, synchronous live-job fencing, settings-revision continuation isolation, cap preservation and DTO/UI integration. The manager coordinates reviewer routing and UI/manual-example integration; no application implementation release is inferred from delivery of this record.
+Agent technical review: independent ai_setup_plan_review, manager-confirmed APPROVED exact record 33598513458f1fbcdd1f5398f2c9cfc573fb0111 versus demo 435d509f0a6d77a28d47dbda4de742510a2ac76d. No blocking findings. Existing service/ledger, actual settlement quiescence and persisted nonsecret revision cover reload/cancel/restart/continuation risks; Elevated/Moderate and verification are adequate. The baseline/equivalent clarification chain preserves the original request. The manager released backend and delegated UI implementation under the same task.
+
+Review implementation detail: reject a serialized stored document exceeding 8192 bytes before rename, including JSON escaping and metadata overhead. A valid 4096-character key can escape to a document above that limit. Test both accepted and rejected escaped-key boundaries; never commit a file that startup cannot read. The approved DTO otherwise remains unchanged; no additional setup-code, permission-validation or settings-CAS mechanism is introduced.
+
+Implementation started after review/release. No live environment, real-key or paid-provider action is authorized. Result review and combined qualification remain required before delivery.
 
 ## Recovery
 
-Retain both task checkouts for the active assignment. Source remains at the clean assigned baseline; only this Work Record changes in core. Next action: validate/commit the plan, submit its exact revision for independent review and resolve findings. Application edits remain stopped at that checkpoint. No cleanup or changes to the live preview are authorized by this planning phase.
+Retain both task checkouts for the active assignment. Independent plan review/release is complete and backend implementation is in progress in the assigned source checkout. Next action: finish fast verification, commit backend/docs and this sole record, integrate the reserved UI contributor's clean commit, then verify the combined build/fast/browser result and obtain independent result/rendered acceptance. Do not change the live preview or clean active task worktrees.
 
 Both assigned branches are `feat/ai-setup-and-demo-flow` in their respective repositories. Last good source is `435d509f0a6d77a28d47dbda4de742510a2ac76d`; record base is `5ebd36f03743547d8c0c57a3f91f5fe27cdee899`. The planning handoff carries the exact committed record revision. Canonical roadmap reconciliation remains manager-owned; this record does not claim it has happened.
