@@ -52,12 +52,12 @@ Stop affected work on identity/evidence/budget assumption failure, material inte
 
 **Exceptions:** —
 
-**State:** Blocked
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
 
-Context established before code discovery. Isolated implementation and record branches start from the current canonical bases. Discovery confirms one demo delivery using existing core artifacts and lifecycle services. Full-delivery plan is ready for clean-context architect review; code remains blocked only on that plan gate and UI DTO settlement. Live-provider testing separately awaits the manager fixture policy.
+Context established before code discovery. Isolated implementation and record branches start from the current canonical bases. Discovery confirms one demo delivery using existing core artifacts and lifecycle services. The architect approved the full plan and final DTO clarification; backend and UI implementation are released. Live-provider testing separately follows the manager-owned allocation policy.
 
 ## Evidence
 
@@ -67,7 +67,7 @@ Minimap resolved both exact source tuples and Pallium successfully attached both
 
 The independent architect read the committed full plan and current product guidance, checked the existing six tools and approved implementation with no blocking findings. Reviewed plan: ca2ed5eb779397642daf590299f5252fe195e3c1; source: 30a5f4905282772b888f22e0155cd211749591f7. Conditions: settle example DTO with UI before parallel edits; preserve independent expectations and actual mismatch explanation; exercise real separate approval/Use; manager alone runs paid qualification against one persistent isolated allocation after original-ledger reservation. Combined rendered, lifecycle and live evidence remain due at result review. Owner read back the completed review through the supported chat tool; transport status alone was not used as approval.
 
-Manager settled the routine example choice and persistence details in plan step 3: Needs attention/open, Done/completed, synthetic situation metadata, transient explicitly labeled script with durable exact lifecycle evidence and no unrelated draft overwrite. This clarifies mechanisms without changing the requirement baseline. Focused architect confirmation of this DTO clarification is pending before parallel code release.
+Manager settled the routine example choice and persistence details in plan step 3: Needs attention/open, Done/completed, synthetic situation metadata, transient explicitly labeled script with durable exact lifecycle evidence and no unrelated draft overwrite. This clarifies mechanisms without changing the requirement baseline. The architect approved exact clarification bed26b247e4c07beb75df874bd885cb37c44436c with explicit release for backend and UI implementation. Owner read back that completed review through the supported compact chat snapshot.
 
 ### Live qualification allocation policy
 
