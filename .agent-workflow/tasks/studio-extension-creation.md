@@ -63,6 +63,8 @@ Exact schema/target clarification: version 5 adds STRICT extensions, extension_r
 
 The designer delivered the maintained interaction design and the architect resolved and approved the active-versus-draft, identity, admission, migration and compatibility contract. The manager inspected the exact document and developer proposal. One developer owns the coherent implementation/test contribution in an isolated checkout; the designer owns independent rendered QA and the manager owns this record, roadmap and delivery. The previous contribution remains delivered; this record owns the newly authorized complete creation/edit/recovery correction.
 
+Baseline reproduction completed before production edits on demo 8e06fbfba4dfe5835a6e07f2cb04c6e43d35b63a: the actual collection New path submitted the previously saved conversation ID, and Enter produced zero turn requests. Failing browser observations/traces are preserved. The developer has started the coordinated implementation, with bounded nonoverlapping helpers for baseline regression, frozen legacy fixtures and React views; all contribute under this same owner-managed record. No operator-data upgrade or paid call has occurred.
+
 ## Evidence
 
 Pending actual reproduction and implementation checks. No new provider call, operator-data edit or live upgrade is claimed.
