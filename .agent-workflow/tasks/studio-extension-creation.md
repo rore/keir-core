@@ -30,6 +30,8 @@ Owning features: [conversational authoring](../../roadmap/features/conversationa
 **Material assumptions:** Existing compiler/runtime semantics can support multiple saved extensions with one active selection for the currently supported hook. If ownership, retention, migration or execution cannot preserve the stated guarantees, stop affected implementation and return to design. Unknown legacy conversation lineage must remain readable without guessing an extension binding. A fresh chat must not treat another draft's source/cases as the new customer's intent.
 
 **Plan:**
+Settled implementation contract: host-generated owner-scoped extension ID with bounded display name, explicit supported hook/binding, creation operation and one versioned draft head per extension. Bind new revisions and conversations durably to that identity. Collection reads are separate from exact-item reads/actions; all six tools resolve the accepted owner/item/base on the host, never from a model-chosen retarget or latest-item fallback. The first accepted request commits item, empty draft state, conversation and operation identity atomically before dispatch; same operation/payload returns that item, conflicting reuse rejects, and rejection creates nothing. Scripted first confirmed save has its own deduplication. Preserve current global budgets, owner run/retention limits and one active selection for today's hook. Legacy untargeted mutations must fail closed or use a provably unique compatibility target. Versioned transactional migration preserves existing IDs/content/evidence/history/selection generation/native rows/budget; empty owners remain empty, and ambiguous old chats remain owner-readable without guessed edit binding. Edit active v1 over saved draft v2 requires an explicit decision with expected draft version, captured active revision and generation checked together; preserve v2/history and require new checks/approval. A lost first response is recovered by the exact operation without automatic generation. Designer flow and developer ten-journey matrix are the acceptance contract; no further design gate is introduced.
+
 1. Consolidate one interaction and technical design before production edits: collection, New, save/continue/edit, active-versus-draft divergence, unsupported requests, keyboard, pending jobs, reload, lost responses and owner changes. Designer owns the maintained interaction document; architect owns identity/lifecycle/compatibility decisions; developer supplies exact source/test proposal.
 2. Add the smallest host-generated owner-scoped extension identity and persistence/API binding needed for separate saved work. Preserve immutable revisions/evidence and legacy data; create nothing on entry and deduplicate first accepted submission. Retain explicit generation-CAS replacement of today's single active selection. Publish the exact migration and recovery contract before implementing it.
 3. Wire actual app navigation and authoring context to explicit fresh/edit/continue intent and extension identity. Keep catalog-driven general creation and truthful support limits. Enter uses the same guarded submit; Shift+Enter is multiline and IME composition is protected.
@@ -46,18 +48,18 @@ Owning features: [conversational authoring](../../roadmap/features/conversationa
 - Experience: designer and manager exercise the actual navigation on desktop, phone and short window with configured synthetic and unconfigured modes, preserving unsaved native task edits. Distinguish scripted transport checks from any separately permitted paid qualification.
 - Regression/delivery: focused and full fast tests, production build, combined browser suite and independent exact result review; hosted checks, disclosure scan, source/data backup and normal worktree cleanup.
 
-**Plan review:** Pending the consolidated interaction/technical design and exact developer proposal; no production implementation release yet.
+**Plan review:** Agent technical review: the independent architect approved isolated implementation after reviewing this record, the exact designer document blob cb81afc07e895f4aa8e4eaedf13575b08ede2770 and the developer's distinct-extension schema/API/migration proposal. The approved interaction includes active-v1 restart with v2 preserved, explicit switching, ambiguous legacy history and full keyboard/recovery/isolation QA. The verdict does not approve live migration or certify product QA. Manager releases only this settled contract and accepts no latest-item or advice-only substitute.
 
 **Approvals:** Not required at this risk level for isolated repository development. Existing user authorization covers this coherent slice. Any live environment/data upgrade follows the standing explicit-approval boundary after the reviewed result is concrete.
 
 **Exceptions:** —
 
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
 
-Discovery and design only. Developer has accepted read-only diagnosis; architect has identified durable extension identity as necessary. Designer assignment is offered. Production edits are not released. The previous contribution remains delivered; this record owns the newly authorized complete creation/edit/recovery correction.
+The designer delivered the maintained interaction design and the architect resolved and approved the active-versus-draft, identity, admission, migration and compatibility contract. The manager inspected the exact document and developer proposal. One developer owns the coherent implementation/test contribution in an isolated checkout; the designer owns independent rendered QA and the manager owns this record, roadmap and delivery. The previous contribution remains delivered; this record owns the newly authorized complete creation/edit/recovery correction.
 
 ## Evidence
 
