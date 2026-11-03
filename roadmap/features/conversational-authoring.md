@@ -23,6 +23,7 @@ Deliver the in-app AI-driven extension creation UI on top of the manual exact-re
 - Keep operator-supplied keys server-side in local environment/ignored configuration; ship placeholders only. Never include keys in browser bundles, source, fixtures, logs or exported scenarios. Missing configuration shows a clear setup state; native tasks and already activated extensions remain usable.
 - Let the local operator configure AI from that setup state through an explanatory dialog. Save provider/model, a write-only key and a finite shared allowance in ignored server-side storage; saving configuration makes no provider call.
 - Keep customer creation conversational. Manual source/scenario authoring belongs in the [core tools example](../../docs/manual-authoring.md), rather than a developer editor or manual fallback in the demo Studio. Preserve saved customizations, exact evidence inspection and explicit approval/activation.
+- Offer one clearly labeled scripted creation example without AI credentials. It illustrates the conversational process and uses the actual supported behavior; it does not claim live AI generation or replace the personal-request flow. The [Studio design feature](extension-studio-design.md) owns the user-requested usability revision.
 
 ## Out of Scope
 
