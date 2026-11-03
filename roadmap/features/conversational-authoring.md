@@ -21,6 +21,8 @@ Deliver the in-app AI-driven extension creation UI on top of the manual exact-re
 - Request exact activation through host policy, with bounded calls/cost and renewed approval after changes.
 - Support configurable provider/model selection through one host-owned authoring workflow; evaluate existing multi-provider libraries versus a small adapter boundary before choosing dependencies. Qualify at least two providers rather than assuming every model or compatible endpoint supports the required tools and structured outputs.
 - Keep operator-supplied keys server-side in local environment/ignored configuration; ship placeholders only. Never include keys in browser bundles, source, fixtures, logs or exported scenarios. Missing configuration shows a clear setup state; native tasks and already activated extensions remain usable.
+- Let the local operator configure AI from that setup state through an explanatory dialog. Save provider/model, a write-only key and a finite shared allowance in ignored server-side storage; saving configuration makes no provider call.
+- Keep customer creation conversational. Manual source/scenario authoring belongs in the [core tools example](../../docs/manual-authoring.md), rather than a developer editor or manual fallback in the demo Studio. Preserve saved customizations, exact evidence inspection and explicit approval/activation.
 
 ## Out of Scope
 
@@ -34,6 +36,8 @@ Arbitrary generated application UI/code, agent certification, automatic approval
 - [ ] Provider compatibility: the same create/clarify/compile-repair/simulate/review flow works with at least two explicitly qualified provider/model configurations. Fast fake-provider regression covers errors, invalid tool arguments, cancellation and absent/invalid credentials; live provider checks are opt-in with the operator's own keys and explicit spend limits. No provider code enters core.
 
 ## Notes
+
+**Current increment:** Implement the in-app local AI setup dialog and remove manual authoring from the customer Studio. The backend/configuration contract and UI change are being planned under one core-owned Work Record. This extends the delivered read-only flow; it does not claim live-provider qualification or new runtime semantics.
 
 **Dependencies:** [extension-studio-design](extension-studio-design.md); [extension-approval-lifecycle](../features/extension-approval-lifecycle.md); [machine-readable-contracts](../features/machine-readable-contracts.md); [reusable-simulation](../features/reusable-simulation.md).
 
