@@ -76,3 +76,5 @@ The reported New/Enter failures were reproduced on the unchanged baseline and in
 
 Pending exact combined implementation and verified user-level acceptance.
 
+Rendered review at checkpoint 8948f50a712dd9013196a21e621d1f0d62bc03ab verified exact per-turn examples, focus restoration to chat, separate approval and activation, current-work resume and read-only earlier discussions. Acceptance remains open: repeated examples bury the current decision, restart confirmation competes with draft approval, and the composer obscures completion on a short screen. The developer owns these corrections; the designer will recheck the corrected states, followed by a clean-context task-based usability pass. Fast regression at this checkpoint reports 187 passes and one existing platform-specific skip in approximately 11 seconds; nine native browser checks pass. These results do not certify the unfinished combined browser matrix, real-provider creation from empty, or live migration.
+
