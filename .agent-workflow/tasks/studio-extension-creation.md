@@ -59,7 +59,7 @@ Exact schema/target clarification: version 5 adds STRICT extensions, extension_r
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -74,7 +74,9 @@ The reported New/Enter failures were reproduced on the unchanged baseline and in
 
 ## Result review
 
-Pending exact combined implementation and verified user-level acceptance.
+Local result accepted at demo faa09f7b5091a90b89184967aea6f2d3679195a5; published main 6d57960a7b30f404e0086aacef33cff3b548282b adds only the compiler-prerequisite documentation. The architect approved the technical contract and corrections; the designer rechecked the major interaction states; two unbriefed business-goal trials and manager navigation/inspection drove further corrections. The final manager walkthrough verified the active version's plain-language checked outcomes, restored focus, and earlier drafts explicitly marked not in use. Source inspection stays secondary. The active summary uses only the exact selected version's approved proof, checks owner/item/revision/generation on readback, and clears unavailable or stale results; operator choices without proof receive an honest fallback.
+
+Verification: 90 combined browser cases passed on 6913dc8; six affected browser cases passed on the active-summary delta, followed by a build and actual rendered check of the final cosmetic action order. Final fast regression passed 192 tests with one existing platform-specific skip in approximately nine seconds. The V5 migration, native adapter and compiler files remain identical to the independently rehearsed checkpoint, so that evidence is reused. Hosted regression on the published final identity is pending. The existing user preview and database have not been upgraded; live cutover needs the standing environment approval. Real-provider creation from empty and broader provider qualification remain unverified and are not claimed by synthetic transport or guided-example success.
 
 Technical review of 8948f50a712dd9013196a21e621d1f0d62bc03ab found two gaps, corrected and approved at 84c40be623c5afeea46ebe716ca28764cfb4dedc: provider discovery explicitly projects bounded fields without human-inspection artifacts, and owner/item-scoped History exposes displaced, never-checked drafts after reload. The new history event grants no rollback authority. Sixteen focused tests pass; the architect reviewed the exact code and tests without duplicating the run. No separate backend finding remains from this review. Combined acceptance still requires actual History inspection, full regression and rendered usability checks.
 
