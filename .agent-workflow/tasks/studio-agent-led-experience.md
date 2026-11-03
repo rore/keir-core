@@ -56,7 +56,7 @@ Stop affected work on identity/evidence/budget assumption failure, material inte
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -146,3 +146,9 @@ The real provider continued the previously live-compiled customer rule, admitted
 Paid testing is now stopped normally at the existing conservative allowance boundary, preserving the same dataset, ledger and external floor. No reset, refund, new allocation, credential/model/cap change or additional dispatch was made. This verifies a resumed request-to-activation journey with one provider/model, not an uninterrupted from-empty journey, every correction case or second-provider compatibility.
 
 The designer's focused assessment identifies remaining presentation corrections in the actual successful conversation: literal Markdown and an internal evidence identifier, generic numbered examples and the repeated phrase Authored advice advice. Keep IDs in exact Details, summarize checked behavior concisely, name only situations supported by the exact saved synthetic case, and use a generic current-advice greeting. A bounded correction proposal is requested; no new paid testing or broad redesign is authorized by this implementation offer.
+
+Presentation candidate 0822ffb99ac24a85b8f56821f994229613977312 implements the approved small projection/UI/coaching delta. Focused real-service tests pass 52/52; full fast regression passes 173 with one existing platform skip in 8.048 seconds; all nine affected browser journeys pass in 36.2 seconds; production build passes. Desktop, phone and short-window screenshots show named situations and distinct expected/observed outcomes. Generic unknown labels, exact historical joins, missing-receipt rejection, case IDs retained in technical details and reopened greeting are covered. The first browser run's single failure was a test selector including Retry text; the corrected selector passes with unchanged product behavior. Narrow technical and rendered result reviews are assigned; future plain-text prompt compliance has not been retested with a paid provider.
+
+Independent technical and designer rendered reviews approve exact presentation revision 0822ffb99ac24a85b8f56821f994229613977312 with no blocking findings. The designer inspected desktop, phone and short-landscape images and the greeting; a future wording refinement for Read temporarily unavailable is optional. The manager independently verified and preserved all ten artifact/log/bundle hashes in the source manifest before cleanup. The new instructions affect future replies only; previous conversation text is retained, and live compliance remains unverified. Broader provider qualification remains in the owning roadmap.
+
+Final source 0822ffb99ac24a85b8f56821f994229613977312 is pushed. The existing preview serves matching reviewed JavaScript/CSS after a normal same-URL update with a fresh recoverable backup. All 13 saved tables including budget and the exact AI settings hash matched through cutover, integrity is valid and foreign keys are clean. Hosted final regression and recoverable task-worktree cleanup are the remaining delivery checks. The completed live fixture is closed; its original ledger and outside allowance floor remain preserved without further dispatches.
