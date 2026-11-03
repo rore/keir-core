@@ -10,6 +10,7 @@ Keir lets a host expose hooks and approved capabilities that customers compose i
 - [Specifications](specs/README.md): maintained language, domain capability model (DCM), artifact, runtime and host contracts, with review and implementation status.
 - [Agent guides](agents/README.md): separate guidance for the host integration assistant and customer extension assistant. Runnable integrations and optional skill packaging come later.
 - [Embedding examples](../examples/README.md): runnable Java and Node hosts for classification and follow-up simulation.
+- [Manual authoring example](manual-authoring.md): supply source and independent scenarios directly, compile them, and inspect the Java/Node simulator and runner integration.
 - [Conformance](../conformance/README.md): shared source, compiled artifacts and independent expectations for both runtimes.
 
 ## For contributors
