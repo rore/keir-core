@@ -1,0 +1,122 @@
+# Agent-led Studio experience
+
+The owning sources are [conversational authoring](../../roadmap/features/conversational-authoring.md), [Studio design](../../roadmap/features/extension-studio-design.md), the customer assistant guide and the demo interaction reset. This record owns full delivery, including backend, UI contributions, integration and repeated actual interaction verification.
+
+<!-- agent-workflow:start -->
+**Outcome:** A business user develops a supported customization through an agent-led conversation, understands checked examples, and explicitly approves then separately turns on the exact checked behavior.
+
+**Target:** Keir demo application.
+
+**Scope:** Trusted scoped business context and agent coaching, useful per-case simulation receipts, one honest no-AI scripted example using actual authoring and lifecycle services, conversational UI and contextual canvas, integration, documentation and repeated rendered/live-AI verification.
+
+**Constraints:** Preserve saved customizations, independent expectations, exact evidence, owner/session isolation, revision checks, resource and cumulative spending limits, cancellation and uncertainty. Keep six existing tools and explicit human approval separate from activation. No manual source editor, pipeline dashboard, new native writes, arbitrary interpreter, secrets in browser/logs, preview data changes or global environment changes. Billable tests require an isolated dataset and settled bounded cap/ledger policy.
+
+**Completion criteria:** A personal request and the labeled scripted example lead through meaningful clarification, positive and no-action examples, mismatch explanation/correction, exact human review and separate activation using real services. Multiple rendered interaction iterations verify usability and recovery; bounded real AI testing records actual results and limits. Fast and full browser regressions and independent technical/rendered reviews protect existing guarantees.
+
+**Requirement baseline:**
+{"source":"work-record-initial","outcome":"A business user develops a supported customization through an agent-led conversation, understands checked examples, and explicitly approves then separately turns on the exact checked behavior.","scope":"Trusted scoped business context and agent coaching, useful per-case simulation receipts, one honest no-AI scripted example using actual authoring and lifecycle services, conversational UI and contextual canvas, integration, documentation and repeated rendered/live-AI verification.","constraints":"Preserve saved customizations, independent expectations, exact evidence, owner/session isolation, revision checks, resource and cumulative spending limits, cancellation and uncertainty. Keep six existing tools and explicit human approval separate from activation. No manual source editor, pipeline dashboard, new native writes, arbitrary interpreter, secrets in browser/logs, preview data changes or global environment changes. Billable tests require an isolated dataset and settled bounded cap/ledger policy.","completion_criteria":"A personal request and the labeled scripted example lead through meaningful clarification, positive and no-action examples, mismatch explanation/correction, exact human review and separate activation using real services. Multiple rendered interaction iterations verify usability and recovery; bounded real AI testing records actual results and limits. Fast and full browser regressions and independent technical/rendered reviews protect existing guarantees."}
+
+**Relationships:**
+{"schema_version":1,"sources":[{"provider":"minimap","scope_ref":"roadmap:v1:git:github.com/rore/keir-core#roadmap","local_ref":"item:v1:conversational-authoring"},{"provider":"minimap","scope_ref":"roadmap:v1:git:github.com/rore/keir-core#roadmap","local_ref":"item:v1:extension-studio-design"}],"pull_requests":[]}
+
+**Risk:** Elevated
+
+**Complexity:** Moderate
+
+**Reason:** Demo code and tests are unclassified under the core governance policy, imposing an Elevated floor. This is one coordinated demo delivery with several affected components; core changes are limited to its owning Work Record.
+
+**Discovery:** The current six-tool loop already owns durable checkpoints, bounded repair, CAS, cancellation, cumulative reservations and exact review. Discovery returns a YAML source example despite the historical sourceJson argument name, but no scenario or business coaching. Simulation and review return only status arrays, preventing grounded mismatch explanation. Existing authenticated compile/scenarios/simulate APIs provide the entire no-AI preparation path; the customer need not operate them. Simulator evidence already includes independent expected outcomes, sanitized native/consumption results and mismatches. Source, owner task records and secrets must not be added to the browser transcript. No new provider/library/runtime semantics or persistence migration is needed. Demo implementation/test paths are GRAY; the core record is excluded. Canonical planning edits remain manager-owned.
+
+**Material assumptions:** Existing authoring, simulation and exact lifecycle services can support the interaction without changing native runtime semantics. If that is false, return affected design to planning. Live testing must preserve a shared finite allowance; no paid calls before the manager settles fixture/ledger policy.
+
+**Plan:**
+1. Keep all six tool schemas, budgets, host identity and review/activation gates. Expand trusted agent instructions to own clarification, source/scenario preparation, bounded repair and ordinary-language explanations; treat customer/tool/source/scenario strings as data. Add static host business context (supported read-only advice, unavailable writes/follow-ups and explanation of checking), a compact worked scenario alongside the existing source example, current exact draft handles, bounded owner-authored current source/independent scenarios and recent conversation through discover_catalog. Re-entry uses saved intent and expectations rather than the generic example; oversized context is explicitly incomplete and must not be silently replaced. Do not send native task records or names to providers.
+2. In src/authoring-service.mjs, replace status-only simulation/review summaries with one shared bounded projection retaining statuses and adding cases: id, label, status, expected, actual native and consumption, and mismatches. Include exact evidence identity outside the summary as today. Read only owner-scoped immutable evidence, cap case/mismatch text and collection sizes, report truncation explicitly, and never derive or rewrite expectations from actual results. Preserve public transcript DTO privacy; full exact proof remains available through its existing authenticated endpoint.
+3. Add a small host-owned example module and authenticated GET /api/authoring/example in src/app.mjs. DTO: label, description, source (existing Needs attention YAML), cases (five original JSON strings excluding host-denied), situations (id, label, taskStatus OPEN/COMPLETED/null). The fixed example shows NEEDS_ATTENTION for open tasks and DONE for completed tasks, making a meaningful change from the initial Pending choice. Situation facts come only from the saved synthetic cases, never client source parsing or invented native facts. This is inert read-only example data without AI setup, provider calls or writes. UI collects explicit business confirmation and orchestrates existing compile, scenarios and simulate endpoints with returned CAS handles; partial failure reads saved state before explicit continuation. Scripted conversation may be transient and explicitly labeled; authoritative draft, evidence and approval remain durable. Re-entry truthfully resumes saved state without claiming a persisted AI conversation or overwriting an unrelated draft. No persistence migration, new interpreter, workflow engine or write API. Real compiler, simulator, review, human approval and separate Use remain authoritative.
+4. UI contributor owns src/web/** and browser suites: replace pipeline-oriented creation with a continuous conversation and only useful contextual canvas; explain ordinary situations, ask necessary business choices, preserve old evidence, selection, drafts, native editing and owner-switch recovery. The scripted example is clearly labeled and never interpreted as a personal live request. Existing saved/prepared choices, history and exact inspection stay available. Confirm this DTO before overlapping implementation; request review of material uncovered interface changes.
+5. Owner implements backend/context/results/example and focused tests; bounded helper contributions may own nonoverlapping test or documentation files under this same record. Target src/authoring-agent.mjs, src/authoring-service.mjs, src/app.mjs, src/authoring-example.mjs, src/extension-lifecycle.mjs, tests/authoring-context.test.mjs and affected existing regression expectations; operator documentation in docs/ai-authoring.md explains outbound static context and real/scripted differences. Integrate reviewed UI commits into the isolated source branch.
+6. Iterate actual interactions multiple times, correcting usability and technical findings between runs. Cover ambiguous personal request, clarification, no-action case, mismatch and explicit correction, unsupported follow-up request, review/approval/Use, interruption, stale state and owner switch. Run fast and focused/full browser regressions; obtain independent technical and designer rendered review of the combined source. Only after manager settles an isolated cloned dataset with shared finite reservation accounting and a small per-run cap, run bounded real-AI interactions without reading/printing secrets or changing the operator allowance. Manager alone delivers canonical roadmap/push/preview. Recoverably archive task evidence and remove task worktrees after accepted integration/release.
+Stop affected work on identity/evidence/budget assumption failure, material interface change or unsupported native effect. Preserve the requirement baseline; no planning-only completion or new human gate is introduced.
+
+**Verification plan:**
+- Grounded supported behavior -> tests/authoring-context.test.mjs checks trusted context, worked source/scenario, unchanged six schemas and useful bounded per-case expected/actual/mismatch receipts against real immutable lifecycle proof, including wrong expectation and no automatic rewrite.
+- Honest no-AI example -> authenticated inert GET with no query fields, no setup/provider calls or mutations; exercise returned source/cases through real compiler, simulator and explicit approval/activation. Check stale CAS, owner/session/Origin rejection and unchanged active snapshot before separate Use.
+- Conversation usability and preservation -> focused browser journeys and several actual desktop/narrow/keyboard interactions cover personal and scripted paths, ambiguity, correction, mismatch, unsupported effect, older evidence, unsaved native edits, interrupted/lost response and owner switching. Designer reviews actual rendered evidence and owner fixes findings before the next interaction iteration.
+- Regression -> npm test, npm run build and full npm run test:e2e on combined exact source, with failures investigated and protections retained. Reuse reliable unchanged technical evidence only where applicable.
+- Live AI -> manager-approved isolated fixture/ledger/cap; multiple bounded real-provider interaction runs after corrections record source, safe model/status/counters/reservations, exact result and limits, without secret output or a claim of second-provider compatibility unless actually qualified.
+- Independent result review -> compares baseline, complete diff and exact combined evidence; fresh workflow, Redline, whitespace, privacy and generic-identity checks precede manager integration. No core semantic change: existing shared Java/Node artifacts are consumed unchanged.
+
+**Plan review:** Agent technical review: see Plan review below. The architect approved full plan ca2ed5eb779397642daf590299f5252fe195e3c1 and settled example clarification bed26b247e4c07beb75df874bd885cb37c44436c before implementation. Final result reviews reuse those decisions and accept the final correction delta.
+
+**Approvals:** Not required at this risk level. The task authorizes full implementation and multiple UX/AI iterations; no planning-only handoff or additional human gate.
+
+**Exceptions:** —
+
+**State:** Ready for review
+<!-- agent-workflow:end -->
+
+## Implementation
+
+The full implementation is ready for canonical integration. Final demo source is 947438821ae1224b77e598025d99299593827955, based on 30a5f4905282772b888f22e0155cd211749591f7. Its tracked tree, 422c31329491bf79df32c8bfc244a72495c7aa97, exactly matches the UI contributor's final 99a8e7825721caa96f69e6df658955ac19ef97d5. Source and test contributions were integrated by exact Git commits; no changing filesystem was copied.
+
+- The agent receives static business guidance, a worked source/scenario, bounded owner-authored current source and original independent cases, and recent conversation. Truncation is explicit. Native task records, protected bindings and credentials are not added to provider context.
+- Expected native and display outcomes remain separate from actual observations. Bounded receipts expose mismatches without rewriting expectations. Public evidence projects expected consumption only from the proof's exact owner/revision and matching saved suite; historical unmatched suites retain their original reports.
+- The clearly labeled no-AI example uses Needs attention for unfinished tasks, Done for completed tasks and no advice for unavailable reads. It runs the actual compiler, original five independent cases, Node simulator, exact review, human approval and separate Turn on. Scripted conversation is transient; authoritative source, cases, evidence and approvals persist.
+- Conversation and task examples replace the pipeline toolbar and permanent report presentation. Exact source, old evidence, history and management remain available through secondary inspection. Completion clearly says the advice is on and returns to the native task without losing its unsaved edit.
+- Interrupted example preparation resumes only after exact source/label/case recognition and current revision checks; unrelated drafts or changed expectations are preserved. Fresh continuation carries bounded prior server conversation, with a truncation marker, under the existing 8 KiB input limit. The full carried request remains inspectable after reload without a large new chat bubble.
+- Missing or invalid consumption says Not observed and blocks approval. A provider request/account limit preserves saved work and requires explicit manual recovery; it does not imply temporary throttling, quota exhaustion or a saved draft that does not exist.
+- Six tool schemas, cumulative spending and resource ceilings, owner/session fences, cancellation/uncertainty, exact approval and separate activation remain intact. No new dependency, persistence migration, native write, interpreter or core semantic change was introduced.
+
+Backend checkpoints were f1793e5d2884063db5e42d8a43e3dbc64ab6b1fc, 072cd12090f78c01920830f2608833eda146a1c5, 67a7e81f35516a8a41e21fe4e446d5bb7f4c9f6e, 4932deae1807d3e303e66d3e46d3d21df3a50c73 and 61d38ca449292313d3a8a1fde42007113748b24c. Real-provider failure feedback produced 7569b117e4b9a0f16f5a97ef0bc6f96ba416c12c. The UI runtime contributions were 40ec7877d09711a3269bec35b30c18a0345c64f6, 7e780034f8b9f9f30a321e32b37129c6459989e4, 396f7232fee3229f8c6414203ae2b43750b5ec69 and 99a8e7825721caa96f69e6df658955ac19ef97d5; committed browser coverage is be1f7088177cd0f9a13fd61f8354c8f1954fc42b.
+
+## Plan review
+
+The independent architect approved full-delivery plan ca2ed5eb779397642daf590299f5252fe195e3c1, then approved exact settled clarification bed26b247e4c07beb75df874bd885cb37c44436c: fixed Needs attention/Done example, synthetic situation metadata, transient labeled script and durable exact lifecycle re-entry. Implementation release was recorded before code at record 58d3c90. The original full-delivery baseline and relationships remain unchanged. No planning-only completion or new human gate was introduced.
+
+## Evidence
+
+| Check | Actual result and scope |
+| --- | --- |
+| Complete fast regression | 165 total: 164 passed, one existing POSIX-only Windows skip. build/combined-fast.log in the UI evidence. Backend and Node test scope is unchanged through the later UI presentation and copy commits. |
+| Complete browser regression | 83/83 passed together in 3.7 minutes at committed be1f7088177cd0f9a13fd61f8354c8f1954fc42b; build/final-browser.log. Earlier 81/83 run failures were stale navigation for moved canvas/read-only details; targeted corrected checks passed before the clean full run. |
+| Final copy followup | 1/1 provider-recovery browser check passed in 5.0 seconds at 99a8e7825721caa96f69e6df658955ac19ef97d5; build/final-provider-copy.log. The only delta is truthful saved-work wording and its matching assertion. |
+| Final production build | Passed on owner 947438821ae1224b77e598025d99299593827955. Built index-uYHJKYCk.js and index-5ShdosoG.css exactly match the contributor's final artifacts. |
+| Context and lifecycle coverage | Actual packaged compiler and Node runtime exercise source/cases, independent wrong expectations, consumer-only mismatch, no-display failure cases, stale revisions, separate approval/activation and historical suite separation. The final historical guard run passed 28 affected checks in 7.383 seconds. |
+| Provider-limit regression | 16 focused context/provider checks passed in 2.431 seconds: one synthetic 429 request, no automatic retry, source/reservation/selection retained and no approval. |
+| Continuation check | Independent reviewer executed the actual helper across four cases, including oversized Unicode and latest user intent; valid Unicode, the 8 KiB ceiling and explicit truncation passed. |
+| Rendered interaction | Multiple real-service desktop, phone and short-landscape iterations; manager walkthrough and final designer review accepted the matching presentation. Final literal-only copy correction is covered by its focused check and reuses that visual review. |
+| Governance and privacy | Complete final diff: 19 paths, 18 GRAY and one BLUE, no boundary violations or required checkpoints. Coherent-change size advisory retained without a waiver or policy change. Baseline/relationship, whitespace, generic commit identity and disclosure checks pass. Final workflow validation is clean, exit 0, with no failed predicates. |
+
+Initial sandboxed real-compiler tests could not finish Windows cleanup: 50 of 52 focused checks passed and two API cases failed. The unchanged 19 API checks passed with approved elevated execution in 3.538 seconds; no product workaround, skipped assertion or global tooling change was made. All subsequent isolated compiler checks used that working execution scope.
+
+The accepted UI manifest independently verifies nine source/test/log/artifact hashes and its recoverable Git bundle. Owner/contributor tracked trees match; built assets match byte-for-byte. Text checkout line-ending differences were verified against the same normalized Git blobs, rather than claimed as raw source-byte identity. Private proof is build/studio-agent-led/accepted-ui-proof.json; public content contains no local absolute paths, credentials or chat/session pointers.
+
+### Actual interaction findings and corrections
+
+The first real example journey passed across desktop, phone and short landscape, including actual Turn on and native task advice with an unsaved title preserved. Rendered review then corrected repeated chrome/tall explanations, sample tasks pushed out of view, internal case IDs, an obsolete approval form after activation, a personal request left visible during the unrelated scripted example, held-reading position through Manage, and oversized carried-context presentation.
+
+Technical review corrected missing expected consumption, historical-suite metadata borrowing, interrupted source-only example dead ends, fresh-conversation loss of an uncompiled correction and missing receipts incorrectly shown as No advice. Regressions retain independent expectations, old evidence, owner switching, lost responses, exact source review, native edits and explicit separate activation. No protected obligation was waived to accommodate the new UI.
+
+### Bounded live-provider outcome
+
+The manager ran two explicit trials against one persistent isolated qualification ledger under the reviewed finite allocation within the unchanged operator allowance. Workers made no paid calls. The first trial performed real discovery, two clarification turns and actual compilation/source persistence, then received PROVIDER_RATE_LIMIT while preparing scenarios. The corrected manual continuation submitted retained discussion/source after restart and also received PROVIDER_RATE_LIMIT before discovery. Both outcomes were HTTP 429; no transient-versus-quota cause is known.
+
+Paid testing is stopped, with the original allocation, isolated ledger and conservative reservations preserved. No automatic retry, credential copy, key/model/cap change, refund or fresh allowance was used. Operational financial/data proofs remain private and manager-owned.
+
+A complete successful live-provider scenario-check/review/activation journey is unqualified. The two owning roadmap features must retain this external provider limitation and broader live-qualification work; this safe implementation contribution does not close the full feature or claim second-provider qualification.
+
+## Result review
+
+Agent technical review: independent architect backend reviews through 61d38ca449292313d3a8a1fde42007113748b24c, followed by clean-context native runtime/correction reviews. Review scopes were reconciled and unchanged results reused rather than restarting broad review.
+
+Reviewed revision: 947438821ae1224b77e598025d99299593827955.
+
+Verification adequacy: final scoped approval has no remaining blocker. The reviewers inspected authority, owner/session isolation, exact evidence and approval/activation, original expectations, partial-stage/CAS recovery, bounded prior context, missing observations and explicit provider-limit recovery. The final saved-work copy condition is resolved. Committed focused tests and complete regression evidence are adequate for the implementation/recovery scope; rendered evidence is accepted. Successful live-provider qualification remains pending the external HTTP 429 condition.
+
+## Delivery and recovery
+
+Both task branches are feat/studio-agent-led-experience in their respective repositories. The manager owns canonical roadmap, main integration/push/CI, same-URL preview verification and private qualification proof. Final demo source 947438821ae1224b77e598025d99299593827955 is pushed to main. The [hosted regression run](https://github.com/rore/keir-demo-app/actions/runs/41659145802) is in progress. The existing preview serves the matching final build; the manager verified a fresh backup, all 13 tables including budget unchanged through final cutover, database integrity/foreign keys and retained AI settings. Canonical roadmap notes keep the external live-qualification limitation explicit.
+
+Next: integrate this record, verify hosted CI, then recoverably archive and normally remove only the owners' task-created worktrees after manager release. Preserve the original preview data, settings and persistent qualification ledger; no user application/global tooling change is part of worker cleanup.
+
+The two exact source relationships remain attached during integration. On release/end, detach only this session's completed explicit participation and verify readback. No completed earlier task is reopened.
