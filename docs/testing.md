@@ -57,6 +57,7 @@ Combined-invalid regressions also preserve safety/policy-before-binding diagnost
 - Test observable behavior at the smallest useful boundary. Include valid, rejection, boundary/+1 and failure cases; reproduce bugs before fixes and retain regressions.
 - Report component line/branch coverage; inspect uncovered authority/error paths. Establish measured baselines with first implementations; do not invent percentages or lower agreed thresholds to pass.
 - Keep expectations independent of implementation. Refactor helpers without losing assertions; regenerating goldens does not approve new behavior.
+- For UI changes, exercise actual entry points with existing saved work, not only empty fixtures or helper shortcuts. Verify visible outcomes and retained state. Use an unbriefed business task for substantial interaction changes; fix observed confusion and repeat it. Test totals and screenshots alone do not establish usability.
 
 ## Initial protected contract
 
