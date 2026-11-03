@@ -67,6 +67,8 @@ Backend component frozen at 072cd12090f78c01920830f2608833eda146a1c5 after f1793
 
 Scoped backend review found that the summary omitted independently expected host consumption when the native classification was correct. Fixed at 67a7e81f35516a8a41e21fe4e446d5bb7f4c9f6e: expected.consumption comes from the exact saved original case, distinct from actual consumption. Situation metadata also stays unknown when a case contains several reads rather than collapsing them into an invented single task state. Exact fix supplied to UI and narrow independent re-review requested; no change to lifecycle semantics or approved scope.
 
+Integration inspection found the same consumer-expectation omission in the ordinary evidence UI caller. Architect endorsed read-only server projection rather than client source parsing. Backend 4932deae1807d3e303e66d3e46d3d21df3a50c73 adds expected.consumption to public evidence readback from the proof's owner/revision-bound original scenarios. Stored payload, identities and passing/approval checks are unchanged; regression asserts this. UI contributor received the exact commit and the requirement to show expected No advice versus actual displayed advice, including historical evidence after a draft edit. src/extension-lifecycle.mjs is an additional GRAY path for this existing receipt obligation; no native runtime semantics or persistent schema change.
+
 ## Evidence
 
 Minimap resolved both exact source tuples and Pallium successfully attached both current-session participation references. No paid provider call or live preview/data change has occurred.
@@ -78,6 +80,7 @@ Minimap resolved both exact source tuples and Pallium successfully attached both
 - Re-entry followup: parent inspected the helper's complete five-test file; focused elevated run passed 5/5. It checks exact custom Pending source and original independent cases (distinct from the attention example), clarification continuity, owner/session isolation and no source in the public transcript. Final backend component npm test: 163 total, 162 passed, one existing POSIX-only Windows skip, zero failures in 8.730 seconds. Private complete log: build/studio-agent-led/fast-reentry.log in the implementation checkout.
 - Fresh backend Redline: five GRAY source/test paths, one BLUE documentation path, no boundaries or required checkpoints. Initial workflow validation passes all blocking predicates; verification-method prose was clarified to its accepted criterion-to-method notation. Final combined checks remain due after UI integration.
 - Review-fix regression: five context tests pass in 1.821 seconds, including a real native-correct/consumer-only mismatch with unchanged original scenario bytes and rejected approval. Exact prior full backend run remains recorded; combined full regression will run after UI integration. Workflow validation is clean with no failed predicates.
+- Public evidence projection: 27 affected context/lifecycle/API checks passed in 8.024 seconds. Reviewer guidance confirms use of the original proof's exact scenario rather than the current draft; actual rendered consumer-only mismatch and historical reopening are delegated to the UI contribution and remain due.
 
 ## Plan review
 
