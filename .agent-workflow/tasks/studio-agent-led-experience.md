@@ -69,6 +69,8 @@ Scoped backend review found that the summary omitted independently expected host
 
 Integration inspection found the same consumer-expectation omission in the ordinary evidence UI caller. Architect endorsed read-only server projection rather than client source parsing. Backend 4932deae1807d3e303e66d3e46d3d21df3a50c73 adds expected.consumption to public evidence readback from the proof's owner/revision-bound original scenarios. Stored payload, identities and passing/approval checks are unchanged; regression asserts this. UI contributor received the exact commit and the requirement to show expected No advice versus actual displayed advice, including historical evidence after a draft edit. src/extension-lifecycle.mjs is an additional GRAY path for this existing receipt obligation; no native runtime semantics or persistent schema change.
 
+Narrow readback review identified historical prepared-suite drift: reused case IDs must not borrow today's expectations when the proof's saved suite identity differs. Fixed at 61d38ca449292313d3a8a1fde42007113748b24c: projection requires the original suite identity match, independently of pass/fail; otherwise original reports remain intact. The exact guard commit is supplied to UI and scoped re-review. A new old-suite/reused-ID regression and the matching failed-proof regression protect both cases.
+
 ## Evidence
 
 Minimap resolved both exact source tuples and Pallium successfully attached both current-session participation references. No paid provider call or live preview/data change has occurred.
@@ -81,6 +83,7 @@ Minimap resolved both exact source tuples and Pallium successfully attached both
 - Fresh backend Redline: five GRAY source/test paths, one BLUE documentation path, no boundaries or required checkpoints. Initial workflow validation passes all blocking predicates; verification-method prose was clarified to its accepted criterion-to-method notation. Final combined checks remain due after UI integration.
 - Review-fix regression: five context tests pass in 1.821 seconds, including a real native-correct/consumer-only mismatch with unchanged original scenario bytes and rejected approval. Exact prior full backend run remains recorded; combined full regression will run after UI integration. Workflow validation is clean with no failed predicates.
 - Public evidence projection: 27 affected context/lifecycle/API checks passed in 8.024 seconds. Reviewer guidance confirms use of the original proof's exact scenario rather than the current draft; actual rendered consumer-only mismatch and historical reopening are delegated to the UI contribution and remain due.
+- Historical suite guard: 28 affected context/lifecycle/API checks passed in 7.383 seconds. Two actual rendered UI iterations are in progress: the first real lifecycle journey passed at desktop, phone and short landscape but screenshot review found excessive vertical explanation; the next removes repeated context chrome, quiets script disclosure and prioritizes familiar task examples. Final browser evidence and independent latest-build rendered review remain due.
 
 ## Plan review
 
