@@ -1,0 +1,136 @@
+# AI setup and customer demo flow
+
+Task identity: `agent-workflow:ai-setup-and-demo-flow`.
+Owning feature: [conversational-authoring](../../roadmap/features/conversational-authoring.md).
+
+<!-- agent-workflow:start -->
+**Outcome:**
+The customer demo explains missing AI setup and lets its local operator configure bounded AI authoring without exposing credentials; manual authoring is demonstrated in core examples.
+
+**Target:**
+keir-demo-app.
+
+**Scope:**
+Discover and plan local AI setup storage, authenticated setup API, service reload, backend tests and operator documentation; maintain this sole core Work Record. UI integration is separately owned; the manager owns core manual examples, canonical documentation and roadmap integration.
+
+**Constraints:**
+Planning only until focused independent plan review. Keep keys server-side in ignored local configuration; no real credentials, paid calls, browser credential persistence, global configuration, running preview or user-data changes. Preserve native tasks, activated extensions, identity isolation, finite cumulative AI allowances and exact human approval. Reserve src/web and browser files for the UI owner; no provider code enters core.
+
+**Completion criteria:**
+When AI is unavailable, signed-in users receive an honest setup state with a Configure action and required-field explanation; valid local operator setup persists outside Git and becomes available without restart or secret disclosure. Invalid, unauthorized, cross-origin or conflicting active-job updates leave the previous configuration intact. Restart restores valid setup and cumulative budget safety. Isolated tests prove these contracts, and the customer demo uses the business flow while core retains the manual example.
+
+**Requirement baseline:**
+{"source":"work-record-initial","outcome":"The customer demo explains missing AI setup and lets its local operator configure bounded AI authoring without exposing credentials; manual authoring is demonstrated in core examples.","scope":"Discover and plan local AI setup storage, authenticated setup API, service reload, backend tests and operator documentation; maintain this sole core Work Record. UI integration is separately owned; the manager owns core manual examples, canonical documentation and roadmap integration.","constraints":"Planning only until focused independent plan review. Keep keys server-side in ignored local configuration; no real credentials, paid calls, browser credential persistence, global configuration, running preview or user-data changes. Preserve native tasks, activated extensions, identity isolation, finite cumulative AI allowances and exact human approval. Reserve src/web and browser files for the UI owner; no provider code enters core.","completion_criteria":"When AI is unavailable, signed-in users receive an honest setup state with a Configure action and required-field explanation; valid local operator setup persists outside Git and becomes available without restart or secret disclosure. Invalid, unauthorized, cross-origin or conflicting active-job updates leave the previous configuration intact. Restart restores valid setup and cumulative budget safety. Isolated tests prove these contracts, and the customer demo uses the business flow while core retains the manual example."}
+
+**Relationships:**
+{"schema_version":1,"sources":[{"provider":"minimap","scope_ref":"roadmap:v1:git:github.com/rore/keir-core#roadmap","local_ref":"item:v1:conversational-authoring"}],"pull_requests":[]}
+
+**Risk:** Elevated
+
+**Complexity:** Moderate
+
+**Reason:**
+Fresh intended-path Redline is GRAY, with no red paths, checkpoints or boundary violations. Elevated is proportionate for a loopback-only demo with existing same-origin/session authority, fixed providers and durable finite spending; local plaintext credentials, parser-error disclosure and configuration replacement require independent security/durability review. No production identity or remote deployment is introduced. Moderate: storage, API and live service coordination within one app, plus separately owned UI integration.
+
+**Discovery:**
+At demo 435d509: authoring-config.mjs strictly admits two exact provider/model pairs, printable keys of 1-4096 characters and positive decimal microdollar caps; apiKey is non-enumerable. app.mjs already enforces exact Host, mutation Origin/JSON, no-store responses, signed-in cookie plus current context token and request-start scope. Its general JSON/parser error path can reflect submitted text. The default body limit is 24 KiB. server.mjs holds one data-directory lock and binds only 127.0.0.1. authoring-service.mjs captures configuration once, retains live jobs through abort-insensitive settlement, journals cumulative reservations in SQLite, fences provider/model/policy changes and performs readback-only recovery. .data is ignored; static serving uses dist with dotfiles denied. Existing config/API/session-race/startup/persistence tests supply the required seams. See settled decisions below.
+
+**Material assumptions:**
+- This remains a trusted local-operator demo. Demo people are selectable identities, not independent administrator accounts. Any signed-in demo person with the current session context can configure the single shared provider/allowance; no remote or multi-operator security claim is made. A remote/multi-user requirement returns this surface to planning.
+- The server owns its chosen data directory through the existing lock; the fixed settings filename is not client-controlled. Local OS account/file access remains the security boundary. Symlink/nonregular settings files are rejected; do not claim encryption or Windows ACL isolation from a POSIX creation mode.
+- Replacement is synchronous and bounded within one event-loop turn, including validation, live-job check, durable file replacement and in-memory swap. If asynchronous persistence becomes necessary, stop and design/test an admission fence rather than retain this atomicity assumption.
+- Existing environment configuration and injected test configuration remain supported. Saved local settings have explicit precedence; an existing invalid saved file fails AI closed rather than silently switching providers. No settings file means the existing environment behavior.
+- The owner handles UI, manual-example removal and canonical integration separately. Changes to src/web or browser files require coordination rather than concurrent edits here.
+
+**Plan:**
+1. Obtain focused independent review of this record and inspected contracts before application edits; resolve material findings in this record.
+2. In a subsequent released implementation, reuse readAuthoringConfig and add a small filesystem settings module, fixed server wiring and authenticated setup GET/POST. Do not add a provider library, global configuration, database migration, generic settings framework or new administration role.
+3. Add synchronous authoring-service configuration replacement guarded by the existing live-job map. Preserve the service instance, recovery state and SQLite ledger. Persist a nonsecret settings revision in transport identity to fence stale continuations after setup changes, including restart.
+4. Prove persistence/privacy/authentication/job-settlement contracts with isolated temporary files, injected transport and real SQLite; update operator/test docs and environment-example precedence text.
+5. Hand the reviewed DTO and backend revision to the UI owner for the Configure popup and business-only demo path. The manager owns core manual examples, their documentation, roadmap reconciliation and combined acceptance. Verify the combined build/browser journeys after integration without taking over those files.
+Target paths: src/authoring-config.mjs, new src/authoring-settings.mjs, src/authoring-service.mjs, src/app.mjs, src/server.mjs; tests/authoring-config.test.mjs, new tests/authoring-settings.test.mjs and tests/authoring-setup-api.test.mjs, affected tests/authoring-api.test.mjs, tests/session-race.test.mjs and tests/startup.test.mjs; docs/ai-authoring.md, tests/README.md, .env.example and .gitignore. Core edits are confined to this record. Stop on secret disclosure, environment expansion, unexpected storage/schema changes, an unfenced configuration/job race or an authority requirement beyond the local-demo model.
+
+**Verification plan:**
+- Missing setup -> setup GET reports safe status/required choices, authoring unavailable, native tasks and saved advice still usable; API tests plus owner browser missing-config/Configure journey.
+- Valid explicit save -> strict allowlisted DTO, exact provider/model/key/cap validation, ignored fixed file, successful hot availability and fake-provider dispatch using the new key; config/settings/API tests, without paid calls.
+- Secrets -> sentinel key absent from all setup/list/error/inspection responses, malformed JSON errors, logs, browser storage and static fetches. Test unknown fields, wrong types, 4096/4097-character keys, invalid cap formats, oversize and malformed bodies; UI owner checks transient password field cleanup and response ownership.
+- Authority -> anonymous/stale cookie/token, user away-and-back, wrong Host/Origin/content type/query and real partially delivered body revoked before completion cannot read/write setup or alter a file/configuration. Reuse API/session-race patterns.
+- Durability -> temp-file exclusive creation, bounded regular-file reads, restrictive creation mode where supported, flush/close/rename/readback; absent/invalid/symlink/oversize/unreadable settings, failed replacement and cleanup preserve old file/config. Reopen the same temporary data directory and verify local-file precedence, no provider call at startup and no secrets served from static routes.
+- Active jobs -> hold fake provider, response-body cancellation and compiler independently, including cancelled jobs; setup returns 409 AI_BUSY until actual settlement. Original file/config/revision and reservations stay unchanged; after settlement explicit retry succeeds. Concurrent POST/turn ordering cannot admit a run under a half-installed configuration.
+- Allowance/continuation -> consumed reservations survive key/provider/model/cap changes, cancellation, reset and restart; a cap below held reservations is rejected without mutation. A new cap is total lifetime allowance, not added credit. Old transport settings revisions reject new turns with CONFIG_CHANGED while read/cancel/deduplication and exact saved approval remain available; a fresh conversation uses the new settings.
+- Combined acceptance -> backend fast suite and npm run build; UI owner browser journeys for popup accessibility, required fields, save/reopen/failure/owner-switch, no automatic generation, and the business-use-case flow without manual source editing. Manager verifies the retained core manual example. Existing unrelated native/approval/conversation tests remain obligations.
+- Plan-only evidence -> fresh intended-demo Redline, actual record-only Redline/checker, exact relationship/baseline readback and privacy/diff checks. Pending review findings are recorded honestly; no runtime result is inferred from these checks.
+
+**Plan review:**
+Pending clean-context independent technical review of the concrete plan.
+
+**Approvals:**
+Not required at Elevated risk. Existing user authorization covers the requested in-app setup and removal of manual authoring from the customer demo, with the manual example retained in core. The explicit planning offer requires independent technical plan review before application edits. No live environment change is included.
+
+**Exceptions:**
+—
+
+**State:** Blocked
+<!-- agent-workflow:end -->
+
+## Implementation
+
+Context established before source discovery. Source baseline is demo `435d509f0a6d77a28d47dbda4de742510a2ac76d`; record checkout baseline is core `5ebd36f03743547d8c0c57a3f91f5fe27cdee899`. Both assigned checkouts were clean. No application edits have begun. State is Blocked on the explicitly requested independent plan-review checkpoint, not on additional human permission.
+
+Discovery confirmed that replacing the whole authoring service would rerun startup interruption handling and complicate live-job settlement. Keep the service and change only its configuration when no job remains live. The existing parser-error response also needs a setup-specific privacy boundary. These findings are included in the plan and tests above.
+
+## Settled setup contract
+
+These are proposed implementation decisions submitted for focused review, not claims of implemented endpoints.
+
+### API and user experience
+
+- `GET /api/authoring/setup` requires the existing signed-in cookie/current context and exact Host; reject a supplied foreign Origin. No query fields. Return only `{ configuration: { status, code, source, provider, model, maxUsd }, choices: [{ provider, model }], availability: { available, code, provider, model } }`. `source` is `local`, `environment` or `none`; invalid/absent configuration has null provider/model/maxUsd. Status/code describe local validation, not provider credential verification. `availability` reuses the existing host/service availability semantics. No key, credential fingerprint, path, continuation or reservation counter is returned.
+- Choices reuse the existing exact pairs `openai` / `gpt-5.6-terra` and `anthropic` / `claude-haiku-5-5`; this work does not certify or broaden that matrix. `maxUsd` is an exact decimal string for the total cumulative cap, derived without rounding microdollars.
+- `POST /api/authoring/setup` requires the same identity plus the existing same-origin JSON mutation checks. Exact object fields: `{ provider, model, apiKey, maxUsd }`, all strings; no additional fields, nulls, arrays or caller-selected paths/revisions/endpoints. Apply an explicit 8192-byte body limit. Every save requires a key; there is no secret readback or masked-key reuse convention. Validate with the existing key/provider/model/cap rules before any write.
+- Success is 200 with the same safe GET DTO, after persistence and in-memory installation. Invalid fields use 400 `AI_CONFIG_INVALID` or `AI_CREDENTIALS_MISSING`; a live/settling run uses 409 `AI_BUSY`; a proposed cap below held reservations uses 409 `SPEND_LIMIT`; persistence failure uses fixed 503 `AI_CONFIG_SAVE_FAILED`. Preserve existing 401/403/413/415 meanings. Add only the needed new safe code to the response allowlist.
+- All errors for the setup route, including JSON parser and body-limit errors raised before the handler, use fixed safe messages. Never return raw parser exceptions, supplied strings or filesystem errors. Logging remains disabled; tests assert sentinel non-disclosure on malformed as well as well-formed inputs.
+- Configure is available when setup is missing/invalid and from connection settings for replacement. The popup explains provider/model, server-only API key, total shared lifetime USD allowance, outbound authoring data and possible charges. Saving validates locally without calling a provider and never starts generation. A saved key may still be invalid at the provider; report that honestly when a later explicit request fails.
+- The UI owner uses the existing same-origin request helper and session-lifetime fences, holds the key only in the open password input, and clears it on success, close, navigation and identity change. No local/session storage, URL, transcript, exported scenario or automatic retry after an uncertain save. Read setup status after uncertainty; a user may explicitly resubmit the full settings. The API never returns enough information to recover a key.
+- The operator setting is shared across all three demo people and is not a per-customer credential. This is a local demonstration, not production administrator authentication. The popup/doc states that the allowance is shared and reconfiguration affects the local app.
+
+### Local persistence and startup
+
+- Use the fixed `ai-authoring.json` file inside the data directory already chosen by server startup. Default `.data/` is ignored; add narrow basename ignores for `ai-authoring.json` and operation-owned `.ai-authoring-*.tmp` so a custom repository-local data directory cannot expose credentials through Git. The caller cannot select a filesystem path through the API. Reject a settings/data location equal to or beneath the static root, comparing resolved real locations at startup, including symlink aliases; test this explicitly. The server passes the fixed path to app creation; direct test/app consumers without a supplied settings path do not acquire implicit filesystem persistence. They retain current injected/environment configuration and return fixed 503 `AI_CONFIG_SAVE_FAILED` on POST.
+- Stored JSON is versioned and bounded to 8192 bytes, with exactly schema version, server-generated random revision, provider, model, apiKey and maxUsd. Revalidate on load; do not trust stored ready flags. The key stays non-enumerable in the runtime config. No key or derived secret identity enters SQLite.
+- Missing local file -> environment fallback as today. Valid local file -> explicit precedence over environment on startup/restart. Existing invalid/unreadable/oversize/nonregular/symlink file -> safe unavailable status with no environment fallback; native tasks and saved advice still start. A full valid explicit POST may replace an invalid regular file. Never silently load `.env` or mutate process.env.
+- Save synchronously: validate and authorize, check service is open/quiescent and cap is not below held reservations, create an exclusive random sibling temporary file with mode 0600, write/flush/close it, verify its exact bytes, atomically rename it over the regular target, then install the already validated config in memory. Reject symlink/nonregular targets; do not follow them. Clean only the operation-owned temporary file on pre-rename failure. Do not keep credential-bearing backup copies.
+- Once rename commits, the bounded in-memory assignment has no further fallible I/O; a response loss may therefore mean a successful save. Startup reads the committed file after process interruption. Tests independently read back the final file and exercise actual commit boundaries. Crash durability is bounded by the host filesystem: flush file content before rename, with no claim of universal power-loss guarantees.
+- Local plaintext storage is intentional, protected by the operator OS account/data directory. POSIX creation mode is tested where meaningful; Windows inherits directory ACLs and is not claimed to gain Unix permissions. No ACL/global configuration change, encryption key service or new dependency is introduced. Keep the data directory out of Git/backups intended for sharing; never put it under the static root.
+
+### Reload, running work and cumulative spending
+
+- Keep one authoring service instance. Add a small synchronous configuration replacement operation receiving the validated config and persistence callback; it rejects while closing or while `live.size` is nonzero. Do not cancel jobs, reconstruct the service or invoke its recovery transaction to install settings.
+- The live map remains authoritative through provider fetch/body cancellation and compiler/simulation settlement, including CANCELLING. Checks, synchronous persistence and config swap occur without an await, so a turn cannot enter between the admission check and installation. Session authorization is checked after body parsing immediately before this sequence; no asynchronous persistence window is created.
+- The SQLite `authoring_budget.reserved_micros` row remains unchanged. Provider/key/model replacement does not refund or reset it. A submitted allowance is the new total cap against that row; reject a cap below already held reservations. Existing conservative per-dispatch reservation remains in force. Do not change the database schema, reset behavior or qualification-script allowance semantics.
+- A successful local save creates a nonsecret random settings revision persisted in the local file and saved `state.transport` alongside provider/model/policy. The service rejects a new turn on an older settings revision with existing `CONFIG_CHANGED`, requiring a fresh conversation; reading/cancelling saved work and exact-operation deduplication retain current behavior. Missing revisions mean legacy/environment configuration only; no raw key/hash enters the state. This also fences same-model key rotation across process restart. Unchanged saved settings preserve their revision and do not create spurious restart conflicts.
+- Configuration and availability refresh immediately after successful save. Provider/model validation is local; no startup/save/restart call spends money. Existing conversation quotas, preserved draft/approval/selection and separate human activation remain unchanged. The UI should explain the fresh-conversation consequence before replacement and retain access to the saved draft.
+
+## Ownership and affected callers
+
+The backend owner covers settings validation/storage, app/server wiring, service replacement/transport revision and backend tests/docs. Existing direct `readAuthoringConfig`, `createAuthoringService`, `createApp`, `start` consumers, qualification scripts and synthetic fixtures must retain their injection/environment defaults. Do not modify the qualification runner to consume a running app's saved key or budget.
+
+The UI owner covers `src/web/**`, browser tests/fixtures and the missing-configuration Configure popup. They remove manual/developer authoring controls from the customer flow while preserving task-advice business behavior, saved customizations and human review/Use. The manager retains the manual example and documentation in core, reconciles the owning roadmap and coordinates final combined acceptance. These ownership boundaries do not make this planning record a second feature tracker.
+
+## Evidence
+
+The explicit task resolver returned the expected absent record path before creation. The supplied exact roadmap tuple is captured above; current-session explicit participation was attached successfully.
+
+Fresh intended-demo-path report: GRAY, with no red paths/checkpoints/boundary violations, shared policy shadow mode. Exit 1 is the reporter's review-warnings outcome, not a runtime failure. Private artifacts live under ignored `.tools/ai-setup-plan/` in the record checkout. Application source is unchanged; runtime verification has not been run for this plan.
+
+Record-only Redline has no boundary/checkpoint findings. The workflow checker passes structure, exact relationships, baseline traceability, declared risk and verification-method coverage; its sole failed predicate is the intentionally pending Elevated clean-context plan review (exit 2). This is not an implementation-readiness pass. Privacy scan, exact changed-path check and Git whitespace validation pass. The demo checkout remains clean at its assigned source baseline.
+
+## Plan review
+
+Pending focused clean-context independent review of the committed plan. Specifically assess request/parser privacy, local-demo authority proportionality, storage commit/failure boundaries, synchronous live-job fencing, settings-revision continuation isolation, cap preservation and DTO/UI integration. The manager coordinates reviewer routing and UI/manual-example integration; no application implementation release is inferred from delivery of this record.
+
+## Recovery
+
+Retain both task checkouts for the active assignment. Source remains at the clean assigned baseline; only this Work Record changes in core. Next action: validate/commit the plan, submit its exact revision for independent review and resolve findings. Application edits remain stopped at that checkpoint. No cleanup or changes to the live preview are authorized by this planning phase.
+
+Both assigned branches are `feat/ai-setup-and-demo-flow` in their respective repositories. Last good source is `435d509f0a6d77a28d47dbda4de742510a2ac76d`; record base is `5ebd36f03743547d8c0c57a3f91f5fe27cdee899`. The planning handoff carries the exact committed record revision. Canonical roadmap reconciliation remains manager-owned; this record does not claim it has happened.
