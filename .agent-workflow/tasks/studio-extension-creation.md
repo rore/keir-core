@@ -70,7 +70,7 @@ Baseline reproduction completed before production edits on demo 8e06fbfba4dfe583
 
 ## Evidence
 
-Pending actual reproduction and implementation checks. No new provider call, operator-data edit or live upgrade is claimed.
+The reported New/Enter failures were reproduced on the unchanged baseline and independently inspected/preserved by the manager. At intermediate checkpoint e0f995ac64ba6265b21a0a537326e1f3398b5630, the manager rehearsed V4-to-V5 migration on a private snapshot copy of the current preview database, with no copied credentials. All 12 unchanged original tables retain their exact values, legacy draft heads/versions and revision links match, integrity/foreign keys pass, and reopening is idempotent. Nine pre/post native task checks match; supplemental assertions require actual tasks.get dispatch and successful displayed outcomes to prevent an all-unavailable false pass. This verifies checkpoint migration/native compatibility only; the combined interface, complete matrix and final source remain unaccepted. No new provider call, operator-data edit or live upgrade is claimed.
 
 ## Result review
 
