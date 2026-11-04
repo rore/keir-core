@@ -66,3 +66,7 @@ Implementation and result-review conditions:
 - Contain Java callback failure consistently with existing key-validation conventions. Node must handle rejected actual native Promises without awaiting, reading arbitrary then properties or assimilating thenables; tests assert zero getter/thenable execution and no unhandled rejection.
 
 No tests or edits were performed by the reviewer. The manager accepts these conditions and releases code in the assigned isolated checkout; frozen implementation/result review, shared/package conformance and separate actual native qualification remain required.
+
+## Implementation checkpoint
+
+The developer reports focused compiler 14, Java runtime/admission 35 and new Node admission 12 checks passing, including the 28 fixed protocol facts, same-artifact simulation/real binding and the independent review's authority/snapshot/budget requirements. The effect/3 simulation corpus has 19 rows: the 17 existing effect/2 expectations plus zero-write and post-write-read cases, with old profile artifact bytes preserved. A failing pre-implementation Node binding regression now passes. This is progress evidence, not accepted delivery: complete combined Java/Node protocol transport, source/installed-package conformance, full regression/coverage, public-content inspection and a frozen independent result review remain. Work continues within the reviewed 51-path scope; these deterministic hosts do not qualify the native demo deployment.
