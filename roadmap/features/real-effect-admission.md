@@ -26,7 +26,7 @@ Multiple writes, self-certifying declarations, exactly-once claims, automatic re
 
 ## Done When
 
-- [ ] Design/spec: publish the real-effect assurance/admission contract and required host evidence, including revocation and unsupported transports.
+- [x] Design/spec: publish the real-effect assurance/admission contract and required host evidence, including revocation and unsupported transports.
 - [ ] Implementation: both runtimes admit only the selected supported real profile and reject missing, stale or incompatible evidence.
 - [ ] Verification: shared conformance covers original-key identity, authority, definite NONE/CONFIRMED versus UNKNOWN, deadlines and rejection before dispatch.
 
@@ -37,3 +37,5 @@ Multiple writes, self-certifying declarations, exactly-once claims, automatic re
 **Design input:** [Native contracts and evidence, sections 3 and 8](../../docs/internal/design-baseline/public/domain-model-v0.md); [Host integration, sections 5-7 and 12](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md); [Keys and admission, sections 3-7](../../docs/internal/design-baseline/public/host-owned-idempotency-and-multi-effect-contracts-v0.7.md).
 
 Design this alongside the native event/effect prototype, without a dependency cycle: the prototype supplies requirements; real execution is accepted only after this gate. Rich collections and AI are not prerequisites.
+
+**Reviewed contract:** [Real single-effect admission](../../docs/specs/real-single-effect-admission.md) and [native handoff](../../docs/internal/real-task-effect-handoff.md) pass independent architecture review, including the frozen host clarification delta. This selects a new effect/3 boundary without changing effect/2. Design approval is for implementation, not production use or SQLite qualification. The core developer's next bounded assignment is the exact source/test plan under [the implementation record](../../.agent-workflow/tasks/real-single-effect-admission.md); native-host discovery proceeds independently.

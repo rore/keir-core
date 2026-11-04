@@ -44,9 +44,11 @@ Owning feature: [Declared-error limit parity](../../roadmap/features/declared-er
 
 ## Implementation
 
-Source inspection and executable reproduction confirm the omitted generic condition. Independent technical plan review passes and the manager releases isolated implementation. The defect fails closed at runtime; no current demo impact or completed fix is claimed.
+Source inspection and executable reproduction confirmed the omitted generic condition. The reviewed fix is integrated on main with passing hosted product and workflow checks; task cleanup remains before closure. No current demo impact or widened runtime authority is claimed.
 
 The developer completed frozen revision 878e6c9c23843d6b96a69e21af952f02029f463f. The manager accepted independent result review and integrated the four exact reviewed file blobs on main. Hosted delivery verification and recoverable task cleanup remain before closing the feature.
+
+Main integration fb48d7ae0df6324860237e9b373056eb84922895 preserves those exact four file blobs. Both hosted checks pass on child revision 73f44a5924679943f27b043f6577582fa5a6bf90: [product contract](https://github.com/rore/keir-core/actions/runs/41845245471) and [workflow](https://github.com/rore/keir-core/actions/runs/41845244950). The developer has been asked to archive and verify retained evidence/branch recovery, remove only its completed task checkout, and detach completed participation. The next core assignment is separate real-effect source-impact discovery, rather than starting an unassigned parser follow-up.
 
 ## Verification and result review
 
