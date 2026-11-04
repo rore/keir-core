@@ -35,7 +35,7 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 
 ## Notes
 
-**Current correction:** Customization deletion is in implementation after architecture advice and independent plan review. The [deletion Work Record](../../.agent-workflow/tasks/customization-deletion.md) owns the confirmed card action, atomic turn-off of the selected item, durable deletion/replay guards, retained audit/accounting, regression coverage and normal demo update. Storage checks pass at the developer checkpoint; combined verification, result review and delivery remain pending.
+**Current correction:** [Customization deletion](https://github.com/rore/keir-demo-app/commit/8c314a68bf0286006b5c6adbc860afc150f6d41b) is reviewed, integrated and pushed. It adds confirmed card deletion, atomic turn-off of the selected item, durable deletion/replay guards and retained audit/accounting. Local verification passes 264 fast tests with one platform-specific skip, 11 deletion browser cases, four existing recovery cases and current-data migration rehearsal. Independent result review and the separate UI confirmation/Cancel check pass. [Hosted CI](https://github.com/rore/keir-demo-app/actions/runs/41825769466) and the normal demo update remain pending in the [Work Record](../../.agent-workflow/tasks/customization-deletion.md).
 
 **Dependencies:** [real-task-reads](../features/real-task-reads.md); [reusable-simulation](../features/reusable-simulation.md).
 
