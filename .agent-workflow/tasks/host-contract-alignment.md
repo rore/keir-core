@@ -21,9 +21,9 @@ Owning feature: [Real-effect admission](../../roadmap/features/real-effect-admis
 
 **Risk:** Elevated
 
-**Complexity:** Moderate
+**Complexity:** Large
 
-**Reason:** Provisional Gray floor for a corrected compiler/runtime authority and compatibility boundary. The existing protocol and interpreters are reused; no native deployment or environment change. Reassess against the concrete complete path set before implementation.
+**Reason:** Gray floor for a corrected compiler/runtime authority and compatibility boundary. Large complexity reflects the reviewed compiler, two-runtime, shared-corpus, package and documentation delivery; the existing interpreters are reused. No native deployment or environment change.
 
 **Discovery:** The audit and completed inventories separate prescribed deployment credentials from real host guarantees. The latest user-directed proposal has two-argument bind/prepare, derives metadata internally and has no extra permission/key/qualification callback or narrowing knobs. It recommends an explicit effect/4 identity with legacy /1-/3 behavior retained only on legacy paths, one engine, and a new demo definition identity. Existing JSON pins can preserve history without speculative DDL; unresolved old work remains ineligible. Independent review must assess necessity and the bounded compatibility cost, not merely internal consistency.
 
@@ -33,13 +33,13 @@ Owning feature: [Real-effect admission](../../roadmap/features/real-effect-admis
 
 **Verification plan:** Shared Java/Node, source/installed and demo native tests -> Complete/missing/extra/incompatible function-map initialization and mixed-mode/profile rejection; same compiler-generated artifact in Java/Node simulation/real and source/installed execution; legacy /1-/3 API/error/golden compatibility and new-vs-legacy overload rejection. Verify normal prepare without repeated metadata, static type/limit checks, fresh context, original opaque key forwarding and separate host rejection/definite NONE versus pre-dispatch structural/deadline failure. Deliberately test zero-call invocation without removed callbacks, pending host permission/revocation before native effects, retained CONFIRMED after a later host denial, duplicate/payload mismatch, malformed evidence, response loss/timeout UNKNOWN and unchanged winners/no retry. Reuse preparation across different events/users/keys/deadlines with no cached permission. A small local/loopback-service host example demonstrates ordinary transport integration without a certification input or new framework. Preserve package integrity and actual native persistence/process coverage; old records/pending/STARTED/revoked states and owner-authorized historical reads remain safe in the separately reviewed demo. Real-provider/designer journey and ordinary setup follow corrected packages; no attestation/platform gate or invented guarantee.
 
-**Plan review:** Agent technical review: independent clean-context review of core 15d9a8f, proposal b921f6e2, frozen inventories and actual callers, recorded under Plan review below. Conditional PASS; manager accepts the simplified architecture and explicit effect/4 compatibility boundary. Owners must record the four concrete path/test conditions before source release. Review found no justification for extra callbacks, credentials, evaluator, registry or generic cache.
+**Plan review:** Agent technical review: independent clean-context review of core 15d9a8f, proposal b921f6e2, frozen inventories and actual callers, recorded under Plan review below. Conditional PASS; manager accepts the simplified architecture and explicit effect/4 compatibility boundary. The core final plan and empty-catalog disposition satisfy its release conditions; demo final path/test planning remains separate. Review found no justification for extra callbacks, credentials, evaluator, registry or generic cache.
 
 **Approvals:** User approved publishing the reviewed audit and continuing: 'yes, let's continue', then 'and let's change what needs to be changed'. This authorizes the audit corrections with preserved safety and explicit compatibility; concrete source changes still follow plan review. No live environment/configuration/history change is authorized.
 
 **Exceptions:** —
 
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Coordination
@@ -70,6 +70,14 @@ Before source release, final owner path/test plans must incorporate:
 - Exact compiler/runtime validators/dispatch/API, shared drivers/verifiers, package/example, specifications/assistant guides, demo catalog/simulator/lifecycle/native/history and provenance boundaries. A small local/service-backed example demonstrates the public API without deployment credentials.
 
 Retain independent expectations for attempted host rejection versus legacy pre-dispatch denial, zero-call behavior, same-prepared fresh contexts, 8-step/4-call and AST/trace/data/DCM ceilings, original keys and truthful NONE/CONFIRMED/UNKNOWN. Compile legacy Java null calls and reject mixed API/handle families and surplus Node arguments. This is plan review only; no new execution, provider or native evidence is claimed. Both developers accepted their read-only final planning contribution. Their final path/test plans are the remaining source-release condition, after which core and demo correction can proceed in disjoint checkouts; demo package verification waits for the verified corrected core delivery.
+
+## Core implementation release
+
+Manager inspected the final core plan SHA256 `c8121b4112939ef5244a4454dfed275388fa15ffecc000a0521406967d9a6f47`. Its planned 61 paths comprise nine existing production files, compiler/runtime tests and shared drivers/verifiers, generated effect4 fixtures, existing packaged examples/lock integrity, and affected specifications/assistant guides. Production ownership is CompilerCli/KeirCompiler/Dcm, Node model/index/validation, and Java KeirRuntime/Artifact/CheckedCel. No dependency, POM, package-export, CI or governance change is planned. The complete exact path/test list is frozen in the private review inputs; final source/result review must compare the actual diff with it.
+
+The plan incorporates internal supported compiler/environment checks, legacy Java null compatibility, strict old/new API/handle/argument rejection, source/installed shared parity, same-prepared fresh context and the local/service-backed test example. Empty capability catalogs are accepted as operation-free with mode inapplicable: never default to real/simulation or add a public mode option. CALL against an absent capability fails structural validation; nonempty registrations remain complete and mode-consistent, including for zero-call programs. Add compiler/Java/Node empty-bind/return and absent-CALL tests. These resolve the core technical conditions of the independent review without changing the frozen API.
+
+Manager releases isolated core implementation under this record. Reuse the existing interpreter and enforce existing DCM/resource ceilings. Preserve legacy /1-/3 behavior and fixtures exactly; changed host rejection/zero-call semantics belong only to /4. Run focused compiler/runtime tests, full affected fast regression/coverage, repeated artifact generation, shared Java/Node and source/installed/package checks. Freeze actual source/packages/evidence for independent result and simplicity review before integration. No runtime correctness or test success is claimed by this release. The demo correction remains separately owned and its final plan is still being completed; it need not wait for core source work, but execution waits for verified packages.
 
 ## Authorized continuation
 
