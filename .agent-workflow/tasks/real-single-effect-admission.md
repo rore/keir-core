@@ -39,7 +39,7 @@ Owning feature: [Real-effect admission](../../roadmap/features/real-effect-admis
 
 **Exceptions:** —
 
-**State:** Ready for review
+**State:** Blocked or returned to planning
 <!-- agent-workflow:end -->
 
 ## Accepted design inputs
@@ -82,3 +82,11 @@ Developer froze cf84d28f5b511942e90101c07b60e25a2f141d97 against 0dbea0611973566
 Evidence reports 250 Java and 424 Node tests with no failures/skips, exact full 28-case cross-runtime protocol output, source/installed conformance, three installed-host tests, 19 packaged read-simulation reports and 29 schema fixtures/reports. All prior golden fixtures/pins and registry dependencies are unchanged. All eight packaged Node files match committed blobs, archive and installation exactly; new effect/3 fixture bytes also match. Tested working files differ from 29 committed text blobs only by Git CRLF-to-LF normalization, recorded separately in the proof; no other byte drift is claimed. The packaged Java host contains the 44 verified runtime classes unchanged.
 
 Independent result review, manager integration and hosted CI remain. Deterministic controlled-real fixtures do not qualify SQLite, a deployment or normal-data real writes. Frozen source/build/logs remain pinned for review; no normal server/data/provider/global setting was changed.
+
+## Result review: changes required
+
+Independent clean-context non-implementer review of cf84d28/proof 681ffffff finds one blocking callback-containment defect and one documentation correction. Promise.prototype.then.call avoids an own then getter but still uses Promise constructor/species lookup before attaching reactions. A rejected native Promise with a throwing constructor or Symbol.species getter can execute that getter and remain unhandled; existing coverage poisons only then. This violates the recorded zero-getter/native-rejection condition. Reproduce in an isolated process and resolve the concrete boundary with focused regression. Do not install global rejection handlers, suppress unrelated host failures, mutate global prototypes, add dependencies or a second execution framework. If supported platform APIs cannot meet the exact adversarial guarantee, report the demonstrated limitation and a bounded contract decision instead of claiming containment or silently weakening assertions.
+
+Narrow runtime-node README's general simulation-only sentence to effect/2, consistent with its explicit real effect/3 section. Preserve original frozen proof and failure evidence; any corrected source/packaged README changes require new package identities and focused installed verification. The reviewer otherwise accepts production semantics and verification adequacy: all 52 source and 30 raw-evidence identities, 29 CRLF-only differences, complete 28-case protocol equality, eight Node archive/installed files and 44 packaged Java runtime classes were independently verified. Existing Java/compiler/conformance results remain reusable where unchanged. The reviewer ran no tests or edits; the Promise finding is source-derived and needs reproduction.
+
+Core integration/package release remains blocked on this bounded repair and delta result review. The separately released demo implementation continues independent work; it must not consume this candidate as an accepted delivery or qualify real writes from its deterministic fixtures.
