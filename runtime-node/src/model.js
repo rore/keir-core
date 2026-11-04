@@ -1,4 +1,5 @@
 import { canonicalBytes, CanonicalLimitError, digest, parseCanonical, parseModelJson } from './canonical.js';
+import { types } from 'node:util';
 import { prepareModelTypes } from './cel.js';
 import { ENVIRONMENT, LIMITS, Fault, requireThat as ok, keys, shape, text, integer, freeze, pointer, validateModel } from './validation.js';
 
@@ -6,6 +7,28 @@ const models = new WeakMap();
 const fields = ['domainId', 'domainVersion', 'format', 'digest', 'descriptorRecipe'];
 export const modelFor = handle => models.get(handle);
 const same = (left, right) => canonicalBytes(left).equals(canonicalBytes(right));
+const { isPromise } = types;
+const { getPrototypeOf, getOwnPropertyDescriptor, hasOwn } = Object;
+const { apply } = Reflect;
+const promiseConstructor = Promise, promisePrototype = Promise.prototype, promiseThen = Promise.prototype.then;
+const speciesKey = Symbol.species;
+const constructorDescriptor = getOwnPropertyDescriptor(promisePrototype, 'constructor');
+const speciesDescriptor = getOwnPropertyDescriptor(promiseConstructor, speciesKey);
+const discard = () => undefined;
+
+function sameDescriptor(current, expected) {
+  return current !== undefined && current.configurable === expected.configurable && current.enumerable === expected.enumerable &&
+    hasOwn(current, 'value') === hasOwn(expected, 'value') && (hasOwn(expected, 'value') ?
+      current.value === expected.value && current.writable === expected.writable : current.get === expected.get && current.set === expected.set);
+}
+
+function discardNativeResult(value) {
+  if (!isPromise(value) || getPrototypeOf(value) !== promisePrototype || getOwnPropertyDescriptor(value, 'constructor')) return;
+  if (!sameDescriptor(getOwnPropertyDescriptor(promisePrototype, 'constructor'), constructorDescriptor) ||
+      !sameDescriptor(getOwnPropertyDescriptor(promiseConstructor, speciesKey), speciesDescriptor)) return;
+  // Only the verified intrinsic path is safe; discard both values to avoid another thenable assimilation.
+  apply(promiseThen, value, [discard, discard]);
+}
 
 function qualificationSnapshot(value, approval, dcm, modelRef) {
   const path = '/binding/qualification';
@@ -33,8 +56,7 @@ export function requireCurrent(bound, code, path) {
   let current;
   try { current = bound.qualification.isCurrent(); } catch { /* A failed host check denies authority. */ }
   if (current === true) return;
-  // Consume rejected native Promises without reading or assimilating arbitrary thenables.
-  try { Promise.prototype.then.call(current, undefined, () => {}); } catch { /* Not a native Promise. */ }
+  discardNativeResult(current);
   throw new Fault(code, path);
 }
 

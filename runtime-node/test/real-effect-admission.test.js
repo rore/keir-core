@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { setImmediate as immediate } from 'node:timers/promises';
 import * as api from '../src/index.js';
 import { canonicalBytes, digest } from '../src/canonical.js';
@@ -16,6 +17,37 @@ function prepared(f, binding = f.bind()) {
   assert.equal(result.diagnostic, null); return result.prepared;
 }
 const noIntent = outcome => { assert.deepEqual(outcome.effects, []); assert.equal(outcome.trace.some(row => row.event === 'EFFECT_INTENT'), false); };
+
+function callbackChild(setups, expectedExit = 0) {
+  const code = `
+    import assert from 'node:assert/strict';
+    import { runInNewContext } from 'node:vm';
+    import * as api from ${JSON.stringify(new URL('../src/index.js', import.meta.url).href)};
+    import { realFixture } from ${JSON.stringify(new URL('../../conformance/generic-hooks/real-effect.mjs', import.meta.url).href)};
+    let getters = 0, traps = 0;
+    const discard = () => undefined;
+    ${(Array.isArray(setups) ? setups : [setups]).map(setup => `{
+    let restore = () => {};
+    ${setup}
+    const f = realFixture(api), result = f.bind(f.qualification({}, () => value));
+    const observed = { code: result.diagnostic?.code, bound: result.boundModel, getters, traps,
+      calls: f.calls.length, authorizers: f.state.authorizations };
+    restore();
+    assert.deepEqual(observed, { code: 'ADMISSION_INVALID', bound: null, getters: 0, traps: 0, calls: 0, authorizers: 0 });
+    console.log(JSON.stringify(observed));
+    }`).join('\n')}
+    setImmediate(() => { assert.equal(getters, 0); assert.equal(traps, 0); console.log('next-turn'); });
+  `;
+  const child = spawnSync(process.execPath, ['--unhandled-rejections=strict', '--input-type=module', '--eval', code],
+    { encoding: 'utf8', timeout: 10_000 });
+  assert.equal(child.error, undefined);
+  assert.equal(child.status, expectedExit, child.stderr);
+  const lines = child.stdout.trim().split('\n');
+  assert.equal(JSON.parse(lines[0]).getters, 0);
+  assert.equal(lines.includes('next-turn'), expectedExit === 0);
+  if (expectedExit === 0) assert.equal(child.stderr, '');
+  else assert.match(child.stderr, /callback rejection/);
+}
 
 test('shared effect/3 protocol facts and same-artifact mode outcomes', async () => {
   const results = await runRealCases(api);
@@ -90,22 +122,90 @@ test('qualification and invoker descriptors are validated without getters', () =
   }
 });
 
-test('invalid current callbacks are synchronous and do not assimilate thenables or leak native rejections', async t => {
+test('invalid current callbacks are synchronous and do not assimilate thenables', () => {
   let getters = 0, thenCalls = 0;
-  const failures = [];
-  const onUnhandled = failure => failures.push(failure);
-  process.on('unhandledRejection', onUnhandled); t.after(() => process.off('unhandledRejection', onUnhandled));
   const thenable = { get then() { getters++; return () => { thenCalls++; }; } };
-  const native = Promise.reject(Error('private rejected callback'));
-  Object.defineProperty(native, 'then', { get() { getters++; throw Error('private getter'); } });
   for (const callback of [() => false, () => null, () => 'true', () => new Boolean(true), () => { throw Error('private'); },
-    () => thenable, () => native, async () => { throw Error('private async'); }]) {
+    () => thenable]) {
     const f = realFixture(api);
     rejected(f.bind(f.qualification({}, callback)));
     assert.equal(f.calls.length, 0);
   }
-  await immediate();
-  assert.deepEqual(failures, []); assert.equal(getters, 0); assert.equal(thenCalls, 0);
+  assert.equal(getters, 0); assert.equal(thenCalls, 0);
+});
+
+test('ordinary native callback results discard both settled values without unhandled rejection', () => {
+  callbackChild([
+    `const value = Promise.reject(Error('callback rejection'));`,
+    `const value = (async () => { throw Error('callback rejection'); })();`,
+    `const value = Promise.resolve(true);`,
+    `const value = Promise.reject(Error('callback rejection'));
+      Object.defineProperty(value, 'then', { get() { getters++; throw Error('private getter'); } });`,
+    `const value = Promise.resolve(true);
+      Object.defineProperty(value, 'then', { get() { getters++; throw Error('private getter'); } });`,
+    `const settled = {}, value = Promise.resolve(settled);
+      Object.defineProperty(settled, 'then', { get() { getters++; throw Error('later poisoned value'); } });`,
+  ]);
+});
+
+test('unsupported callback shapes deny without getters, proxy traps or asynchronous assimilation', () => {
+  callbackChild([...[true, false].map(configurable => `
+    const value = Promise.reject(Error('callback rejection')); value.catch(discard);
+    Object.defineProperty(value, 'constructor', { configurable: ${configurable}, get() { getters++; throw Error('constructor getter'); } });
+  `),
+    `class HostPromise extends Promise {};
+      const value = HostPromise.reject(Error('callback rejection')); value.catch(discard);
+      Object.defineProperty(HostPromise, Symbol.species, { get() { getters++; throw Error('species getter'); } });`,
+    `const value = runInNewContext('Promise.reject(Error("callback rejection"))'); value.catch(discard);
+      Object.defineProperty(Object.getPrototypeOf(value).constructor, Symbol.species,
+        { get() { getters++; throw Error('foreign species getter'); } });`,
+    `const promise = Promise.reject(Error('callback rejection')); promise.catch(discard);
+      const value = new Proxy(promise, {
+        get() { traps++; throw Error('proxy get'); }, getPrototypeOf() { traps++; throw Error('proxy prototype'); },
+        getOwnPropertyDescriptor() { traps++; throw Error('proxy descriptor'); }
+      });`,
+    `const value = { get then() { getters++; throw Error('thenable getter'); } };`,
+    `const value = Promise.reject(Error('callback rejection')); value.catch(discard);
+      const before = Object.getOwnPropertyDescriptor(Promise.prototype, 'constructor');
+      restore = () => Object.defineProperty(Promise.prototype, 'constructor', before);
+      Object.defineProperty(Promise.prototype, 'constructor', { configurable: true, get() { getters++; throw Error('intrinsic constructor getter'); } });`,
+    `const value = Promise.reject(Error('callback rejection')); value.catch(discard);
+      const before = Object.getOwnPropertyDescriptor(Promise, Symbol.species);
+      restore = () => Object.defineProperty(Promise, Symbol.species, before);
+      Object.defineProperty(Promise, Symbol.species, { get() { getters++; throw Error('intrinsic species getter'); } });`,
+  ]);
+});
+
+test('unsupported unmanaged host rejections remain explicit isolated failures, not containment claims', () => {
+  // The host violates the synchronous contract; strict children must still report its unhandled rejection.
+  for (const setup of [
+    `const value = Promise.reject(Error('callback rejection'));
+      Object.defineProperty(value, 'constructor', { get() { getters++; throw Error('constructor getter'); } });`,
+    `class HostPromise extends Promise { static get [Symbol.species]() { getters++; throw Error('species getter'); } }
+      const value = HostPromise.reject(Error('callback rejection'));`,
+    `const value = runInNewContext('Promise.reject(Error("callback rejection"))');`,
+    `const value = Promise.reject(Error('callback rejection'));
+      const before = Object.getOwnPropertyDescriptor(Promise.prototype, 'constructor');
+      restore = () => Object.defineProperty(Promise.prototype, 'constructor', before);
+      Object.defineProperty(Promise.prototype, 'constructor', { ...before, writable: false });`,
+    `const value = Promise.reject(Error('callback rejection'));
+      const before = Object.getOwnPropertyDescriptor(Promise, Symbol.species);
+      restore = () => Object.defineProperty(Promise, Symbol.species, before);
+      Object.defineProperty(Promise, Symbol.species, { ...before, enumerable: !before.enumerable });`,
+    `const value = Promise.reject(Error('callback rejection'));
+      const before = Object.getOwnPropertyDescriptor(Promise, Symbol.species);
+      restore = () => Object.defineProperty(Promise, Symbol.species, before);
+      Object.defineProperty(Promise, Symbol.species, { configurable: true, value: Promise });`,
+  ]) callbackChild(setup, 1);
+});
+
+test('invalid callback after CONFIRMED denies the later READ and preserves the receipt', async () => {
+  const f = realFixture(api, { program: 'after-write-read' }); let current = true, getters = 0;
+  const handle = prepared(f, f.bind(f.qualification({}, () => current)));
+  f.state.afterWrite = () => { current = { get then() { getters++; throw Error('private getter'); } }; };
+  const outcome = await api.invokeProgram(handle, { taskId: 'task1' }, f.invocation);
+  assert.equal(outcome.error.code, 'AUTHORITY_DENIED'); assert.equal(outcome.effects[0].state, 'CONFIRMED');
+  assert.equal(getters, 0); assert.equal(f.calls.length, 2); assert.equal(f.state.authorizations, 3);
 });
 
 test('snapshots all authority references before the initial host callback', async () => {
