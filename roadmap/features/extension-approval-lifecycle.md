@@ -35,7 +35,7 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 
 ## Notes
 
-**Current correction:** The user reports that customization deletion is missing. The [deletion Work Record](../../.agent-workflow/tasks/customization-deletion.md) owns the bounded lifecycle/API/UI correction, regression coverage and update of the normal demo. Planning is in progress; no deletion support is claimed yet.
+**Current correction:** Customization deletion is in implementation after architecture advice and independent plan review. The [deletion Work Record](../../.agent-workflow/tasks/customization-deletion.md) owns the confirmed card action, atomic turn-off of the selected item, durable deletion/replay guards, retained audit/accounting, regression coverage and normal demo update. Storage checks pass at the developer checkpoint; combined verification, result review and delivery remain pending.
 
 **Dependencies:** [real-task-reads](../features/real-task-reads.md); [reusable-simulation](../features/reusable-simulation.md).
 
