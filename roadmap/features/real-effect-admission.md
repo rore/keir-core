@@ -1,7 +1,7 @@
 ---
 id: "real-effect-admission"
 title: "Define and qualify admission for real single effects"
-status: "blocked"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -12,7 +12,7 @@ repo: "keir-core"
 
 Establish the reviewed contract and executable evidence needed to admit a real single WRITE. Current effect/2 is intentionally SIMULATION_ONLY.
 
-**Current assignment — hold:** The user has reopened the real-application design. The architect is auditing the base guiding principles against the added contracts and will identify deviations and concrete corrections before further implementation, acceptance or rollout. Distinguish the host capability/API contract from integration-specific evidence. Preserve delivered source and test evidence; no speculative rollback or older release supersedes this hold. See the owning implementation record for preserved delivery facts and the new hold.
+**Current assignment — corrective planning:** The user approved the [audit](../../docs/internal/real-application-design-audit.md) and requested the necessary changes. The [corrective work record](../../.agent-workflow/tasks/host-contract-alignment.md) owns the exact generic contract, consumer/state inventory, compatibility choice and subsequent reviewed core correction. Architect and developer offers cover disjoint design/inventory work; earlier implementation is not resumed. Preserve host guarantees and prior measured evidence while removing prescribed core deployment-report/build gates. Source release follows the concrete corrected plan and baseline-alignment review.
 
 ## In Scope
 
