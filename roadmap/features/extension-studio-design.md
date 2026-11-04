@@ -10,6 +10,8 @@ repo: "keir-demo-app"
 
 ## Summary
 
+Current iteration: the real AI-driven journey is under task-based business-user review on the upgraded demo. The first complete journey worked, but exposed sentence-length saved names, a less relevant foregrounded example and policy-like explanations. The designer and developer are iterating on the actual interaction, including changes of mind and returning to saved work; fresh human visual acceptance remains open.
+
 The Extension Studio is the centerpiece of the demo. Maintain the accepted working design baseline and refine each workflow's product, interaction and visual design as real functionality is implemented.
 
 The designer owns UX/UI: a purposeful, polished application with clear hierarchy, usable density and realistic interactions, not a generic AI template. The architect owns technical constraints; the manager coordinates acceptance. The chat-led, resizable preview is the accepted starting direction; production interaction details mature with each functional feature.
