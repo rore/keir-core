@@ -39,7 +39,7 @@ Owning feature: [Real-effect admission](../../roadmap/features/real-effect-admis
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Accepted design inputs
@@ -107,4 +107,10 @@ Focused tests cover ordinary rejected/fulfilled Promises, poisoned own then, con
 
 The architect also considered removing all rejection cleanup for simplicity. Manager retains the independent reviewer's safe-subset choice: a small guard preserves ordinary accidental-async error handling, whereas removal would unnecessarily lose it without satisfying universal hostile-host containment. This alternative does not reopen the released plan. The developer has confirmed adoption and resumed guarded cleanup/tests/package verification; only a concrete correctness conflict would return the repair to planning.
 
-The corrected source checkpoint reports 428 Node regression cases passing with full source-line coverage. Focused callback cases pass in 3.58 seconds after batching safe child-process cases; constructor/species cases deny with zero user getters, ordinary subset rejection cleanup remains contained and unsupported unmanaged failures stay explicit isolated negatives. The newly installed package passes all 16 admission and three host cases plus combined conformance. An initial generated installed-test copy mixed source and installed module identities; the corrected installed test setup passes without changing the admission assertions. The five-path correction is committed as edb43cb21c63f54a6e479fc6744e7886a45106c8 with a clean tracked tree; final proof compilation and bounded delta result review remain. Original cf84d28 proof, 30 raw evidence files and previous archive remain preserved.
+The corrected source checkpoint reports 428 Node regression cases passing with full source-line coverage. Focused callback cases pass in 3.58 seconds after batching safe child-process cases; constructor/species cases deny with zero user getters, ordinary subset rejection cleanup remains contained and unsupported unmanaged failures stay explicit isolated negatives. The newly installed package passes all 16 admission and three host cases plus combined conformance. The initial generated installed-test copy corrupted a Unicode fixture through Windows cp1252 decoding; regenerating explicitly as UTF-8 makes the same installed admission assertions pass. This corrects the earlier provisional explanation; no product change was required. The five-path correction is committed as edb43cb21c63f54a6e479fc6744e7886a45106c8 with a clean tracked tree. Original cf84d28 proof, 30 raw evidence files and previous archive remain preserved.
+
+## Frozen callback correction for delta review
+
+Manager verified clean edb43cb21c63f54a6e479fc6744e7886a45106c8 and final proof SHA256 8b5278d541ed7d8d72d564a1a3f0350e4e2ab166c9276c5bbd213d9fa4476846. Delta is exactly five reviewed paths: Node model, admission tests, README, local example lock integrity and the callback-boundary specification. The new runtime archive SHA256 is 30f2059f9e976da448b61ccd43e732cc6eac7d158ad348db4e8aba32d6ebca0c; committed/archive/installed bytes agree. Compiler CLI, Java runtime/host JAR identities and old artifact/schema evidence remain unchanged and reused.
+
+Measured correction evidence records 16 focused, 428 full Node, 16 installed admission and three installed host cases passing, matching 28-case protocol output and combined source/packaged conformance. Eight strict child processes cover safe and explicitly unsupported cases without global rejection handlers; after-CONFIRMED denial retains its receipt. Node source-line coverage is 100%, branches 97.97%; the model's lines/branches are fully covered. Initial authorization-count and fixture-decoding failures and their repair logs remain retained. Independent bounded delta result review is assigned; package release/integration and native qualification remain gated.
