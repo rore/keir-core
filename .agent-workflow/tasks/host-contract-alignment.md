@@ -94,3 +94,6 @@ Start from that initialization model: validate the DCM and complete compatible i
 ## Implementation checkpoint
 
 The assigned core developer explicitly accepted the source release and resumed isolated implementation of the reviewed 61-path plan. The queued release required an ordinary app-message fallback after its recipient became idle; acceptance was verified separately from transport delivery. Manager retains canonical record/roadmap and integration ownership. No corrected runtime test or package result is claimed yet.
+## First source and focused-verification milestone
+
+Developer-reported in the released isolated checkout: compiler effect/4 support and four deterministic fixture variants are ready; GenericHookCompilerTest passes 16 tests; the Java corrected public API compiles; Node two-argument binding/preparation and fresh call context are implemented, with 39 focused legacy checks passing. Manager inspected the evolving compiler/runtime source path set and the corresponding demo stable-context/native-preservation changes. These are partial implementation checks, not shared new-profile conformance or package/result acceptance. New Node/Java public-API tests, independent shared outcomes, examples/scenarios, source/installed parity, package evidence and independent result/simplicity review remain. No committed correction or package handoff is claimed.
