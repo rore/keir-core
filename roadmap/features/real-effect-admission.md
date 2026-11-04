@@ -1,7 +1,7 @@
 ---
 id: "real-effect-admission"
 title: "Define and qualify admission for real single effects"
-status: "active"
+status: "blocked"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -12,7 +12,7 @@ repo: "keir-core"
 
 Establish the reviewed contract and executable evidence needed to admit a real single WRITE. Current effect/2 is intentionally SIMULATION_ONLY.
 
-**Current assignment:** The architect is producing the smallest concrete real-profile/evidence/API contract for the task-completion scenario and local SQLite adapter, aligned with native event and keyed-create requirements. Define a separate compatibility boundary and preserve existing simulation-only enforcement. Compiler/Java/Node implementation follows reviewed contracts and shared cases; no unchecked mode switch is authorized. This design progresses in parallel with host-foundation discovery and Studio review.
+**Current assignment — hold:** The user has reopened the real-application design. The architect is auditing the base guiding principles against the added contracts and will identify deviations and concrete corrections before further implementation, acceptance or rollout. Distinguish the host capability/API contract from integration-specific evidence. Preserve delivered source and test evidence; no speculative rollback or older release supersedes this hold. See the owning implementation record for preserved delivery facts and the new hold.
 
 ## In Scope
 
@@ -26,7 +26,7 @@ Multiple writes, self-certifying declarations, exactly-once claims, automatic re
 
 ## Done When
 
-- [x] Design/spec: publish the real-effect assurance/admission contract and required host evidence, including revocation and unsupported transports.
+- [ ] Design/spec reopened: audit and reconcile the real-effect contract and host responsibilities against the base guiding principles before accepting corrected definitions.
 - [x] Implementation: both runtimes admit only the selected supported real profile and reject missing, stale or incompatible evidence.
 - [x] Verification: shared conformance covers original-key identity, authority, definite NONE/CONFIRMED versus UNKNOWN, deadlines and rejection before dispatch.
 

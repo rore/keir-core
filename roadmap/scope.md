@@ -2,7 +2,7 @@
 
 This is the single roadmap for `keir-core` and `keir-demo-app`: delivered features, planned deliveries and visible uncommitted proposals. The manager owns sequence and combined acceptance; each card identifies the repository that owns implementation.
 
-Current focus is a recognizable real customization: completing a task in a customer-chosen project creates a task with a customer-chosen title. Mature the real-effect contract and native event/key foundation in parallel with reviewing and simplifying the reusable Studio UI. The small compiler compatibility fix runs independently. Keep unassigned parser, AI-readiness, broader schema/simulation and host-skill follow-ups explicitly queued rather than treating every unfinished feature as active.
+Current focus is a user-directed base-design reassessment. Real-effect and task-integration implementation, acceptance and rollout are on hold while the architect compares the real-application contracts with the original guiding principles and provides concrete deviations/corrections and concise durable guidance. Preserve current source, tests, evidence and user data; do not infer product-design acceptance from technical passes or perform a speculative rollback. The manager will reconcile corrected scope before resuming the affected core, Studio, authoring and lifecycle work. Unassigned follow-ups remain queued.
 
 ## Tracking progress
 

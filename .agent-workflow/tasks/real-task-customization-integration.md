@@ -39,7 +39,7 @@ Owning feature: [Real task integration](../../roadmap/features/demo-task-integra
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Blocked or returned to planning
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -71,6 +71,10 @@ Manager accepts the architect's exact-environment CI clarification. The first re
 Core package dependency is cleared for isolated consumption: independent delta result review passes edb43cb, integrated and pushed as core d59e375 with all 52 source blobs verified equal. Manager rehashed the exact runtime archive and compiler CLI against accepted proof and sent the actual package identities/provenance mapping to the developer. Core hosted CI remains in progress, and normal-data release still requires all delivery/host qualification/combined result gates. The developer may now install only into the isolated checkout after unlinking its dependency junction, then exercise actual effect/3 runtime/native/lifecycle/AI paths. No artifact, app approval or qualified effect is inferred from this handoff.
 
 Core hosted product/workflow CI now passes on d59e375, and subsequent bookkeeping CI passes. The demo developer verified the exact proof, copied and rehashed the accepted runtime archive/compiler CLI, checked all eight runtime archive entries and retained the unchanged compiler dependency/notice inventory. Manager independently hashed both actual task-vendor files to the same accepted identities. The task dependency junction was removed nonrecursively after target verification, and isolated offline local-file installation is underway with task-owned cache. No canonical dependency/data/provider/global changes are claimed. No package or core-CI wait remains for isolated actual native/runtime tests; application qualification, real provider/designer acceptance and normal rollout remain distinct gates.
+
+## User-directed design hold
+
+The user directs a base-design/guiding-principle audit of the real-application definitions and a concrete correction plan before further work. Hold all affected implementation, acceptance, package use, qualification/effect/provider runs, rollout and cleanup; earlier releases do not override this instruction. The architect owns the source-backed reassessment, including the boundary between the host capability/API contract and integration-specific implementation evidence. Manager will reconcile corrected scope before any resume. Preserve uncommitted source, test data, receipts/accounting, packages and evidence at a safe operation boundary. No speculative rollback, environment change or live-demo update. Prior technical passes remain evidence of their tested behavior, not acceptance of the reopened product design.
 
 ## Accepted integration decisions
 

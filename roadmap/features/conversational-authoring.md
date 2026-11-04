@@ -1,7 +1,7 @@
 ---
 id: "conversational-authoring"
 title: "Author customer extensions through a bounded AI workflow"
-status: "active"
+status: "blocked"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -9,6 +9,8 @@ repo: "keir-demo-app"
 ---
 
 ## Summary
+
+**Hold:** The current real-task authoring iteration is held for the user-directed base-design audit. Preserve source, discussions, receipts, provider configuration and accounting. Earlier deliveries remain recorded; no new implementation, provider acceptance or rollout proceeds before corrected scope is reconciled.
 
 **Readiness follow-up:** A valid provider configuration can currently report ready even when its allowance cannot fund one conservative request reservation. Before personal authoring starts, distinguish configured credentials from available spending headroom and explain an insufficient allowance with a direct configuration action. Keep the existing reservation guard, durable accounting and explicit operator settings intact; never increase an allowance or make a provider call merely to validate setup. Verify below/at the reservation boundary and after earlier reservations consume headroom. This is a bounded first-use/recovery fix, not another normal-path workflow panel.
 

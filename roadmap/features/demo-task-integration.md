@@ -1,7 +1,7 @@
 ---
 id: "demo-task-integration"
 title: "Run a real single-effect extension after task completion"
-status: "active"
+status: "blocked"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -14,7 +14,7 @@ Connect an explicitly admitted scalar extension to native TaskCompleted events a
 
 Current priority: replace the invented task-advice demonstration with recognizable task-management customization, beginning with completion-driven task creation. Connect the reviewed native foundation, core real-effect admission and actual Studio journey. Later generic operations should follow actual task-model needs. Preserve existing customer data/history during the transition; do not merely rename advice or claim planned behavior works.
 
-**Current assignment:** Completing a task in a customer-chosen existing project creates a task with a customer-chosen title through generic capabilities. The native event/receipt foundation is reviewed, integrated and verified in hosted CI. The concrete [actual journey integration plan](../../.agent-workflow/tasks/real-task-customization-integration.md) passes independent technical review with recorded draft-identity and fair-dispatch conditions; isolated implementation is released. Host-qualification setup and interface decisions are accepted, including a minimal demo-owned simulation fixture adapter over public runtime APIs; core effect/3 delivery proceeds independently. Existing approvals remain confined to their original read-only behavior.
+**Current assignment — hold:** Real-task implementation, acceptance and rollout are held by the user's request for a base-design/guiding-principle audit. The architect owns concrete deviations and correction planning; manager will reconcile scope before resumption. Preserve the native foundation, uncommitted integration work, packages, test evidence and all user data. Earlier technical approvals/releases do not override the hold; no existing read approval becomes write authority.
 
 ## In Scope
 
@@ -29,7 +29,7 @@ Multiple writes, implicit source-task relationships, derived downstream keys, au
 
 ## Done When
 
-- [x] Design/spec: settle native event/key/dedupe/retention and selection contracts against the core real-effect admission requirements.
+- [ ] Design/spec reopened: reconcile the real-application definitions and host capability responsibilities with the base guiding principles and audit corrections.
 - [ ] Implementation: a reviewed scalar program creates or skips a task against actual services using pinned packages; native completion survives reaction failure.
 - [ ] Verification: concurrent duplicates, payload mismatch, revoked access, restart, changed selection, lost response and UNKNOWN have correct persistent outcomes; no blind replay.
 - [ ] User scope: queue an event for user A, switch the browser to B, then process/redeliver A's event. It retains A's pinned selection and current dispatch authorization, cannot select B's customization and cannot access B's data.
