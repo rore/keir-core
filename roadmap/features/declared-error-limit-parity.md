@@ -1,7 +1,7 @@
 ---
 id: declared-error-limit-parity
 title: Reject oversized read/2 error catalogs during compilation
-status: queued
+status: active
 priority: high
 commitment: committed
 milestone: Execute extensions in Java and Node
