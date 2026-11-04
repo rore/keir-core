@@ -39,12 +39,20 @@ Owning feature: [Declared-error limit parity](../../roadmap/features/declared-er
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 Source inspection and executable reproduction confirm the omitted generic condition. Independent technical plan review passes and the manager releases isolated implementation. The defect fails closed at runtime; no current demo impact or completed fix is claimed.
+
+The developer completed frozen revision 878e6c9c23843d6b96a69e21af952f02029f463f. The manager accepted independent result review and integrated the four exact reviewed file blobs on main. Hosted delivery verification and recoverable task cleanup remain before closing the feature.
+
+## Verification and result review
+
+Agent technical review: independent clean-context non-implementer PASS for 878e6c9 against 9b4ae91, with no blockers. Reviewed revision: 878e6c9c23843d6b96a69e21af952f02029f463f. Verification adequacy: sufficient for the bounded compiler parity fix; source/evidence hashes and actual before/after failure were checked without unnecessary reruns.
+
+The new compiler regression fails before the fix and passes afterward. Full Maven verification passes 233 tests with no failures/skips in 23.006 seconds; Node regression/coverage passes all 391 tests in 2.884 seconds. Shared/packaged conformance preserves 61 legacy read cases, 25 legacy effect scenarios, nine generic read and 19 generic effect scenarios, with 16 fresh compiler runs and eight packaged host batches retaining exact golden bytes. Changed compiler line 147 has all four branches covered. Three additive boundary tests preserve legacy behavior and verify zero runtime dispatch on invalid models. All 25 frozen evidence files and four source hashes match; no fixtures, schemas, runtime production logic, dependencies or unrelated behavior changed.
 
 ## Plan review
 

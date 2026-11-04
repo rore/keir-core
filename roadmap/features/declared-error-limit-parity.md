@@ -14,10 +14,12 @@ The read/2 compiler omits the 16-declared-error limit already enforced by its sc
 
 ## Done When
 
-- [ ] Reproduce the compiler/runtime mismatch at the 16/17 boundary.
-- [ ] Apply the existing limit to read/2 compilation, preserving legacy read/1 behavior and existing effect-profile validation.
-- [ ] Compiler, Java and Node boundary regressions agree; existing conformance passes without weakening admission or changing valid artifacts.
+- [x] Reproduce the compiler/runtime mismatch at the 16/17 boundary.
+- [x] Apply the existing limit to read/2 compilation, preserving legacy read/1 behavior and existing effect-profile validation.
+- [x] Compiler, Java and Node boundary regressions agree; existing conformance passes without weakening admission or changing valid artifacts.
 
 ## Notes
 
 Bounded follow-up to [generic hook contracts](generic-hook-capability-contract.md). The manager owns planning; this fix runs independently of demo UX and real-task scenario design.
+
+Implementation at 878e6c9 passes independent result review: 233 Maven tests, 391 Node tests and shared/packaged conformance preserve exact reference artifacts. The manager integrated the reviewed files on main. Hosted delivery verification and recoverable cleanup remain before closing this feature; no runtime-authority or profile limit was weakened.
