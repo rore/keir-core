@@ -56,7 +56,7 @@ function callShape(call, dcm, stub) {
 }
 
 export function consumeGeneric(outcome, dcm) {
-  const entry = Object.values(dcm.entrypoints)[0], effect = dcm.format === 'keir-dcm/effect-2';
+  const entry = Object.values(dcm.entrypoints)[0], effect = dcm.format.startsWith('keir-dcm/effect-');
   try {
     if (own(outcome, 'result')) typed(outcome.result, entry.output, dcm);
     if (effect) return consumeEffect(outcome);
@@ -82,12 +82,12 @@ export function consumeGeneric(outcome, dcm) {
 }
 
 export function validateGenericScenario(row, dcm) {
-  json(row); const effect = dcm.format === 'keir-dcm/effect-2', entry = Object.values(dcm.entrypoints)[0];
-  shape(row, ['format', 'id', 'given', 'stubs', 'expect']); assert.equal(row.format, 'keir-scenario/' + (effect ? 'effect-2' : 'read-2'));
+  json(row); const effect = dcm.format.startsWith('keir-dcm/effect-'), effect3 = dcm.format === 'keir-dcm/effect-3', entry = Object.values(dcm.entrypoints)[0];
+  shape(row, ['format', 'id', 'given', 'stubs', 'expect']); assert.equal(row.format, 'keir-scenario/' + (effect3 ? 'effect-3' : effect ? 'effect-2' : 'read-2'));
   assert.match(row.id, /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/);
   shape(row.given, ['input', 'fixture', 'program']); typed(row.given.input, entry.input, dcm);
   assert.ok((effect ? fixtures : sharedFixtures).includes(row.given.fixture), 'Known trusted fixture');
-  assert.ok((effect ? ['main', 'project2', 'title2'] : ['main', 'repeated', 'alternate']).includes(row.given.program), 'Fixed program selector');
+  assert.ok((effect3 ? ['main', 'zero', 'after-write-read'] : effect ? ['main', 'project2', 'title2'] : ['main', 'repeated', 'alternate']).includes(row.given.program), 'Fixed program selector');
   assert.ok(Array.isArray(row.stubs) && row.stubs.length <= 4, 'CAPACITY_EXCEEDED'); row.stubs.forEach(call => callShape(call, dcm, true));
   shape(row.expect, ['outcome', 'calls', 'consumption']); assert.ok(Array.isArray(row.expect.calls) && row.expect.calls.length <= 4);
   row.expect.calls.forEach(call => callShape(call, dcm, false));
@@ -108,10 +108,10 @@ export async function runBatch(api, bundle, scenarios) {
   assert.ok(Array.isArray(scenarios) && scenarios.length > 0 && scenarios.length <= 128, 'CAPACITY_EXCEEDED');
   scenarios = json(scenarios, 1048576);
   const dcm = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bundle.dcmBytes));
-  assert.ok(['keir-dcm/read-2', 'keir-dcm/effect-2'].includes(dcm.format));
-  const effect = dcm.format === 'keir-dcm/effect-2', ids = new Set();
+  assert.ok(['keir-dcm/read-2', 'keir-dcm/effect-2', 'keir-dcm/effect-3'].includes(dcm.format));
+  const effect = dcm.format.startsWith('keir-dcm/effect-'), effect3 = dcm.format === 'keir-dcm/effect-3', ids = new Set();
   for (const row of scenarios) { validateGenericScenario(row, dcm); assert.ok(!ids.has(row.id)); ids.add(row.id); }
-  const names = effect ? ['main', 'project2', 'title2'] : ['main', 'repeated', 'alternate']; shape(bundle.programs, names);
+  const names = effect3 ? ['main', 'zero', 'after-write-read'] : effect ? ['main', 'project2', 'title2'] : ['main', 'repeated', 'alternate']; shape(bundle.programs, names);
   const scope = 'sample.scope', storage = new AsyncLocalStorage(), harness = createHarness(api);
   const [entryId, entry] = Object.entries(dcm.entrypoints)[0];
   const invokers = Object.fromEntries(Object.entries(dcm.capabilities).map(([capability, cap]) => [capability, {
@@ -142,7 +142,7 @@ export async function runBatch(api, bundle, scenarios) {
   }]));
   const selected = harness.bind(bundle.dcmBytes, { scope, modelRef: { domainId: dcm.domain.id, domainVersion: dcm.domain.version,
     format: dcm.format, digest: bundle.dcmDigest, descriptorRecipe: 'keir-record-descriptors/1' },
-  profile: effect ? 'keir-effect/2' : 'keir-read/2', environment: api.ENVIRONMENT, mode: 'simulation',
+  profile: effect3 ? 'keir-effect/3' : effect ? 'keir-effect/2' : 'keir-read/2', environment: api.ENVIRONMENT, mode: 'simulation',
   ...(effect ? { keyBinding: { type: dcm.hostKey.type, validate: value => keys.has(value) } } : {}) }, invokers);
   assert.equal(selected.diagnostic, null, 'Model binding failed');
   const prepared = new Map();

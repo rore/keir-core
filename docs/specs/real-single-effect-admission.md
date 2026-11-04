@@ -1,6 +1,6 @@
 # Real single-effect admission
 
-Status: **proposed; not implemented or qualified**. This is the bounded contract for the first real task integration. It extends the [single-effect semantics](single-effect.md), [generic catalog contract](generic-hook-capability-contract.md) and [host model binding](host-model-binding.md). The [SQLite host handoff](../internal/real-task-effect-handoff.md) supplies the concrete first qualification. Acceptance requires compiler, Java and Node evidence; this document grants no live execution authority.
+Status: **core protocol implemented and locally exercised; native deployment not qualified**. This is the bounded contract for the first real task integration. It extends the [single-effect semantics](single-effect.md), [generic catalog contract](generic-hook-capability-contract.md) and [host model binding](host-model-binding.md). The [SQLite host handoff](../internal/real-task-effect-handoff.md) supplies the concrete first qualification. Compiler, Java and Node deterministic fixtures exercise the same artifacts and separate mode authority; independent delivery review and actual native qualification remain separate. This document grants no live execution authority.
 
 ## Compatibility boundary
 

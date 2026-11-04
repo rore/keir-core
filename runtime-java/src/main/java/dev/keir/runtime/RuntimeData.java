@@ -75,52 +75,94 @@ final class RuntimeData {
 
     static byte[] canonical(Object value) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        write(value, 1, output);
+        write(value, 1, output, MAX_BYTES, false);
         return output.toByteArray();
     }
 
-    private static void append(ByteArrayOutputStream output, String text) {
+    static byte[] canonical(Object value, int maxBytes) {
+        if (maxBytes < 0 || maxBytes > MAX_BYTES) throw invalid();
+        ByteArrayOutputStream output = new ByteArrayOutputStream(Math.min(maxBytes, 8192));
+        write(value, 1, output, maxBytes, true);
+        return output.toByteArray();
+    }
+
+    private static void append(ByteArrayOutputStream output, String text, int maxBytes, boolean bounded) {
         byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
-        if (output.size() + bytes.length > MAX_BYTES) throw invalid();
+        ensureCapacity(output, bytes.length, maxBytes, bounded);
         output.writeBytes(bytes);
     }
 
-    private static void write(Object value, int depth, ByteArrayOutputStream output) {
+    private static void ensureCapacity(ByteArrayOutputStream output, int count, int maxBytes, boolean bounded) {
+        if (output.size() + count > maxBytes) {
+            if (bounded) throw new RuntimeFault("BUDGET_EXCEEDED", "/artifact");
+            throw invalid();
+        }
+    }
+
+    private static void writeByte(ByteArrayOutputStream output, int value, int maxBytes, boolean bounded) {
+        ensureCapacity(output, 1, maxBytes, bounded);
+        output.write(value);
+    }
+
+    private static void writeCodePoint(ByteArrayOutputStream output, int codePoint, int maxBytes, boolean bounded) {
+        int count = codePoint < 0x80 ? 1 : codePoint < 0x800 ? 2 : codePoint < 0x10000 ? 3 : 4;
+        ensureCapacity(output, count, maxBytes, bounded);
+        if (count == 1) output.write(codePoint);
+        else if (count == 2) {
+            output.write(0xc0 | codePoint >> 6); output.write(0x80 | codePoint & 0x3f);
+        } else if (count == 3) {
+            output.write(0xe0 | codePoint >> 12); output.write(0x80 | codePoint >> 6 & 0x3f); output.write(0x80 | codePoint & 0x3f);
+        } else {
+            output.write(0xf0 | codePoint >> 18); output.write(0x80 | codePoint >> 12 & 0x3f);
+            output.write(0x80 | codePoint >> 6 & 0x3f); output.write(0x80 | codePoint & 0x3f);
+        }
+    }
+
+    private static void write(Object value, int depth, ByteArrayOutputStream output, int maxBytes, boolean bounded) {
         if (depth > 16) throw invalid();
-        if (value instanceof String text) { quoted(text, output); return; }
-        if (value instanceof Boolean bool) { append(output, bool.toString()); return; }
+        if (value instanceof String text) { quoted(text, output, maxBytes, bounded); return; }
+        if (value instanceof Boolean bool) { append(output, bool.toString(), maxBytes, bounded); return; }
         if (value instanceof Integer || value instanceof Long) {
             long number = ((Number)value).longValue();
             if (number < 0 || number > MAX_INTEGER) throw invalid();
-            append(output, Long.toString(number)); return;
+            append(output, Long.toString(number), maxBytes, bounded); return;
         }
         if (value instanceof List<?> list) {
-            append(output, "[");
-            for (int i = 0; i < list.size(); i++) { if (i > 0) append(output, ","); write(list.get(i), depth + 1, output); }
-            append(output, "]"); return;
+            append(output, "[", maxBytes, bounded);
+            for (int i = 0; i < list.size(); i++) { if (i > 0) append(output, ",", maxBytes, bounded); write(list.get(i), depth + 1, output, maxBytes, bounded); }
+            append(output, "]", maxBytes, bounded); return;
         }
         Map<String,Object> map = map(value, "/artifact");
         List<String> keys = new ArrayList<>(map.keySet());
         keys.sort((left, right) -> Arrays.compare(left.codePoints().toArray(), right.codePoints().toArray()));
-        append(output, "{");
+        append(output, "{", maxBytes, bounded);
         for (int i = 0; i < keys.size(); i++) {
-            if (i > 0) append(output, ",");
-            String key = keys.get(i); quoted(key, output); append(output, ":"); write(map.get(key), depth + 1, output);
+            if (i > 0) append(output, ",", maxBytes, bounded);
+            String key = keys.get(i); quoted(key, output, maxBytes, bounded); append(output, ":", maxBytes, bounded); write(map.get(key), depth + 1, output, maxBytes, bounded);
         }
-        append(output, "}");
+        append(output, "}", maxBytes, bounded);
     }
 
-    private static void quoted(String text, ByteArrayOutputStream output) {
+    private static void quoted(String text, ByteArrayOutputStream output, int maxBytes, boolean bounded) {
         unicode(text);
-        if (text.getBytes(StandardCharsets.UTF_8).length + 2 > MAX_BYTES) throw invalid();
-        StringBuilder escaped = new StringBuilder("\"");
+        writeByte(output, '"', maxBytes, bounded);
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            if (c == '"' || c == '\\') escaped.append('\\').append(c);
-            else if (c < 32) escaped.append(String.format(Locale.ROOT, "\\u%04x", (int)c));
-            else escaped.append(c);
+            if (c == '"' || c == '\\') {
+                writeByte(output, '\\', maxBytes, bounded); writeByte(output, c, maxBytes, bounded);
+            } else if (c < 32) {
+                writeByte(output, '\\', maxBytes, bounded); writeByte(output, 'u', maxBytes, bounded);
+                for (int shift = 12; shift >= 0; shift -= 4) {
+                    int digit = c >> shift & 0xf;
+                    writeByte(output, digit < 10 ? '0' + digit : 'a' + digit - 10, maxBytes, bounded);
+                }
+            } else {
+                int codePoint = text.codePointAt(i);
+                if (Character.isHighSurrogate(c)) i++;
+                writeCodePoint(output, codePoint, maxBytes, bounded);
+            }
         }
-        append(output, escaped.append('"').toString());
+        writeByte(output, '"', maxBytes, bounded);
     }
 
     static void unicode(String text) {

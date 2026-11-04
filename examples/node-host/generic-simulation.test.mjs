@@ -7,11 +7,11 @@ import { consumeGeneric, runBatch } from './generic-simulation.mjs';
 
 const load = (profile, name) => JSON.parse(readFileSync(new URL(`../../conformance/generic-hooks/${profile}/${name}.json`, import.meta.url)));
 test('generic consumers reject forged typed output and trace data without changing legacy consumers', () => {
-  for (const profile of ['read', 'effect']) {
+  for (const profile of ['read', 'effect', 'effect3']) {
     const dcm = load(profile, 'dcm'), completed = load(profile, 'scenarios')[0].expect.outcome;
-    const invalid = profile === 'effect' ? 'NOT_REPORTED' : 'NOT_DISPLAYED';
+    const effect = profile !== 'read', invalid = effect ? 'NOT_REPORTED' : 'NOT_DISPLAYED';
     for (const mutate of [
-      value => { value.result.extra = true; }, value => { value.result[profile === 'effect' ? 'status' : 'classification'] = 'FORGED'; },
+      value => { value.result.extra = true; }, value => { value.result[effect ? 'status' : 'classification'] = 'FORGED'; },
       value => { value.trace[0].event = ['INVOCATION_START']; }, value => { value.trace[1].sequence = 99; },
     ]) { const value = structuredClone(completed); mutate(value); assert.equal(consumeGeneric(value, dcm).status, invalid); }
   }

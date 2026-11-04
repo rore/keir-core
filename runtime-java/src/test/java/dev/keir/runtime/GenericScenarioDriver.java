@@ -14,7 +14,7 @@ public final class GenericScenarioDriver {
             var execute=Class.forName("dev.keir.examples.GenericHost").getMethod("execute",Path.class);
             var rows=new LinkedHashMap<String,Object>();
             Path resources=Path.of(GenericScenarioDriver.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-            for(String profile:List.of("read","effect")) {
+            for(String profile:List.of("read","effect","effect3")) {
                 rows.put(profile,RuntimeData.parseJson((byte[])execute.invoke(null,resources.resolve("generic-hooks").resolve(profile)),1_048_576));
             }
             out.writeBytes(RuntimeData.canonical(rows)); out.println(); return 0;

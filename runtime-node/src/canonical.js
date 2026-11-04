@@ -3,6 +3,10 @@ import { createHash } from 'node:crypto';
 const MAX_BYTES = 1_048_576;
 const MAX_DEPTH = 16;
 
+export class CanonicalLimitError extends Error {
+  constructor() { super('Canonical JSON exceeds byte limit'); this.name = 'CanonicalLimitError'; }
+}
+
 function compareScalars(left, right) {
   const a = Array.from(left, char => char.codePointAt(0));
   const b = Array.from(right, char => char.codePointAt(0));
@@ -10,23 +14,38 @@ function compareScalars(left, right) {
   return a.length - b.length;
 }
 
-export function canonicalBytes(value) {
+export function canonicalBytes(value, maxBytes = MAX_BYTES) {
+  const requestedLimit = arguments.length > 1;
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 0 || maxBytes > MAX_BYTES) throw new Error('Invalid canonical JSON byte limit');
   let size = 0;
   const chunks = [];
+  let pending = [];
+  let pendingBytes = 0;
   const write = chunk => {
-    size += Buffer.byteLength(chunk, 'utf8');
-    if (size > MAX_BYTES) throw new Error('Canonical JSON exceeds byte limit');
-    chunks.push(chunk);
+    const bytes = Buffer.byteLength(chunk, 'utf8');
+    if (size + bytes > maxBytes) {
+      if (!requestedLimit) throw new Error('Canonical JSON exceeds byte limit');
+      throw new CanonicalLimitError();
+    }
+    size += bytes;
+    pending.push(chunk);
+    pendingBytes += bytes;
+    if (pendingBytes >= 1024) {
+      chunks.push(pending.join(''));
+      pending = [];
+      pendingBytes = 0;
+    }
   };
   const writeString = value => {
     if (!value.isWellFormed()) throw new Error('Invalid Unicode string');
-    if (Buffer.byteLength(value, 'utf8') + 2 > MAX_BYTES) throw new Error('Canonical JSON exceeds byte limit');
-    const escaped = value.replace(/["\\\u0000-\u001f]/g, char => {
-      if (char === '"') return '\\"';
-      if (char === '\\') return '\\\\';
-      return `\\u00${char.charCodeAt(0).toString(16).padStart(2, '0')}`;
-    });
-    write(`"${escaped}"`);
+    write('"');
+    for (const char of value) {
+      if (char === '"') write('\\"');
+      else if (char === '\\') write('\\\\');
+      else if (char.charCodeAt(0) < 32) write(`\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`);
+      else write(char);
+    }
+    write('"');
   };
   const visit = (item, depth) => {
     if (depth > MAX_DEPTH) throw new Error('Canonical JSON exceeds depth limit');
@@ -69,6 +88,7 @@ export function canonicalBytes(value) {
     write('}');
   };
   visit(value, 1);
+  if (pending.length) chunks.push(pending.join(''));
   return Buffer.from(chunks.join(''), 'utf8');
 }
 

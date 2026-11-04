@@ -61,10 +61,10 @@ export function narrowPolicy(dcm, policy, previous, path) {
 }
 
 export function validateModel(dcm, profile, p = '/artifact/dcm') {
-  const v2 = profile === 'keir-read/2' || profile === 'keir-effect/2';
-  const effect = v2 ? profile === 'keir-effect/2' : dcm?.format === 'keir-dcm/effect-1';
+  const v2 = ['keir-read/2', 'keir-effect/2', 'keir-effect/3'].includes(profile);
+  const effect = v2 ? profile === 'keir-effect/2' || profile === 'keir-effect/3' : dcm?.format === 'keir-dcm/effect-1';
   shape(dcm, ['format', 'domain', 'types', 'capabilities', 'entrypoints', ...(effect ? ['hostKey', 'assurance'] : [])], p);
-  requireThat(v2 ? dcm.format === (effect ? 'keir-dcm/effect-2' : 'keir-dcm/read-2') : effect || dcm.format === 'keir-dcm/read-1', p);
+  requireThat(v2 ? dcm.format === (profile === 'keir-effect/3' ? 'keir-dcm/effect-3' : effect ? 'keir-dcm/effect-2' : 'keir-dcm/read-2') : effect || dcm.format === 'keir-dcm/read-1', p);
   requireThat(canonicalBytes(dcm).length <= LIMITS.dcmBytes, p, 'BUDGET_EXCEEDED');
   shape(dcm.domain, ['id', 'version'], p + '/domain');
   text(dcm.domain.id, p, true); text(dcm.domain.version, p, true);
@@ -87,7 +87,7 @@ export function validateModel(dcm, profile, p = '/artifact/dcm') {
   const scalar = type => (!v2 || typeof type === 'string') && (type === 'Boolean' || type === 'String' || ['nominal', 'enum'].includes(dcm.types[type]?.kind));
   const record = type => (!v2 || typeof type === 'string') && dcm.types[type]?.kind === 'record';
   if (effect) {
-    requireThat(dcm.assurance === 'SIMULATION_ONLY', p);
+    requireThat(dcm.assurance === (profile === 'keir-effect/3' ? 'HOST_QUALIFIED_SINGLE_WRITE' : 'SIMULATION_ONLY'), p);
     shape(dcm.hostKey, ['source', 'type'], p + '/hostKey');
     requireThat(dcm.hostKey.source === 'requestKey', p + '/hostKey');
     text(dcm.hostKey.type, p + '/hostKey/type', true);
@@ -153,14 +153,14 @@ export function validateValue(dcm, typeName, value, path, code) {
 export function validateEnvelope(artifact, bound) {
   const v2 = bound !== undefined;
   shape(artifact, ['format', 'profile', 'compiler', 'environment', 'sourceDigest', ...(v2 ? ['modelRef'] : ['dcmDigest', 'dcm', 'descriptors']), 'entrypoint', 'expressions', 'steps', 'return'], '/artifact');
-  const effect = v2 ? bound.profile === 'keir-effect/2' : artifact.profile === 'keir-effect/1';
+  const effect = v2 ? bound.profile === 'keir-effect/2' || bound.profile === 'keir-effect/3' : artifact.profile === 'keir-effect/1';
   if (v2) {
     shape(artifact.environment, Object.keys(ENVIRONMENT), '/artifact/environment');
     shape(artifact.modelRef, ['domainId', 'domainVersion', 'format', 'digest', 'descriptorRecipe'], '/artifact/modelRef');
     text(artifact.compiler, '/artifact/compiler', true);
     requireThat(typeof artifact.entrypoint === 'string' && Object.hasOwn(bound.dcm.entrypoints, artifact.entrypoint), '/artifact/entrypoint');
     requireThat(Object.keys(ENVIRONMENT).every(k => artifact.environment[k] === ENVIRONMENT[k]), '/artifact/environment');
-    requireThat(artifact.format === (effect ? 'keir-artifact/effect-2' : 'keir-artifact/read-2'), '/artifact/format');
+    requireThat(artifact.format === (bound.profile === 'keir-effect/3' ? 'keir-artifact/effect-3' : effect ? 'keir-artifact/effect-2' : 'keir-artifact/read-2'), '/artifact/format');
     requireThat(canonicalBytes(artifact.modelRef).equals(canonicalBytes(bound.modelRef)), '/artifact/modelRef');
     requireThat(artifact.profile === bound.profile, '/artifact/profile');
     requireThat(typeof artifact.sourceDigest === 'string' && /^sha256:[0-9a-f]{64}$/.test(artifact.sourceDigest), '/artifact/sourceDigest');

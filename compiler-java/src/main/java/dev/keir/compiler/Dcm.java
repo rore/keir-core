@@ -71,12 +71,16 @@ final class Dcm {
     }
 
     static Dcm parse(Object value, boolean effectProfile, boolean generic) {
+        return parse(value, effectProfile, generic, false);
+    }
+
+    static Dcm parse(Object value, boolean effectProfile, boolean generic, boolean effect3) {
         var root = effectProfile
                 ? shape(value,"/dcm","format","domain","types","capabilities","entrypoints","hostKey","assurance")
                 : shape(value,"/dcm","format","domain","types","capabilities","entrypoints");
-        supported(root.get("format"),"keir-dcm/" + (effectProfile ? "effect-" : "read-") + (generic ? "2" : "1"),"/dcm/format");
+        supported(root.get("format"),"keir-dcm/" + (effectProfile ? "effect-" : "read-") + (effect3 ? "3" : generic ? "2" : "1"),"/dcm/format");
         if (effectProfile) {
-            if (!"SIMULATION_ONLY".equals(root.get("assurance"))) throw invalid("/dcm/assurance");
+            if (!(effect3 ? "HOST_QUALIFIED_SINGLE_WRITE" : "SIMULATION_ONLY").equals(root.get("assurance"))) throw invalid("/dcm/assurance");
             var key = shape(root.get("hostKey"),"/dcm/hostKey","source","type");
             if (!"requestKey".equals(key.get("source"))) throw invalid("/dcm/hostKey/source");
             metadataText(key.get("type"),"/dcm/hostKey/type");
@@ -202,7 +206,7 @@ final class Dcm {
     }
 
     Map<String,Object> root() { return root; }
-    boolean generic() { return root.get("format").equals("keir-dcm/read-2") || root.get("format").equals("keir-dcm/effect-2"); }
+    boolean generic() { return root.get("format").equals("keir-dcm/read-2") || root.get("format").equals("keir-dcm/effect-2") || root.get("format").equals("keir-dcm/effect-3"); }
     Map<String,Type> types() { return types; }
     Map<String,Capability> capabilities() { return capabilities; }
     Map<String,Entrypoint> entrypoints() { return entrypoints; }

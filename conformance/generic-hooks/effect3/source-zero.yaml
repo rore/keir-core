@@ -1,0 +1,16 @@
+language: keir/v0
+domain: {id: sample.tasks, version: '3', fingerprint: 'sha256:61f6540edcbb971d4f69fe84e2cd6c84001a393d9aed24a71b2b8f11e7074d2b'}
+entrypoint: TaskCompleted
+name: read-without-write
+steps:
+  - id: eligibleProject
+    let: {literal: 'project1', type: ProjectId}
+  - id: source
+    call: tasks.get
+    args:
+      taskId: {cel: input.taskId}
+  - id: eligible
+    let: {cel: 'source.status == "COMPLETED" && source.projectId == eligibleProject'}
+return:
+  record:
+    status: {cel: 'eligible ? "CREATED" : "NO_OP"'}

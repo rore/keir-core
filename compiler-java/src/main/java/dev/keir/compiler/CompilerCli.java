@@ -18,6 +18,7 @@ public final class CompilerCli {
             case "--profile=keir-effect/1" -> KeirCompiler.Environment.effect();
             case "--profile=keir-read/2" -> KeirCompiler.Environment.read2();
             case "--profile=keir-effect/2" -> KeirCompiler.Environment.effect2();
+            case "--profile=keir-effect/3" -> KeirCompiler.Environment.effect3();
             case null, default -> null;
         } : null;
         if (environment == null) return error(errors, "SYNTAX_INVALID", "/source");

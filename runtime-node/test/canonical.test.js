@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { canonicalBytes, parseCanonical, digest } from '../src/canonical.js';
+import { canonicalBytes, CanonicalLimitError, parseCanonical, digest } from '../src/canonical.js';
 
 const bytes = text => Buffer.from(text, 'utf8');
 
@@ -58,6 +58,19 @@ test('enforces inclusive depth and byte bounds', () => {
   assert.equal(parseCanonical(bytes(exact), 12), 'a'.repeat(10));
   assert.throws(() => parseCanonical(bytes(exact), 11));
   assert.throws(() => canonicalBytes('a'.repeat(1_048_575)));
+});
+
+test('bounded encoding counts aggregate escaped UTF-8 bytes while preserving defaults', () => {
+  const value = '\0\né😀';
+  const expected = Buffer.from('"\\u0000\\u000aé😀"');
+  assert.deepEqual(canonicalBytes(value, expected.length), expected);
+  assert.equal(canonicalBytes(value, 16_384).toString(), canonicalBytes(value).toString());
+  assert.throws(() => canonicalBytes(value, expected.length - 1), CanonicalLimitError);
+  assert.throws(() => canonicalBytes([true, true], 8), CanonicalLimitError);
+  assert.throws(() => canonicalBytes('\ud800', 1), /Invalid Unicode string/);
+  assert.throws(() => canonicalBytes('x'.repeat(100_000), 16_384), CanonicalLimitError);
+  assert.throws(() => canonicalBytes('a'.repeat(1_048_575), 1_048_576), CanonicalLimitError);
+  assert.equal(canonicalBytes(value).toString(), expected.toString());
 });
 
 test('digest uses the sha256 prefix and lowercase hex', () => {

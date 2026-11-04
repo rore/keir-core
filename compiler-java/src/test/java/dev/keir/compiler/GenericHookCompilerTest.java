@@ -20,7 +20,11 @@ class GenericHookCompilerTest {
     private static Map<String,Object> source(String profile) throws IOException { return map(StrictData.parse(bytes(profile,"source.yaml"),"/source")); }
     private static Map<String,Object> model(String profile) throws IOException { return map(StrictData.parse(bytes(profile,"dcm.json"),"/dcm")); }
     private static Map<String,Object> entry(Map<String,Object> model) { return map(map(model.get("entrypoints")).values().iterator().next()); }
-    private static KeirCompiler.Environment environment(String profile) { return profile.equals("read") ? KeirCompiler.Environment.read2() : KeirCompiler.Environment.effect2(); }
+    private static KeirCompiler.Environment environment(String profile) { return switch (profile) {
+        case "read" -> KeirCompiler.Environment.read2();
+        case "effect3" -> KeirCompiler.Environment.effect3();
+        default -> KeirCompiler.Environment.effect2();
+    }; }
     private static KeirCompiler.Compilation compile(String profile,Map<String,Object> source,Map<String,Object> model) {
         map(source.get("domain")).put("fingerprint",StrictData.digest(model));
         return COMPILER.compile(StrictData.canonical(source),StrictData.canonical(model),environment(profile));
@@ -77,6 +81,45 @@ class GenericHookCompilerTest {
         }
         assertEquals(1534,bytes("effect","dcm.json").length);
         assertEquals("sha256:68b72e4da41aa006a6a8182b5b8a6a4363a6734688da3c1e0c3807c0aff4ac04",StrictData.digest(model("effect")));
+    }
+
+    @Test void effect3CompilesPinnedSourcesAndKeepsOnePotentialWriteLimit() throws Exception {
+        var model=model("effect3");
+        assertEquals("HOST_QUALIFIED_SINGLE_WRITE",model.get("assurance"));
+        assertEquals("KEY_PAYLOAD_MISMATCH",((List<?>)map(map(model.get("capabilities")).get("tasks.create")).get("errors")).getLast());
+        assertEquals(Files.readString(fixture("effect3","dcm.sha256")).trim(),StrictData.digest(model));
+        for (String suffix : List.of("", "-zero", "-after-write-read")) {
+            String sourceName="source"+suffix+".yaml", artifactName="artifact"+suffix+".json";
+            var first=COMPILER.compile(bytes("effect3",sourceName),bytes("effect3","dcm.json"),environment("effect3"));
+            var second=COMPILER.compile(bytes("effect3",sourceName),bytes("effect3","dcm.json"),environment("effect3"));
+            assertArrayEquals(first.artifact(),second.artifact());
+            assertArrayEquals(bytes("effect3",artifactName),first.artifact());
+            assertEquals(Files.readString(fixture("effect3","artifact"+suffix+".sha256")).trim(),first.artifactDigest());
+            var artifact=artifact(first);
+            assertEquals("keir-artifact/effect-3",artifact.get("format"));
+            assertEquals("keir-effect/3",artifact.get("profile"));
+            assertEquals("keir-dcm/effect-3",map(artifact.get("modelRef")).get("format"));
+        }
+        var zero=artifact(COMPILER.compile(bytes("effect3","source-zero.yaml"),bytes("effect3","dcm.json"),environment("effect3")));
+        assertTrue(((List<?>)zero.get("steps")).stream().noneMatch(step -> "CALL".equals(map(step).get("op")) && "tasks.create".equals(map(step).get("capability"))));
+        var source=source("effect3"); var duplicate=new TreeMap<>(steps(source).get(3)); duplicate.put("id","secondWrite"); duplicate.put("when","eligible"); steps(source).add(duplicate);
+        denied(compile("effect3",source,model("effect3")),"BUDGET_EXCEEDED","/source/steps/4/call");
+        source=source("effect3"); steps(source).get(2).put("let",Map.of("literal",false));
+        duplicate=new TreeMap<>(steps(source).get(3)); duplicate.put("id","secondWrite"); duplicate.put("when","eligible"); steps(source).add(duplicate);
+        denied(compile("effect3",source,model("effect3")),"BUDGET_EXCEEDED","/source/steps/4/call");
+    }
+
+    @Test void effect3RequiresItsExactAssuranceAndFormats() throws Exception {
+        var model=model("effect3"); model.put("assurance","SIMULATION_ONLY");
+        denied(compile("effect3",source("effect3"),model),"DCM_INVALID","/dcm/assurance");
+        model=model("effect3"); model.put("format","keir-dcm/effect-2");
+        denied(compile("effect3",source("effect3"),model),"PROFILE_UNSUPPORTED","/dcm/format");
+        var source=source("effect3"); map(source.get("domain")).put("version","2");
+        denied(compile("effect3",source,model("effect3")),"PIN_MISMATCH","/source/domain/version");
+        var stdout=new ByteArrayOutputStream(); var stderr=new ByteArrayOutputStream();
+        String[] args={fixture("effect3","source.yaml").toString(),fixture("effect3","dcm.json").toString(),"--profile=keir-effect/3"};
+        assertEquals(0,CompilerCli.run(args,new PrintStream(stdout),new PrintStream(stderr)));
+        assertArrayEquals(bytes("effect3","artifact.json"),stdout.toByteArray()); assertEquals(0,stderr.size());
     }
 
     @Test void authoredConstantsAndGenericCreateArgumentsRemainInTheProgram() throws Exception {

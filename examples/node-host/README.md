@@ -1,5 +1,14 @@
 # Node host example
 
+The generic simulation command also accepts the fixed `conformance/generic-hooks/effect3` corpus:
+
+```sh
+node examples/node-host/generic.mjs conformance/generic-hooks/effect3
+node conformance/generic-hooks/real-effect.mjs --installed
+```
+
+The first command remains simulation-only and accepts no qualification or real adapter from scenario data. The second runs fixed deterministic admission fixtures against the installed package, including separate real-mode bindings of the same artifacts. It performs no native task writes and qualifies no host or deployment. See the [effect/3 contract](../../docs/specs/real-single-effect-admission.md) for the independent build/report/current-authority gate.
+
 This command-line host consumes the Java-produced shared artifact through a locally packed Node library. It shows completed/open/missing tasks and a deliberately wrong-resource fake, with separate runtime outcomes and DISPLAYED/NOT_DISPLAYED consumption. All users/tasks are fictional fixture data; no real authorization or persistence is certified.
 
 From the repository root, create the ignored package directory if needed and run:

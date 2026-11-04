@@ -16,6 +16,7 @@ export function fixture(profile = 'effect', variant = 'main') {
   return { bytes, pin, dcmBytes, dcmPin, artifact: JSON.parse(bytes), dcm: JSON.parse(dcmBytes), profile };
 }
 const keys = new WeakSet();
+const effectProfile = profile => profile === 'effect' || profile === 'effect3';
 export function nativeKey() {
   const poison = () => { throw new Error('Native key must never be converted'); };
   const key = Object.freeze({ toString: poison, valueOf: poison, toJSON: poison, [Symbol.toPrimitive]: poison });
@@ -24,20 +25,20 @@ export function nativeKey() {
 export const confirmed = { kind: 'SUCCESS', value: { id: 'task2' }, effect: 'CONFIRMED' };
 export function approval(f, overrides = {}) {
   return { scope: 'scope1', modelRef: { domainId: f.dcm.domain.id, domainVersion: f.dcm.domain.version, format: f.dcm.format,
-    digest: f.dcmPin, descriptorRecipe: 'keir-record-descriptors/1' }, profile: 'keir-' + f.profile + '/2',
+    digest: f.dcmPin, descriptorRecipe: 'keir-record-descriptors/1' }, profile: f.profile === 'effect3' ? 'keir-effect/3' : 'keir-' + f.profile + '/2',
     environment: { ...ENVIRONMENT }, mode: 'simulation',
-    ...(f.profile === 'effect' ? { keyBinding: { type: f.dcm.hostKey.type, validate: key => keys.has(key) } } : {}), ...overrides };
+    ...(effectProfile(f.profile) ? { keyBinding: { type: f.dcm.hostKey.type, validate: key => keys.has(key) } } : {}), ...overrides };
 }
 export function registrations(f, overrides = {}) {
   return Object.fromEntries(Object.entries(f.dcm.capabilities).map(([id, cap]) => [id, {
-    version: '1', mode: 'simulation', ...(f.profile === 'effect' ? { keyType: f.dcm.hostKey.type } : {}),
+    version: '1', mode: 'simulation', ...(effectProfile(f.profile) ? { keyType: f.dcm.hostKey.type } : {}),
     invoke: id === 'tasks.create' ? async () => confirmed : async args => ({ kind: 'SUCCESS', value: {
-      id: args.taskId, ...(f.profile === 'effect' ? { projectId: 'project1' } : {}), status: 'COMPLETED' } }),
+      id: args.taskId, ...(effectProfile(f.profile) ? { projectId: 'project1' } : {}), status: 'COMPLETED' } }),
     ...overrides[id],
   }]));
 }
 export function admission(f, overrides = {}) {
-  const entrypoint = f.profile === 'effect' ? 'TaskCompleted' : 'ClassifyTask';
+  const entrypoint = effectProfile(f.profile) ? 'TaskCompleted' : 'ClassifyTask';
   return { expectedArtifactDigest: f.pin, expectedDcmDigest: f.dcmPin, entrypoint,
     consumer: structuredClone(f.dcm.entrypoints[entrypoint].consumer), compiler: 'keir-compiler-java/0.1.0-SNAPSHOT',
     environment: { ...ENVIRONMENT }, mode: 'simulation', ...overrides };
@@ -50,5 +51,5 @@ export function prepared(f, model = bind(f), overrides = {}) {
 }
 export function context(profile = 'effect', overrides = {}) {
   return { scope: 'scope1', bindings: { actorId: 'user1' }, deadline: { clock: { nowMs: () => 0 }, expiresAtMs: 1000 }, authorize: async () => true,
-    ...(profile === 'effect' ? { requestKey: nativeKey(), event: { id: 'event1', source: 'task1' } } : {}), ...overrides };
+    ...(effectProfile(profile) ? { requestKey: nativeKey(), event: { id: 'event1', source: 'task1' } } : {}), ...overrides };
 }

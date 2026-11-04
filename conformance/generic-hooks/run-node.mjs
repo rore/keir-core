@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url';
 import * as api from '../../runtime-node/src/index.js';
 import { runBatch } from '../../examples/node-host/generic-simulation.mjs';
 
-const names = { read: ['main', 'repeated', 'alternate'], effect: ['main', 'project2', 'title2'] };
+const names = { read: ['main', 'repeated', 'alternate'], effect: ['main', 'project2', 'title2'], effect3: ['main', 'zero', 'after-write-read'] };
 const read = (profile, file) => readFileSync(new URL(`${profile}/${file}`, import.meta.url));
 const pin = (profile, file) => read(profile, file).toString('utf8').trim();
 export const fixtures = Object.fromEntries(Object.entries(names).map(([profile, programs]) => [profile, {
@@ -24,7 +24,7 @@ export async function runProfile(profile, scenarios = loadScenarios(profile)) {
   return runBatch(api, fixtures[profile], scenarios);
 }
 export async function runCorpus() {
-  return { read: await runProfile('read'), effect: await runProfile('effect') };
+  return { read: await runProfile('read'), effect: await runProfile('effect'), effect3: await runProfile('effect3') };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try { assert.equal(process.argv.length, 2, 'Runner accepts no arguments'); console.log(JSON.stringify(await runCorpus())); }

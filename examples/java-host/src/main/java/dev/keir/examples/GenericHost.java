@@ -10,13 +10,13 @@ public final class GenericHost {
     private GenericHost() {}
     public static void main(String[] args) { System.exit(run(args,System.out,System.err)); }
     public static int run(String[] args,PrintStream out,PrintStream err) {
-        if(args.length!=1) { err.println("Usage: GenericHost <read-or-effect-fixture-directory>"); return 2; }
+        if(args.length!=1) { err.println("Usage: GenericHost <fixed-generic-fixture-directory>"); return 2; }
         try { out.writeBytes(execute(Path.of(args[0]))); out.println(); return 0; }
         catch(Exception failure) { err.println("The selected generic simulation could not be executed."); return 1; }
     }
     public static byte[] execute(Path directory) throws IOException {
         String profile=directory.getFileName().toString();
-        EffectSimulation.check(Set.of("read","effect").contains(profile),"Unknown fixture directory");
+        EffectSimulation.check(Set.of("read","effect","effect3").contains(profile),"Unknown fixture directory");
         var programs=new LinkedHashMap<String,GenericSimulation.Program>();
         for(String name:programNames(profile)) {
             String file=name.equals("main")?"artifact":"artifact-"+name;
@@ -26,7 +26,7 @@ public final class GenericHost {
         byte[] corpus=read(directory.resolve("scenarios.json"),1_048_576);
         return execute(profile,dcm,pin(directory.resolve("dcm.sha256")),programs,corpus);
     }
-    static List<String> programNames(String profile) { return profile.equals("read")?List.of("main","repeated","alternate"):List.of("main","project2","title2"); }
+    static List<String> programNames(String profile) { return switch(profile) { case "read" -> List.of("main","repeated","alternate"); case "effect3" -> List.of("main","zero","after-write-read"); default -> List.of("main","project2","title2"); }; }
     static byte[] execute(String profile,byte[] dcm,String pin,Map<String,GenericSimulation.Program> programs,byte[] corpus) {
         return EffectJson.encode(GenericSimulation.batch(profile,dcm,pin,programs,EffectJson.parse(corpus)));
     }

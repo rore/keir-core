@@ -1,7 +1,7 @@
 import { canonicalBytes, digest, parseCanonical } from './canonical.js';
 import { prepareExpressions, evaluateBinding } from './cel.js';
 import { ENVIRONMENT, LIMITS, Fault, requireThat as ok, keys, shape, text, integer, freeze, pointer, narrowPolicy, validateEnvelope, validatePlan, validateValue } from './validation.js';
-import { modelFor } from './model.js';
+import { modelFor, requireCurrent } from './model.js';
 
 export { ENVIRONMENT };
 export { bindModel } from './model.js';
@@ -116,6 +116,8 @@ export function prepareProgram(artifactBytes, boundModel, admission) {
       if (!Object.hasOwn(hostFields, name)) hostFields[name] = [];
       hostFields[name].push(parameter.type);
     }
+    path = '/admission/qualification'; code = 'ADMISSION_INVALID';
+    requireCurrent(bound, code, path);
     const prepared = Object.freeze(Object.create(null));
     handles.set(prepared, { version: 2, artifact: freeze(artifact), dcm: bound.dcm, entrypoint, grants: freeze(grants), limits: freeze(limits), cel,
       adapters: bound.adapters, hostFields, effect: bound.effect, effectGrant, keyValidator: bound.keyValidator, scope: bound.scope, bound });
@@ -226,6 +228,7 @@ async function execute(prepared, businessInput, trustedInvocation, version) {
     let clock;
     try { clock = deadline(trustedInvocation.deadline); } catch { throw new Fault('HOST_CONTEXT_INVALID', ''); }
     clock.remaining('');
+    current('');
     const { artifact, entrypoint, adapters, hostFields } = plan;
     const dcm = plan.dcm;
     const grants = Object.create(null);
@@ -270,8 +273,15 @@ async function execute(prepared, businessInput, trustedInvocation, version) {
       ok(valid === true, '', 'HOST_CONTEXT_INVALID');
     }
     const authorize = trustedInvocation.authorize;
+    function current(path) {
+      if (!plan.bound?.qualification) return;
+      clock.remaining(path);
+      try { requireCurrent(plan.bound, 'AUTHORITY_DENIED', path); }
+      finally { clock.remaining(path); }
+    }
     async function authorized(request, path) {
       clock.remaining(path);
+      current(path);
       const allowed = await clock.wait(() => authorize(freeze(request)), path, 'AUTHORITY_CHECK_FAILED');
       ok(typeof allowed === 'boolean', path, 'AUTHORITY_CHECK_FAILED');
       ok(allowed, path, 'AUTHORITY_DENIED');
@@ -314,6 +324,7 @@ async function execute(prepared, businessInput, trustedInvocation, version) {
       }
       await authorized({ entrypoint: artifact.entrypoint, capability: step.capability, version: step.version }, path);
       clock.remaining(path);
+      current(path);
       freeze(agentArgs); freeze(protectedArgs);
       let receipt, recorded = false;
       const settled = response => {

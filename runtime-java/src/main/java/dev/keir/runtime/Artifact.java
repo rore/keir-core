@@ -59,6 +59,10 @@ final class Artifact {
         model(dcm,effect,true);
     }
 
+    static void validateModel2(Map<String,Object> dcm, String profile) {
+        model(dcm,!"keir-read/2".equals(profile),true,"keir-effect/3".equals(profile));
+    }
+
     static Map<String,Object> modelRef(Map<String,Object> dcm) {
         Map<String,Object> domain = map(dcm.get("domain"),MODEL);
         return Map.of("domainId",domain.get("id"),"domainVersion",domain.get("version"),
@@ -67,14 +71,18 @@ final class Artifact {
     }
 
     private static void model(Map<String,Object> dcm, boolean effect, boolean generic) {
+        model(dcm,effect,generic,false);
+    }
+
+    private static void model(Map<String,Object> dcm, boolean effect, boolean generic, boolean qualified) {
         String p = MODEL;
         if (effect) exact(dcm,p,"format","domain","types","capabilities","entrypoints","hostKey","assurance");
         else exact(dcm, p, "format", "domain", "types", "capabilities", "entrypoints");
-        require((effect ? (generic ? "keir-dcm/effect-2" : "keir-dcm/effect-1")
+        require((effect ? (qualified ? "keir-dcm/effect-3" : generic ? "keir-dcm/effect-2" : "keir-dcm/effect-1")
                 : (generic ? "keir-dcm/read-2" : "keir-dcm/read-1")).equals(dcm.get("format")), p);
         require(canonical(dcm).length <= Profile.DCM_BYTES, p, "BUDGET_EXCEEDED");
         if (effect) {
-            require("SIMULATION_ONLY".equals(dcm.get("assurance")),p+"/assurance","DCM_INVALID");
+            require((qualified ? "HOST_QUALIFIED_SINGLE_WRITE" : "SIMULATION_ONLY").equals(dcm.get("assurance")),p+"/assurance","DCM_INVALID");
             exact(dcm.get("hostKey"),p+"/hostKey","source","type");
             Map<String,Object> key = map(dcm.get("hostKey"),p+"/hostKey");
             require("requestKey".equals(key.get("source")),p+"/hostKey/source","DCM_INVALID");
@@ -195,13 +203,18 @@ final class Artifact {
     }
 
     static void validateEnvelope2(Map<String,Object> artifact, Map<String,Object> dcm, boolean effect) {
+        validateEnvelope2(artifact,dcm,effect ? "keir-effect/2" : "keir-read/2");
+    }
+
+    static void validateEnvelope2(Map<String,Object> artifact, Map<String,Object> dcm, String profile) {
+        boolean effect=!"keir-read/2".equals(profile), qualified="keir-effect/3".equals(profile);
         exact(artifact,"/artifact","format","profile","compiler","environment","sourceDigest","modelRef","entrypoint","expressions","steps","return");
         text(artifact.get("compiler"),"/artifact/compiler",true,256);
         require(map(dcm.get("entrypoints"),MODEL).containsKey(artifact.get("entrypoint")),"/artifact/entrypoint");
         require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment");
-        require((effect ? "keir-artifact/effect-2" : "keir-artifact/read-2").equals(artifact.get("format")),"/artifact/format");
+        require((qualified ? "keir-artifact/effect-3" : effect ? "keir-artifact/effect-2" : "keir-artifact/read-2").equals(artifact.get("format")),"/artifact/format");
         require(modelRef(dcm).equals(artifact.get("modelRef")),"/artifact/modelRef");
-        require((effect ? "keir-effect/2" : "keir-read/2").equals(artifact.get("profile")),"/artifact/profile");
+        require(profile.equals(artifact.get("profile")),"/artifact/profile");
         require(artifact.get("sourceDigest") instanceof String text && text.matches("sha256:[0-9a-f]{64}"),"/artifact/sourceDigest");
     }
 
@@ -214,6 +227,12 @@ final class Artifact {
                                  Map<String,Long> limits, CapabilityPolicy.State admissionPolicy, long admissionEffectGrant) {
         validateEnvelope2(artifact,dcm,effect);
         return plan(artifact,dcm,effect,true,limits,admissionPolicy,admissionEffectGrant);
+    }
+
+    static Plan validateProgram2(Map<String,Object> artifact, Map<String,Object> dcm, String profile,
+                                 Map<String,Long> limits, CapabilityPolicy.State admissionPolicy, long admissionEffectGrant) {
+        validateEnvelope2(artifact,dcm,profile);
+        return plan(artifact,dcm,!"keir-read/2".equals(profile),true,limits,admissionPolicy,admissionEffectGrant);
     }
 
     private static Plan plan(Map<String,Object> artifact, Map<String,Object> dcm, boolean effect, boolean generic) {

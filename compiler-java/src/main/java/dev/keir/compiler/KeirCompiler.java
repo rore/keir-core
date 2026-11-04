@@ -15,6 +15,7 @@ public final class KeirCompiler {
     public static final String EFFECT_PROFILE = "keir-effect/1";
     public static final String READ2_PROFILE = "keir-read/2";
     public static final String EFFECT2_PROFILE = "keir-effect/2";
+    public static final String EFFECT3_PROFILE = "keir-effect/3";
     public static final String IDENTITY = "keir-compiler-java/0.1.0-SNAPSHOT";
     private static final Map<String, String> PACKAGES = Map.of("celJava", "0.14.0", "celNode", "0.6.1",
             "protobufJava", "4.35.1", "protobufNode", "2.6.2");
@@ -29,6 +30,7 @@ public final class KeirCompiler {
         public static Environment effect() { return new Environment(EFFECT_PROFILE, IDENTITY, PACKAGES); }
         public static Environment read2() { return new Environment(READ2_PROFILE, IDENTITY, PACKAGES); }
         public static Environment effect2() { return new Environment(EFFECT2_PROFILE, IDENTITY, PACKAGES); }
+        public static Environment effect3() { return new Environment(EFFECT3_PROFILE, IDENTITY, PACKAGES); }
     }
     public record Diagnostic(String code, String path, String message) {}
     public record Compilation(byte[] artifact, String artifactDigest, List<Diagnostic> diagnostics) {
@@ -46,12 +48,14 @@ public final class KeirCompiler {
             if (trustedDcmBytes == null) fail("SYNTAX_INVALID", "/dcm");
             Object parsedSource = StrictData.parse(sourceBytes, "/source");
             Object parsedDcm = StrictData.parse(trustedDcmBytes, "/dcm");
-            boolean effect = environment != null && (EFFECT_PROFILE.equals(environment.profile()) || EFFECT2_PROFILE.equals(environment.profile()));
-            boolean generic = environment != null && (READ2_PROFILE.equals(environment.profile()) || EFFECT2_PROFILE.equals(environment.profile()));
+            boolean effect3 = environment != null && EFFECT3_PROFILE.equals(environment.profile());
+            boolean effect = environment != null && (EFFECT_PROFILE.equals(environment.profile()) || EFFECT2_PROFILE.equals(environment.profile()) || effect3);
+            boolean generic = environment != null && (READ2_PROFILE.equals(environment.profile()) || EFFECT2_PROFILE.equals(environment.profile()) || effect3);
             Map<String, Object> source = sourceShape(parsedSource, effect, generic);
-            Dcm dcm = Dcm.parse(parsedDcm, effect, generic);
+            Dcm dcm = Dcm.parse(parsedDcm, effect, generic, effect3);
             if (StrictData.canonical(dcm.root()).length > StrictData.MAX_BYTES) fail("BUDGET_EXCEEDED", "/dcm");
-            if (environment == null || !(generic ? effect ? EFFECT2_PROFILE : READ2_PROFILE : effect ? EFFECT_PROFILE : PROFILE).equals(environment.profile())
+            String selectedProfile = effect3 ? EFFECT3_PROFILE : generic ? effect ? EFFECT2_PROFILE : READ2_PROFILE : effect ? EFFECT_PROFILE : PROFILE;
+            if (environment == null || !selectedProfile.equals(environment.profile())
                     || !IDENTITY.equals(environment.compiler()) || !PACKAGES.equals(environment.packages()))
                 fail("PIN_MISMATCH", "/source");
             var domain = object(source.get("domain"), "/source/domain");
@@ -119,7 +123,7 @@ public final class KeirCompiler {
             byte[] descriptors = dcm.descriptorBytes();
             if (descriptors.length > 65_536) fail("BUDGET_EXCEEDED", "/dcm/types");
             var artifact = new TreeMap<String, Object>();
-            artifact.put("format", "keir-artifact/" + (effect ? "effect-" : "read-") + (generic ? "2" : "1"));
+            artifact.put("format", "keir-artifact/" + (effect ? "effect-" : "read-") + (effect3 ? "3" : generic ? "2" : "1"));
             artifact.put("profile", environment.profile());
             artifact.put("compiler", environment.compiler()); artifact.put("environment", environment.packages());
             artifact.put("sourceDigest", StrictData.digest(source)); artifact.put("entrypoint", entryId);
