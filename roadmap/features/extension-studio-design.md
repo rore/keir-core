@@ -10,7 +10,7 @@ repo: "keir-demo-app"
 
 ## Summary
 
-Current correction: the user's actual Studio review identifies a persistent decision box that obscures chat and leaves activation unclear. The [conversation-clarity Work Record](../../.agent-workflow/tasks/studio-chat-decision-clarity.md) owns focused design, implementation and interaction verification. Keep conversation primary and decisions deliberate and understandable, while preserving exact approval/activation and saved work. Prior technical/rendered passes establish their scoped behavior, not acceptance of this obstructive layout; human UX acceptance remains open.
+Current correction: the user rejects the complete customization UI as confusing, including the persistent decision box that obscures chat. The [conversation-clarity Work Record](../../.agent-workflow/tasks/studio-chat-decision-clarity.md) owns one coherent entry, discussion, canvas, examples, deliberate review/use and later-edit experience, with implementation and actual business-persona iteration. Keep conversation primary and decisions understandable while preserving exact approval/activation and saved work. Prior technical/rendered passes establish their scoped behavior, not acceptance of the whole experience; human UX acceptance remains open.
 
 The Extension Studio is the centerpiece of the demo. Maintain the accepted working design baseline and refine each workflow's product, interaction and visual design as real functionality is implemented.
 
