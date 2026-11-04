@@ -30,6 +30,8 @@ A global runtime registry, mandatory telemetry vendor or speculative optimizatio
 
 ## Notes
 
+**Queued source-level candidate:** Java CheckedCel, KeirRuntime and Artifact independently snapshot the DCM, and Prepared plans copy an already privately held model before a deep equality check. Investigate sharing one immutable snapshot per bound model across compatible plans. Preserve external mutation isolation, concurrency and artifact validation, and verify conformance before changing ownership. Measure retained memory/preparation behavior before making a performance claim; this is not an urgent blocker for the current contract correction.
+
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
 **Design input:** [Full-runner measurement, section 6.3](../../docs/internal/design-baseline/public/keir-architecture.md); [Trace and effect evidence, section 4](../../docs/internal/design-baseline/public/simulation-and-authoring-v0.md); [Lifecycle/budgets, sections 10-11](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md).
