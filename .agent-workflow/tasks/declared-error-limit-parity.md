@@ -44,7 +44,7 @@ Owning feature: [Declared-error limit parity](../../roadmap/features/declared-er
 
 ## Implementation
 
-Source inspection confirms the omitted generic condition. The assigned core developer has started isolated boundary reproduction; clean-context technical plan review is running independently. Production edits remain held for that review. The defect fails closed at runtime; no current demo impact or completed fix is claimed.
+Source inspection confirms the omitted generic condition. The assigned core developer has started isolated boundary reproduction and independent technical plan review has passed. Production edit release awaits executable reproduction. The defect fails closed at runtime; no current demo impact or completed fix is claimed.
 
 ## Plan review
 
