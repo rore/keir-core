@@ -33,13 +33,13 @@ Owning feature: [Real task integration](../../roadmap/features/demo-task-integra
 
 **Verification plan:** New native-task-effect-persistence tests plus affected data/API, lifecycle/deletion and migration suites cover populated V7-to-V8/reopen and injected rollback; exact legacy bytes/selections/generations/held spend/UNKNOWN preservation; corrupt backup and reset/old-key rejection; first/repeated completion and actual file-backed multi-process contention; atomic event/task/receipt rollback and crash windows; one claim, no STARTED replay; stable same-key receipt after native task edits/FINISHED, mismatch/unknown/cross-owner/unbranded keys; deterministic NONE versus transient/UNKNOWN; A's event after browser B; replacement versus disable-reenable/delete and current qualification/resource authority at commit; retained confirmed audit; surrogate rejection, valid supplementary Unicode, trim/native bounds and unchanged public DTOs. Update genuine legacy fixture teardown and direct selection SQL callers explicitly, without IF NOT EXISTS masking. Run focused affected checks then the fast suite; run affected browser fixture suites only if setup changes. Reuse generic UI evidence. No paid provider or live qualification/rollout is needed for this dormant slice.
 
-**Plan review:** Exact developer plan and reviewed core/host interface are recorded; clean-context technical plan review is pending before production edits. The architect's Unicode correction is included explicitly in the keyed boundary and verification.
+**Plan review:** Agent technical review: clean-context non-implementer PASS under Plan review below, including exact developer packet and corrected Unicode boundary. Elevated/Moderate remains appropriate for the dormant two-file slice. Required transaction, historical migration, permanent revocation, retained receipt and actual crash/concurrency conditions are recorded and accepted; implementation is released.
 
 **Approvals:** User authorizes advancing real task-management customization and managing parallel open work. No new live environment or production effect activation is authorized by this discovery record.
 
 **Exceptions:** —
 
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -47,3 +47,16 @@ Owning feature: [Real task integration](../../roadmap/features/demo-task-integra
 The manager accepts the architect's first scenario recommendation: completing a task in a customer-chosen existing project creates a task with a customer-chosen title. Actual core admission and host durability are missing; this is not an advice rename. The assigned developer has resumed separate isolated host discovery while the architect details the core/host interface. Generic UI technical/rendered review and the small compiler bug proceed independently. Production edits remain gated on the concrete reviewed plan, rather than on completion of unrelated UI work.
 
 Concrete developer plan is complete at unchanged demo 0b4f6d9, with exactly two production-file owners. It aligns with reviewed admission/handoff plus the architect's narrow Unicode correction. Manager inspected the clean source and exact plan evidence, recorded scope/risk/test seams, and requested independent review. No schema8, native authority guarantee, real runner or public activation is implemented yet.
+
+## Plan review
+
+Independent clean-context technical review passes the exact plan and affected native/API/lifecycle/migration callers. The reviewer confirms Elevated/Moderate for additive local stores, small selection migration and an unconstructed service with no public runner/activation. The manager accepts the following conditions and releases production implementation in the assigned isolated checkout:
+
+- Use a single nonnested transaction owner and internal validation/insertion helpers. Required authority callbacks are trusted synchronous non-I/O strict Booleans; missing-receipt writes recheck authority immediately before commit.
+- Resolve branded key and owner before disclosure. Matching receipts retain a separately read-authorized path after finish/revocation; missing receipts require STARTED and exact current authority. Runtime outcome is immutable, reconciliation separate; transient/UNKNOWN never becomes durable rejection or replay.
+- Preserve seedLifecycle's historical V1-to-V2 use before the V8 selection shape exists. Keep genuine V4 fixtures intact and explicitly adjust current-schema teardown/upgrade assertions. Schema8 remains exclusively owned here.
+- Disable/delete revokes admissions item-wide, including old replaced revisions and an unselected deleted item; replacement alone does not revoke and re-enable never clears it. Any required durable revocation observation must survive denial rather than roll back with it.
+- Deliver actual separate-process file-backed contention and abrupt termination/reopen evidence at event, claim, create/receipt and outcome boundaries. Include legacy/spending/UNKNOWN preservation, corrupt backup and failed reset, old-key rejection, retained audit and every affected selection fixture/browser suite.
+- Apply malformed-Unicode rejection only to the new keyed project/title boundary before canonicalization, preserve ordinary CRUD and the 120 UTF-16-unit title bound, and test lone surrogates plus valid supplementary characters. The corrected handoff pin is 97397650b6bde792678aa468c930d34f24f9b5f1.
+
+No tests, edits or live actions were performed by the reviewer. This accepts the implementation plan; actual native guarantees and real-execution/deployment qualification remain unproven until implementation review.
