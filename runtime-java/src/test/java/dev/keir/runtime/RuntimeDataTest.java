@@ -54,4 +54,19 @@ class RuntimeDataTest {
         assertThrows(UnsupportedOperationException.class,()->RuntimeData.list(snapshot.get("values"),"/input").clear());
         assertEquals("/input/a~1b~0c",RuntimeData.pointer("/input","a/b~c"));
     }
+
+    @Test void boundedCanonicalEncodingCountsEscapedUtf8Bytes() {
+        String encoded = "\"\\u0000\\u000aé😀\"";
+        Object value = "\0\né😀";
+        byte[] expected = bytes(encoded);
+        assertArrayEquals(expected, RuntimeData.canonical(value, expected.length));
+        assertEquals(expected.length, RuntimeData.canonical(value, 16_384).length);
+        RuntimeFault overflow = assertThrows(RuntimeFault.class, () -> RuntimeData.canonical(value, expected.length - 1));
+        assertEquals("BUDGET_EXCEEDED", overflow.code);
+        assertEquals("/artifact", overflow.path);
+        assertArrayEquals(RuntimeData.canonical(value), expected);
+        assertThrows(RuntimeFault.class, () -> RuntimeData.canonical("\ud800", 1));
+        assertThrows(RuntimeFault.class, () -> RuntimeData.canonical(List.of(true, true), 8));
+        assertThrows(RuntimeFault.class, () -> RuntimeData.canonical("x".repeat(100_000), 16_384));
+    }
 }

@@ -1,5 +1,11 @@
 # Shared generic-hook simulations
 
+The separate `effect3/` corpus exercises explicit real single-effect admission without changing the older fixtures. Its main, zero-WRITE and post-WRITE READ programs have independently stored compiler/model pins; 19 simulation scenarios preserve the prior main-program expectations and add the two new program cases. A program-authored CREATED label in the zero-WRITE case still carries no confirmed effect.
+
+`admission-cases.json` supplies 28 independently authored facts for fixed trusted host fixtures. `real-effect.mjs` and the Java `RealEffectScenarioDriver` compare full outcomes, ordered calls, traces and EVENT_REPORT consumption using the exact same artifacts in separate simulation and real bindings. Source and installed Node packages and the packaged Java runtime must agree. Qualification factories/current-state changes live in test code; scenario data cannot supply callbacks, real invokers, evidence or module paths.
+
+Run `node conformance/generic-hooks/real-effect.mjs` after building the fixtures and runtime dependencies. `--installed` selects only the fixed installed example package. The generic and combined verifiers run both selections and the Java transport. These deterministic real-mode fakes verify the admission protocol, not SQLite atomicity, a deployment report or live write permission.
+
 The read and effect directories hold one approved complete model each, three independently selected Java-compiled programs each, independent SHA-256 pins and hand-authored scenario expectations. The read variants select a second published READ or repeat the first READ. The effect variants change only the authored project or title, leaving the model, hook input and host context unchanged.
 
 Scenario files contain bounded, closed, data-only records. `given.program` selects a fixed host file/pin mapping; it cannot name a path, module or model. The host supplies all authority, current authorization and original native key/event context. `tasks.create` receives only project/title business arguments; actor and native context travel separately. Stubs supply typed responses; ordered actual calls are reconciled against runtime dispatch evidence before complete outcome, trace, receipt and consumer comparisons. A runtime failure cannot hide a harness mismatch.

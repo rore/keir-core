@@ -1,5 +1,13 @@
 # Java host example
 
+The fixed generic host also simulates `conformance/generic-hooks/effect3`. After the ordinary Maven build, run its deterministic admission protocol transport with the host JAR and runtime test classes:
+
+```powershell
+java -cp "examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar;runtime-java/target/test-classes" dev.keir.runtime.RealEffectScenarioDriver
+```
+
+It compares the same pinned effect/3 artifacts under separately admitted simulation and real bindings using fixed fake invokers and an original UUID. The test-only transport reuses the existing pure EVENT_REPORT formatter. No scenario supplies qualification or executable host authority; no native task is written and no SQLite deployment is qualified. Existing effect/1 and effect/2 host paths remain simulation-only.
+
 The separate `dev.keir.examples.GenericHost` entrypoint executes the [generic `/2` corpus](../../conformance/generic-hooks/README.md). It accepts one trusted fixture directory, `conformance/generic-hooks/read` or `conformance/generic-hooks/effect`, and loads fixed program filenames plus independent pins. For example: `java -cp examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar dev.keir.examples.GenericHost conformance/generic-hooks/effect`. Each batch binds the complete approved catalog once and prepares three programs against that same handle. It supplies fresh native context and current authorization per invocation, validates actual dispatch independently of expected calls, and enforces finite lexical harness reservations. It uses no compiler, YAML parser, network or real adapters. The legacy entrypoints and fixtures below remain separate compatibility checks.
 
 This command-line host prepares the shared Java-compiled artifact once using a digest supplied outside the artifact, then runs four controlled cases through that same prepared handle in one process. The simulation adapter supplies completed, open, missing and deliberately wrong-resource task data. The independent host consumer displays only a COMPLETED outcome with exactly one `classification` field whose value is `DONE` or `PENDING`.

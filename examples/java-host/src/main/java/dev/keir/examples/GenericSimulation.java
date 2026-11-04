@@ -16,7 +16,7 @@ final class GenericSimulation {
         check(value instanceof String text&&!text.isEmpty()&&text.getBytes(java.nio.charset.StandardCharsets.UTF_8).length<=256,"Bounded scenario scalar"); EffectJson.encode(value);
     }
     private static void fields(Object value,String... names) { shape(value,names); for(String name:names) scalar(object(value).get(name)); }
-    static void callShape(Object value,boolean stub,boolean effect) {
+    static void callShape(Object value,boolean stub,boolean effect,Set<String> createErrors) {
         var call=object(value); shape(call,stub?new String[]{"step","capability","version","args","protectedArgs","response"}:new String[]{"step","capability","version","args","protectedArgs"});
         check(call.get("step") instanceof String id&&id.matches("[A-Za-z][A-Za-z0-9]{0,63}"),"Invalid call step");
         check((effect?Set.of("tasks.get","tasks.create"):Set.of("tasks.get","tasks.lookup")).contains(call.get("capability"))&&"1".equals(call.get("version")),"Unknown simulation capability/version");
@@ -32,25 +32,28 @@ final class GenericSimulation {
             }
             case "BUSINESS_REJECTION" -> {
                 shape(response,write?new String[]{"kind","code","effect"}:new String[]{"kind","code"});
-                check((write?Set.of("CREATE_REJECTED","ACCESS_DENIED"):Set.of("TASK_NOT_FOUND","ACCESS_DENIED")).contains(response.get("code")),"Undeclared business code");
+                check((write?createErrors:Set.of("TASK_NOT_FOUND","ACCESS_DENIED")).contains(response.get("code")),"Undeclared business code");
                 check(!write||"NONE".equals(response.get("effect")),"Invalid rejection effect");
             }
             case "TRANSIENT_FAILURE" -> { shape(response,write?new String[]{"kind","effect"}:new String[]{"kind"}); check(!write||"NONE".equals(response.get("effect")),"Invalid transient effect"); }
             default -> { shape(response,"kind","effect"); check(write&&"UNKNOWN_COMMIT".equals(response.get("kind"))&&"UNKNOWN".equals(response.get("effect")),"Invalid response"); }
         }
     }
-    static void validateScenario(Object value,boolean effect) {
+    static void validateScenario(Object value,boolean effect,boolean effect3,Set<String> createErrors) {
         GenericCapacity.scenarios(0,0,EffectJson.encode(value).length,0,0); shape(value,"format","id","given","stubs","expect"); var row=object(value);
-        check((effect?"keir-scenario/effect-2":"keir-scenario/read-2").equals(row.get("format")),"Unsupported scenario format");
+        check((effect?(effect3?"keir-scenario/effect-3":"keir-scenario/effect-2"):"keir-scenario/read-2").equals(row.get("format")),"Unsupported scenario format");
         check(row.get("id") instanceof String id&&id.matches("[A-Za-z0-9][A-Za-z0-9_-]{0,63}"),"Invalid scenario ID");
         shape(row.get("given"),"input","fixture","program"); var given=object(row.get("given")); fields(given.get("input"),"taskId");
         check(COMMON.contains(given.get("fixture"))||effect&&EFFECT.contains(given.get("fixture")),"Unknown trusted fixture");
-        check(GenericHost.programNames(effect?"effect":"read").contains(given.get("program")),"Unknown fixed program");
-        var stubs=array(row.get("stubs")); GenericCapacity.scenarios(0,0,0,stubs.size(),0); stubs.forEach(stub->callShape(stub,true,effect));
+        check(GenericHost.programNames(effect3?"effect3":effect?"effect":"read").contains(given.get("program")),"Unknown fixed program");
+        var stubs=array(row.get("stubs")); GenericCapacity.scenarios(0,0,0,stubs.size(),0); stubs.forEach(stub->callShape(stub,true,effect,createErrors));
         shape(row.get("expect"),"outcome","calls","consumption"); var expect=object(row.get("expect"));
-        var calls=array(expect.get("calls")); GenericCapacity.scenarios(0,0,0,0,calls.size()); calls.forEach(call->callShape(call,false,effect));
+        var calls=array(expect.get("calls")); GenericCapacity.scenarios(0,0,0,0,calls.size()); calls.forEach(call->callShape(call,false,effect,createErrors));
         same(consume(expect.get("outcome"),effect),expect.get("consumption"),"Invalid expected consumer receipt");
         check((effect?"REPORTED":"DISPLAYED").equals(object(expect.get("consumption")).get("status"))||!effect&&"NOT_DISPLAYED".equals(object(expect.get("consumption")).get("status")),"Invalid expected outcome");
+    }
+    static void validateScenario(Object value,boolean effect) {
+        validateScenario(value,effect,false,effect?Set.of("CREATE_REJECTED","ACCESS_DENIED"):Set.of());
     }
     static Map<String,Object> consume(Object value,boolean effect) {
         if(effect)return EffectConsumer.consume(value);
@@ -64,11 +67,15 @@ final class GenericSimulation {
         return JavaHost.consume(classification,result,error);
     }
     static List<Map<String,Object>> batch(String profile,byte[] dcm,String dcmPin,Map<String,Program> programs,Object corpus) {
-        boolean effect="effect".equals(profile); check(effect||"read".equals(profile),"Unknown profile");
+        boolean effect=profile.startsWith("effect"), effect3="effect3".equals(profile); check(effect||"read".equals(profile),"Unknown profile");
+        var document=object(EffectJson.parse(dcm));
+        check((effect3?"keir-dcm/effect-3":effect?"keir-dcm/effect-2":"keir-dcm/read-2").equals(document.get("format")),"Profile and model format mismatch");
+        var createErrors=new HashSet<String>();
+        if(effect) for(Object code:array(object(object(document.get("capabilities")).get("tasks.create")).get("errors"))) createErrors.add((String)code);
         var rows=array(corpus); GenericCapacity.scenarios(EffectJson.encode(corpus).length,rows.size(),0,0,0); check(!rows.isEmpty(),"Empty scenario batch");
-        var ids=new HashSet<Object>(); for(Object row:rows) { validateScenario(row,effect); check(ids.add(object(row).get("id")),"Duplicate scenario ID"); }
+        var ids=new HashSet<Object>(); for(Object row:rows) { validateScenario(row,effect,effect3,createErrors); check(ids.add(object(row).get("id")),"Duplicate scenario ID"); }
         check(programs.keySet().equals(Set.copyOf(GenericHost.programNames(profile))),"Incomplete fixed program map");
-        try(var harness=new Harness(effect,dcm,dcmPin,programs)) {
+        try(var harness=new Harness(profile,effect,dcm,dcmPin,programs)) {
             var results=new ArrayList<Map<String,Object>>(); for(Object row:rows)results.add(harness.run(object(row))); return results;
         }
     }
@@ -81,7 +88,7 @@ final class GenericSimulation {
     static final class Harness implements AutoCloseable {
         final boolean effect; final GenericCapacity capacity=new GenericCapacity(); final List<GenericCapacity.Lease> leases=new ArrayList<>();
         final Map<String,KeirRuntime.Prepared> prepared=new LinkedHashMap<>(); KeirRuntime.BoundModel model; Active active;
-        Harness(boolean effect,byte[] dcm,String dcmPin,Map<String,Program> programs) {
+        Harness(String profile,boolean effect,byte[] dcm,String dcmPin,Map<String,Program> programs) {
             this.effect=effect;
             try {
                 GenericCapacity.capacity(dcm.length<=65_536); var document=object(EffectJson.parse(dcm));
@@ -90,7 +97,7 @@ final class GenericSimulation {
                 var approval=new LinkedHashMap<String,Object>(); approval.put("scope","sample-scope");
                 var domain=object(document.get("domain"));
                 approval.put("modelRef",Map.of("domainId",domain.get("id"),"domainVersion",domain.get("version"),"format",document.get("format"),"digest",dcmPin,"descriptorRecipe","keir-record-descriptors/1"));
-                approval.put("profile",effect?"keir-effect/2":"keir-read/2"); approval.put("environment",KeirRuntime.ENVIRONMENT); approval.put("mode","simulation");
+                approval.put("profile",effect?profile.equals("effect3")?"keir-effect/3":"keir-effect/2":"keir-read/2"); approval.put("environment",KeirRuntime.ENVIRONMENT); approval.put("mode","simulation");
                 if(effect)approval.put("keyBinding",new KeirRuntime.KeyBinding("sample.RequestUuid/1",candidate->active!=null&&candidate==active.key));
                 var invokers=new LinkedHashMap<String,Object>();
                 for(String id:object(document.get("capabilities")).keySet()) {

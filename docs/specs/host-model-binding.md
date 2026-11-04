@@ -4,6 +4,8 @@ Status: **implemented experimental `/2` contract, locally verified in Java and N
 
 ## One binding boundary
 
+The explicit [effect/3 extension](real-single-effect-admission.md) adds an optional final `qualification` argument to `bindModel`. Java adds `bindModel(bytes, approval, invokers, Qualification)` and retains the old three-argument overload; explicit fourth-argument null is invalid. Its `Qualification` contains evidence and a synchronous `Supplier<?>` current callback accepting Boolean true by value. Node treats undefined as omission and rejects null and boxed Boolean results. Qualification is required only for real effect/3, forbidden for simulation and earlier profiles. All existing `/1` and `/2` rules below remain unchanged. Native-host/deployment qualification is a separate obligation.
+
 The host binds a complete approved DCM and its invokers together, then reuses that opaque BoundModel. Preparation accepts no separate invoker map. A callable normally bridges to an internal HTTP/RPC service; it need not implement business logic locally.
 
 Implemented API families (diagnostics must be checked before using handles):

@@ -106,7 +106,7 @@ try {
   assert.deepEqual(effectNodeHost, effectExpected, 'Installed Node effect host differs from full shared expectations');
   assert.deepEqual(effectJavaHost, effectNodeHost, 'Packaged effect hosts differ');
   const generic = verifyGeneric({ repo, run });
-  console.log(`Verified ${cases.length} read cases/${cases.reduce((count, row) => count + row.runs.length, 0)} invocations and ${effectCases.length} effect scenarios; ${generic.read} generic read/${generic.effect} generic effect scenarios, 16 compiler runs, 8 host batches; artifacts ${artifactDigest}, ${effectPin}.`);
+  console.log(`Verified ${cases.length} read cases/${cases.reduce((count, row) => count + row.runs.length, 0)} invocations and ${effectCases.length} effect scenarios; ${generic.read} generic read/${generic.effect} generic effect/${generic.effect3} effect/3 scenarios and ${generic.qualification} effect/3 protocol cases, ${generic.compilerRuns + 4} compiler runs, ${generic.hostBatches + 4} host batches; artifacts ${artifactDigest}, ${effectPin}.`);
 } catch (error) {
   const message = String(error?.message ?? 'Verification failed').split('\n', 1)[0]
     .replaceAll(repo, '<repo>');

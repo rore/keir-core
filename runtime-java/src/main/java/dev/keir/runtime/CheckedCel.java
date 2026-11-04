@@ -96,7 +96,7 @@ final class CheckedCel {
     }
 
     static Bundle prepare(Artifact.Plan plan) {
-        if (Set.of("keir-read/2","keir-effect/2").contains(plan.document().get("profile")))
+        if (Set.of("keir-read/2","keir-effect/2","keir-effect/3").contains(plan.document().get("profile")))
             return prepare2(plan,bindModel2(plan.dcm()));
         Map<String,Object> dcm = plan.dcm();
         byte[] descriptors = base64(plan.document().get("descriptors"), 65_536, "/artifact/descriptors");

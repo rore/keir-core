@@ -6,8 +6,8 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { fixtures, loadScenarios, runProfile, runCorpus } from './run-node.mjs';
 
-test('independent model pins and six exact compiler artifacts remain selected', () => {
-  for (const profile of ['read', 'effect']) {
+test('independent model pins and nine exact compiler artifacts remain selected', () => {
+  for (const profile of ['read', 'effect', 'effect3']) {
     const fixture = fixtures[profile];
     assert.equal(`sha256:${createHash('sha256').update(fixture.dcmBytes).digest('hex')}`, fixture.dcmDigest);
     for (const program of Object.values(fixture.programs)) assert.equal(`sha256:${createHash('sha256').update(program.bytes).digest('hex')}`, program.digest);
@@ -16,7 +16,7 @@ test('independent model pins and six exact compiler artifacts remain selected', 
   assert.equal(fixtures.effect.dcmDigest, 'sha256:68b72e4da41aa006a6a8182b5b8a6a4363a6734688da3c1e0c3807c0aff4ac04');
 });
 test('full generic scenarios compare independent outcomes, ordered calls, traces and consumption', async t => {
-  for (const profile of ['read', 'effect']) {
+  for (const profile of ['read', 'effect', 'effect3']) {
     const rows = loadScenarios(profile), before = JSON.stringify(rows);
     for (const row of rows) await t.test(`${profile}/${row.id}`, async () => {
       assert.deepEqual(await runProfile(profile, [row]), [{ id: row.id, ...row.expect }]);
@@ -33,6 +33,9 @@ test('fixture applicability and all fixed program variants remain explicit', () 
     assert.deepEqual([...new Set(rows.map(row => row.given.program))].sort(), Object.keys(fixtures[profile].programs).sort());
     for (const row of rows) assert.deepEqual(Object.keys(row.given.input), ['taskId']);
   }
+  const effect3 = loadScenarios('effect3'), fixtureSet = new Set(effect3.map(row => row.given.fixture));
+  assert.ok(fixtureSet.has('normal'));
+  assert.deepEqual([...new Set(effect3.map(row => row.given.program))].sort(), Object.keys(fixtures.effect3.programs).sort());
   for (const fixture of ['zero-effect', 'revoked-after-read', 'invalid-key', 'wrong-origin', 'lost-response', 'response-expired']) {
     assert.ok(loadScenarios('effect').some(row => row.given.fixture === fixture));
     assert.ok(!loadScenarios('read').some(row => row.given.fixture === fixture));
@@ -46,6 +49,20 @@ test('closed corpus cannot configure paths, protected authority or executable pa
     row => { row.stubs[1].args.sourceTaskId = 'task1'; }, row => { row.stubs[0].response.effect = 'NONE'; },
     row => { row.stubs[1].response.effect = 'NONE'; }, row => { row.stubs[0].response.value.extra = true; },
   ]) { const row = structuredClone(loadScenarios('effect')[0]); mutate(row); await assert.rejects(runProfile('effect', [row])); }
+});
+test('effect/3 uses only its fixed programs and DCM-declared create errors', async () => {
+  const dcm = JSON.parse(fixtures.effect3.dcmBytes), row = structuredClone(loadScenarios('effect3')[0]);
+  for (const mutate of [
+    value => { value.format = 'keir-scenario/effect-2'; },
+    value => { value.given.program = 'project2'; },
+    value => { value.given.qualification = { evidence: {} }; },
+  ]) { const value = structuredClone(row); mutate(value); await assert.rejects(runProfile('effect3', [value])); }
+  const rejection = structuredClone(row);
+  rejection.stubs[1].response = { kind: 'BUSINESS_REJECTION', code: 'KEY_PAYLOAD_MISMATCH', effect: 'NONE' };
+  const { validateGenericScenario } = await import('../../examples/node-host/generic-simulation.mjs');
+  assert.doesNotThrow(() => validateGenericScenario(rejection, dcm));
+  const old = structuredClone(loadScenarios('effect')[0]); old.stubs[1].response.code = 'KEY_PAYLOAD_MISMATCH';
+  assert.throws(() => validateGenericScenario(old, JSON.parse(fixtures.effect.dcmBytes)));
 });
 test('missing, extra, wrong-order, wrong-step and mismatched stubs fail independently of runtime handling', async () => {
   for (const mutate of [

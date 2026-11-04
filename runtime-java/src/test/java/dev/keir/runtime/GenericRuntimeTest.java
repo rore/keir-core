@@ -19,10 +19,10 @@ class GenericRuntimeTest {
     static Map<String,Object> document(byte[] bytes) { return map(parseCanonical(bytes),""); }
     static Map<String,Object> approval(String profile,String scope) throws IOException {
         var result=new LinkedHashMap<String,Object>();
-        result.put("scope",scope); result.put("profile","keir-"+profile+"/2");
+        result.put("scope",scope); result.put("profile",profile.equals("effect3")?"keir-effect/3":"keir-"+profile+"/2");
         result.put("modelRef",Artifact.modelRef(document(file(profile,"dcm.json"))));
         result.put("environment",KeirRuntime.ENVIRONMENT); result.put("mode","simulation");
-        if(profile.equals("effect")) result.put("keyBinding",new KeirRuntime.KeyBinding(KEY_TYPE,key->key instanceof UUID));
+        if(profile.startsWith("effect")) result.put("keyBinding",new KeirRuntime.KeyBinding(KEY_TYPE,key->key instanceof UUID));
         return result;
     }
     static Map<String,Object> admission(String profile,byte[] bytes) {
@@ -30,7 +30,7 @@ class GenericRuntimeTest {
         result.put("expectedArtifactDigest",digest(bytes)); result.put("expectedDcmDigest",map(artifact.get("modelRef"),"").get("digest"));
         result.put("compiler",artifact.get("compiler")); result.put("environment",KeirRuntime.ENVIRONMENT);
         result.put("entrypoint",artifact.get("entrypoint")); result.put("mode","simulation");
-        result.put("consumer",profile.equals("effect")?Map.of("id","sample.followup.report","version","1","kind","EVENT_REPORT"):
+        result.put("consumer",profile.startsWith("effect")?Map.of("id","sample.followup.report","version","1","kind","EVENT_REPORT"):
                 Map.of("id","sample.classification","version","1","kind","DISPLAY")); return result;
     }
     static CompletableFuture<Object> done(Object value) { return CompletableFuture.completedFuture(value); }
