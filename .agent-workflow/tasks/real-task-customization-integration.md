@@ -44,4 +44,4 @@ Owning feature: [Real task integration](../../roadmap/features/demo-task-integra
 
 ## Implementation
 
-This owns the visible real-task outcome after the separately delivered foundations. Discovery offers are pending; source implementation remains unreleased. The reviewed native foundation and UI correction remain pinned, and the normal demo is unchanged during planning.
+This owns the visible real-task outcome after the separately delivered foundations. The developer accepted bounded discovery in a new isolated checkout at f02932b and is mapping concrete integration paths. Targeted architect consultation is underway on qualification distribution and remaining interface decisions. Source implementation remains unreleased. The reviewed native foundation and UI correction remain pinned, and the normal demo is unchanged during planning.
