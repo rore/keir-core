@@ -27,8 +27,8 @@ Multiple writes, self-certifying declarations, exactly-once claims, automatic re
 ## Done When
 
 - [x] Design/spec: publish the real-effect assurance/admission contract and required host evidence, including revocation and unsupported transports.
-- [ ] Implementation: both runtimes admit only the selected supported real profile and reject missing, stale or incompatible evidence.
-- [ ] Verification: shared conformance covers original-key identity, authority, definite NONE/CONFIRMED versus UNKNOWN, deadlines and rejection before dispatch.
+- [x] Implementation: both runtimes admit only the selected supported real profile and reject missing, stale or incompatible evidence.
+- [x] Verification: shared conformance covers original-key identity, authority, definite NONE/CONFIRMED versus UNKNOWN, deadlines and rejection before dispatch.
 
 ## Notes
 
@@ -41,3 +41,5 @@ Design this alongside the native event/effect prototype, without a dependency cy
 **Reviewed contract:** [Real single-effect admission](../../docs/specs/real-single-effect-admission.md) and [native handoff](../../docs/internal/real-task-effect-handoff.md) pass independent architecture review, including the frozen host clarification delta. This selects a new effect/3 boundary without changing effect/2. The concrete source/test plan under [the implementation record](../../.agent-workflow/tasks/real-single-effect-admission.md) passes independent review and implementation is underway. Final combined conformance, packaged verification and independent result review remain. Design and plan approval do not qualify production use or the native host.
 
 **Current result gate:** Corrected core edb43cb passes independent delta result review, reusing the accepted unchanged broad review and measured Java/Node/source/installed conformance. The safe-subset repair preserves ordinary async cleanup and strict authority with explicit unsupported host async limits. Manager accepts exact core integration and verified package consumption by the isolated demo implementation. Main delivery/hosted CI and recoverable cleanup remain; no native qualification is inferred.
+
+**Integrated:** Core d59e375 is pushed to main with all 52 reviewed source blobs preserved exactly. The contract and workflow hosted runs are in progress; actual verified runtime/compiler packages are released for isolated demo consumption. The completed source/output checkout remains temporarily pinned for CI, consumer-copy verification and recoverable archive, rather than further implementation. Native host qualification is separate.
