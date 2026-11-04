@@ -45,15 +45,15 @@ Owning feature: [extension approval lifecycle](../../roadmap/features/extension-
 - Data preservation → if a migration is needed, consistent snapshot rehearsal compares native/history/accounting records, integrity and foreign keys; qualified rollout compares the live result with the expected migration.
 - Delivery and usability → production build, affected fast regression, focused keyboard/browser walkthrough, independent result review and exact served-asset verification at the existing demo address.
 
-**Plan review:** Architecture contract advice is accepted against 20fb2e4 and incorporated above. Independent clean-context technical plan review is pending; no product implementation released yet.
+**Plan review:** Agent technical review: independent clean-context plan review passes core 604158c against demo 20fb2e4 with no required corrections. It confirms the additive tombstone, existing selection transition, early terminal receipt handling, raw settlement separation, cursor anchors and migration/reset coverage are the smallest complete approach. Architecture contract advice is accepted and incorporated above. Implementation is released within this plan; final result review remains required.
 
 **Approvals:** The user reports that a customization cannot be deleted and authorizes fixing it through the ongoing development task. Standing direction authorizes keeping the normal local demo current after verified changes, including routine restarts and preserving migrations. No physical audit purge, accounting reset or unrelated environment change is authorized.
 
 **Exceptions:** —
 
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
 
-Discovery confirms the reported missing behavior. The developer accepts planning/discovery with verified role and feature participation; the architect provides the concrete additive-storage, atomic-selection and terminal-receipt contract above. Independent plan review remains before implementation. This planning dependency does not require human approval.
+Discovery confirms the reported missing behavior. The developer accepts the assignment with verified role and feature participation; architecture advice and independent clean-context plan review pass. Implementation is released under the recorded plan, including reachable terminal recovery even if the preliminary item-scoped list request fails. A consistent isolated schema-6 snapshot passes integrity and foreign-key checks for all 18 tables; credentials are not copied and the running demo is unchanged. No new human approval is required for implementation or the verified local demo update.
