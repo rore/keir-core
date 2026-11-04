@@ -42,13 +42,13 @@ Owning feature: [Extension Studio design](../../roadmap/features/extension-studi
 - Agent/UI agreement → focused coaching checks and a business-persona interaction against actual available controls; use existing approved provider testing safely if live calls are needed, preserving prior accounting.
 - Delivery → affected fast regression, build, combined browser CI, independent result review and exact served-asset/data-preservation checks at the existing demo address.
 
-**Plan review:** Full-flow designer direction and developer concrete technical plan are recorded below. Independent technical plan review is pending before production edits; actual rendered business-persona assessment runs on isolated copied data in parallel.
+**Plan review:** Agent technical review: clean-context non-implementer review under Plan review below. PASS on the recorded full-flow design and technical plan at demo 0b4f6d9, with stable viewed identity, guarded asynchronous reading intent, retained decision fences, genuine continued chat and connected regression cases carried into implementation/verification. Designer actual business-persona assessment runs on isolated copied data in parallel.
 
 **Approvals:** The user rejects the persistent decision box as unclear and obstructive and requests a simple business-user experience. Existing authorization covers actual interaction/UX iterations and updating the normal demo after verification. No guide, Git identity/configuration or history change is part of this correction.
 
 **Exceptions:** —
 
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -64,3 +64,17 @@ The review sheet combines what the change does, what a representative task shows
 The developer identified connected UI coaching and existing browser helpers that assume the automatic Current decision card. Update those expectations intentionally while retaining exact identity, permission, stale-response and selection assertions. Reuse existing canvas/open/close/review state and the actual approval/activation handlers; do not introduce a dismissal registry, workflow engine or alternate authority path.
 
 Actual persona acceptance covers: new vague request through clarification, checked behavior, unrelated discussion, deliberate review, approval, separate use and native result; returning to active work, revising, preserving an unsent note through canvas changes, deferring switch and reloading; unsupported requests with consent before substitution; unknown/failure/stale/owner/history paths. Inspect desktop, phone and short windows, long content, zoom, keyboard focus/divider and scroll ownership. Tests complement actual rendered interaction and do not establish human visual acceptance.
+
+## Plan review
+
+Independent clean-context technical review inspected demo 0b4f6d9060c95a458824db84cac3e7e52a65c671, the record/config/workflow, Studio and collection presentation, native navigation, actual agent coaching, bounded authoring admission, connected design documents and browser tests/CI. Verdict: PASS for implementation; Elevated/Moderate remains appropriate. Reusing the contextual canvas and existing handlers is the smallest coherent mechanism.
+
+Required implementation/verification conditions:
+
+- Snapshot the viewed owner/item/revision/draft-version/evidence/suite and selection generation; compare with trusted current state before actions. New work leaves earlier content readable with an explicit latest entry. Approved evidence A is not silently replaced by a newer run B.
+- Explicit review owns its load intent. Closing or changing views must fence delayed proof/source completions and animation-frame focus/scroll work, including approval focus. Composer focus, workspace replacement and unmount invalidate focus ownership; ordinary reading must not strand a valid load.
+- Retain every current running/recovery/settings/restart/legacy/stale/history and exact proof/source fence after moving controls. Historical receipts remain read-only even if their revision later becomes current.
+- Removing completion presentation must also restore a real subsequent send/revision. Keep current runtime selection until separate activation. Back to tasks must target tasks, preserving native-origin navigation and unsaved edits.
+- Update connected browser callers through actual review entry while retaining mutation counts, identity and saved-state assertions. Add controlled close/reopen during proof/source loads; close/composer focus during approval/activation response; new draft/run or selection-generation change while viewing review; and real continued chat after activation. Preserve existing history/owner/source/uncertainty regressions.
+
+No production edits, tests, provider calls or environment changes were made by the reviewer. The manager accepts these conditions and releases the coherent implementation; rendered persona findings remain inputs to iteration and acceptance.
