@@ -39,7 +39,7 @@ Owning feature: [Real task integration](../../roadmap/features/demo-task-integra
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -60,3 +60,11 @@ Independent clean-context technical review passes the exact plan and affected na
 - Apply malformed-Unicode rejection only to the new keyed project/title boundary before canonicalization, preserve ordinary CRUD and the 120 UTF-16-unit title bound, and test lone surrogates plus valid supplementary characters. The corrected handoff pin is 97397650b6bde792678aa468c930d34f24f9b5f1.
 
 No tests, edits or live actions were performed by the reviewer. This accepts the implementation plan; actual native guarantees and real-execution/deployment qualification remain unproven until implementation review.
+
+## Frozen implementation and verification
+
+Developer result f02932bed14980e05d6843cbfff5370b247f3258 against demo 0b4f6d9 is clean and frozen. Production scope remains data.mjs and extension-lifecycle.mjs, with 17 affected test/fixture files; no frontend, public runner, package/core or live changes. The manager verified source identity, tracked cleanliness and exact result-manifest hash and requested independent frozen result review before integration.
+
+Reported verification: fast regression passes 284 tests with no failures; its initial 11 skips comprise one existing Windows permission case and ten gated physical cases. Two additional physical-only ordering cases were subsequently added; the final default process file confirms all 12 physical cases remain gated. The final selected physical suite passes all 12 with no skips, including real separate-process contention, abrupt termination around commit boundaries and both selection/completion orders. Focused native/storage/API passes 23 cases, assigned migration/context passes 60, all 42 affected browser cases pass, and build/typecheck passes. Raw logs, source/test/build hashes and original setup-failure evidence are retained privately for review.
+
+Implementation evidence covers owner/key/authority/revocation, separately read-authorized retained receipts, immutable outcomes/reconciliation, exact populated migration/backup/reset/legacy/accounting preservation, current keyed Unicode/native bounds and non-replay of interrupted STARTED work. Power-loss/fsync guarantees, actual runtime binding, deployment qualification and whole-product UX remain outside this dormant result. Original logs were retained when scoped test elevation and an isolated dependency junction resolved setup failures; no global tooling was changed. The checkout/evidence/participation remain pinned for review and possible fixes.
