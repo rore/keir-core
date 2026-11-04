@@ -72,6 +72,28 @@ class GenericRuntimeTest {
         assertFalse(value.succeeded()); assertNull(value.boundModel()); assertEquals(code,value.diagnostic().code()); assertEquals(path,value.diagnostic().path());
     }
 
+    @Test void bindingChecksDeclaredErrorBoundaryAcrossTheCompleteCatalog() throws Exception {
+        for(String profile:List.of("read","effect")) for(String id:List.of("tasks.get","tasks.create")) {
+            var model=document(file(profile,"dcm.json"));
+            var capability=map(map(model.get("capabilities"),"").get(id),"");
+            var errors=new ArrayList<>((List<String>)capability.get("errors"));
+            while(errors.size()<16) errors.add("ERROR"+errors.size());
+            capability.put("errors",errors);
+            AtomicInteger calls=new AtomicInteger();
+            Map<String,?> invokers=profile.equals("read")
+                ? reads((a,h,ms)->{calls.incrementAndGet();return done(null);})
+                : effects((a,h,ms,c)->{calls.incrementAndGet();return done(null);},(a,h,ms,c)->{calls.incrementAndGet();return done(null);});
+            for(int count:List.of(16,17)) {
+                if(count==17) errors.add("EXTRA_ERROR");
+                var approved=approval(profile,"scope"); approved.put("modelRef",Artifact.modelRef(model));
+                var result=KeirRuntime.bindModel(canonical(model),approved,invokers);
+                if(count==16) { assertTrue(result.succeeded(),()->String.valueOf(result.diagnostic())); assertNull(result.diagnostic()); }
+                else bindingDenied(result,"BUDGET_EXCEEDED","/binding/dcm");
+                assertEquals(0,calls.get());
+            }
+        }
+    }
+
     @Test void completeReadCatalogSupportsOtherAndRepeatedReadsWithNoNamedPolicy() throws Exception {
         AtomicInteger calls=new AtomicInteger();
         var bound=bound("read","scope",reads((a,h,ms)->{calls.incrementAndGet();assertEquals(Map.of("actorId","user1"),h);return done(read("COMPLETED"));}));

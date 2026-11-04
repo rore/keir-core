@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bindModel, ENVIRONMENT } from '../src/index.js';
 import { approval, dcmBytes, effectApproval, effectDcmBytes, effectInvokers, invokers, modelRef } from './model-binding-helpers.js';
+import { canonicalBytes, digest } from '../src/canonical.js';
+import { fixture, approval as referenceApproval, registrations } from './reference-helpers.js';
 
 const reject = (bytes, approved, registrations, path) => {
   let invoked = 0;
@@ -13,6 +15,29 @@ const reject = (bytes, approved, registrations, path) => {
   assert.equal(invoked, 0);
   return result;
 };
+
+test('binds 16 declared errors and rejects 17 across generic profiles and the complete catalog', () => {
+  for (const profile of ['read', 'effect']) for (const id of ['tasks.get', 'tasks.create']) {
+    const f = fixture(profile);
+    const errors = f.dcm.capabilities[id].errors;
+    while (errors.length < 16) errors.push(`ERROR${errors.length}`);
+    let calls = 0;
+    const guarded = registrations(f);
+    for (const row of Object.values(guarded)) row.invoke = () => { calls++; };
+    for (const count of [16, 17]) {
+      if (count === 17) errors.push('EXTRA_ERROR');
+      f.dcmBytes = canonicalBytes(f.dcm); f.dcmPin = digest(f.dcmBytes);
+      const result = bindModel(f.dcmBytes, referenceApproval(f), guarded);
+      if (count === 16) {
+        assert.notEqual(result.boundModel, null); assert.equal(result.diagnostic, null);
+      } else {
+        assert.equal(result.boundModel, null);
+        assert.deepEqual(result.diagnostic, { code: 'ADMISSION_INVALID', path: '/binding/dcm', message: 'The selected artifact or host configuration is invalid.' });
+      }
+      assert.equal(calls, 0);
+    }
+  }
+});
 
 test('binds the exact complete catalog atomically, including unused WRITE in read/2', () => {
   let calls = 0;
