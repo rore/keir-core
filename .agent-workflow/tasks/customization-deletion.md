@@ -51,7 +51,7 @@ Owning feature: [extension approval lifecycle](../../roadmap/features/extension-
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -61,3 +61,17 @@ Discovery confirms the reported missing behavior. The developer accepts the assi
 Implementation is in progress in the accepted isolated checkout. Target files are demo `src/data.mjs`, `src/extension-lifecycle.mjs`, `src/authoring-service.mjs`, `src/app.mjs`, `src/web/Customizations.tsx`, `src/web/Studio.tsx`, `src/web/main.tsx`, `src/web/styles.css`, affected lifecycle/authoring docs and deletion storage/lifecycle/API/authoring/browser regressions plus existing schema-version fixtures. The developer owns backend integration and bounded same-task frontend/storage contributions under this record. The developer reports 27 passing storage cases covering fresh databases, populated schema-6 migration, reopen, rollback and reset backup with records and UNKNOWN holds retained; combined verification and independent result review are still pending.
 
 Backend, storage, API, replay and race implementation now passes the developer's full fast checkpoint: 264 passes, one expected platform-specific skip, zero failures in about 12.3 seconds; production build passes. Fourteen focused browser cases pass, including ten deletion and four existing recovery cases; an additional all-UI real compiler/runtime creation-to-activation-to-deletion journey is being finalized before the source is frozen. An intermediate test-fixture synchronization stall was isolated and corrected before the final passing run; no live app or provider was touched. Exact source identity, independent result review, hosted CI and normal rollout remain pending.
+
+## Evidence
+
+Frozen candidate: demo `8c314a68bf0286006b5c6adbc860afc150f6d41b`, based on `20fb2e4`, with clean tracked source and generic public attribution. The final fast suite passes 264 tests with one expected Windows platform skip and zero failures; type checking and production build pass. Eleven deletion browser cases pass, including the actual no-AI guided create/check/approve/use/delete journey with the real compiler/runtime; four existing recovery cases also pass. Twenty-seven storage/migration checks pass. Busy browser feedback is modeled; actual busy/settlement and both race orders are covered by service/API tests. Exact build assets, logs and desktop/mobile captures are preserved. Independent result review passes below. [Hosted verification](https://github.com/rore/keir-demo-app/actions/runs/41825769466) and normal delivery remain pending; no live data or provider settings have changed.
+
+## Result review
+
+Agent technical review: Independent non-implementer review passes the exact candidate against the accepted plan, including connected readers/mutators, receipts, settlement, paging, migration and UI recovery, with no required corrections.
+
+Reviewed revision: 8c314a68bf0286006b5c6adbc860afc150f6d41b
+
+Verification adequacy: The fast/API/storage/race suite, actual compiler/runtime browser journey, existing recovery checks and independently rehearsed current-data migration adequately cover this contribution. All 18 original tables and held accounting are preserved in the migration rehearsal, with null initial tombstones, idempotent reopen, clean integrity/foreign keys and zero provider calls. A separate actual compiled-UI check verifies the named selected-item confirmation, turn-off warning, Cancel and returned focus on an isolated copy. It does not substitute for the automated deletion execution or claim fresh human visual acceptance. Code is integrated and pushed; hosted combined CI and the normal backed-up rollout remain pending.
+
+The copied UI's 18 tables remain identical after confirmation and Cancel. Final shared Workflow checking has zero blocking predicates; its commit-order advisory is checked against the actual histories: this core record was created at `6e0eb02`, before demo implementation `8c314a6`. No policy exception or weakened check is used.
