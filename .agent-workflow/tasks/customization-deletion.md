@@ -51,7 +51,7 @@ Owning feature: [extension approval lifecycle](../../roadmap/features/extension-
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -70,10 +70,12 @@ Frozen candidate: demo `8c314a68bf0286006b5c6adbc860afc150f6d41b`, based on `20f
 
 Agent technical review: Independent non-implementer review passes the exact candidate against the accepted plan, including connected readers/mutators, receipts, settlement, paging, migration and UI recovery, with no required corrections.
 
-Reviewed revision: 8c314a68bf0286006b5c6adbc860afc150f6d41b
+Reviewed revision: 0b4f6d9060c95a458824db84cac3e7e52a65c671
 
 Verification adequacy: The fast/API/storage/race suite, actual compiler/runtime browser journey, existing recovery checks and independently rehearsed current-data migration adequately cover this contribution. All 18 original tables and held accounting are preserved in the migration rehearsal, with null initial tombstones, idempotent reopen, clean integrity/foreign keys and zero provider calls. A separate actual compiled-UI check verifies the named selected-item confirmation, turn-off warning, Cancel and returned focus on an isolated copy. It does not substitute for the automated deletion execution or claim fresh human visual acceptance. Code is integrated and pushed; hosted combined CI and the normal backed-up rollout remain pending.
 
 The copied UI's 18 tables remain identical after confirmation and Cancel. Final shared Workflow checking has zero blocking predicates; its commit-order advisory is checked against the actual histories: this core record was created at `6e0eb02`, before demo implementation `8c314a6`. No policy exception or weakened check is used.
 
 The first hosted combined run fails two existing browser cases, with 129 passing and two failing; build and fast checks pass. One assertion reads the newly introduced actions wrapper instead of the containing customization article. Another recovery fixture waits for the old preliminary index request, while the corrected recovery path now checks the exact operation receipt first. The developer is released for the bounded existing-test corrections, preserving the original selection, blocked-retry, same-operation and unsent-text assertions. No application behavior, timeout or retry setting is weakened. Final acceptance, normal rollout and worktree cleanup are held until the corrected exact revision passes review and hosted CI; unchanged application reviews and migration/UI evidence remain valid.
+
+The test-only correction is frozen at `0b4f6d9060c95a458824db84cac3e7e52a65c671`, with only the two identified existing browser test files changed. Both affected cases pass together in 6.1 seconds. Selection now scopes to the containing card; the recovery fixture uses its existing exact-operation recovery hook and adds payload equality assertions while retaining blocked retry, identical submitted operation and unsent follow-up checks. Application source, timeouts and retry settings are unchanged, and all three build asset hashes match the accepted 8c build. Unchanged application result review, migration rehearsal, fast and deletion/browser evidence are reused. Independent scoped review passes with no required correction; the corrected revision is integrated and pushed. Replacement hosted verification remains pending before rollout.
