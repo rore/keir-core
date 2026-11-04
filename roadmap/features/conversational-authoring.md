@@ -10,6 +10,8 @@ repo: "keir-demo-app"
 
 ## Summary
 
+Current iteration: the approved database upgrade is verified on the normal demo. An uninterrupted real-provider journey now covers fresh creation, clarification, actual compilation and four checked examples, exact approval, separate activation and observed results on saved tasks. Further business-persona trials and fixes are active, including naming, example relevance and ordinary revision usability. The second provider remains unqualified.
+
 Deliver the in-app AI-driven extension creation UI on top of the manual exact-revision review/activation flow. This is part of the complete demo; the customer need not write IR. The person running the app supplies their own AI provider configuration and credentials.
 
 ## In Scope

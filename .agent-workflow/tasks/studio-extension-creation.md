@@ -55,14 +55,16 @@ Exact schema/target clarification: version 5 adds STRICT extensions, extension_r
 
 **Plan review:** Agent technical review: the independent architect approved isolated implementation after reviewing this record, the exact designer document blob cb81afc07e895f4aa8e4eaedf13575b08ede2770 and the developer's distinct-extension schema/API/migration proposal. The approved interaction includes active-v1 restart with v2 preserved, explicit switching, ambiguous legacy history and full keyboard/recovery/isolation QA. The verdict does not approve live migration or certify product QA. Manager releases only this settled contract and accepts no latest-item or advice-only substitute.
 
-**Approvals:** Not required at this risk level for isolated repository development. Existing user authorization covers this coherent slice. Any live environment/data upgrade follows the standing explicit-approval boundary after the reviewed result is concrete.
+**Approvals:** The user approved the reviewed, backed-up live database upgrade at the existing demo URL and further real-provider business-persona trials, with repeated interaction and visual improvements. Testing has no user-imposed spending cap; preserve cumulative accounting, prior holds and product guards. Keep provider credentials private, preserve existing data and use a recoverable cutover. No global tooling or unrelated service changes are authorized.
 
 **Exceptions:** —
 
-**State:** Ready for review
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
+
+The user approved the pending live cutover and further provider qualification. Reuse the reviewed migration and qualified build; back up the original database consistently, verify preserved data/settings/accounting and the same URL, then run real AI journeys as business users. Record observed confusion and iterate with the designer and developer. Preserve the previous qualification ledger without reset or refund; use explicit, accounted testing allowance where needed. Technical correctness and prior synthetic/browser checks remain valid but do not establish real-provider usability.
 
 A delayed checkpoint report also identified long customization names consuming several phone-header lines. Inspection of the accepted source confirmed this smaller responsive issue remained. Within the same scope, constrain the visible title to one line while retaining the full accessible name and native title; reproduce with an 80-character saved name on phone and short landscape, then run affected layout checks and an independent small result review. No runtime, authority, database or paid-provider change is involved.
 
@@ -73,6 +75,10 @@ The designer delivered the maintained interaction design and the architect resol
 Baseline reproduction completed before production edits on demo 8e06fbfba4dfe5835a6e07f2cb04c6e43d35b63a: the actual collection New path submitted the previously saved conversation ID, and Enter produced zero turn requests. Original observations/traces remain preserved. One developer coordinated bounded helpers for baseline regression, frozen legacy fixtures and React views under this owner-managed record. No operator-data upgrade or paid call occurred.
 
 ## Evidence
+
+Approved live cutover completed on the qualified b896053 build at the existing demo address. A consistent database backup and integrity check precede migration. All 12 preserved original tables, legacy draft heads and links, provider settings and held reservations match; schema and foreign-key checks pass. The supported setup API then increased testing allowance while preserving the provider, model, key and every prior reservation. The earlier qualification allocation remains unchanged.
+
+The first uninterrupted real-provider business-user trial created a distinct item from plain-language intent, clarified the manual trigger, compiled the actual program and checked four independent examples. Exact human approval and separate switching succeeded. Two saved native tasks then returned Needs attention and Done through Keir without changing task data. Six provider calls and six tool calls were accounted for. This trial exposed sentence-length item naming, a completed-task example foregrounded ahead of the requested unfinished-task behavior, and policy-like wording. Designer and developer are investigating those findings and change-of-mind/recovery usability; no complete UX or multi-provider acceptance is claimed.
 
 The manager independently preserved the unchanged New/Enter baseline and rehearsed V4-to-V5 migration at e0f995ac64ba6265b21a0a537326e1f3398b5630 on a private snapshot copy, without credentials. All 12 unchanged original tables retained exact values; draft heads, versions and links matched; integrity/foreign keys passed; reopening was idempotent. Nine pre/post native checks matched, including six actual tasks.get dispatches and displayed outcomes. Final migration, native adapter and compiler files remain byte-identical to that checkpoint, so this evidence is reused. The rehearsal alone does not qualify UI or real-provider behavior.
 
