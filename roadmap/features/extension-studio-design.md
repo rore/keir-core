@@ -1,7 +1,7 @@
 ---
 id: "extension-studio-design"
 title: "Design and prototype the Extension Studio experience"
-status: "blocked"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -10,7 +10,7 @@ repo: "keir-demo-app"
 
 ## Summary
 
-**Hold:** The current real-task Studio iteration is held while the architect audits the real-application design against the user's base guiding principles. Preserve reusable UI work and existing evidence; resume implementation/acceptance only after corrected scope is reconciled. Earlier delivered UI remains historical evidence, not acceptance of the held iteration.
+**Current assignment:** The standing designer accepted actual business-user interaction and visual QA. Core host-contract corrections pass independent result review and are integrated; the demo is installing verified packages and preparing a genuine authoring-to-native-result candidate. Designer testing begins on that earliest verified candidate, with repeated fixes and rechecks. Preserve the reviewed UI and saved work; no new standalone proposal, stale-preview review or additional approval gate blocks implementation. Whole-product UX acceptance remains open.
 
 **Simplification candidates after alignment:** Check whether fixed scripted-example preparation can use an existing host operation rather than browser-orchestrated create/scenario/simulation/evidence steps. Compare it with AI lifecycle orchestration before merging: the flows are not assumed identical, and operation identity, explicit retry, CAS, partial recovery and separate approval/activation remain. Also inspect duplicated selected-version evidence interpretation in authoring-service.mjs and Studio.tsx; prefer an existing host read projection only if it reduces code while preserving client owner/evidence/generation freshness fences. No current wrong result or accepted refactor is claimed. Apply only demonstrated net simplification during real journey work, without a workflow engine or broad UI rewrite.
 

@@ -1,7 +1,7 @@
 ---
 id: "conversational-authoring"
 title: "Author customer extensions through a bounded AI workflow"
-status: "blocked"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -10,7 +10,7 @@ repo: "keir-demo-app"
 
 ## Summary
 
-**Hold:** The current real-task authoring iteration is held for the user-directed base-design audit. Preserve source, discussions, receipts, provider configuration and accounting. Earlier deliveries remain recorded; no new implementation, provider acceptance or rollout proceeds before corrected scope is reconciled.
+**Current assignment:** Real-task authoring continues under the reviewed host-contract correction and verified core package handoff. The demo is running the actual compile/simulate/runtime and authoring browser flow before designer and real-provider business-persona iterations. Preserve source, discussions, operation receipts, provider configuration and accounting. Historical deliveries remain evidence of their own scope; actual new task-customization acceptance and rollout are still pending.
 
 **Bounded simplification follow-up:** After contract alignment, check the actual candidate for duplicated navigation instructions in authoring-agent.mjs and authoring-example.mjs, both supplied through discovery. Keep stable agent rules and one host-provided navigation description, preserving unsupported-request and explicit approval/use boundaries. This is the first small cleanup to consider while refining real authoring, not a new framework or standalone gate. Verify current source before applying; earlier audit locations may have moved.
 
