@@ -1,7 +1,7 @@
 ---
 id: "extension-studio-design"
 title: "Design and prototype the Extension Studio experience"
-status: "active"
+status: "blocked"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -9,6 +9,8 @@ repo: "keir-demo-app"
 ---
 
 ## Summary
+
+**Hold:** The current real-task Studio iteration is held while the architect audits the real-application design against the user's base guiding principles. Preserve reusable UI work and existing evidence; resume implementation/acceptance only after corrected scope is reconciled. Earlier delivered UI remains historical evidence, not acceptance of the held iteration.
 
 Current correction: the user rejects the complete customization UI as confusing, including the persistent decision box that obscures chat. The [conversation-clarity Work Record](../../.agent-workflow/tasks/studio-chat-decision-clarity.md) owns one coherent entry, discussion, canvas, examples, deliberate review/use and later-edit experience, with implementation and actual business-persona iteration. Keep conversation primary and decisions understandable while preserving exact approval/activation and saved work. Prior technical/rendered passes establish their scoped behavior, not acceptance of the whole experience; human UX acceptance remains open.
 

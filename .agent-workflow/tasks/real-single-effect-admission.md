@@ -39,7 +39,7 @@ Owning feature: [Real-effect admission](../../roadmap/features/real-effect-admis
 
 **Exceptions:** —
 
-**State:** Ready for review
+**State:** Blocked or returned to planning
 <!-- agent-workflow:end -->
 
 ## Accepted design inputs
@@ -122,3 +122,7 @@ Agent technical review: independent clean-context non-implementer PASS for clean
 Verification is adequate for the bounded correction, reusing the accepted unchanged broad result. The reviewer reran no tests/builds or live actions. Manager accepts this gate and authorizes exact core integration and assigned isolated demo consumption of the verified runtime archive/compiler JAR. Main push/hosted CI and recoverable checkout cleanup remain delivery checks. Unsupported host async work still has the disclosed limit; neither this acceptance nor deterministic fixtures qualify native SQLite, a deployment or live writes.
 
 Manager integrated the two reviewed commits onto main as b616c97 and d59e37576fe951688c83a449a1808c449b343445 and pushed them. Every one of the 52 integrated source blobs matches reviewed edb43cb exactly; clean tree, diff check and approved commit identity pass. The [Keir contract run](https://github.com/rore/keir-core/actions/runs/41873759463) and [workflow run](https://github.com/rore/keir-core/actions/runs/41873759417) pass for that exact head; [subsequent bookkeeping CI](https://github.com/rore/keir-core/actions/runs/41874301204) also passes. Actual runtime archive and compiler CLI were rehashed against reviewed proof, and isolated demo package consumption is released. Developer copy readback and manager hashing of the actual demo vendor files both match the accepted archive/JAR. The retention gates are cleared and recoverable core-checkout cleanup is released; no native qualification or normal-data writes are enabled.
+
+## User-directed design hold
+
+The user directs rereading the base design and guiding principles, auditing the real-application definitions for deviations, and producing concrete corrections before further work. This supersedes earlier implementation, acceptance, package-use, rollout and cleanup clearances for affected work. The architect owns the source-backed audit and concise durable guidance; manager coordinates the hold and subsequent scope reconciliation. Passing technical review/tests/CI does not validate a product design that the user has reopened. Preserve all source, measured evidence and archives; no speculative rollback, discarded work, history rewrite or live changes. Resume only after the corrective scope is explicitly reconciled and released. Completed checkout cleanup before receipt of the hold remains historical fact, with recovery artifacts preserved.
