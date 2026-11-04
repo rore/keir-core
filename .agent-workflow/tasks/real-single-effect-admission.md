@@ -33,13 +33,13 @@ Owning feature: [Real-effect admission](../../roadmap/features/real-effect-admis
 
 **Verification plan:** New shared/public-API compiler/Java/Node vectors cover closed qualification and exact pins, missing/null/extra/mixed/oversized fields, scope/key/catalog/build/current approval, all modes, forged handles and input mutation; false/throw/null/boxed/non-Boolean/async/thenable callbacks and rejected async returns; digest-first preparation, revocation at entry, during pending authorization, between calls and after CONFIRMED before later READ; original key/actor/event identity and fresh remainingMs/no intent on callback expiry. Canonicalizer cap tests isolate byte budgeting from later invalid field bounds: valid evidence need not reach 16 KiB. Independently pin new main/zero-write/after-write-read artifacts and run exact same bytes/scenario identities in both modes/runtimes/source/installed packages. Cover potential two-WRITE compile/forgery, zero ceiling/false guard, duplicate CONFIRMED, definite/transient NONE, UNKNOWN, malformed envelope/value and immutable deadline winners, reusing existing effect semantics tests. Run final fast Java/Node coverage and combined source/packaged conformance with all old pins unchanged; verify installed source identity and Java exclusion of compiler/parser classes. No native host qualification or paid provider/live writes.
 
-**Plan review:** Independent architecture review approves the protocol for implementation planning, not production use. The exact 51-path developer plan, risk and verification are recorded; clean-context concrete technical plan review is pending before production edits.
+**Plan review:** Agent technical review: independent clean-context concrete plan review PASS under Plan review below, after prior architecture approval. The exact frozen source/path/risk packet is verified. Elevated/Moderate remains proportionate; API compatibility, bounded string encoding, descriptor-safe retention, post-authorization current/deadline checks and honest settlement conditions are accepted. Implementation is released; native deployment is not.
 
 **Approvals:** User authorizes real task-management customization and parallel progress. This record does not authorize live environment changes or unqualified effects; any further required approval must address a concrete uncovered decision after planning.
 
 **Exceptions:** —
 
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Accepted design inputs
@@ -51,3 +51,18 @@ The manager accepts independent architecture approval for admission document blo
 The small compiler parity fix is integrated with passing hosted CI and verified cleanup. The core developer accepted effect/3 source-impact discovery and concrete planning in a separate isolated checkout, with exact feature participation verified; no production code release yet. The demo developer owns native-host foundation discovery and the designer's real-task interaction handoff remains an input to eventual Studio wiring.
 
 Concrete planning is complete at unchanged core 0dbea06. The manager inspected the frozen source-impact packet and exact path/risk evidence; production source remains clean. Scope is one existing protocol family extended across compiler and both runtimes, with bounded test fixtures/package verification and no new framework. Independent plan review is now requested; native-host implementation has its own separate reviewed release.
+
+## Plan review
+
+Independent clean-context technical review passes the exact plan at source 0dbea06119735667023ee33fd64342cb4f29bbd9 and record revision 9b59437. The reviewer independently matched the packet hash and 51-path inventory, inspected actual compiler/runtime/clock/canonicalizer/scenario/package/test seams, and found no blocker or contradiction with the accepted contract. Elevated/Moderate is appropriate; static Gray/API flags do not eliminate the acknowledged new authority boundary. The additional bounded encoder and fixed test-only host drivers solve concrete gaps without another interpreter/framework.
+
+Implementation and result-review conditions:
+
+- Preserve the old Java three-argument overload independently of explicit fourth-argument null rejection. Accept Java Boolean true by value; Node separately rejects boxed Boolean objects. Node undefined is omission and null is invalid supplied qualification.
+- Enforce the 16,384-byte ceiling during string escaping/encoding and before evidence copying. Existing encoders build escaped intermediates: a smaller final-output check alone is insufficient. Test inclusive/aggregate byte bounds, control escapes, multibyte Unicode, unchanged default output and fixed-path overflow versus malformed-data errors.
+- Validate Node descriptors before reading qualification/evidence/invoker fields. Capture independent immutable evidence and callback/invoker references before isCurrent; caller mutation cannot replace them and pure caches retain no authority callbacks/results.
+- Check currentness before authorizers and again after asynchronous authorization, before dispatch reservation. Recheck time after callbacks; adapter budget includes callback time. Denial/expiry creates no effect intent, receipt or adapter call.
+- Keep qualification outside clock/response/receipt winner callbacks. A winning confirmed response survives revocation/subsequent failure; every later reached call checks independently.
+- Contain Java callback failure consistently with existing key-validation conventions. Node must handle rejected actual native Promises without awaiting, reading arbitrary then properties or assimilating thenables; tests assert zero getter/thenable execution and no unhandled rejection.
+
+No tests or edits were performed by the reviewer. The manager accepts these conditions and releases code in the assigned isolated checkout; frozen implementation/result review, shared/package conformance and separate actual native qualification remain required.
