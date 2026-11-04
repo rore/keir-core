@@ -1,7 +1,7 @@
 ---
 id: "host-integration-assistant"
 title: "Help a host developer define and approve an integration"
-status: "active"
+status: "queued"
 priority: "medium"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -32,6 +32,8 @@ An agent runtime in core, automatic certification, mandatory API importers or a 
 - [ ] Walkthrough: document the pre-design-time checkout, native startup, coding-agent task and expected integration checks; verify it from a clean checkout using a compatible pinned core release. Main retains the configured customer journey.
 
 ## Notes
+
+Remaining skill/checkpoint distribution work is unassigned and queued behind the current real-task customization increment. The delivered runnable guide and its verification remain valid; this status does not undo that contribution.
 
 **Dependencies:** [real-task-reads](../features/real-task-reads.md); [machine-readable-contracts](../features/machine-readable-contracts.md).
 

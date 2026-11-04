@@ -2,6 +2,8 @@
 
 This is the single roadmap for `keir-core` and `keir-demo-app`: delivered features, planned deliveries and visible uncommitted proposals. The manager owns sequence and combined acceptance; each card identifies the repository that owns implementation.
 
+Current focus is a recognizable real customization: completing a task in a customer-chosen project creates a task with a customer-chosen title. Mature the real-effect contract and native event/key foundation in parallel with reviewing and simplifying the reusable Studio UI. The small compiler compatibility fix runs independently. Keep unassigned parser, AI-readiness, broader schema/simulation and host-skill follow-ups explicitly queued rather than treating every unfinished feature as active.
+
 ## Tracking progress
 
 - **Milestones describe outcomes; features own delivery.** Board order expresses priority; cards name actual dependencies. Milestones are not serial gates: native app work, tooling and experimental packaging may proceed independently.

@@ -1,7 +1,7 @@
 ---
 id: "machine-readable-contracts"
 title: "Publish current schemas and agent-consumable contracts"
-status: "active"
+status: "queued"
 priority: "medium"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -29,6 +29,8 @@ A second language specification in prompts, an agent framework in core or an aut
 - [ ] Verification: examples/schemas match the actual validators, diagnostics are repairable and scoped, and forged/unsupported authority stays rejected.
 
 ## Notes
+
+The remaining cross-profile/API coverage has no active implementation assignment. Keep it queued and pull the exact subset required by the reviewed real-effect contract; preserve the delivered read/2 evidence below.
 
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
