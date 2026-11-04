@@ -39,6 +39,21 @@ class GenericHookCompilerTest {
         assertEquals(path,result.diagnostics().getFirst().path());
     }
 
+    @Test void declaredErrorsAreBoundedAcrossGenericProfilesAndTheCompleteCatalog() throws Exception {
+        for (String profile:List.of("read","effect")) for (String id:List.of("tasks.get","tasks.create")) {
+            var model=model(profile);
+            var capability=map(map(model.get("capabilities")).get(id));
+            var errors=new ArrayList<>((List<String>)capability.get("errors"));
+            while(errors.size()<16) errors.add("ERROR"+errors.size());
+            capability.put("errors",errors);
+            var accepted=compile(profile,source(profile),model);
+            assertTrue(accepted.succeeded(),accepted.diagnostics().toString());
+            assertNotNull(accepted.artifactDigest()); assertTrue(accepted.diagnostics().isEmpty());
+            errors.add("EXTRA_ERROR");
+            denied(compile(profile,source(profile),model),"BUDGET_EXCEEDED","/dcm/capabilities/"+id+"/errors");
+        }
+    }
+
     @Test void compilerReproducesEveryReferenceFixtureWithoutEmbeddedModels() throws Exception {
         for (String profile : List.of("read","effect")) for (String suffix : profile.equals("read")
                 ? List.of("","-repeated","-alternate") : List.of("","-project2","-title2")) {

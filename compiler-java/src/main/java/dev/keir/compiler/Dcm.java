@@ -144,7 +144,7 @@ final class Dcm {
                 if (!binding.equals("agent") && !binding.equals("host")) throw invalid(child(pp,"binding"));
                 parameters.put(param.getKey(),new Parameter(type,binding));
             }
-            var errors = strings(cap.get("errors"),child(path,"errors"),effectProfile ? 16 : Integer.MAX_VALUE,false,true);
+            var errors = strings(cap.get("errors"),child(path,"errors"),(effectProfile || generic) ? 16 : Integer.MAX_VALUE,false,true);
             capabilities.put(entry.getKey(),new Capability(version,immutable(parameters),result,effect,errors));
         }
         var entries = new TreeMap<String,Entrypoint>();
