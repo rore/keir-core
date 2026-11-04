@@ -60,7 +60,7 @@ final class Artifact {
     }
 
     static void validateModel2(Map<String,Object> dcm, String profile) {
-        model(dcm,!"keir-read/2".equals(profile),true,"keir-effect/3".equals(profile));
+        model(dcm,!"keir-read/2".equals(profile),true,"keir-effect/3".equals(profile),"keir-effect/4".equals(profile));
     }
 
     static Map<String,Object> modelRef(Map<String,Object> dcm) {
@@ -75,14 +75,18 @@ final class Artifact {
     }
 
     private static void model(Map<String,Object> dcm, boolean effect, boolean generic, boolean qualified) {
+        model(dcm,effect,generic,qualified,false);
+    }
+
+    private static void model(Map<String,Object> dcm, boolean effect, boolean generic, boolean qualified, boolean bound) {
         String p = MODEL;
         if (effect) exact(dcm,p,"format","domain","types","capabilities","entrypoints","hostKey","assurance");
         else exact(dcm, p, "format", "domain", "types", "capabilities", "entrypoints");
-        require((effect ? (qualified ? "keir-dcm/effect-3" : generic ? "keir-dcm/effect-2" : "keir-dcm/effect-1")
+        require((effect ? (bound ? "keir-dcm/effect-4" : qualified ? "keir-dcm/effect-3" : generic ? "keir-dcm/effect-2" : "keir-dcm/effect-1")
                 : (generic ? "keir-dcm/read-2" : "keir-dcm/read-1")).equals(dcm.get("format")), p);
         require(canonical(dcm).length <= Profile.DCM_BYTES, p, "BUDGET_EXCEEDED");
         if (effect) {
-            require((qualified ? "HOST_QUALIFIED_SINGLE_WRITE" : "SIMULATION_ONLY").equals(dcm.get("assurance")),p+"/assurance","DCM_INVALID");
+            require((bound ? "HOST_BOUND_SINGLE_WRITE" : qualified ? "HOST_QUALIFIED_SINGLE_WRITE" : "SIMULATION_ONLY").equals(dcm.get("assurance")),p+"/assurance","DCM_INVALID");
             exact(dcm.get("hostKey"),p+"/hostKey","source","type");
             Map<String,Object> key = map(dcm.get("hostKey"),p+"/hostKey");
             require("requestKey".equals(key.get("source")),p+"/hostKey/source","DCM_INVALID");
@@ -207,12 +211,13 @@ final class Artifact {
     }
 
     static void validateEnvelope2(Map<String,Object> artifact, Map<String,Object> dcm, String profile) {
-        boolean effect=!"keir-read/2".equals(profile), qualified="keir-effect/3".equals(profile);
+        boolean effect=!"keir-read/2".equals(profile), qualified="keir-effect/3".equals(profile), bound="keir-effect/4".equals(profile);
         exact(artifact,"/artifact","format","profile","compiler","environment","sourceDigest","modelRef","entrypoint","expressions","steps","return");
         text(artifact.get("compiler"),"/artifact/compiler",true,256);
         require(map(dcm.get("entrypoints"),MODEL).containsKey(artifact.get("entrypoint")),"/artifact/entrypoint");
-        require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment");
-        require((qualified ? "keir-artifact/effect-3" : effect ? "keir-artifact/effect-2" : "keir-artifact/read-2").equals(artifact.get("format")),"/artifact/format");
+        require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment",bound?"PIN_MISMATCH":"ARTIFACT_INVALID");
+        if (bound) require("keir-compiler-java/0.1.0-SNAPSHOT".equals(artifact.get("compiler")),"/artifact/compiler","PIN_MISMATCH");
+        require((bound ? "keir-artifact/effect-4" : qualified ? "keir-artifact/effect-3" : effect ? "keir-artifact/effect-2" : "keir-artifact/read-2").equals(artifact.get("format")),"/artifact/format");
         require(modelRef(dcm).equals(artifact.get("modelRef")),"/artifact/modelRef");
         require(profile.equals(artifact.get("profile")),"/artifact/profile");
         require(artifact.get("sourceDigest") instanceof String text && text.matches("sha256:[0-9a-f]{64}"),"/artifact/sourceDigest");

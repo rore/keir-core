@@ -1,6 +1,12 @@
 # Generic hooks and capability composition
 
-Status: **implemented experimental `/2` contract with local compiler, Java/Node and packaged-host conformance**. [Testing evidence](../testing.md) records the measured scope; the [owning feature](../../roadmap/features/generic-hook-capability-contract.md) tracks final acceptance. Effects remain simulation-only, and production qualification/release are open. Existing `/1` profiles retain their required grants and golden bytes. [Rationale and migration](../internal/generic-hook-capability-contract-design.md) explain the correction.
+## Corrected host-bound effect/4
+
+The corrected single-write profile is explicit: `keir-effect/4`, `keir-dcm/effect-4`, `keir-artifact/effect-4` and `keir-scenario/effect-4`, with `HOST_BOUND_SINGLE_WRITE`. The host defines the full catalog in the DCM and supplies every compatible implementation at initialization. Keir checks catalog completeness, versions, key types and homogeneous mode, then derives static model/artifact/compiler/environment checks internally. Host implementations enforce current permissions, business rules, key authenticity and native commit semantics. Corrected two-argument `bindModel` and `prepareProgram` forms require no approval/admission records or separate authorization, key-validation or qualification callbacks.
+
+An empty catalog and empty implementation map are valid and mode-inapplicable. A program that reaches no capability may complete without native permission or key-authenticity checks. When a capability is reached, host rejection is an attempted call; it is definite NONE only when the implementation establishes no effect. Exception, timeout or response loss after dispatch remains UNKNOWN. Preserve the original non-null opaque key, typed event and one absolute deadline in fresh invocation context. The remainder documents legacy behavior where marked; `/1`–`/3` grant and qualification machinery are not `/4` prerequisites.
+
+The `/2` contract below is legacy behavior with local compiler, Java/Node and packaged-host conformance. [Testing evidence](../testing.md) records its measured scope; the [owning feature](../../roadmap/features/generic-hook-capability-contract.md) tracks its acceptance. Existing `/1` profiles retain their required grants and golden bytes. [Rationale and migration](../internal/generic-hook-capability-contract-design.md) explain that earlier correction.
 
 ## Responsibility boundaries
 

@@ -7,9 +7,9 @@ Keir has two product-facing agent personas. Both are host integrations over Keir
 | Host integration assistant | Helps the host developer define the domain, DCM, hooks, capabilities, adapters and contracts | [Host integration](host-integration-assistant.md) |
 | Customer extension assistant | Helps a customer describe a customization, author an extension/scenarios and review simulation before requesting activation | [Extension authoring](extension-assistant.md) |
 
-**Status:** initial guidance for proposed workflows, not installed tools or a complete SDK. Planned delivery includes a host-design skill used by a developer's coding agent and the demo's in-app customer extension-authoring UI. These are two personas and execution contexts; the host-design skill does not require a second in-app agent.
+**Status:** initial guidance for proposed workflows, not installed tools or a complete SDK. The corrected host flow uses explicit `/4` host-bound single-write semantics; `/1`–`/3` remain legacy contracts. Planned delivery includes a host-design skill used by a developer's coding agent and the demo's in-app customer extension-authoring UI. These are two personas and execution contexts; the host-design skill does not require a second in-app agent.
 
-Both guides distinguish legacy `/1` contracts from the implemented experimental [generic-hook `/2` profiles](../specs/generic-hook-capability-contract.md). Local compiler, Java/Node and packaged-host checks pass; effects remain simulation-only. Generic hooks do not require a sample program's call list. Optional policy, aggregate budgets and current authorization remain separate; passing simulation does not certify real adapters or production readiness.
+Both guides distinguish the explicit `/4` host-bound contract from legacy `/1`–`/3` behavior in the [generic-hook specification](../specs/generic-hook-capability-contract.md). Do not describe `/4` as verified until implementation evidence is confirmed. Generic hooks do not require a sample program's call list. Host implementations enforce current permission; simulation does not certify real adapters or production readiness.
 
 For offline read/2 checks, use the shared [simulation operator guide](read-simulation.md) and its exact-artifact examples. Scenarios supply data and independent expectations; authority and consumer behavior remain host-owned.
 

@@ -1,5 +1,9 @@
 # Read-and-decide compiler and artifact
 
+## Effect/4 identity
+
+The corrected host-bound single-write family uses explicit `keir-effect/4`, `keir-dcm/effect-4`, `keir-artifact/effect-4` and `HOST_BOUND_SINGLE_WRITE` identities. Do not infer it from missing qualification fields or relabel earlier bytes. The DCM supplies model identity; preparation checks the exact bound model and supported compiler/environment internally. The host selects approved artifact bytes and owns any expected-digest check against that selection. Corrected preparation does not accept expected digest, consumer, scope, compiler or environment as caller-supplied admission metadata. `/1`–`/3` artifact validation and pin behavior remain legacy contracts.
+
 The implemented [generic-hook `/2` contract](generic-hook-capability-contract.md#versioned-delta) uses explicit new profile/DCM/artifact identifiers and [reference artifacts](host-model-binding.md#exact-reference-artifact). This page's `/1` envelope and grant semantics remain unchanged. Changing a version string or deleting grants is not migration.
 
 Status: implemented experimental checkpoint; deterministic compiler output and local Java/Node execution pass [verification](../../conformance/read-and-decide/README.md#verify-both-runtimes-and-packaged-hosts). One Java compiler library/CLI emits one artifact consumed unchanged by both runtimes. This replaces the baseline's illustrative multi-file bundle for this profile only.

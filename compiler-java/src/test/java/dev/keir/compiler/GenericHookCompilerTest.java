@@ -23,6 +23,7 @@ class GenericHookCompilerTest {
     private static KeirCompiler.Environment environment(String profile) { return switch (profile) {
         case "read" -> KeirCompiler.Environment.read2();
         case "effect3" -> KeirCompiler.Environment.effect3();
+        case "effect4" -> KeirCompiler.Environment.effect4();
         default -> KeirCompiler.Environment.effect2();
     }; }
     private static KeirCompiler.Compilation compile(String profile,Map<String,Object> source,Map<String,Object> model) {
@@ -120,6 +121,43 @@ class GenericHookCompilerTest {
         String[] args={fixture("effect3","source.yaml").toString(),fixture("effect3","dcm.json").toString(),"--profile=keir-effect/3"};
         assertEquals(0,CompilerCli.run(args,new PrintStream(stdout),new PrintStream(stderr)));
         assertArrayEquals(bytes("effect3","artifact.json"),stdout.toByteArray()); assertEquals(0,stderr.size());
+    }
+
+    @Test void effect4ReproducesPinnedFixturesAndKeepsItsBoundSingleWriteContract() throws Exception {
+        var model=model("effect4");
+        assertEquals("HOST_BOUND_SINGLE_WRITE",model.get("assurance"));
+        assertEquals(Files.readString(fixture("effect4","dcm.sha256")).trim(),StrictData.digest(model));
+        for (String suffix : List.of("", "-zero", "-after-write-read", "-no-call")) {
+            var first=COMPILER.compile(bytes("effect4","source"+suffix+".yaml"),bytes("effect4","dcm.json"),environment("effect4"));
+            var second=COMPILER.compile(bytes("effect4","source"+suffix+".yaml"),bytes("effect4","dcm.json"),environment("effect4"));
+            assertArrayEquals(first.artifact(),second.artifact());
+            assertArrayEquals(bytes("effect4","artifact"+suffix+".json"),first.artifact());
+            assertEquals(Files.readString(fixture("effect4","artifact"+suffix+".sha256")).trim(),first.artifactDigest());
+            var artifact=artifact(first);
+            assertEquals("keir-artifact/effect-4",artifact.get("format"));
+            assertEquals("keir-effect/4",artifact.get("profile"));
+            assertEquals("keir-dcm/effect-4",map(artifact.get("modelRef")).get("format"));
+            if (suffix.equals("-no-call")) assertTrue(steps(artifact).stream().allMatch(step -> "BIND".equals(map(step).get("op"))));
+        }
+        var source=source("effect4"); var duplicate=new TreeMap<>(steps(source).get(3)); duplicate.put("id","secondWrite"); duplicate.put("when","eligible"); steps(source).add(duplicate);
+        denied(compile("effect4",source,model("effect4")),"BUDGET_EXCEEDED","/source/steps/4/call");
+        var noCall=map(StrictData.parse(bytes("effect4","source-no-call.yaml"),"/source"));
+        model= model("effect4"); map(model.get("capabilities")).clear();
+        var empty=artifact(compile("effect4",noCall,model));
+        assertTrue(steps(empty).stream().allMatch(step -> "BIND".equals(map(step).get("op"))));
+        var missingCall=source("effect4"); steps(missingCall).get(1).put("call","tasks.missing");
+        denied(compile("effect4",missingCall,model("effect4")),"CAPABILITY_UNKNOWN","/source/steps/1/call");
+    }
+
+    @Test void effect4RequiresItsOwnAssuranceAndCliProfile() throws Exception {
+        var model=model("effect4"); model.put("assurance","HOST_QUALIFIED_SINGLE_WRITE");
+        denied(compile("effect4",source("effect4"),model),"DCM_INVALID","/dcm/assurance");
+        model=model("effect4"); model.put("format","keir-dcm/effect-3");
+        denied(compile("effect4",source("effect4"),model),"PROFILE_UNSUPPORTED","/dcm/format");
+        var stdout=new ByteArrayOutputStream(); var stderr=new ByteArrayOutputStream();
+        String[] args={fixture("effect4","source.yaml").toString(),fixture("effect4","dcm.json").toString(),"--profile=keir-effect/4"};
+        assertEquals(0,CompilerCli.run(args,new PrintStream(stdout),new PrintStream(stderr)));
+        assertArrayEquals(bytes("effect4","artifact.json"),stdout.toByteArray()); assertEquals(0,stderr.size());
     }
 
     @Test void authoredConstantsAndGenericCreateArgumentsRemainInTheProgram() throws Exception {

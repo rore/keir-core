@@ -77,21 +77,26 @@ export function prepareProgram(artifactBytes, boundModel, admission) {
   let path = '/binding', code = 'ADMISSION_INVALID';
   try {
     const bound = modelFor(boundModel); ok(bound, path, code);
+    const hostBound = bound.profile === 'keir-effect/4';
     path = '/admission';
-    shape(admission, ['expectedArtifactDigest', 'expectedDcmDigest', 'entrypoint', 'consumer', 'compiler', 'environment', 'mode',
-      ...['capabilityPolicy', 'limits', ...(bound.effect ? ['effectGrant'] : [])].filter(field => Object.hasOwn(admission ?? {}, field))], path);
-    path = '/admission/expectedArtifactDigest';
-    ok(typeof admission.expectedArtifactDigest === 'string' && /^sha256:[0-9a-f]{64}$/.test(admission.expectedArtifactDigest), path, code);
+    if (hostBound) ok(arguments.length === 2, path, code);
+    else {
+      shape(admission, ['expectedArtifactDigest', 'expectedDcmDigest', 'entrypoint', 'consumer', 'compiler', 'environment', 'mode',
+        ...['capabilityPolicy', 'limits', ...(bound.effect ? ['effectGrant'] : [])].filter(field => Object.hasOwn(admission ?? {}, field))], path);
+      path = '/admission/expectedArtifactDigest';
+      ok(typeof admission.expectedArtifactDigest === 'string' && /^sha256:[0-9a-f]{64}$/.test(admission.expectedArtifactDigest), path, code);
+    }
     path = '/artifact'; code = 'ARTIFACT_INVALID';
     ok(artifactBytes instanceof Uint8Array, path, code); ok(artifactBytes.byteLength <= LIMITS.artifactBytes, path, 'BUDGET_EXCEEDED');
-    const bytes = Buffer.from(artifactBytes); ok(digest(bytes) === admission.expectedArtifactDigest, path, 'PIN_MISMATCH');
+    const bytes = Buffer.from(artifactBytes);
+    if (!hostBound) ok(digest(bytes) === admission.expectedArtifactDigest, path, 'PIN_MISMATCH');
     const artifact = parseCanonical(bytes); validateEnvelope(artifact, bound);
     const entrypoint = bound.dcm.entrypoints[artifact.entrypoint];
     const limits = { steps: LIMITS.steps, calls: LIMITS.calls, totalAstNodes: LIMITS.totalAstNodes, traceEvents: LIMITS.traceEvents };
     let grants = { ...bound.model.policies[artifact.entrypoint] };
     let effectGrant = bound.effect ? bound.model.effectGrants[artifact.entrypoint] : 0;
     code = 'ADMISSION_INVALID';
-    for (const field of Object.keys(admission).sort()) {
+    for (const field of hostBound ? [] : Object.keys(admission).sort()) {
       path = '/admission/' + field;
       if (field === 'capabilityPolicy') {
         ok(admission.capabilityPolicy !== undefined, path); grants = narrowPolicy(bound.dcm, admission.capabilityPolicy, grants, path);
@@ -116,8 +121,10 @@ export function prepareProgram(artifactBytes, boundModel, admission) {
       if (!Object.hasOwn(hostFields, name)) hostFields[name] = [];
       hostFields[name].push(parameter.type);
     }
-    path = '/admission/qualification'; code = 'ADMISSION_INVALID';
-    requireCurrent(bound, code, path);
+    if (!hostBound) {
+      path = '/admission/qualification'; code = 'ADMISSION_INVALID';
+      requireCurrent(bound, code, path);
+    }
     const prepared = Object.freeze(Object.create(null));
     handles.set(prepared, { version: 2, artifact: freeze(artifact), dcm: bound.dcm, entrypoint, grants: freeze(grants), limits: freeze(limits), cel,
       adapters: bound.adapters, hostFields, effect: bound.effect, effectGrant, keyValidator: bound.keyValidator, scope: bound.scope, bound });
@@ -196,10 +203,11 @@ function effectEvidence(response) {
 }
 
 export function invoke(prepared, businessInput, trustedInvocation) { return execute(prepared, businessInput, trustedInvocation, 1); }
-export function invokeProgram(prepared, businessInput, trustedInvocation) { return execute(prepared, businessInput, trustedInvocation, 2); }
+export function invokeProgram(prepared, businessInput, trustedInvocation) { return execute(prepared, businessInput, trustedInvocation, 2, arguments.length); }
 
-async function execute(prepared, businessInput, trustedInvocation, version) {
+async function execute(prepared, businessInput, trustedInvocation, version, argumentCount = 3) {
   const plan = handles.get(prepared);
+  const hostBound = plan?.bound?.profile === 'keir-effect/4';
   const trace = [];
   const effects = [];
   let businessCause;
@@ -217,25 +225,38 @@ async function execute(prepared, businessInput, trustedInvocation, version) {
   emit('INVOCATION_START');
   try {
     ok(plan && plan.version === version, '', 'HOST_CONTEXT_INVALID');
+    if (hostBound) ok(argumentCount === 3, '', 'HOST_CONTEXT_INVALID');
     try {
-      shape(trustedInvocation, ['bindings', 'deadline', 'authorize', ...(version === 2 ? ['scope',
-        ...(Object.hasOwn(trustedInvocation ?? {}, 'capabilityPolicy') ? ['capabilityPolicy'] : [])] : ['grants']),
-      ...(plan.effect ? ['requestKey', 'event', ...(version === 1 || Object.hasOwn(trustedInvocation ?? {}, 'effectGrant') ? ['effectGrant'] : [])] : [])], '');
-      if (version === 2) { text(trustedInvocation.scope, '', true); ok(trustedInvocation.scope === plan.scope, ''); }
+      if (hostBound) shape(trustedInvocation, ['bindings', 'deadline', 'requestKey', 'event'], '');
+      else {
+        shape(trustedInvocation, ['bindings', 'deadline', 'authorize', ...(version === 2 ? ['scope',
+          ...(Object.hasOwn(trustedInvocation ?? {}, 'capabilityPolicy') ? ['capabilityPolicy'] : [])] : ['grants']),
+        ...(plan.effect ? ['requestKey', 'event', ...(version === 1 || Object.hasOwn(trustedInvocation ?? {}, 'effectGrant') ? ['effectGrant'] : [])] : [])], '');
+        if (version === 2) { text(trustedInvocation.scope, '', true); ok(trustedInvocation.scope === plan.scope, ''); }
+      }
     }
     catch { throw new Fault('HOST_CONTEXT_INVALID', ''); }
-    ok(typeof trustedInvocation.authorize === 'function', '', 'HOST_CONTEXT_INVALID');
-    let clock;
-    try { clock = deadline(trustedInvocation.deadline); } catch { throw new Fault('HOST_CONTEXT_INVALID', ''); }
+    if (!hostBound) ok(typeof trustedInvocation.authorize === 'function', '', 'HOST_CONTEXT_INVALID');
+    let clock, invocationDeadline;
+    try {
+      if (hostBound) {
+        shape(trustedInvocation.deadline, ['clock', 'expiresAtMs'], '');
+        const sourceClock = trustedInvocation.deadline.clock, nowMs = sourceClock?.nowMs;
+        ok(typeof nowMs === 'function', '', 'HOST_CONTEXT_INVALID');
+        invocationDeadline = Object.freeze({ clock: Object.freeze({ nowMs: nowMs.bind(sourceClock) }),
+          expiresAtMs: trustedInvocation.deadline.expiresAtMs });
+      }
+      clock = deadline(hostBound ? invocationDeadline : trustedInvocation.deadline);
+    } catch { throw new Fault('HOST_CONTEXT_INVALID', ''); }
     clock.remaining('');
-    current('');
+    if (!hostBound) current('');
     const { artifact, entrypoint, adapters, hostFields } = plan;
     const dcm = plan.dcm;
     const grants = Object.create(null);
     if (version === 2) {
       try {
-        if (Object.hasOwn(trustedInvocation, 'capabilityPolicy')) ok(trustedInvocation.capabilityPolicy !== undefined, '');
-        Object.assign(grants, narrowPolicy(dcm, trustedInvocation.capabilityPolicy, plan.grants, ''));
+        if (!hostBound && Object.hasOwn(trustedInvocation, 'capabilityPolicy')) ok(trustedInvocation.capabilityPolicy !== undefined, '');
+        Object.assign(grants, hostBound ? plan.grants : narrowPolicy(dcm, trustedInvocation.capabilityPolicy, plan.grants, ''));
       } catch { throw new Fault('HOST_CONTEXT_INVALID', ''); }
     }
     const state = Object.fromEntries([['input', validateValue(dcm, entrypoint.input, businessInput, '/input', 'INPUT_INVALID')]]);
@@ -254,7 +275,7 @@ async function execute(prepared, businessInput, trustedInvocation, version) {
     let hostContext, effectGrant;
     if (plan.effect) {
       try {
-        effectGrant = version === 2 && !Object.hasOwn(trustedInvocation, 'effectGrant') ? plan.effectGrant : trustedInvocation.effectGrant;
+        effectGrant = hostBound || version === 2 && !Object.hasOwn(trustedInvocation, 'effectGrant') ? plan.effectGrant : trustedInvocation.effectGrant;
         integer(effectGrant, plan.effectGrant, '', 0);
         shape(trustedInvocation.event, ['id', 'source'], '');
         const event = Object.freeze({
@@ -263,16 +284,18 @@ async function execute(prepared, businessInput, trustedInvocation, version) {
         });
         const requestKey = trustedInvocation.requestKey;
         ok(requestKey !== null && requestKey !== undefined, '', 'HOST_CONTEXT_INVALID');
-        hostContext = Object.freeze({ requestKey, event });
+        hostContext = Object.freeze({ requestKey, event, ...(hostBound ? { deadline: invocationDeadline } : {}) });
       } catch (error) { throw new Fault(error instanceof Fault && error.code === 'BUDGET_EXCEEDED' ? error.code : 'HOST_CONTEXT_INVALID', ''); }
       clock.remaining('');
-      let valid;
-      const validateKey = plan.keyValidator;
-      try { valid = validateKey(hostContext.requestKey); } catch { valid = false; }
-      clock.remaining('');
-      ok(valid === true, '', 'HOST_CONTEXT_INVALID');
+      if (!hostBound) {
+        let valid;
+        const validateKey = plan.keyValidator;
+        try { valid = validateKey(hostContext.requestKey); } catch { valid = false; }
+        clock.remaining('');
+        ok(valid === true, '', 'HOST_CONTEXT_INVALID');
+      }
     }
-    const authorize = trustedInvocation.authorize;
+    const authorize = hostBound ? undefined : trustedInvocation.authorize;
     function current(path) {
       if (!plan.bound?.qualification) return;
       clock.remaining(path);
@@ -286,7 +309,7 @@ async function execute(prepared, businessInput, trustedInvocation, version) {
       ok(typeof allowed === 'boolean', path, 'AUTHORITY_CHECK_FAILED');
       ok(allowed, path, 'AUTHORITY_DENIED');
     }
-    await authorized({ entrypoint: artifact.entrypoint }, '');
+    if (!hostBound) await authorized({ entrypoint: artifact.entrypoint }, '');
     const counts = Object.create(null);
     let totalCalls = 0, totalEffects = 0;
     const evaluate = (binding, path) => {
@@ -322,9 +345,9 @@ async function execute(prepared, businessInput, trustedInvocation, version) {
         if (parameter.binding === 'host') protectedArgs[name] = validateValue(dcm, parameter.type, bindings[name], '/hostBindings', 'HOST_BINDING_INVALID');
         else agentArgs[name] = validateValue(dcm, parameter.type, evaluate(step.args[name], path), path, 'INPUT_INVALID');
       }
-      await authorized({ entrypoint: artifact.entrypoint, capability: step.capability, version: step.version }, path);
+      if (!hostBound) await authorized({ entrypoint: artifact.entrypoint, capability: step.capability, version: step.version }, path);
       clock.remaining(path);
-      current(path);
+      if (!hostBound) current(path);
       freeze(agentArgs); freeze(protectedArgs);
       let receipt, recorded = false;
       const settled = response => {

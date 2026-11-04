@@ -4,7 +4,7 @@ The [read-and-decide fixtures](read-and-decide/README.md) contain maintained sou
 
 The [single-effect fixture](single-effect/README.md) adds a Java-compiled artifact and 25 shared simulation scenarios. Local combined verification compares full outcomes, traces, ordered calls and EVENT_REPORT consumption across Java, Node and both packaged hosts. Real-mode admission remains rejected; fake adapters establish no persistence or duplicate-safety guarantee.
 
-The [generic-hook `/2` fixtures](generic-hooks/README.md) add six reference artifacts against two host-bound models, nine read/nineteen effect scenarios, authored nominal constants and generic task creation. The same combined verifier compiles every program twice and checks both runtimes and packaged hosts. `/1` fixtures remain unchanged. See [testing evidence](../docs/testing.md) for current local results and the separate CI status.
+The generic-hook fixtures retain legacy `/1`–`/3` profiles and add explicit `/4` host-bound effects without relabeling old artifacts. Each corpus uses explicit identities, data-only scenarios, compiler-generated artifacts and independent digests. Local combined verification passed exact Java/Node/source/installed parity, including 11 effect/4 scenarios and 25 host-bound protocol cases; independent result/simplicity review and manager integration remain pending. No native-provider qualification or hosted CI result is claimed. See [testing evidence](../docs/testing.md) for the full measured scope.
 
 Compare typed values, exact call order and arguments, guard decisions, effects and termination classes. Keep compiler rejection tests, expression interoperability, runner conformance and real host adapter guarantees distinct.
 

@@ -1,10 +1,28 @@
 # Node runtime
 
-ESM library implementing bounded read and single-effect profiles. Legacy `keir-read/1` and `keir-effect/1` APIs remain available; `keir-read/2` and `keir-effect/2` add complete scoped model binding and reference artifacts. `keir-effect/3` adds explicit host-qualified real admission; older effect profiles remain simulation-only. It prepares trusted Java compiler output once and returns typed outcomes with redacted traces. Runtime execution requires Node, not Java or the compiler. The current tested environment is Node 24.14.1, CEL-ES 0.6.1 and protobuf 2.6.2; dependency pins are recorded in the npm lockfile.
+ESM library implementing bounded read and single-effect profiles. The corrected `keir-effect/4` contract uses `bindModel(dcmBytes, implementations)`, `prepareProgram(artifactBytes, boundModel)` and `invokeProgram(prepared, businessInput, invocation)`. Binding checks the complete catalog, compatible versions/key types and homogeneous mode; preparation derives model/compiler/environment checks internally; invocation carries fresh bindings, deadline, original non-null key and typed event. Host implementations enforce current permissions, key authenticity and native commit rules. `/1`–`/3` retain their explicit legacy APIs and behavior. Verification is reported separately in [testing evidence](../docs/testing.md); this contract does not qualify native effects.
 
-The [read and decide](../roadmap/features/portable-core-first-slice.md) profile preserves its three-argument adapter API and DISPLAY consumption. The [single-effect contract](../docs/specs/single-effect.md) adds one guarded post-commit write with receipts and terminal business handlers. The [effect/3 protocol](../docs/specs/real-single-effect-admission.md) checks separately approved host qualification. Source parsing, native-host qualification, live activation and production containment remain outside this library.
+The [read and decide](../roadmap/features/portable-core-first-slice.md) profile preserves its three-argument adapter API and DISPLAY consumption. The [single-effect contract](../docs/specs/single-effect.md) adds one guarded post-commit write with receipts and terminal business handlers. The corrected `/4` API has no qualification input; native permission and commit guarantees remain host responsibilities. Source parsing, live activation and production containment remain outside this library.
 
-For effect/3, `bindModel(dcmBytes, approval, invokers, qualification)` requires the optional final argument only when `approval.mode` is `real`. It is forbidden for simulation and earlier profiles. `undefined` means omission; explicit `null` is invalid. Qualification is the closed `{evidence,isCurrent}` record in the protocol: complete catalog, exact scope/model/environment/key identity, independently approved host build/report and positive revision. Evidence is capped at 16,384 canonical UTF-8 bytes during encoding, before snapshotting. The runtime retains independent immutable evidence and callback/invoker references.
+The corrected `/4` host flow is:
+
+```js
+const { boundModel, diagnostic: bindError } = bindModel(dcmBytes, implementations);
+if (bindError) throw new Error(bindError.code);
+
+const { prepared, diagnostic: prepareError } = prepareProgram(artifactBytes, boundModel);
+if (prepareError) throw new Error(prepareError.code);
+
+const outcome = await invokeProgram(prepared, businessInput, {
+  bindings, deadline: { clock, expiresAtMs }, requestKey, event: { id, source }
+});
+```
+
+The call has exactly three arguments total: `prepared`, `businessInput`, and `{bindings, deadline, requestKey, event}`. Each implementation has `{version, mode, keyType, invoke}`; `invoke(args, protectedArgs, remainingMs, context)` receives context `{requestKey, event: {id, source}, deadline}`. The host supplies fresh values and a non-null original request key. The runtime's deadline wrapper snapshots expiry and captures the source `nowMs` function and receiver; it does not freeze or mutate the host's clock object. Each implementation owns current permission and key-authenticity checks.
+
+### Legacy effect/3
+
+`keir-effect/3` retains its separately qualified admission protocol for existing callers. Its qualification record, callback, pins and denial timing apply only to that legacy profile; they are not `/4` prerequisites.
 
 `isCurrent` is a trusted synchronous, non-I/O callback that returns primitive Boolean true only while that exact host deployment/report/revision remains approved. Exceptions, Promises, thenables and boxed Boolean objects deny admission. The library cannot establish native atomicity, retention or deployment trust from supplied JSON or a constant callback. An independently reviewed native report and current host/user authority remain required.
 

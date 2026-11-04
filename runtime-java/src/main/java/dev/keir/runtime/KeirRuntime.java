@@ -19,6 +19,14 @@ public final class KeirRuntime {
         CompletionStage<?> invoke(Map<String,Object> agentArgs, Map<String,Object> protectedArgs, long remainingMs, HostContext context);
     }
     @FunctionalInterface public interface KeyValidator { Object validate(Object key); }
+    @FunctionalInterface public interface BoundEffectFunction {
+        CompletionStage<?> invoke(Map<String,Object> args, Map<String,Object> protectedArgs, long remainingMs, BoundEffectContext context);
+    }
+    public record BoundEffectAdapter(String version, String mode, String keyType, BoundEffectFunction invoke) {}
+    public record BoundEffectContext(Object requestKey, Map<String,Object> event, Deadline deadline) {
+        public BoundEffectContext { event=Map.copyOf(event); }
+    }
+    public record BoundEffectInvocation(Map<String,Object> bindings, Deadline deadline, Object requestKey, Map<String,Object> event) {}
     public record Adapter(String version, String mode, AdapterFunction invoke) {}
     public record EffectAdapter(String version, String mode, String keyType, EffectAdapterFunction invoke) {}
     public record KeyBinding(String type, KeyValidator validate) {}
@@ -52,16 +60,24 @@ public final class KeirRuntime {
         private final KeyBinding keyBinding;
         private final Map<String,Adapter> adapters;
         private final Map<String,EffectAdapter> effectAdapters;
+        private final Map<String,BoundEffectAdapter> boundEffectAdapters;
         private final CheckedCel.Model types;
         private final Qualification qualification;
         private BoundModel(Map<String,Object> dcm, Map<String,Object> modelRef, String scope,
                            String profile, String mode, KeyBinding keyBinding, Map<String,Adapter> adapters,
                            Map<String,EffectAdapter> effectAdapters, CheckedCel.Model types, Qualification qualification) {
+            this(dcm,modelRef,scope,profile,mode,keyBinding,adapters,effectAdapters,types,qualification,Map.of());
+        }
+        private BoundModel(Map<String,Object> dcm, Map<String,Object> modelRef, String scope,
+                           String profile, String mode, KeyBinding keyBinding, Map<String,Adapter> adapters,
+                           Map<String,EffectAdapter> effectAdapters, CheckedCel.Model types, Qualification qualification,
+                           Map<String,BoundEffectAdapter> boundEffectAdapters) {
             this.dcm=snapshot(dcm); this.modelRef=snapshot(modelRef); this.scope=scope;
-            this.profile=profile; this.mode=mode; this.effect=Set.of("keir-effect/2","keir-effect/3").contains(profile);
+            this.profile=profile; this.mode=mode; this.effect=Set.of("keir-effect/2","keir-effect/3","keir-effect/4").contains(profile);
             this.keyBinding=keyBinding; this.adapters=Map.copyOf(adapters);
             this.effectAdapters=Map.copyOf(effectAdapters); this.types=types;
             this.qualification=qualification;
+            this.boundEffectAdapters=Map.copyOf(boundEffectAdapters);
         }
     }
 
@@ -139,6 +155,39 @@ public final class KeirRuntime {
 
     public static ModelBinding bindModel(byte[] dcmBytes, Map<String,Object> approval, Map<String,?> invokers) {
         return bindModel(dcmBytes,approval,invokers,null,false);
+    }
+
+    public static ModelBinding bindModel(byte[] dcmBytes, Map<String,BoundEffectAdapter> implementations) {
+        try {
+            require(dcmBytes!=null,"ADMISSION_INVALID","/binding/dcm");
+            require(dcmBytes.length<=Profile.DCM_BYTES,"BUDGET_EXCEEDED","/binding/dcm");
+            Map<String,Object> dcm;
+            CheckedCel.Model types;
+            try {
+                dcm=map(parseJson(dcmBytes.clone(),Profile.DCM_BYTES),"/binding/dcm");
+                Artifact.validateModel2(dcm,"keir-effect/4");
+                types=CheckedCel.bindModel2(dcm);
+            } catch (RuntimeException failure) {
+                throw new RuntimeFault(failure instanceof RuntimeFault fault && "BUDGET_EXCEEDED".equals(fault.code)?"BUDGET_EXCEEDED":"ADMISSION_INVALID","/binding/dcm");
+            }
+            Map<String,Object> caps=map(dcm.get("capabilities"),"");
+            require(implementations!=null && implementations.keySet().equals(caps.keySet()),"ADMISSION_INVALID","/binding/implementations");
+            Map<String,BoundEffectAdapter> registered=new LinkedHashMap<>(implementations);
+            String mode=null, keyType=(String)map(dcm.get("hostKey"),"").get("type");
+            for (String id:new TreeSet<>(caps.keySet())) {
+                String path=pointer("/binding/implementations",id);
+                Object value=registered.get(id);
+                require(value instanceof BoundEffectAdapter,"ADMISSION_INVALID",path);
+                BoundEffectAdapter adapter=(BoundEffectAdapter)value;
+                require(Objects.equals(map(caps.get(id),"").get("version"),adapter.version()) &&
+                        Objects.equals(keyType,adapter.keyType()) && adapter.invoke()!=null &&
+                        ("simulation".equals(adapter.mode()) || "real".equals(adapter.mode())),"ADMISSION_INVALID",path);
+                if (mode==null) mode=adapter.mode();
+                require(mode.equals(adapter.mode()),"ADMISSION_INVALID",path);
+            }
+            return new ModelBinding(new BoundModel(dcm,Artifact.modelRef(dcm),null,"keir-effect/4",mode,null,
+                    Map.of(),Map.of(),types,null,registered),null);
+        } catch (RuntimeException failure) { return new ModelBinding(null,diagnostic(failure,"ADMISSION_INVALID","/binding")); }
     }
 
     public static ModelBinding bindModel(byte[] dcmBytes, Map<String,Object> approval, Map<String,?> invokers, Qualification qualification) {
@@ -256,7 +305,7 @@ public final class KeirRuntime {
 
     public static Preparation prepareProgram(byte[] artifactBytes, BoundModel boundModel, Map<String,Object> admission) {
         try {
-            require(boundModel!=null,"ADMISSION_INVALID","/binding");
+            require(boundModel!=null && !"keir-effect/4".equals(boundModel.profile),"ADMISSION_INVALID","/binding");
             Set<String> optional=new HashSet<>(Set.of("capabilityPolicy","limits"));
             if (boundModel.effect) optional.add("effectGrant");
             closed(admission,Set.of("expectedArtifactDigest","expectedDcmDigest","entrypoint","consumer","compiler","environment","mode"),optional,"/admission");
@@ -297,6 +346,32 @@ public final class KeirRuntime {
             current(boundModel,"ADMISSION_INVALID","/admission/qualification");
             return new Preparation(new Prepared(plan,cel,boundModel.adapters,policy.ceilings(),limits,hostFields,boundModel.effectAdapters,
                     effectGrant,boundModel.keyBinding,boundModel,policy),null);
+        } catch (RuntimeException failure) { return new Preparation(null,diagnostic(failure,"ARTIFACT_INVALID","/artifact")); }
+    }
+
+    public static Preparation prepareProgram(byte[] artifactBytes, BoundModel boundModel) {
+        try {
+            require(boundModel!=null && "keir-effect/4".equals(boundModel.profile),"ADMISSION_INVALID","/binding");
+            require(artifactBytes!=null,"ARTIFACT_INVALID","/artifact");
+            require(artifactBytes.length<=Profile.ARTIFACT_BYTES,"BUDGET_EXCEEDED","/artifact");
+            Map<String,Object> artifact=map(parseCanonical(artifactBytes.clone()),"/artifact");
+            Artifact.validateEnvelope2(artifact,boundModel.dcm,boundModel.profile);
+            Map<String,Object> entry=map(map(boundModel.dcm.get("entrypoints"),"").get(artifact.get("entrypoint")),"");
+            CapabilityPolicy.State policy=CapabilityPolicy.narrow(CapabilityPolicy.catalog(boundModel.dcm),
+                    entry.getOrDefault("capabilityPolicy",Map.of()),"/artifact/entrypoint/capabilityPolicy","ARTIFACT_INVALID");
+            long effectGrant=number(entry.getOrDefault("effectGrant",1L),0,1,"/artifact/entrypoint/effectGrant");
+            Map<String,Long> limits=limits2(Map.of());
+            Artifact.Plan plan=Artifact.validateProgram2(artifact,boundModel.dcm,boundModel.profile,limits,policy,effectGrant);
+            CheckedCel.Bundle cel=CheckedCel.prepare2(plan,boundModel.types);
+            require(cel.totalNodes()<=limits.get("totalAstNodes"),"BUDGET_EXCEEDED","/artifact/expressions");
+            Map<String,List<String>> hostFields=new LinkedHashMap<>();
+            Map<String,Object> caps=map(boundModel.dcm.get("capabilities"),"");
+            for (String id:plan.calls().keySet()) for (var parameter:map(map(caps.get(id),"").get("parameters"),"").entrySet()) {
+                Map<String,Object> definition=map(parameter.getValue(),"");
+                if ("host".equals(definition.get("binding"))) hostFields.computeIfAbsent(parameter.getKey(),ignored->new ArrayList<>()).add((String)definition.get("type"));
+            }
+            return new Preparation(new Prepared(plan,cel,Map.of(),policy.ceilings(),limits,hostFields,Map.of(),
+                    effectGrant,null,boundModel,policy),null);
         } catch (RuntimeException failure) { return new Preparation(null,diagnostic(failure,"ARTIFACT_INVALID","/artifact")); }
     }
 
@@ -431,7 +506,7 @@ public final class KeirRuntime {
     public static CompletionStage<Outcome> invokeEffectProgram(Prepared prepared, Object businessInput, EffectInvocation2 invocation) {
         Run run=new Run(prepared,true);
         try {
-            require(prepared!=null && prepared.boundModel!=null && prepared.plan.effect() && invocation!=null,"HOST_CONTEXT_INVALID","");
+            require(prepared!=null && prepared.boundModel!=null && !"keir-effect/4".equals(prepared.boundModel.profile) && prepared.plan.effect() && invocation!=null,"HOST_CONTEXT_INVALID","");
             Invocation common=context2(prepared,invocation.scope(),invocation.bindings(),invocation.deadline(),invocation.authorize(),invocation.capabilityPolicy());
             require(invocation.effectGrant()!=null,"HOST_CONTEXT_INVALID","");
             long grant=invocation.effectGrant().isPresent()?invocation.effectGrant().getAsLong():prepared.effectGrant;
@@ -441,6 +516,24 @@ public final class KeirRuntime {
             catch (RuntimeException failure) { throw new RuntimeFault("HOST_CONTEXT_INVALID",""); }
             EffectInvocation effect=new EffectInvocation(common.bindings(),common.deadline(),common.authorize(),common.grants(),grant,invocation.requestKey(),event);
             return run.start(businessInput,common,effect).handle((outcome,failure)->failure==null?outcome:run.failed(failure));
+        } catch (RuntimeException failure) { return CompletableFuture.completedFuture(run.failed(failure)); }
+    }
+
+    public static CompletionStage<Outcome> invokeBoundEffectProgram(Prepared prepared, Object businessInput, BoundEffectInvocation invocation) {
+        Run run=new Run(prepared,true);
+        try {
+            require(prepared!=null && prepared.boundModel!=null && "keir-effect/4".equals(prepared.boundModel.profile) && invocation!=null && invocation.deadline()!=null,
+                    "HOST_CONTEXT_INVALID","");
+            Deadline deadline=new Deadline(invocation.deadline().clock(),invocation.deadline().expiresAtMs());
+            Map<String,Object> bindings;
+            try { bindings=contextFields2(invocation.bindings(),prepared.hostFields.keySet()); }
+            catch (RuntimeException failure) { throw new RuntimeFault("HOST_BINDING_INVALID","/hostBindings"); }
+            Map<String,Object> event;
+            try { event=contextFields2(invocation.event(),Set.of("id","source")); }
+            catch (RuntimeException failure) { throw new RuntimeFault("HOST_CONTEXT_INVALID",""); }
+            BoundEffectInvocation fresh=new BoundEffectInvocation(bindings,deadline,invocation.requestKey(),event);
+            Invocation common=new Invocation(bindings,deadline,null,prepared.grants);
+            return run.start(businessInput,common,null,fresh).handle((outcome,failure)->failure==null?outcome:run.failed(failure));
         } catch (RuntimeException failure) { return CompletableFuture.completedFuture(run.failed(failure)); }
     }
 
@@ -478,6 +571,7 @@ public final class KeirRuntime {
         private int totalCalls;
         private long effectGrant;
         private HostContext hostContext;
+        private BoundEffectContext boundEffectContext;
         private Map<String,Object> receipt;
         private Run(Prepared prepared,boolean effect) { this.prepared=prepared; this.effect=effect; traceLimit=prepared==null?Profile.TRACE_EVENTS:prepared.limits.get("traceEvents"); emit("INVOCATION_START",Map.of(),""); }
         private void emit(String event,Map<String,Object> attributes,String path) {
@@ -505,7 +599,10 @@ public final class KeirRuntime {
             return terminate(fault.code.equals("BUDGET_EXCEEDED")?"LIMIT_EXCEEDED":"FAILED",error,null);
         }
         private CompletionStage<Outcome> start(Object input,Invocation invocation,EffectInvocation effect) {
-            require(prepared!=null && invocation!=null && invocation.authorize()!=null && invocation.deadline()!=null,"HOST_CONTEXT_INVALID","");
+            return start(input,invocation,effect,null);
+        }
+        private CompletionStage<Outcome> start(Object input,Invocation invocation,EffectInvocation effect,BoundEffectInvocation bound) {
+            require(prepared!=null && invocation!=null && (bound!=null || invocation.authorize()!=null) && invocation.deadline()!=null,"HOST_CONTEXT_INVALID","");
             clock=new InvocationClock(invocation.deadline().clock(),invocation.deadline().expiresAtMs()); clock.remaining("");
             current("");
             state.put("input",Artifact.value(prepared.plan.dcm(),(String)prepared.plan.entrypoint().get("input"),input,"/input","INPUT_INVALID"));
@@ -520,30 +617,36 @@ public final class KeirRuntime {
                     grants.put(grant.getKey(),number(grant.getValue(),prepared.boundModel==null?1:0,prepared.grants.get(grant.getKey()),""));
                 }
             } catch (RuntimeException failure) { throw new RuntimeFault("HOST_CONTEXT_INVALID",""); }
-            if (effect!=null) {
-                try { effectGrant=number(effect.effectGrant(),0,prepared.effectGrant,""); }
+            if (effect!=null || bound!=null) {
+                try { effectGrant=bound!=null?prepared.effectGrant:number(effect.effectGrant(),0,prepared.effectGrant,""); }
                 catch (RuntimeException failure) { throw new RuntimeFault("HOST_CONTEXT_INVALID",""); }
-                require(effect.requestKey()!=null,"HOST_CONTEXT_INVALID","");
-                clock.remaining("");
-                Object accepted;
-                try { accepted=prepared.keyBinding.validate().validate(effect.requestKey()); }
-                catch (Throwable failure) { accepted=null; }
-                clock.remaining("");
-                require(Boolean.TRUE.equals(accepted),"HOST_CONTEXT_INVALID","");
-                try { shape(effect.event(),Set.of("id","source"),""); }
+                Object requestKey=bound!=null?bound.requestKey():effect.requestKey();
+                Map<String,Object> suppliedEvent=bound!=null?bound.event():effect.event();
+                require(requestKey!=null,"HOST_CONTEXT_INVALID","");
+                if (bound==null) {
+                    clock.remaining("");
+                    Object accepted;
+                    try { accepted=prepared.keyBinding.validate().validate(requestKey); }
+                    catch (Throwable failure) { accepted=null; }
+                    clock.remaining("");
+                    require(Boolean.TRUE.equals(accepted),"HOST_CONTEXT_INVALID","");
+                }
+                try { shape(suppliedEvent,Set.of("id","source"),""); }
                 catch (RuntimeException failure) { throw new RuntimeFault("HOST_CONTEXT_INVALID",""); }
                 Map<String,Object> eventTypes=map(prepared.plan.entrypoint().get("event"),"");
                 Map<String,Object> event=new LinkedHashMap<>();
-                event.put("id",Artifact.value(prepared.plan.dcm(),(String)eventTypes.get("idType"),effect.event().get("id"),"","HOST_CONTEXT_INVALID"));
-                event.put("source",Artifact.value(prepared.plan.dcm(),(String)eventTypes.get("sourceType"),effect.event().get("source"),"","HOST_CONTEXT_INVALID"));
-                hostContext=new HostContext(effect.requestKey(),event);
+                event.put("id",Artifact.value(prepared.plan.dcm(),(String)eventTypes.get("idType"),suppliedEvent.get("id"),"","HOST_CONTEXT_INVALID"));
+                event.put("source",Artifact.value(prepared.plan.dcm(),(String)eventTypes.get("sourceType"),suppliedEvent.get("source"),"","HOST_CONTEXT_INVALID"));
+                if (bound!=null) boundEffectContext=new BoundEffectContext(requestKey,event,bound.deadline());
+                else hostContext=new HostContext(requestKey,event);
             }
             authorizer=invocation.authorize();
-            return authorized(Map.of("entrypoint",prepared.plan.document().get("entrypoint")),"").thenCompose(ignored->step(0));
+            return bound!=null?step(0):authorized(Map.of("entrypoint",prepared.plan.document().get("entrypoint")),"").thenCompose(ignored->step(0));
         }
         private CompletionStage<Object> authorized(Map<String,Object> request,String path) {
             current(path);
             clock.remaining(path);
+            if (boundEffectContext!=null) return CompletableFuture.completedFuture(null);
             return clock.waitFor(budget->authorizer.authorize(snapshot(request)),path,"AUTHORITY_CHECK_FAILED",null).thenApply(allowed->{
                 require(allowed instanceof Boolean,"AUTHORITY_CHECK_FAILED",path);
                 require(Boolean.TRUE.equals(allowed),"AUTHORITY_DENIED",path); return allowed;
@@ -602,7 +705,9 @@ public final class KeirRuntime {
                         current(path);
                         clock.remaining(path);
                         var agentSnapshot=snapshot(agent); var protectedSnapshot=snapshot(protectedArgs);
-                        java.util.function.LongFunction<CompletionStage<?>> action=budget->prepared.plan.effect()
+                        java.util.function.LongFunction<CompletionStage<?>> action=budget->boundEffectContext!=null
+                                ? prepared.boundModel.boundEffectAdapters.get(capability).invoke().invoke(agentSnapshot,protectedSnapshot,budget,boundEffectContext)
+                                : prepared.plan.effect()
                                 ? prepared.effectAdapters.get(capability).invoke().invoke(agentSnapshot,protectedSnapshot,budget,hostContext)
                                 : prepared.adapters.get(capability).invoke().invoke(agentSnapshot,protectedSnapshot,budget);
                         Runnable dispatch=()->{

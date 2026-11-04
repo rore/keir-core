@@ -11,6 +11,7 @@ final class GenericSimulation {
     record Program(byte[] bytes,String digest) { Program { bytes=bytes.clone(); } }
     static final Set<String> COMMON=Set.of("normal","invocation-denied","call-denied","wrong-scope","read-throws");
     static final Set<String> EFFECT=Set.of("zero-effect","revoked-after-read","invalid-key","wrong-origin","lost-response","response-expired");
+    static final Set<String> BOUND_EFFECT=Set.of("normal","read-throws","lost-response","response-expired");
     private GenericSimulation() {}
     private static void scalar(Object value) {
         check(value instanceof String text&&!text.isEmpty()&&text.getBytes(java.nio.charset.StandardCharsets.UTF_8).length<=256,"Bounded scenario scalar"); EffectJson.encode(value);
@@ -39,13 +40,13 @@ final class GenericSimulation {
             default -> { shape(response,"kind","effect"); check(write&&"UNKNOWN_COMMIT".equals(response.get("kind"))&&"UNKNOWN".equals(response.get("effect")),"Invalid response"); }
         }
     }
-    static void validateScenario(Object value,boolean effect,boolean effect3,Set<String> createErrors) {
+    static void validateScenario(Object value,boolean effect,boolean effect3,boolean effect4,Set<String> createErrors) {
         GenericCapacity.scenarios(0,0,EffectJson.encode(value).length,0,0); shape(value,"format","id","given","stubs","expect"); var row=object(value);
-        check((effect?(effect3?"keir-scenario/effect-3":"keir-scenario/effect-2"):"keir-scenario/read-2").equals(row.get("format")),"Unsupported scenario format");
+        check((effect?(effect4?"keir-scenario/effect-4":effect3?"keir-scenario/effect-3":"keir-scenario/effect-2"):"keir-scenario/read-2").equals(row.get("format")),"Unsupported scenario format");
         check(row.get("id") instanceof String id&&id.matches("[A-Za-z0-9][A-Za-z0-9_-]{0,63}"),"Invalid scenario ID");
         shape(row.get("given"),"input","fixture","program"); var given=object(row.get("given")); fields(given.get("input"),"taskId");
-        check(COMMON.contains(given.get("fixture"))||effect&&EFFECT.contains(given.get("fixture")),"Unknown trusted fixture");
-        check(GenericHost.programNames(effect3?"effect3":effect?"effect":"read").contains(given.get("program")),"Unknown fixed program");
+        check((effect4?BOUND_EFFECT:COMMON).contains(given.get("fixture"))||effect&&!effect4&&EFFECT.contains(given.get("fixture")),"Unknown trusted fixture");
+        check(GenericHost.programNames(effect4?"effect4":effect3?"effect3":effect?"effect":"read").contains(given.get("program")),"Unknown fixed program");
         var stubs=array(row.get("stubs")); GenericCapacity.scenarios(0,0,0,stubs.size(),0); stubs.forEach(stub->callShape(stub,true,effect,createErrors));
         shape(row.get("expect"),"outcome","calls","consumption"); var expect=object(row.get("expect"));
         var calls=array(expect.get("calls")); GenericCapacity.scenarios(0,0,0,0,calls.size()); calls.forEach(call->callShape(call,false,effect,createErrors));
@@ -53,7 +54,7 @@ final class GenericSimulation {
         check((effect?"REPORTED":"DISPLAYED").equals(object(expect.get("consumption")).get("status"))||!effect&&"NOT_DISPLAYED".equals(object(expect.get("consumption")).get("status")),"Invalid expected outcome");
     }
     static void validateScenario(Object value,boolean effect) {
-        validateScenario(value,effect,false,effect?Set.of("CREATE_REJECTED","ACCESS_DENIED"):Set.of());
+        validateScenario(value,effect,false,false,effect?Set.of("CREATE_REJECTED","ACCESS_DENIED"):Set.of());
     }
     static Map<String,Object> consume(Object value,boolean effect) {
         if(effect)return EffectConsumer.consume(value);
@@ -67,17 +68,92 @@ final class GenericSimulation {
         return JavaHost.consume(classification,result,error);
     }
     static List<Map<String,Object>> batch(String profile,byte[] dcm,String dcmPin,Map<String,Program> programs,Object corpus) {
-        boolean effect=profile.startsWith("effect"), effect3="effect3".equals(profile); check(effect||"read".equals(profile),"Unknown profile");
+        boolean effect=profile.startsWith("effect"), effect3="effect3".equals(profile), effect4="effect4".equals(profile); check(effect||"read".equals(profile),"Unknown profile");
         var document=object(EffectJson.parse(dcm));
-        check((effect3?"keir-dcm/effect-3":effect?"keir-dcm/effect-2":"keir-dcm/read-2").equals(document.get("format")),"Profile and model format mismatch");
+        check((effect4?"keir-dcm/effect-4":effect3?"keir-dcm/effect-3":effect?"keir-dcm/effect-2":"keir-dcm/read-2").equals(document.get("format")),"Profile and model format mismatch");
         var createErrors=new HashSet<String>();
         if(effect) for(Object code:array(object(object(document.get("capabilities")).get("tasks.create")).get("errors"))) createErrors.add((String)code);
         var rows=array(corpus); GenericCapacity.scenarios(EffectJson.encode(corpus).length,rows.size(),0,0,0); check(!rows.isEmpty(),"Empty scenario batch");
-        var ids=new HashSet<Object>(); for(Object row:rows) { validateScenario(row,effect,effect3,createErrors); check(ids.add(object(row).get("id")),"Duplicate scenario ID"); }
+        var ids=new HashSet<Object>(); for(Object row:rows) { validateScenario(row,effect,effect3,effect4,createErrors); check(ids.add(object(row).get("id")),"Duplicate scenario ID"); }
         check(programs.keySet().equals(Set.copyOf(GenericHost.programNames(profile))),"Incomplete fixed program map");
+        if(effect4) return boundEffectBatch(dcm,dcmPin,programs,rows,document,createErrors);
         try(var harness=new Harness(profile,effect,dcm,dcmPin,programs)) {
             var results=new ArrayList<Map<String,Object>>(); for(Object row:rows)results.add(harness.run(object(row))); return results;
         }
+    }
+
+    private static List<Map<String,Object>> boundEffectBatch(byte[] dcm,String pin,Map<String,Program> programs,List<Object> rows,
+                                                              Map<String,Object> document,Set<String> createErrors) {
+        check(digest(dcm).equals(pin),"Pinned DCM bytes mismatch");
+        for(Program program:programs.values()) check(digest(program.bytes()).equals(program.digest()),"Pinned artifact bytes mismatch");
+        try(var harness=new BoundHarness4(dcm,programs,document,createErrors)) {
+            var results=new ArrayList<Map<String,Object>>(); for(Object row:rows) results.add(harness.run(object(row))); return results;
+        }
+    }
+
+    private static String digest(byte[] bytes) {
+        try { return "sha256:"+java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes)); }
+        catch(java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
+    }
+
+    private static final class BoundHarness4 implements AutoCloseable {
+        final Map<String,KeirRuntime.Prepared> prepared=new LinkedHashMap<>();
+        final Set<String> createErrors; final Map<String,Object> document; final GenericCapacity capacity=new GenericCapacity();
+        final List<GenericCapacity.Lease> leases=new ArrayList<>(); KeirRuntime.BoundModel model; Active current;
+        BoundHarness4(byte[] dcm,Map<String,Program> programs,Map<String,Object> document,Set<String> createErrors) {
+            this.document=document; this.createErrors=createErrors;
+            try {
+                GenericCapacity.capacity(dcm.length<=65_536); leases.add(capacity.model(dcm.length,EffectJson.encode(document).length,65_536));
+                var invokers=new LinkedHashMap<String,KeirRuntime.BoundEffectAdapter>();
+                for(String id:object(document.get("capabilities")).keySet()) invokers.put(id,new KeirRuntime.BoundEffectAdapter("1","simulation","sample.RequestUuid/1",
+                        (args,protectedArgs,remaining,host)->dispatch(id,args,protectedArgs,remaining,host)));
+                try(var work=capacity.work()) { var result=KeirRuntime.bindModel(dcm,invokers); check(result.succeeded(),"Bound model binding failed"); model=result.boundModel(); }
+                for(var entry:programs.entrySet()) {
+                    Program program=entry.getValue(); leases.add(capacity.program(program.bytes().length));
+                    try(var work=capacity.work()) { var result=KeirRuntime.prepareProgram(program.bytes(),model); check(result.succeeded(),"Bound program preparation failed"); prepared.put(entry.getKey(),result.prepared()); }
+                }
+            } catch(RuntimeException failure) { close(); throw failure; }
+        }
+        CompletionStage<?> dispatch(String capability,Map<String,Object> args,Map<String,Object> protectedArgs,long remaining,KeirRuntime.BoundEffectContext host) {
+            Active state=current; Map<String,Object> selected; boolean write="tasks.create".equals(capability);
+            try {
+                check(state!=null&&state.captures.size()<4,"Dispatch outside request");
+                var captured=object(EffectJson.copy(Map.of("capability",capability,"version","1","args",args,"protectedArgs",protectedArgs))); state.captures.add(captured);
+                check(remaining>0&&remaining<=1000&&host.deadline().clock().getAsLong()<host.deadline().expiresAtMs(),"Native absolute deadline expired");
+                check(protectedArgs.equals(Map.of("actorId","user1")),"Protected actor mismatch");
+                check(host.requestKey()==state.key&&host.event().equals(state.event),"Original key or host event mismatch");
+                check(state.used<state.stubs.size(),"Unexpected native call"); selected=object(state.stubs.get(state.used));
+                same(captured,Map.of("capability",selected.get("capability"),"version",selected.get("version"),"args",selected.get("args"),"protectedArgs",selected.get("protectedArgs")),"Adapter arguments mismatch");
+                var envelope=object(selected.get("response"));
+                if(write) check(state.event.get("source").equals(state.input.get("taskId")),"Host event does not own task");
+                else if("SUCCESS".equals(envelope.get("kind"))) check(Objects.equals(object(envelope.get("value")).get("id"),args.get("taskId")),"Read resource mismatch");
+                state.used++;
+            } catch(RuntimeException failure) {
+                if(state!=null) state.violations.add("Adapter arguments, native identity or resource mismatch");
+                throw new IllegalStateException("Simulation adapter mismatch");
+            }
+            if(!write&&state.fixture.equals("read-throws")) throw new IllegalStateException("Unavailable read");
+            if(write&&state.fixture.equals("lost-response")) throw new IllegalStateException("Lost response");
+            Object response=EffectJson.copy(selected.get("response"));
+            if(write&&state.fixture.equals("response-expired")) state.now.set(1000);
+            return CompletableFuture.completedFuture(response);
+        }
+        Map<String,Object> run(Map<String,Object> row) {
+            check(current==null,"Concurrent scenario reuse"); current=new Active(row);
+            try(var invocation=capacity.invocation()) {
+                Active state=current; var deadline=new KeirRuntime.Deadline(state.now::get,1000);
+                var handle=prepared.get(object(row.get("given")).get("program"));
+                var outcome=KeirRuntime.invokeBoundEffectProgram(handle,EffectJson.copy(state.input),
+                        new KeirRuntime.BoundEffectInvocation("no-call".equals(object(row.get("given")).get("program"))?Map.of():Map.of("actorId","user1"),deadline,state.key,state.event))
+                        .toCompletableFuture().get(3,TimeUnit.SECONDS);
+                if(state.used!=state.stubs.size()) state.violations.add("Unconsumed scenario stub");
+                var calls=reconcile(state.captures,outcome.trace(),state.stubs,state.violations); check(state.violations.isEmpty(),"Simulation violations");
+                var actual=Map.<String,Object>of("outcome",outcome.toMap(),"calls",calls,"consumption",consume(outcome.toMap(),true));
+                same(actual,row.get("expect"),"Simulation result mismatch"); var result=new LinkedHashMap<String,Object>(actual); result.put("id",row.get("id")); return result;
+            } catch(Exception failure) { if(failure instanceof RuntimeException runtime) throw runtime; throw new IllegalArgumentException("Bound simulation invocation failed"); }
+            finally { current=null; }
+        }
+        public void close() { check(current==null,"Cannot release in-flight bound model"); prepared.clear(); model=null; for(int i=leases.size()-1;i>=0;i--) leases.get(i).close(); leases.clear(); }
     }
     static final class Active {
         final String fixture; final Map<String,Object> input,event; final UUID key=UUID.fromString("00000000-0000-4000-8000-000000000001");

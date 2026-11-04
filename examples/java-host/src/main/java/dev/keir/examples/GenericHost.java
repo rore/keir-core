@@ -16,7 +16,7 @@ public final class GenericHost {
     }
     public static byte[] execute(Path directory) throws IOException {
         String profile=directory.getFileName().toString();
-        EffectSimulation.check(Set.of("read","effect","effect3").contains(profile),"Unknown fixture directory");
+        EffectSimulation.check(Set.of("read","effect","effect3","effect4").contains(profile),"Unknown fixture directory");
         var programs=new LinkedHashMap<String,GenericSimulation.Program>();
         for(String name:programNames(profile)) {
             String file=name.equals("main")?"artifact":"artifact-"+name;
@@ -26,7 +26,7 @@ public final class GenericHost {
         byte[] corpus=read(directory.resolve("scenarios.json"),1_048_576);
         return execute(profile,dcm,pin(directory.resolve("dcm.sha256")),programs,corpus);
     }
-    static List<String> programNames(String profile) { return switch(profile) { case "read" -> List.of("main","repeated","alternate"); case "effect3" -> List.of("main","zero","after-write-read"); default -> List.of("main","project2","title2"); }; }
+    static List<String> programNames(String profile) { return switch(profile) { case "read" -> List.of("main","repeated","alternate"); case "effect3" -> List.of("main","zero","after-write-read"); case "effect4" -> List.of("main","zero","after-write-read","no-call"); default -> List.of("main","project2","title2"); }; }
     static byte[] execute(String profile,byte[] dcm,String pin,Map<String,GenericSimulation.Program> programs,byte[] corpus) {
         return EffectJson.encode(GenericSimulation.batch(profile,dcm,pin,programs,EffectJson.parse(corpus)));
     }

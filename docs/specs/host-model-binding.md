@@ -1,6 +1,47 @@
 # Binding a host model to capability invokers
 
-Status: **implemented experimental `/2` contract, locally verified in Java and Node**. This implements the [shared-model direction](../internal/artifact-model-sharing-evaluation.md) and [generic-hook contract](generic-hook-capability-contract.md). See [testing evidence](../testing.md) and the runnable hosts. `/1` APIs and bytes are preserved; real transport/native guarantees and production qualification remain open.
+## Corrected host-bound `/4` binding
+
+For `keir-dcm/effect-4` with `HOST_BOUND_SINGLE_WRITE`, initialize with `bindModel(dcmBytes, implementations)`. Validate the complete catalog, including unused capabilities, matching versions and key types, callable implementations, and homogeneous real or simulation mode. An empty capability catalog and empty implementation map are valid and mode-neutral; the DCM still has its required domain and entrypoint definitions. Binding invokes no implementation and performs no live authorization or key authentication.
+
+Prepare with `prepareProgram(artifactBytes, boundModel)`. The runtime derives model identity from the DCM, checks `keir-artifact/effect-4`, exact model compatibility and supported compiler/environment internally, and enforces existing program and resource limits. The host selects approved bytes and owns stored-byte integrity: this API has no expected digest input. Invoke with fresh trusted bindings, deadline, original non-null request key and typed event. Stable host implementations enforce current permission, key authenticity and native commit conditions. No approval, admission, scope, expected digest, compiler, consumer, environment, authorizer, key-validator or qualification input is part of corrected bind/prepare/invoke.
+
+Preparation can be reused with distinct fresh invocation contexts. Event data is snapshotted and the original opaque request key is passed unchanged. Node snapshots the deadline's expiry and captures the `nowMs` function with its source receiver in a wrapper; it does not freeze or mutate the source clock object. Java creates a `Deadline` with the same `LongSupplier` and expiry. Neither runtime resets the deadline. Java's corrected adapter and invocation types and `invokeBoundEffectProgram` remain distinct from legacy types and methods.
+
+### Exact corrected API shapes
+
+Node registration values are `{version, mode, keyType, invoke}` with mode `simulation` or `real`. The invoke function receives `(args, protectedArgs, remainingMs, context)`, where context is `{requestKey, event: {id, source}, deadline: {clock: {nowMs}, expiresAtMs}}`. The only invocation shape is:
+
+```javascript
+bindModel(dcmBytes, implementations) // {boundModel, diagnostic}
+prepareProgram(artifactBytes, boundModel) // {prepared, diagnostic}
+invokeProgram(prepared, businessInput, {bindings, deadline, requestKey, event}) // Promise<Outcome>
+```
+
+Java uses the following corrected nested `KeirRuntime` types and distinct invocation method. Every catalog capability, including READ entries, maps to a `BoundEffectAdapter`:
+
+```java
+@FunctionalInterface
+public interface BoundEffectFunction {
+    CompletionStage<?> invoke(Map<String,Object> args, Map<String,Object> protectedArgs,
+        long remainingMs, BoundEffectContext context);
+}
+public record BoundEffectAdapter(String version, String mode, String keyType, BoundEffectFunction invoke) {}
+public record BoundEffectContext(Object requestKey, Map<String,Object> event, Deadline deadline) {}
+public record BoundEffectInvocation(Map<String,Object> bindings, Deadline deadline,
+    Object requestKey, Map<String,Object> event) {}
+
+public static ModelBinding bindModel(byte[] dcmBytes, Map<String,BoundEffectAdapter> implementations)
+public static Preparation prepareProgram(byte[] artifactBytes, BoundModel boundModel)
+public static CompletionStage<Outcome> invokeBoundEffectProgram(Prepared prepared,
+    Object businessInput, BoundEffectInvocation invocation)
+```
+
+`Deadline` reuses the existing `(LongSupplier clock, long expiresAtMs)` record. Java snapshots the event map and retains the original opaque key by reference.
+
+The remainder preserves the legacy `/1`–`/3` binding and admission contracts. Their callbacks and qualification requirements do not apply to `/4`.
+
+The `/2` contract described below is legacy behavior, locally verified in Java and Node. It implements the [shared-model direction](../internal/artifact-model-sharing-evaluation.md) and [generic-hook contract](generic-hook-capability-contract.md). See [testing evidence](../testing.md) and the runnable hosts. `/1` APIs and bytes are preserved; real transport/native guarantees and production qualification remain open.
 
 ## One binding boundary
 

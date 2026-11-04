@@ -28,6 +28,12 @@ test('installed bound-model runtime matches both full shared /2 fixture batches'
   }
 });
 
+test('installed bound-model runtime matches the hand-authored effect/4 generic host batch', async () => {
+  const directory = new URL('../../conformance/generic-hooks/effect4/', import.meta.url);
+  const scenarios = JSON.parse(readFileSync(new URL('scenarios.json', directory), 'utf8'));
+  assert.deepEqual(await runGeneric(fileURLToPath(directory)), scenarios.map(row => ({ id: row.id, ...row.expect })));
+});
+
 test('installed effect runtime executes the complete independent scenario/consumer batch', async () => {
   const fixture = new URL('../../conformance/single-effect/', import.meta.url);
   const rows = await runEffectScenarios(readFileSync(new URL('artifact.json', fixture)),

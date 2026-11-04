@@ -23,15 +23,34 @@ class GenericHostTest {
     static void capacity(Runnable action) { assertEquals("CAPACITY_EXCEEDED",assertThrows(IllegalArgumentException.class,action::run).getMessage()); }
 
     @Test void completeHandAuthoredReadAndEffectCorpusUsesOneBindingForThreePrograms() throws Exception {
-        for(String profile:List.of("read","effect","effect3")) {
+        for(String profile:List.of("read","effect","effect3","effect4")) {
             var scenarios=corpus(profile); byte[] before=EffectJson.encode(scenarios); var actual=batch(profile,scenarios);
-            assertEquals(profile.equals("read")?9:19,actual.size());
+            assertEquals(profile.equals("read")?9:profile.equals("effect4")?11:19,actual.size());
             for(int i=0;i<actual.size();i++) { var expected=new LinkedHashMap<>(object(object(scenarios.get(i)).get("expect"))); expected.put("id",object(scenarios.get(i)).get("id")); same(actual.get(i),expected,"Complete result mismatch"); }
             assertArrayEquals(before,EffectJson.encode(scenarios));
             assertArrayEquals(EffectJson.encode(actual),GenericHost.execute(fixture(profile)));
             // Release/rebind is an offline cold start with the same independently selected bytes.
             same(batch(profile,scenarios),actual,"Cold start changed behavior");
         }
+    }
+    @Test void effect4ScenariosContainNoLegacyAuthorityFixturesOrKnobs() throws Exception {
+        var rows=corpus("effect4");
+        assertEquals(Set.of("normal","read-throws","lost-response","response-expired"),rows.stream().map(row->object(object(row).get("given")).get("fixture")).collect(java.util.stream.Collectors.toSet()));
+        for(Object raw:rows) {
+            var row=object(raw); assertEquals("keir-scenario/effect-4",row.get("format"));
+            assertFalse(row.containsKey("qualification")); assertFalse(row.containsKey("authorize"));
+        }
+        var wrongScope=object(EffectJson.copy(rows.getFirst())); object(wrongScope.get("given")).put("scope","caller-controlled");
+        assertThrows(RuntimeException.class,()->GenericSimulation.validateScenario(wrongScope,true,false,true,Set.of("CREATE_REJECTED","ACCESS_DENIED","KEY_PAYLOAD_MISMATCH")));
+        var wrongKey=object(EffectJson.copy(rows.getFirst())); object(wrongKey.get("given")).put("fixture","invalid-key");
+        assertThrows(RuntimeException.class,()->GenericSimulation.validateScenario(wrongKey,true,false,true,Set.of("CREATE_REJECTED","ACCESS_DENIED","KEY_PAYLOAD_MISMATCH")));
+    }
+    @Test void effect4MismatchLedgerCannotBeMaskedByExpectedAdapterFailure() throws Exception {
+        var rows=corpus("effect4"); var readFailure=object(EffectJson.copy(rows.stream().filter(row->object(row).get("id").equals("read-throws")).findFirst().orElseThrow()));
+        object(readFailure.get("given")).put("fixture","normal"); object(object(stub(readFailure,0).get("response")).get("value")).put("id","wrong-resource");
+        var failure=assertThrows(IllegalArgumentException.class,()->batch("effect4",List.of(readFailure))); assertEquals("Simulation violations",failure.getMessage());
+        var wrongStep=object(EffectJson.copy(rows.getFirst())); object(stub(wrongStep,0)).put("step","wrongStep");
+        failure=assertThrows(IllegalArgumentException.class,()->batch("effect4",List.of(wrongStep))); assertEquals("Simulation violations",failure.getMessage());
     }
     @Test void effect3UsesOnlyItsModelDeclaredCreateErrors() throws Exception {
         var effect3=object(EffectJson.copy(corpus("effect3").getFirst()));
@@ -99,6 +118,7 @@ class GenericHostTest {
         var out=new ByteArrayOutputStream(); var err=new ByteArrayOutputStream();
         assertEquals(0,GenericHost.run(new String[]{fixture("effect").toString()},new PrintStream(out),new PrintStream(err))); assertEquals(19,array(EffectJson.parse(out.toByteArray())).size()); assertEquals(0,err.size());
         out.reset(); assertEquals(0,GenericHost.run(new String[]{fixture("effect3").toString()},new PrintStream(out),new PrintStream(err))); assertEquals(19,array(EffectJson.parse(out.toByteArray())).size());
+        out.reset(); assertEquals(0,GenericHost.run(new String[]{fixture("effect4").toString()},new PrintStream(out),new PrintStream(err))); assertEquals(11,array(EffectJson.parse(out.toByteArray())).size());
         out.reset(); assertEquals(2,GenericHost.run(new String[]{},new PrintStream(out),new PrintStream(err))); assertEquals(0,out.size());
         err.reset(); assertEquals(1,GenericHost.run(new String[]{temp.resolve("private").toString()},new PrintStream(out),new PrintStream(err))); assertFalse(err.toString().contains(temp.toString()));
         Path file=temp.resolve("bounded.json"); Files.write(file,new byte[1_048_576]); assertEquals(1_048_576,GenericHost.read(file,1_048_576).length); Files.write(file,new byte[1_048_577]); capacity(()->{ try { GenericHost.read(file,1_048_576); } catch(IOException failure) { throw new RuntimeException(failure); } });
