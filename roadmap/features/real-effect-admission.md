@@ -1,7 +1,7 @@
 ---
 id: "real-effect-admission"
 title: "Bind hosts for real single effects"
-status: "active"
+status: "done"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -45,3 +45,4 @@ Design this alongside the native event/effect prototype, without a dependency cy
 **Historical effect/3 integration:** Core d59e375 is pushed to main with all 52 reviewed source blobs preserved exactly. [Contract CI](https://github.com/rore/keir-core/actions/runs/41873759463) and [workflow CI](https://github.com/rore/keir-core/actions/runs/41873759417) pass; exact runtime/compiler package copies are verified in the isolated demo. Core implementation delivery is accepted. Recoverable checkout cleanup is released and remains the final housekeeping item. Native host qualification is separate.
 
 **Corrected integration:** Effect/4 source `95e5fd0` passes independent result and simplicity review, reusing existing engines and preserving legacy APIs. Reported final verification passes 271 Java and 454 Node tests, shared same-artifact/source-installed conformance and exact package/class checks. Manager verified all 61 integrated source blobs and stages exact packages for isolated demo consumption. Hosted CI and recoverable cleanup remain; actual native application and customer-journey acceptance belong to the demo feature.
+**Complete:** The reviewed correction is integrated, both hosted CI jobs pass, exact packages execute the demo's 50 native/runtime cases, and task-worktree cleanup is independently verified with complete recoverable source/evidence preserved. Actual customer authoring and UX acceptance remain owned by [real task integration](demo-task-integration.md).
