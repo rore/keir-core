@@ -4,6 +4,7 @@
 - portable-core-first-slice
 - single-effect-followup
 - generic-hook-capability-contract
+- declared-error-limit-parity
 - native-task-app
 - real-task-reads
 - real-effect-admission
