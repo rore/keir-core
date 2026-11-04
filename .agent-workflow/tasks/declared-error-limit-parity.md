@@ -33,19 +33,23 @@ Owning feature: [Declared-error limit parity](../../roadmap/features/declared-er
 
 **Verification plan:** Compiler boundary regression fails before the fix and passes afterward; diagnostics identify the oversized capability errors without an artifact. Both runtimes admit a valid boundary model and reject an oversized one through existing preparation/loading APIs. Existing compiler, Java/Node validation and affected shared structural conformance preserve read/1/effect and valid reference artifacts. Run affected fast checks once; broaden only for changes/failures. Inspect public diff/metadata before integration and recoverably clean the task checkout afterward.
 
-**Plan review:** Agent technical review: independent clean-context review under Plan review below passes the smallest existing-limit correction and boundary verification. Executable compiler/runtime reproduction remains required before production edit release.
+**Plan review:** Agent technical review: independent clean-context review under Plan review below passes the smallest existing-limit correction and boundary verification. The manager verified actual compiler/Java/Node reproduction at unchanged source 9b4ae91; implementation is released under the reviewed plan.
 
 **Approvals:** Existing authorization covers repository bug fixes and verification. No separate human approval is required at this risk level.
 
 **Exceptions:** —
 
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
 
-Source inspection confirms the omitted generic condition. The assigned core developer has started isolated boundary reproduction and independent technical plan review has passed. Production edit release awaits executable reproduction. The defect fails closed at runtime; no current demo impact or completed fix is claimed.
+Source inspection and executable reproduction confirm the omitted generic condition. Independent technical plan review passes and the manager releases isolated implementation. The defect fails closed at runtime; no current demo impact or completed fix is claimed.
 
 ## Plan review
 
 Independent non-implementer review inspected the record, policy/workflow, compiler validation and boundary/reference tests, both runtime validators/tests and read/2 schema at core 6636171. Verdict: PASS, Elevated/Simple. Apply the existing limit when effectProfile or generic is true; preserve read/1's intentional larger error lists, existing effect limits and runtime diagnostic differences. Boundary tests must isolate the error ceiling using valid bound-model identities and reject 17 without artifact/digest. Existing reference-byte tests protect valid artifacts; no fixture regeneration is warranted. The unused WRITE definition in the read/2 catalog supplies a small additional invalid-definition case. No tests or edits were performed by the reviewer; executable reproduction is still pending.
+
+## Reproduction evidence
+
+At unchanged product source 9b4ae911a2453a9f22a315c4f1e1164554c4d18a, isolated probes invoke actual KeirCompiler.compile, public Java KeirRuntime.bindModel and Node model validation. For both the used READ definition and unused WRITE catalog definition, 16 declared errors compile and both runtimes accept. With 17, the compiler still emits a 1,799-byte artifact; Java rejects BUDGET_EXCEEDED and Node rejects ARTIFACT_INVALID before dispatch. The unchanged reference model/source still reproduces its exact golden artifact. Maven package passes in 21.879 seconds; all 18 existing DcmTest cases pass, preserving effect and legacy read/1 behavior. The manager inspected the source identity, clean tracked state and actual logs; no rerun or fixture change was needed. Detailed private probes remain outside tracked content.
