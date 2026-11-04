@@ -12,6 +12,8 @@ repo: "keir-demo-app"
 
 Current correction: the user rejects the complete customization UI as confusing, including the persistent decision box that obscures chat. The [conversation-clarity Work Record](../../.agent-workflow/tasks/studio-chat-decision-clarity.md) owns one coherent entry, discussion, canvas, examples, deliberate review/use and later-edit experience, with implementation and actual business-persona iteration. Keep conversation primary and decisions understandable while preserving exact approval/activation and saved work. Prior technical/rendered passes establish their scoped behavior, not acceptance of the whole experience; human UX acceptance remains open.
 
+The user also rejects task advice as the demo's product concept. Ground Studio in ordinary task-management capabilities and recognizable customer customizations; a wording change or advice-only walkthrough is insufficient. Preserve reusable interaction fixes while [real task integration](demo-task-integration.md) settles the first actual scenario and missing execution contracts. Do not claim unsupported mutations or discard existing saved work to change the demonstration.
+
 The Extension Studio is the centerpiece of the demo. Maintain the accepted working design baseline and refine each workflow's product, interaction and visual design as real functionality is implemented.
 
 The designer owns UX/UI: a purposeful, polished application with clear hierarchy, usable density and realistic interactions, not a generic AI template. The architect owns technical constraints; the manager coordinates acceptance. The chat-led, resizable preview is the accepted starting direction; production interaction details mature with each functional feature.

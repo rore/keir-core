@@ -48,7 +48,7 @@ Owning feature: [Extension Studio design](../../roadmap/features/extension-studi
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Blocked or returned to planning
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -84,3 +84,11 @@ No production edits, tests, provider calls or environment changes were made by t
 The standing designer completed a real-assistant walkthrough on isolated copied data, from a new fictional request through capability clarification, checked examples, separate approval, deferred use/reload, activation, native result and a later unapproved revision. The manager inspected the short-window evidence. At 683 by 384, the persistent decision hides the latest reply and pushes the composer partly outside the viewport. On a 390 by 844 phone viewport, shell/status and decision content consume most working space. Activation removes the composer and the completion action returns to the collection instead of tasks. Status repeats through four surfaces. These findings confirm the full-flow plan and were passed to the developer before implementation.
 
 Preserve the working consent before substituting unsupported behavior, exact separate decisions, unchanged active result during later editing, optional naming and unsent-text continuity. Simplify remaining normal-path agent wording such as synthetic examples into example tasks. Private screenshots and detailed test state remain outside tracked content. This walkthrough is baseline discovery, not postchange acceptance; controlled races, keyboard/zoom stress and hosted regression remain required. The developer now implements the accepted plan in the isolated task checkout; the normal demo remains unchanged until verified delivery.
+
+## Product correction: real task customizations
+
+The user rejects task advice itself as an invented product abstraction and requires recognizable task-management capabilities and scenarios. Renaming advice or polishing its existing demonstration does not satisfy that request. The generic chat, canvas, review, continuity and responsive work remains useful and may continue under the reviewed presentation plan; advice-only persona acceptance, integration and deployment are held. This task does not silently acquire backend/effect scope.
+
+Candidate a4b8564d2eb8b450d4e64fc6aeff552d4bfeb02a preserves the reusable UI work. Build/typecheck, fast regression and ten controlled continuity cases pass; connected browser regression remains unfinished. No final result, whole-product UX acceptance or normal-demo update is claimed.
+
+The architect has been offered bounded read-only discovery under [real task integration](../../roadmap/features/demo-task-integration.md), including its [real-effect admission prerequisite](../../roadmap/features/real-effect-admission.md). Settle the smallest actual task scenario, generic host capabilities, core/host/Studio gaps and preservation of existing saved work before semantic implementation. Native completion followed by a source-authored project condition and generic task creation is a candidate grounded in the original design, not a newly approved contract. Existing simulation-only effect assurance must not be relabeled real. Manager owns the resulting semantic Work Record and delivery sequence; no new user approval stop is introduced by this planning correction.
