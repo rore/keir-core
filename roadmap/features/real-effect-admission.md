@@ -1,7 +1,7 @@
 ---
 id: "real-effect-admission"
 title: "Define and qualify admission for real single effects"
-status: "queued"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -11,6 +11,8 @@ repo: "keir-core"
 ## Summary
 
 Establish the reviewed contract and executable evidence needed to admit a real single WRITE. Current effect/2 is intentionally SIMULATION_ONLY.
+
+**Current assignment:** The architect is producing the smallest concrete real-profile/evidence/API contract for the task-completion scenario and local SQLite adapter, aligned with native event and keyed-create requirements. Define a separate compatibility boundary and preserve existing simulation-only enforcement. Compiler/Java/Node implementation follows reviewed contracts and shared cases; no unchecked mode switch is authorized. This design progresses in parallel with host-foundation discovery and Studio review.
 
 ## In Scope
 

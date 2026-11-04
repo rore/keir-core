@@ -1,7 +1,7 @@
 ---
 id: "reusable-simulation"
 title: "Offer reusable simulation and host-conformance tools"
-status: "active"
+status: "queued"
 priority: "medium"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -29,6 +29,8 @@ A production adapter certification service or a mandatory replacement for the al
 - [ ] Verification: same-artifact parity, missing/extra/out-of-order stubs, invalid authority fields, typed consumer failures and redacted reports are covered.
 
 ## Notes
+
+The remaining effect/non-task/conformance-kit work is unassigned. Keep it queued until its next bounded contract/implementation assignment; the delivered read/2 tooling remains available and verified.
 
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 

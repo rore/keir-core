@@ -1,7 +1,7 @@
 ---
 id: "demo-task-integration"
 title: "Run a real single-effect extension after task completion"
-status: "queued"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -13,6 +13,8 @@ repo: "keir-demo-app"
 Connect an explicitly admitted scalar extension to native TaskCompleted events and generic task creation, preserving actual authority and effect evidence.
 
 Current priority: replace the invented task-advice demonstration with recognizable task-management customization. Architect discovery is requested to map existing native services, the actual domain model and generic capabilities to the smallest real end-to-end scenario and its core/host/Studio implementation steps. Completion-driven task creation is the original candidate; confirm its real-effect admission dependencies rather than bypassing them. Later generic operations should follow actual task-model needs. Preserve existing customer data/history during the transition; do not merely rename advice or claim planned behavior works.
+
+**Current assignment:** Architect discovery is complete and the manager adopts the first scenario: completing a task in a customer-chosen existing project creates a task with a customer-chosen title through generic capabilities. The architect is detailing the core/host contract; a developer is discovering the smallest native event/receipt patch under [the host-foundation record](../../.agent-workflow/tasks/native-task-effect-foundation.md). These run alongside Studio review. No real execution or advice-to-write migration is claimed. Existing approvals remain confined to their original read-only behavior.
 
 ## In Scope
 
