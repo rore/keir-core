@@ -1,6 +1,6 @@
 ---
 id: "real-effect-admission"
-title: "Define and qualify admission for real single effects"
+title: "Bind hosts for real single effects"
 status: "active"
 priority: "high"
 commitment: "committed"
@@ -10,7 +10,7 @@ repo: "keir-core"
 
 ## Summary
 
-Establish the reviewed contract and executable evidence needed to admit a real single WRITE. Current effect/2 is intentionally SIMULATION_ONLY.
+Bind a host DCM and complete compatible implementations, prepare an extension, and execute a real single WRITE with fresh context and honest outcomes. The corrected effect/4 API needs no deployment credential. Legacy effect/2 remains SIMULATION_ONLY; old /3 semantics stay on explicit legacy paths.
 
 **Current assignment — corrective implementation:** The user approved the [audit](../../docs/internal/real-application-design-audit.md) and requested the necessary changes. The [corrective work record](../../.agent-workflow/tasks/host-contract-alignment.md) owns the exact generic contract, consumer/state inventory, compatibility choice and subsequent reviewed core correction. Inventories and independent plan review are complete. Manager accepts the simplified bind/prepare/run contract and bounded effect/4 compatibility choice, and releases isolated compiler/Java/Node correction with the reviewed test/package plan. Earlier qualification machinery remains legacy-only; corrected source/result verification is pending. Preserve host guarantees and prior measured evidence while removing prescribed core deployment-report/build gates. Source release follows the concrete corrected plan and baseline-alignment review.
 
@@ -26,7 +26,7 @@ Multiple writes, self-certifying declarations, exactly-once claims, automatic re
 
 ## Done When
 
-- [ ] Design/spec reopened: audit and reconcile the real-effect contract and host responsibilities against the base guiding principles before accepting corrected definitions.
+- [x] Design/spec: corrected host responsibilities and the simple initialization API are reconciled with the baseline and pass independent plan/result review.
 - [x] Implementation: both runtimes admit only the selected supported real profile and reject missing, stale or incompatible evidence.
 - [x] Verification: shared conformance covers original-key identity, authority, definite NONE/CONFIRMED versus UNKNOWN, deadlines and rejection before dispatch.
 
@@ -38,8 +38,10 @@ Multiple writes, self-certifying declarations, exactly-once claims, automatic re
 
 Design this alongside the native event/effect prototype, without a dependency cycle: the prototype supplies requirements; real execution is accepted only after this gate. Rich collections and AI are not prerequisites.
 
-**Reviewed contract:** [Real single-effect admission](../../docs/specs/real-single-effect-admission.md) and [native handoff](../../docs/internal/real-task-effect-handoff.md) pass independent architecture review, including the frozen host clarification delta. This selects a new effect/3 boundary without changing effect/2. The concrete source/test plan under [the implementation record](../../.agent-workflow/tasks/real-single-effect-admission.md) passes independent review and implementation is underway. Final combined conformance, packaged verification and independent result review remain. Design and plan approval do not qualify production use or the native host.
+**Historical effect/3 contract:** [Real single-effect admission](../../docs/specs/real-single-effect-admission.md) and [native handoff](../../docs/internal/real-task-effect-handoff.md) pass independent architecture review, including the frozen host clarification delta. This selects a new effect/3 boundary without changing effect/2. The concrete source/test plan under [the implementation record](../../.agent-workflow/tasks/real-single-effect-admission.md) passes independent review and implementation is underway. Final combined conformance, packaged verification and independent result review remain. Design and plan approval do not qualify production use or the native host.
 
-**Current result gate:** Corrected core edb43cb passes independent delta result review, reusing the accepted unchanged broad review and measured Java/Node/source/installed conformance. The safe-subset repair preserves ordinary async cleanup and strict authority with explicit unsupported host async limits. Manager accepts exact core integration and verified package consumption by the isolated demo implementation. Main delivery/hosted CI and recoverable cleanup remain; no native qualification is inferred.
+**Historical effect/3 result gate:** Corrected core edb43cb passes independent delta result review, reusing the accepted unchanged broad review and measured Java/Node/source/installed conformance. The safe-subset repair preserves ordinary async cleanup and strict authority with explicit unsupported host async limits. Manager accepts exact core integration and verified package consumption by the isolated demo implementation. Main delivery/hosted CI and recoverable cleanup remain; no native qualification is inferred.
 
-**Integrated:** Core d59e375 is pushed to main with all 52 reviewed source blobs preserved exactly. [Contract CI](https://github.com/rore/keir-core/actions/runs/41873759463) and [workflow CI](https://github.com/rore/keir-core/actions/runs/41873759417) pass; exact runtime/compiler package copies are verified in the isolated demo. Core implementation delivery is accepted. Recoverable checkout cleanup is released and remains the final housekeeping item. Native host qualification is separate.
+**Historical effect/3 integration:** Core d59e375 is pushed to main with all 52 reviewed source blobs preserved exactly. [Contract CI](https://github.com/rore/keir-core/actions/runs/41873759463) and [workflow CI](https://github.com/rore/keir-core/actions/runs/41873759417) pass; exact runtime/compiler package copies are verified in the isolated demo. Core implementation delivery is accepted. Recoverable checkout cleanup is released and remains the final housekeeping item. Native host qualification is separate.
+
+**Corrected integration:** Effect/4 source `95e5fd0` passes independent result and simplicity review, reusing existing engines and preserving legacy APIs. Reported final verification passes 271 Java and 454 Node tests, shared same-artifact/source-installed conformance and exact package/class checks. Manager verified all 61 integrated source blobs and stages exact packages for isolated demo consumption. Hosted CI and recoverable cleanup remain; actual native application and customer-journey acceptance belong to the demo feature.
