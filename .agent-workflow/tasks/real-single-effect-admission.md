@@ -39,7 +39,7 @@ Owning feature: [Real-effect admission](../../roadmap/features/real-effect-admis
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Accepted design inputs
@@ -74,3 +74,11 @@ The developer reports focused compiler 14, Java runtime/admission 35 and new Nod
 The assembled verification checkpoint reports 250 Java cases passing (64 compiler, 155 runtime, 31 host) and 424 Node cases passing with zero skips, plus matching complete 28-case Java/Node protocol output. Source and installed-package conformance pass the legacy and new profiles, including 19 effect/3 scenarios, 22 fresh compiler runs and 10 packaged host batches; old goldens/pins remain unchanged. Packaged read-simulation verification and three installed-host tests pass. Three new Java host assertion errors were repaired against the final corpus and exact diagnostic text, followed by affected verification. Raw failures and repair evidence remain available for result review.
 
 Manager inspected and accepts one nonmaterial path refinement: conformance/read-and-decide/verify.mjs only prints the truthful counts returned by the extended verifier rather than stale hardcoded totals. This changes neither assertions nor execution scope; the final inventory is 52 paths, with the original plan packet retained for lineage. Risk and complexity remain Elevated/Moderate. Final audit, frozen revision/proof and independent result review remain pending; these checks do not qualify native SQLite or a deployment.
+
+## Frozen result for independent review
+
+Developer froze cf84d28f5b511942e90101c07b60e25a2f141d97 against 0dbea06119735667023ee33fd64342cb4f29bbd9. Manager verified the clean source, exact approved commit identity and proof SHA256 681ffffff79395643c5fa4e607d3bda5bc389008f73c61f3b52111d4e84deb0c before requesting independent result review. Final inventory is 52 paths; initial failure and repair logs remain retained. Scope/risk/privacy audit is complete with Gray classification and an advisory size finding, no boundary/checkpoint violation.
+
+Evidence reports 250 Java and 424 Node tests with no failures/skips, exact full 28-case cross-runtime protocol output, source/installed conformance, three installed-host tests, 19 packaged read-simulation reports and 29 schema fixtures/reports. All prior golden fixtures/pins and registry dependencies are unchanged. All eight packaged Node files match committed blobs, archive and installation exactly; new effect/3 fixture bytes also match. Tested working files differ from 29 committed text blobs only by Git CRLF-to-LF normalization, recorded separately in the proof; no other byte drift is claimed. The packaged Java host contains the 44 verified runtime classes unchanged.
+
+Independent result review, manager integration and hosted CI remain. Deterministic controlled-real fixtures do not qualify SQLite, a deployment or normal-data real writes. Frozen source/build/logs remain pinned for review; no normal server/data/provider/global setting was changed.
