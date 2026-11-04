@@ -45,3 +45,5 @@ Owning feature: [Real-effect admission](../../roadmap/features/real-effect-admis
 ## Coordination
 
 Corrective planning is resumed by the user; superseded implementation/qualification/rollout remains held. Manager owns this record and the shared roadmap. The architect owns the proposed corrected contract; the two existing developers own disjoint read-only core and demo inventories before implementation release. Existing audit and held implementation records retain historical evidence; no destructive reset or duplicate code delivery is introduced.
+
+All three existing collaborators explicitly accepted and resumed their bounded assignments with current role guidance and unchanged model settings. Architect writes the proposed contract only; core and demo developers write ignored inventory notes only, preserving the held demo candidate. Successful message delivery was separately confirmed by acceptance readback. No source, migration, provider or live-environment changes are released at this stage.
