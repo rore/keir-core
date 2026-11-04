@@ -6,8 +6,8 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { fixtures, loadScenarios, runProfile, runCorpus } from './run-node.mjs';
 
-test('independent model pins and nine exact compiler artifacts remain selected', () => {
-  for (const profile of ['read', 'effect', 'effect3']) {
+test('independent model pins and thirteen exact compiler artifacts remain selected', () => {
+  for (const profile of ['read', 'effect', 'effect3', 'effect4']) {
     const fixture = fixtures[profile];
     assert.equal(`sha256:${createHash('sha256').update(fixture.dcmBytes).digest('hex')}`, fixture.dcmDigest);
     for (const program of Object.values(fixture.programs)) assert.equal(`sha256:${createHash('sha256').update(program.bytes).digest('hex')}`, program.digest);
@@ -16,7 +16,7 @@ test('independent model pins and nine exact compiler artifacts remain selected',
   assert.equal(fixtures.effect.dcmDigest, 'sha256:68b72e4da41aa006a6a8182b5b8a6a4363a6734688da3c1e0c3807c0aff4ac04');
 });
 test('full generic scenarios compare independent outcomes, ordered calls, traces and consumption', async t => {
-  for (const profile of ['read', 'effect', 'effect3']) {
+  for (const profile of ['read', 'effect', 'effect3', 'effect4']) {
     const rows = loadScenarios(profile), before = JSON.stringify(rows);
     for (const row of rows) await t.test(`${profile}/${row.id}`, async () => {
       assert.deepEqual(await runProfile(profile, [row]), [{ id: row.id, ...row.expect }]);
@@ -36,6 +36,9 @@ test('fixture applicability and all fixed program variants remain explicit', () 
   const effect3 = loadScenarios('effect3'), fixtureSet = new Set(effect3.map(row => row.given.fixture));
   assert.ok(fixtureSet.has('normal'));
   assert.deepEqual([...new Set(effect3.map(row => row.given.program))].sort(), Object.keys(fixtures.effect3.programs).sort());
+  const effect4 = loadScenarios('effect4');
+  assert.deepEqual([...new Set(effect4.map(row => row.given.program))].sort(), Object.keys(fixtures.effect4.programs).sort());
+  assert.ok(effect4.every(row => row.format === 'keir-scenario/effect-4'));
   for (const fixture of ['zero-effect', 'revoked-after-read', 'invalid-key', 'wrong-origin', 'lost-response', 'response-expired']) {
     assert.ok(loadScenarios('effect').some(row => row.given.fixture === fixture));
     assert.ok(!loadScenarios('read').some(row => row.given.fixture === fixture));

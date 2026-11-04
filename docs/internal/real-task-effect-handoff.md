@@ -1,6 +1,8 @@
-# First real task customization: host handoff
+# Legacy `/3` real-task effect handoff
 
-Status: **proposed implementation contract; not implemented or accepted**. Depends on [real single-effect admission](../specs/real-single-effect-admission.md). This is the first actual task behavior replacing advice as the main demo, not a renamed status display. Core stays domain-independent. One existing Node host and its SQLite database suffice.
+> This handoff records host-specific native persistence and preservation evidence. It is not a generic runtime initialization credential or a prerequisite input to corrected `/4` bind/prepare calls. The host remains responsible for its actual permission, key and commit guarantees. The demo's new definition identity and migration/activation behavior belong to its owner; this handoff does not change them.
+
+**Legacy `/3` plan status:** proposed implementation contract; not implemented or accepted. This described the first task-effect integration under the old qualification protocol. It is preserved as host-specific planning and evidence; it is not a generic `/4` initialization contract. Core stays domain-independent. The demo owner controls any new task definition identity, migration and activation behavior.
 
 ## Customer contract and catalog
 

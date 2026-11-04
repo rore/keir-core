@@ -1,8 +1,12 @@
 # Read-and-decide runtime
 
-Required grant maps here are `/1` compatibility behavior. The implemented [generic-hook `/2` API](host-model-binding.md) uses reference artifacts, complete model/invoker binding and optional narrowing policy; current authorization and aggregate budgets remain mandatory. Omission must never widen an old invocation.
+Required grant maps described below are legacy `/1` behavior. The legacy [generic-hook `/2` API](host-model-binding.md) uses reference artifacts, complete model/invoker binding and optional narrowing policy; its current authorization and aggregate budgets remain mandatory. Omission must never widen an old invocation.
 
-Status: implemented experimental checkpoint with local shared conformance. Java and Node share this behavior and [artifact contract](compiler-artifact.md). APIs below define data/ownership semantics; Java futures and Node promises implement the same asynchronous adapter boundary. Production containment qualification remains open.
+Status: the API details below preserve their existing profile behavior. The corrected experimental `/4` host-bound single-write contract is summarized here and specified in [real single-effect admission](real-single-effect-admission.md). Implementation and shared verification must be confirmed from current results. No profile claims arbitrary-host containment or native qualification.
+
+## Corrected effect/4 invocation boundary
+
+`bindModel(dcmBytes, implementations)` validates the complete catalog and homogeneous implementation mode. `prepareProgram(artifactBytes, boundModel)` derives identity and supported compiler/environment checks internally. Invocation supplies fresh `bindings`, original non-null `requestKey`, typed `event` and `deadline`. A reached implementation receives the same absolute deadline/clock snapshot alongside `remainingMs`, protected arguments, event and original key. It must recheck expiry before native commit; a remaining duration must not be restarted. Host implementations own current permission and key authenticity. No `/4` authorizer, grant map, qualification or key-validator callback is required. Empty catalogs are valid and mode-neutral; no-call programs can complete without native authorization.
 
 ## Prepare and invoke
 

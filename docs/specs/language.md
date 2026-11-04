@@ -1,5 +1,7 @@
 # Read-and-decide language contract
 
+The corrected single-write contract selects `keir-effect/4` explicitly, with `keir-dcm/effect-4`, `keir-artifact/effect-4` and `keir-scenario/effect-4`. It retains the existing single-write language, descriptor recipe, CEL environment, event metadata and result/receipt vocabulary. This identity changes host-binding and admission semantics; it adds no language construct. Earlier profile identities keep their existing semantics and bytes.
+
 The implemented [generic-hook `/2` contract](generic-hook-capability-contract.md) keeps source `keir/v0`, permits repeated/different published reads without named grants, and adds explicit nominal literals for authored constants. It changes no host payload and adds no configuration channel. The `/1` rules and example below remain compatibility behavior.
 
 Status: implemented experimental checkpoint, verified locally in Java and Node. Profile `keir-read/1` is selected by the trusted compiler configuration. It implements a strict subset of source `keir/v0`; unsupported baseline syntax is rejected. See [status](README.md), [DCM](domain-model.md) and [artifact](compiler-artifact.md).

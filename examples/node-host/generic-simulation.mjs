@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { createHash } from 'node:crypto';
 import { createHarness } from './generic-capacity.mjs';
 import { consumeEffect } from './effect-consumer.mjs';
 import { reconcileCalls } from './effect-simulation.mjs';
 
 const fixtures = ['normal', 'invocation-denied', 'call-denied', 'zero-effect', 'wrong-scope', 'revoked-after-read', 'invalid-key', 'wrong-origin', 'read-throws', 'lost-response', 'response-expired'];
 const sharedFixtures = ['normal', 'invocation-denied', 'call-denied', 'wrong-scope', 'read-throws'];
+const boundEffectFixtures = ['normal', 'read-throws', 'lost-response', 'response-expired'];
 const own = (value, name) => Object.hasOwn(value, name);
 function shape(value, required) {
   assert.ok(value && typeof value === 'object' && !Array.isArray(value), 'Expected fixture record');
@@ -82,12 +84,12 @@ export function consumeGeneric(outcome, dcm) {
 }
 
 export function validateGenericScenario(row, dcm) {
-  json(row); const effect = dcm.format.startsWith('keir-dcm/effect-'), effect3 = dcm.format === 'keir-dcm/effect-3', entry = Object.values(dcm.entrypoints)[0];
-  shape(row, ['format', 'id', 'given', 'stubs', 'expect']); assert.equal(row.format, 'keir-scenario/' + (effect3 ? 'effect-3' : effect ? 'effect-2' : 'read-2'));
+  json(row); const effect = dcm.format.startsWith('keir-dcm/effect-'), effect3 = dcm.format === 'keir-dcm/effect-3', effect4 = dcm.format === 'keir-dcm/effect-4', entry = Object.values(dcm.entrypoints)[0];
+  shape(row, ['format', 'id', 'given', 'stubs', 'expect']); assert.equal(row.format, 'keir-scenario/' + (effect4 ? 'effect-4' : effect3 ? 'effect-3' : effect ? 'effect-2' : 'read-2'));
   assert.match(row.id, /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/);
   shape(row.given, ['input', 'fixture', 'program']); typed(row.given.input, entry.input, dcm);
-  assert.ok((effect ? fixtures : sharedFixtures).includes(row.given.fixture), 'Known trusted fixture');
-  assert.ok((effect3 ? ['main', 'zero', 'after-write-read'] : effect ? ['main', 'project2', 'title2'] : ['main', 'repeated', 'alternate']).includes(row.given.program), 'Fixed program selector');
+  assert.ok((effect4 ? boundEffectFixtures : effect ? fixtures : sharedFixtures).includes(row.given.fixture), 'Known trusted fixture');
+  assert.ok((effect4 ? ['main', 'zero', 'after-write-read', 'no-call'] : effect3 ? ['main', 'zero', 'after-write-read'] : effect ? ['main', 'project2', 'title2'] : ['main', 'repeated', 'alternate']).includes(row.given.program), 'Fixed program selector');
   assert.ok(Array.isArray(row.stubs) && row.stubs.length <= 4, 'CAPACITY_EXCEEDED'); row.stubs.forEach(call => callShape(call, dcm, true));
   shape(row.expect, ['outcome', 'calls', 'consumption']); assert.ok(Array.isArray(row.expect.calls) && row.expect.calls.length <= 4);
   row.expect.calls.forEach(call => callShape(call, dcm, false));
@@ -108,10 +110,11 @@ export async function runBatch(api, bundle, scenarios) {
   assert.ok(Array.isArray(scenarios) && scenarios.length > 0 && scenarios.length <= 128, 'CAPACITY_EXCEEDED');
   scenarios = json(scenarios, 1048576);
   const dcm = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bundle.dcmBytes));
-  assert.ok(['keir-dcm/read-2', 'keir-dcm/effect-2', 'keir-dcm/effect-3'].includes(dcm.format));
-  const effect = dcm.format.startsWith('keir-dcm/effect-'), effect3 = dcm.format === 'keir-dcm/effect-3', ids = new Set();
+  assert.ok(['keir-dcm/read-2', 'keir-dcm/effect-2', 'keir-dcm/effect-3', 'keir-dcm/effect-4'].includes(dcm.format));
+  const effect = dcm.format.startsWith('keir-dcm/effect-'), effect3 = dcm.format === 'keir-dcm/effect-3', effect4 = dcm.format === 'keir-dcm/effect-4', ids = new Set();
   for (const row of scenarios) { validateGenericScenario(row, dcm); assert.ok(!ids.has(row.id)); ids.add(row.id); }
-  const names = effect3 ? ['main', 'zero', 'after-write-read'] : effect ? ['main', 'project2', 'title2'] : ['main', 'repeated', 'alternate']; shape(bundle.programs, names);
+  const names = effect4 ? ['main', 'zero', 'after-write-read', 'no-call'] : effect3 ? ['main', 'zero', 'after-write-read'] : effect ? ['main', 'project2', 'title2'] : ['main', 'repeated', 'alternate']; shape(bundle.programs, names);
+  if (effect4) return runBoundEffectBatch(api, bundle, scenarios, dcm, names);
   const scope = 'sample.scope', storage = new AsyncLocalStorage(), harness = createHarness(api);
   const [entryId, entry] = Object.entries(dcm.entrypoints)[0];
   const invokers = Object.fromEntries(Object.entries(dcm.capabilities).map(([capability, cap]) => [capability, {
@@ -184,5 +187,63 @@ export async function runBatch(api, bundle, scenarios) {
   } finally {
     for (const handle of prepared.values()) assert.ok(harness.releasePrepared(handle));
     assert.ok(harness.releaseModel(selected.boundModel)); storage.disable();
+  }
+}
+
+async function runBoundEffectBatch(api, bundle, scenarios, dcm, names) {
+  assert.equal(createHash('sha256').update(bundle.dcmBytes).digest('hex'), bundle.dcmDigest.slice(7), 'Pinned DCM bytes');
+  for (const name of names) assert.equal(createHash('sha256').update(bundle.programs[name].bytes).digest('hex'), bundle.programs[name].digest.slice(7), 'Pinned artifact bytes');
+  const storage = new AsyncLocalStorage();
+  const invokers = Object.fromEntries(Object.entries(dcm.capabilities).map(([capability, cap]) => [capability, {
+    version: cap.version, mode: 'simulation', keyType: dcm.hostKey.type,
+    invoke: async (args, protectedArgs, remainingMs, host) => {
+      const state = storage.getStore(); assert.ok(state, 'Request-local fixture context');
+      let stub;
+      try {
+        const call = json({ capability, version: cap.version, args, protectedArgs }); state.calls.push(call);
+        assert.ok(state.calls.length <= 4 && Number.isSafeInteger(remainingMs) && remainingMs > 0 && remainingMs <= 1000);
+        assert.deepEqual(json(protectedArgs), { actorId: 'user1' });
+        shape(host, ['requestKey', 'event', 'deadline']); assert.strictEqual(host.requestKey, state.key); assert.deepEqual(host.event, state.event);
+        assert.ok(host.deadline.clock.nowMs() < host.deadline.expiresAtMs, 'Native operation remains before its absolute deadline');
+        stub = state.row.stubs[state.used]; assert.ok(stub, 'Missing stub');
+        assert.deepEqual(call, { capability: stub.capability, version: stub.version, args: stub.args, protectedArgs: stub.protectedArgs });
+        if (cap.effect === 'READ' && stub.response.kind === 'SUCCESS') assert.equal(stub.response.value.id, args.taskId, 'Read resource mismatch');
+        if (cap.effect === 'WRITE') assert.equal(state.event.source, state.row.given.input.taskId, 'Host event owns the task being changed');
+        state.used++;
+      } catch {
+        state.violations.push('Call, arguments, protected identity or resource mismatch');
+        throw new Error('Simulation mismatch');
+      }
+      if (cap.effect === 'READ') {
+        if (state.row.given.fixture === 'read-throws' && state.reads === 0) throw new Error('Unavailable read');
+        state.reads++;
+      } else if (state.row.given.fixture === 'lost-response') throw new Error('Lost response');
+      const response = json(stub.response);
+      if (cap.effect === 'WRITE' && state.row.given.fixture === 'response-expired') state.now = 1000;
+      return response;
+    },
+  }]));
+  const prepared = new Map();
+  try {
+    const selected = api.bindModel(bundle.dcmBytes, invokers); assert.equal(selected.diagnostic, null, 'Model binding failed');
+    for (const name of names) {
+      const result = api.prepareProgram(bundle.programs[name].bytes, selected.boundModel);
+      assert.equal(result.diagnostic, null, 'Program preparation failed'); prepared.set(name, result.prepared);
+    }
+    const results = [];
+    for (const row of scenarios) {
+      const state = { row, now: 0, used: 0, reads: 0, key: nativeKey(), event: Object.freeze({ id: 'event1', source: 'task1' }), calls: [], violations: [] };
+      const deadline = { clock: { nowMs: () => state.now }, expiresAtMs: 1000 };
+      const context = { bindings: row.given.program === 'no-call' ? {} : { actorId: 'user1' }, deadline, requestKey: state.key, event: state.event };
+      const outcome = json(await storage.run(state, () => api.invokeProgram(prepared.get(row.given.program), json(row.given.input), context)));
+      if (state.used !== row.stubs.length) state.violations.push('Unconsumed stub');
+      const calls = reconcileCalls(state.calls, outcome.trace, row.stubs, state.violations);
+      assert.deepEqual(state.violations, [], `${row.id}: simulation violations`);
+      const actual = { id: row.id, outcome, calls, consumption: consumeGeneric(outcome, dcm) };
+      assert.deepEqual(actual, { id: row.id, ...row.expect }, `${row.id}: simulation result mismatch`); results.push(actual);
+    }
+    return results;
+  } finally {
+    prepared.clear(); storage.disable();
   }
 }

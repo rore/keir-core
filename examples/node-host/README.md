@@ -1,13 +1,20 @@
 # Node host example
 
-The generic simulation command also accepts the fixed `conformance/generic-hooks/effect3` corpus:
+Run the corrected `/4` generic corpus and host-bound protocol after installing the packed Node runtime package in the example host:
+
+```sh
+node examples/node-host/generic.mjs conformance/generic-hooks/effect4
+node conformance/generic-hooks/bound-effect.mjs --installed
+```
+
+The generic host binds the complete DCM and implementation map, prepares artifacts against that binding, then invokes with fresh context. The older `effect3/` qualification-protocol corpus remains available only as a legacy check:
 
 ```sh
 node examples/node-host/generic.mjs conformance/generic-hooks/effect3
 node conformance/generic-hooks/real-effect.mjs --installed
 ```
 
-The first command remains simulation-only and accepts no qualification or real adapter from scenario data. The second runs fixed deterministic admission fixtures against the installed package, including separate real-mode bindings of the same artifacts. It performs no native task writes and qualifies no host or deployment. See the [effect/3 contract](../../docs/specs/real-single-effect-admission.md) for the independent build/report/current-authority gate.
+For corrected `/4`, bind the DCM and complete implementation map, prepare against that bound model, then invoke with fresh context. There is no qualification object, authorizer or key-validator callback. The `effect3` and `real-effect.mjs` commands exercise legacy behavior; no example command qualifies native service guarantees. See the [effect contract](../../docs/specs/real-single-effect-admission.md).
 
 This command-line host consumes the Java-produced shared artifact through a locally packed Node library. It shows completed/open/missing tasks and a deliberately wrong-resource fake, with separate runtime outcomes and DISPLAYED/NOT_DISPLAYED consumption. All users/tasks are fictional fixture data; no real authorization or persistence is certified.
 

@@ -1,0 +1,472 @@
+[
+  {
+    "id": "simulation-main",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "CREATED"
+      }
+    }
+  },
+  {
+    "id": "simulation-zero",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get"
+      ],
+      "effects": [],
+      "nativeActions": [
+        "tasks.get"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "CREATED"
+      }
+    }
+  },
+  {
+    "id": "simulation-after-write-read",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get",
+        "tasks.create",
+        "tasks.get"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create",
+        "tasks.get"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "CREATED"
+      }
+    }
+  },
+  {
+    "id": "simulation-no-call",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [],
+      "effects": [],
+      "nativeActions": [],
+      "reported": "REPORTED",
+      "result": {
+        "status": "NO_OP"
+      }
+    }
+  },
+  {
+    "id": "real-main",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "CREATED"
+      }
+    }
+  },
+  {
+    "id": "real-zero",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get"
+      ],
+      "effects": [],
+      "nativeActions": [
+        "tasks.get"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "CREATED"
+      }
+    }
+  },
+  {
+    "id": "real-after-write-read",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get",
+        "tasks.create",
+        "tasks.get"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create",
+        "tasks.get"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "CREATED"
+      }
+    }
+  },
+  {
+    "id": "real-no-call",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [],
+      "effects": [],
+      "nativeActions": [],
+      "reported": "REPORTED",
+      "result": {
+        "status": "NO_OP"
+      }
+    }
+  },
+  {
+    "id": "missing-implementation",
+    "expect": {
+      "phase": "binding",
+      "code": "ADMISSION_INVALID",
+      "path": "/binding/implementations",
+      "calls": 0
+    }
+  },
+  {
+    "id": "mixed-mode",
+    "expect": {
+      "phase": "binding",
+      "code": "ADMISSION_INVALID",
+      "path": "/binding/implementations/tasks.get",
+      "calls": 0
+    }
+  },
+  {
+    "id": "unsupported-compiler",
+    "expect": {
+      "phase": "preparation",
+      "code": "PIN_MISMATCH",
+      "path": "/artifact/compiler",
+      "calls": 0
+    }
+  },
+  {
+    "id": "empty-catalog",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [],
+      "effects": [],
+      "nativeActions": [],
+      "reported": "REPORTED",
+      "result": {
+        "status": "NO_OP"
+      }
+    }
+  },
+  {
+    "id": "denied-entry",
+    "expect": {
+      "phase": "invocation",
+      "classification": "BUSINESS_REJECTION",
+      "calls": [
+        "tasks.get"
+      ],
+      "effects": [],
+      "nativeActions": [],
+      "reported": "REPORTED",
+      "error": {
+        "code": "ACCESS_DENIED",
+        "path": "/steps/1"
+      }
+    }
+  },
+  {
+    "id": "invalid-key",
+    "expect": {
+      "phase": "invocation",
+      "classification": "BUSINESS_REJECTION",
+      "calls": [
+        "tasks.get"
+      ],
+      "effects": [],
+      "nativeActions": [],
+      "reported": "REPORTED",
+      "error": {
+        "code": "ACCESS_DENIED",
+        "path": "/steps/1"
+      }
+    }
+  },
+  {
+    "id": "denied-write",
+    "expect": {
+      "phase": "invocation",
+      "classification": "BUSINESS_REJECTION",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "NONE"
+      ],
+      "nativeActions": [
+        "tasks.get"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "ACCESS_DENIED",
+        "path": "/steps/3"
+      }
+    }
+  },
+  {
+    "id": "denied-pending-native",
+    "expect": {
+      "phase": "invocation",
+      "classification": "BUSINESS_REJECTION",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "NONE"
+      ],
+      "nativeActions": [
+        "tasks.get"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "ACCESS_DENIED",
+        "path": "/steps/3"
+      }
+    }
+  },
+  {
+    "id": "denied-after-confirmed",
+    "expect": {
+      "phase": "invocation",
+      "classification": "BUSINESS_REJECTION",
+      "calls": [
+        "tasks.get",
+        "tasks.create",
+        "tasks.get"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "ACCESS_DENIED",
+        "path": "/steps/4"
+      }
+    }
+  },
+  {
+    "id": "expired-entry",
+    "expect": {
+      "phase": "invocation",
+      "classification": "LIMIT_EXCEEDED",
+      "calls": [],
+      "effects": [],
+      "nativeActions": [],
+      "reported": "REPORTED",
+      "error": {
+        "code": "BUDGET_EXCEEDED",
+        "path": ""
+      }
+    }
+  },
+  {
+    "id": "false-guard",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get"
+      ],
+      "effects": [],
+      "nativeActions": [
+        "tasks.get"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "NO_OP"
+      }
+    }
+  },
+  {
+    "id": "definite-mismatch",
+    "expect": {
+      "phase": "invocation",
+      "classification": "BUSINESS_REJECTION",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "NONE"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "KEY_PAYLOAD_MISMATCH",
+        "path": "/steps/3"
+      }
+    }
+  },
+  {
+    "id": "transient-none",
+    "expect": {
+      "phase": "invocation",
+      "classification": "FAILED",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "NONE"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "ADAPTER_TRANSIENT",
+        "path": "/steps/3"
+      }
+    }
+  },
+  {
+    "id": "unknown-commit",
+    "expect": {
+      "phase": "invocation",
+      "classification": "UNCERTAIN",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "UNKNOWN"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "UNKNOWN_COMMIT",
+        "path": "/steps/3"
+      }
+    }
+  },
+  {
+    "id": "lost-response",
+    "expect": {
+      "phase": "invocation",
+      "classification": "UNCERTAIN",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "UNKNOWN"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "ADAPTER_EXCEPTION",
+        "path": "/steps/3"
+      }
+    }
+  },
+  {
+    "id": "malformed-confirmed-value",
+    "expect": {
+      "phase": "invocation",
+      "classification": "FAILED",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "ADAPTER_INVALID",
+        "path": "/steps/3"
+      }
+    }
+  },
+  {
+    "id": "confirmed-response-expired",
+    "expect": {
+      "phase": "invocation",
+      "classification": "LIMIT_EXCEEDED",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "BUDGET_EXCEEDED",
+        "path": "/steps/3"
+      }
+    }
+  }
+]

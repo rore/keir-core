@@ -41,3 +41,23 @@ test('a pending batch keeps its admitted fixture snapshot when caller data chang
   row.given.input.taskId = 'changed'; row.stubs[0].args.taskId = 'changed'; row.stubs[0].response.value.id = 'changed';
   release(); assert.deepEqual(await pending, [{ id: original.id, ...original.expect }]);
 });
+
+test('effect/4 uses two-argument binding and preparation with no legacy authority knobs', async () => {
+  const directory = new URL('../../conformance/generic-hooks/effect4/', import.meta.url);
+  const read = name => readFileSync(new URL(name, directory));
+  const scenarios = JSON.parse(read('scenarios.json'));
+  const programs = Object.fromEntries(['main', 'zero', 'after-write-read', 'no-call'].map(name => {
+    const stem = name === 'main' ? 'artifact' : `artifact-${name}`;
+    return [name, { bytes: read(`${stem}.json`), digest: read(`${stem}.sha256`).toString('utf8').trim() }];
+  }));
+  const bundle = { dcmBytes: read('dcm.json'), dcmDigest: read('dcm.sha256').toString('utf8').trim(), programs };
+  assert.deepEqual(await runBatch(api, bundle, scenarios), scenarios.map(row => ({ id: row.id, ...row.expect })));
+  for (const mutate of [row => { row.given.scope = 'forged'; }, row => { row.given.fixture = 'wrong-scope'; }, row => { row.qualification = {}; }]) {
+    const row = structuredClone(scenarios[0]); mutate(row); await assert.rejects(runBatch(api, bundle, [row]));
+  }
+  const readFailure = structuredClone(scenarios.find(row => row.id === 'read-throws'));
+  readFailure.given.fixture = 'normal'; readFailure.stubs[0].response.value.id = 'wrong-resource';
+  await assert.rejects(runBatch(api, bundle, [readFailure]), /simulation violations/);
+  const wrongStep = structuredClone(scenarios[0]); wrongStep.stubs[0].step = 'wrongStep';
+  await assert.rejects(runBatch(api, bundle, [wrongStep]), /simulation violations/);
+});

@@ -1,6 +1,6 @@
 # Customer extension assistant
 
-**Status:** assistant guidance for implemented read and simulation-only effect profiles. The [demo host](https://github.com/rore/keir-demo-app/blob/main/docs/ai-authoring.md) implements bounded conversational authoring, checks and separate human approval/activation for task advice. Tool interfaces remain host-defined, outside Keir core. Read the [agent overview](README.md) and [specification status](../specs/README.md).
+**Status:** assistant guidance for read profiles and corrected host-bound `/4` single-write semantics. `/1`–`/3` preserve explicit legacy requirements. The [demo host](https://github.com/rore/keir-demo-app/blob/main/docs/ai-authoring.md) owns authoring, customer approval and activation. Tool interfaces remain host-defined, outside Keir core. Read the [agent overview](README.md) and [specification status](../specs/README.md).
 
 For decoded read/2 structural checks, use the shared [schema index](../../schemas/read-2/README.md); schema success does not grant host approval or execution authority.
 
@@ -10,7 +10,7 @@ Help a customer clarify application behavior, author a constrained extension and
 
 Compose the customization from native operations: when the scoped catalog exposes `tasks.create`, use it with authored project/title to implement a follow-up rule. Do not ask the host to add an operation that pre-implements that rule or assume task relationships the catalog does not expose.
 
-The implemented [experimental `/2` contract](../specs/generic-hook-capability-contract.md) lets an unchanged hook use different published capabilities and repeated reads within aggregate budgets. Current authorization, lifecycle/effect limits and explicit advanced filters still apply. Do not ask the host to prewire your call list or widen policy. `/1` retains required grants; choose a supported profile explicitly. Effects remain simulation-only.
+The corrected [host-bound `/4` contract](../specs/generic-hook-capability-contract.md) lets a program compose the host-published catalog within DCM operation and effect limits. The host supplies fresh context and each implementation checks current permission and key authenticity. Do not ask the host to prewire a call list or add approval/qualification callbacks to the Keir API. `/1`–`/3` retain legacy contracts; choose a profile explicitly. Simulation is not native-effect evidence.
 
 ## Workflow
 
@@ -26,14 +26,14 @@ The implemented [experimental `/2` contract](../specs/generic-hook-capability-co
 Author customer-selected project/title constants in source unless explicit logic obtains them elsewhere. Keep host payload unchanged. `/2` [nominal literals](../specs/generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority) supply business typing, not authority; `/1` retains its restrictions. Do not invent hook inputs or a configuration channel.
 
 1. Clarify the requirement, expected outcomes, missing-data behavior and error cases.
-2. Discover the approved scoped catalog, hook contract, supported profile and any explicit restrictive policy. Compose compatible operations; under the corrected contract, repeated reads need aggregate budget, not a default named grant per operation. Explain current implementation limits rather than widening the catalog.
+2. Discover the host-published catalog, hook contract, supported profile and explicit restrictive policies. Compose compatible operations within existing limits. Explain current implementation limits rather than widening the catalog.
 3. Author source against the approved contract; use structured [compiler library/CLI diagnostics](../../compiler-java/README.md) for bounded repair. Connect customer-facing tools through host policy.
 4. Propose scenarios and expected outcomes, including denial, adapter failure and uncertainty. Run the approved simulation path and explain both program and host-consumption outcomes.
 5. Have the authorized user/domain owner review intended outcomes, then request activation of the exact reviewed revision through host policy. Changes require the applicable renewed review.
 
 ## Authority and tools
 
-Under `/2` [host binding](../specs/host-model-binding.md), the host supplies the exact catalog and invokers together. Author against that published reference; do not select clients or substitute models/adapters. Other programs may reuse the binding. A changed catalog needs explicit recompilation/selection; earlier programs may retain an available approved snapshot. Never fall back from an unavailable or revoked dependency to the latest version.
+Under `/4` [host binding](../specs/host-model-binding.md), the host supplies the exact DCM and complete compatible implementations together. Author against that published reference; do not select clients or substitute models/adapters. Preparations may be reused with fresh invocation context. A changed catalog needs explicit recompilation/selection. Host selection and current permission remain host responsibilities; never fall back from an unavailable dependency to the latest version.
 
 Do not change the authoritative DCM, register capabilities/endpoints, widen grants, select protected identity/key values, certify adapters or approve your own activation. Host metadata is not ordinary source input. Successful simulation cannot establish real authorization, duplicate suppression or commit guarantees.
 

@@ -1,6 +1,6 @@
 # Host integration assistant
 
-**Status:** initial assistant guidance over the implemented read and simulation-only effect profiles. Host-integrated discovery, approval and activation tools remain future host work. Read the [agent overview](README.md) and [specification status](../specs/README.md).
+**Status:** initial assistant guidance over read profiles and corrected host-bound `/4` single-write semantics. Host-integrated discovery, approval and activation tools remain host work. `/1`–`/3` retain their legacy requirements. Read the [agent overview](README.md) and [specification status](../specs/README.md).
 
 For decoded read/2 structural checks, use the shared [schema index](../../schemas/read-2/README.md); schema success does not grant host approval or execution authority.
 
@@ -12,13 +12,13 @@ Help the host developer define domain types, generic hooks and result consumers,
 
 Expose reusable native operations, not the customization being demonstrated: `tasks.create` creates a task; the extension supplies its project/title and decides that creation is a follow-up. Do not hide the program's eligibility or composition in a special adapter. Domain-specific atomic operations remain valid when they are actual host contracts. See the [capability ownership rule](../specs/generic-hook-capability-contract.md#responsibility-boundaries).
 
-Design hooks around inputs, outputs, lifecycle and effect constraints. Under the implemented [experimental `/2` contract](../specs/generic-hook-capability-contract.md), customers select published operations and repeat reads within aggregate budgets. Named filters and quotas are advanced opt-in restrictions. `/1` samples retain required grants for compatibility; never remove their fields or infer `/2` from field omission. Select the supported profile explicitly.
+Design hooks around inputs, outputs, lifecycle and effect constraints. Under the corrected [host-bound `/4` contract](../specs/generic-hook-capability-contract.md), the host publishes the complete DCM catalog and binds every compatible implementation at initialization. Do not add default per-capability grants or qualification callbacks. `/1`–`/3` retain explicit legacy behavior; never infer a profile from omitted fields.
 
 Assume capability business operations usually live behind internal service-to-service APIs, including HTTP/RPC. A registered adapter bridges the runner to those services; do not equate its local callable interface with a local business implementation. Keep routing, credentials, trusted identity propagation, deadlines and transport/result mapping host-owned. A timed-out remote WRITE may still commit; preserve uncertainty and do not invent retries or verified native guarantees. See the [dispatch boundary](../specs/generic-hook-capability-contract.md#capability-invocation-across-services).
 
 ## Workflow
 
-For the `/2` [binding API](../specs/host-model-binding.md), bind the complete approved DCM and compatible invokers once; check diagnostics before preparing programs against the handle. Do not swap invokers at preparation or curate registration around one program. Keep scope/current lifecycle checks explicit and client identity request-local. Missing unused bindings reject setup. Effects remain simulation-only; real service guarantees need host evidence.
+For `/4` [binding](../specs/host-model-binding.md), initialize with `bindModel(dcmBytes, implementations)` and prepare with `prepareProgram(artifactBytes, boundModel)`. Check diagnostics and stop initialization on failure. Bind the complete catalog, including unused capabilities; do not swap or curate registrations per program. Supply fresh bindings, event, original non-null key and absolute deadline per invocation. Host implementations enforce permission and key authenticity, including before native commit. `/3` qualification applies only to legacy callers. Host-specific engineering evidence is not a runtime credential.
 
 Preserve the host-defined payload, including unused legitimate fields. Customer project/title choices belong in source unless explicitly obtained elsewhere. `/2` supports [nominal literals](../specs/generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority); these supply typing, not authority. Do not add sample-specific hook fields or a configuration channel.
 
@@ -26,7 +26,7 @@ Preserve the host-defined payload, including unused legitimate fields. Customer 
 2. Draft the scoped catalog and generic hook separately. Identify protected parameters, effect/lifecycle ceilings, aggregate limits, compatibility and unresolved guarantees. Add named capability restrictions only for an explicit host requirement; do not infer them from one proposed program.
 3. Propose host conformance cases and evidence for actual adapters, including rejection and failure paths.
 4. Use the [compiler library/CLI](../../compiler-java/README.md) diagnostics and [controlled host verification](../../conformance/read-and-decide/README.md#verify-both-runtimes-and-packaged-hosts) to revise proposals with the developer. Connect host agent tools separately.
-5. Submit an exact proposed revision for host-owner approval and publication; identify outstanding certification obligations.
+5. Submit an exact proposed revision for host-owner approval and publication; identify outstanding native guarantees without presenting engineering evidence as a runtime credential.
 
 ## Authority and tools
 

@@ -61,6 +61,7 @@ export function requireCurrent(bound, code, path) {
 }
 
 export function bindModel(dcmBytes, approval, invokers, qualification) {
+  if (arguments.length === 2) return bindHostModel(dcmBytes, approval);
   let path = '/binding/approval';
   try {
     const profile = approval && Object.getOwnPropertyDescriptor(approval, 'profile');
@@ -122,5 +123,43 @@ export function bindModel(dcmBytes, approval, invokers, qualification) {
     const diagnostic = Object.freeze({ code: error instanceof Fault && error.code === 'BUDGET_EXCEEDED' ? error.code : 'ADMISSION_INVALID', path,
       message: 'The selected artifact or host configuration is invalid.' });
     return Object.freeze({ boundModel: null, diagnostic });
+  }
+}
+
+function bindHostModel(dcmBytes, implementations) {
+  let path = '/binding/dcm';
+  try {
+    ok(dcmBytes instanceof Uint8Array, path, 'ADMISSION_INVALID');
+    ok(dcmBytes.byteLength <= LIMITS.dcmBytes, path, 'BUDGET_EXCEEDED');
+    const raw = Buffer.from(dcmBytes), dcm = parseModelJson(raw), canonical = canonicalBytes(dcm);
+    const profile = 'keir-effect/4';
+    const model = validateModel(dcm, profile, path);
+    const modelRef = { domainId: dcm.domain.id, domainVersion: dcm.domain.version, format: dcm.format,
+      digest: digest(canonical), descriptorRecipe: 'keir-record-descriptors/1' };
+    path = '/binding/dcm/types';
+    const types = prepareModelTypes(dcm, path);
+    path = '/binding/implementations';
+    shape(implementations, Object.keys(dcm.capabilities), path);
+    const adapters = Object.create(null);
+    let mode;
+    for (const id of keys(implementations, path, 8).sort()) {
+      path = '/binding/implementations/' + pointer(id);
+      const implementation = implementations[id];
+      shape(implementation, ['version', 'mode', 'keyType', 'invoke'], path);
+      ok(implementation.version === dcm.capabilities[id].version && ['simulation', 'real'].includes(implementation.mode) &&
+        implementation.keyType === dcm.hostKey.type && typeof implementation.invoke === 'function', path);
+      if (mode === undefined) mode = implementation.mode;
+      ok(implementation.mode === mode, path);
+      adapters[id] = Object.freeze({ invoke: implementation.invoke });
+    }
+    const bound = Object.freeze({ dcm: freeze(dcm), raw, canonical, modelRef: freeze(modelRef), model,
+      profile, mode, effect: true, types, adapters: Object.freeze(adapters) });
+    const boundModel = Object.freeze(Object.create(null));
+    models.set(boundModel, bound);
+    return Object.freeze({ boundModel, diagnostic: null });
+  } catch (error) {
+    return Object.freeze({ boundModel: null, diagnostic: Object.freeze({
+      code: error instanceof Fault && error.code === 'BUDGET_EXCEEDED' ? error.code : 'ADMISSION_INVALID', path,
+      message: 'The selected artifact or host configuration is invalid.' }) });
   }
 }

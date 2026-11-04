@@ -1,8 +1,8 @@
 # Keir specifications
 
-The [generic hook/capability contract](generic-hook-capability-contract.md) is **implemented and locally verified under experimental `/2` profiles**. It replaces mandatory program-specific grants with optional narrowing controls while preserving aggregate bounds and single-write safety. Six compiled programs and 28 shared scenarios pass in both runtimes and packaged hosts; existing `/1` behavior and golden bytes remain unchanged.
+The corrected host-bound single-write contract is explicit `/4`; `/1`–`/3` retain their legacy behavior. The [generic hook/capability contract](generic-hook-capability-contract.md) documents the current boundary and migration. Local Java/Node, source/installed and packaged verification passed; independent result/simplicity review and manager integration remain pending. Native-provider qualification and hosted CI are not claimed. See [testing evidence](../testing.md).
 
-The implemented [host model binding](host-model-binding.md) defines `/2` reference artifacts and a complete-catalog DCM/invoker binding with reusable model preparation and fresh invocation authority. See the [worked example](generic-hook-example.md), runnable hosts and [testing evidence](../testing.md). Real transport guarantees, production containment and release remain unqualified; local `/2` results do not imply a new CI result.
+The [host model binding](host-model-binding.md) defines corrected `/4` initialization, preparation and fresh invocation context, alongside preserved legacy APIs. See the [worked example](generic-hook-example.md), runnable hosts and [testing evidence](../testing.md). Host transport/native guarantees and production containment remain host-owned; local checks do not establish native-provider qualification or a hosted CI result.
 
 The first maintained contract is **`keir-read/1`, an implemented experimental checkpoint** for REQUEST/read/classify/display. The Java compiler and both runtimes pass the same local and CI conformance corpus and packaged-host verification. [Testing evidence](../testing.md) records supported scope and limitations; production qualification and release remain open.
 
