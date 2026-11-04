@@ -12,6 +12,8 @@ repo: "keir-demo-app"
 
 Connect an explicitly admitted scalar extension to native TaskCompleted events and generic task creation, preserving actual authority and effect evidence.
 
+Current priority: replace the invented task-advice demonstration with recognizable task-management customization. Architect discovery is requested to map existing native services, the actual domain model and generic capabilities to the smallest real end-to-end scenario and its core/host/Studio implementation steps. Completion-driven task creation is the original candidate; confirm its real-effect admission dependencies rather than bypassing them. Later generic operations should follow actual task-model needs. Preserve existing customer data/history during the transition; do not merely rename advice or claim planned behavior works.
+
 ## In Scope
 
 - Commit native completion before admitting a reaction; pin artifact/model/consumer selection once and preserve the original event/key.
