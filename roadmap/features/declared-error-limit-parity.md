@@ -1,7 +1,7 @@
 ---
 id: declared-error-limit-parity
 title: Reject oversized read/2 error catalogs during compilation
-status: active
+status: done
 priority: high
 commitment: committed
 milestone: Execute extensions in Java and Node
@@ -22,4 +22,4 @@ The read/2 compiler omits the 16-declared-error limit already enforced by its sc
 
 Bounded follow-up to [generic hook contracts](generic-hook-capability-contract.md). The manager owns planning; this fix runs independently of demo UX and real-task scenario design.
 
-Implementation at 878e6c9 passes independent result review: 233 Maven tests, 391 Node tests and shared/packaged conformance preserve exact reference artifacts. The manager integrated the reviewed files on main. Hosted delivery verification and recoverable cleanup remain before closing this feature; no runtime-authority or profile limit was weakened.
+Implementation at 878e6c9 passes independent result review: 233 Maven tests, 391 Node tests and shared/packaged conformance preserve exact reference artifacts. Main integration fb48d7a retains the reviewed files; [product CI](https://github.com/rore/keir-core/actions/runs/41845245471) and [workflow CI](https://github.com/rore/keir-core/actions/runs/41845244950) pass. Recovery archive integrity/restore and task-only cleanup are verified, and completed participation is detached. No runtime-authority or profile limit was weakened.
