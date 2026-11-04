@@ -1,7 +1,7 @@
 ---
 id: "demo-task-integration"
 title: "Run a real single-effect extension after task completion"
-status: "blocked"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -14,7 +14,7 @@ Connect an explicitly admitted scalar extension to native TaskCompleted events a
 
 Current priority: replace the invented task-advice demonstration with recognizable task-management customization, beginning with completion-driven task creation. Connect the reviewed native foundation, core real-effect admission and actual Studio journey. Later generic operations should follow actual task-model needs. Preserve existing customer data/history during the transition; do not merely rename advice or claim planned behavior works.
 
-**Current assignment — hold:** Real-task implementation, acceptance and rollout are held by the user's request for a base-design/guiding-principle audit. The architect owns concrete deviations and correction planning; manager will reconcile scope before resumption. Preserve the native foundation, uncommitted integration work, packages, test evidence and all user data. Earlier technical approvals/releases do not override the hold; no existing read approval becomes write authority.
+**Current assignment — corrective planning:** The user approved the base-design audit and requested the necessary changes. The developer's first bounded step is a read-only map of held candidate state, redundant deployment gates, retained native/lifecycle authority and preservation/reader choices, feeding the corrected contract. Code changes, acceptance and rollout resume only under the reviewed corrected plan. Preserve the native foundation, uncommitted work, packages, test evidence and user data; no existing read approval becomes write authority. Core correction is tracked separately under [host-contract alignment](../../.agent-workflow/tasks/host-contract-alignment.md).
 
 ## In Scope
 
