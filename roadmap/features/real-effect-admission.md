@@ -12,7 +12,7 @@ repo: "keir-core"
 
 Establish the reviewed contract and executable evidence needed to admit a real single WRITE. Current effect/2 is intentionally SIMULATION_ONLY.
 
-**Current assignment — corrective planning:** The user approved the [audit](../../docs/internal/real-application-design-audit.md) and requested the necessary changes. The [corrective work record](../../.agent-workflow/tasks/host-contract-alignment.md) owns the exact generic contract, consumer/state inventory, compatibility choice and subsequent reviewed core correction. Architect and developer offers cover disjoint design/inventory work; earlier implementation is not resumed. Preserve host guarantees and prior measured evidence while removing prescribed core deployment-report/build gates. Source release follows the concrete corrected plan and baseline-alignment review.
+**Current assignment — corrective planning:** The user approved the [audit](../../docs/internal/real-application-design-audit.md) and requested the necessary changes. The [corrective work record](../../.agent-workflow/tasks/host-contract-alignment.md) owns the exact generic contract, consumer/state inventory, compatibility choice and subsequent reviewed core correction. Inventories are complete. The simplified bind/prepare/run proposal is in independent plan review; developers have bounded offers for final exact implementation/test plans. Earlier implementation is not resumed. Preserve host guarantees and prior measured evidence while removing prescribed core deployment-report/build gates. Source release follows the concrete corrected plan and baseline-alignment review.
 
 ## In Scope
 

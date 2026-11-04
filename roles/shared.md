@@ -5,6 +5,7 @@ Load only your selected role and this guide at role entry. For assignments, read
 ## Simplicity
 
 - Choose the simplest architecture, code and process satisfying current requirements. Reuse existing/standard capabilities. Justify extra layers, abstractions, dependencies or infrastructure with a concrete need.
+- Start from the smallest end-to-end host example. For each added public input, callback, abstraction or service, identify the current requirement, why existing DCM/artifact/host code cannot satisfy it, and the concrete failure prevented. Remove unjustified additions; existing code/tests, consistency and hypothetical use do not suffice. Independent plan/result review checks actual signatures and call sites and records a short verdict in the owning Work Record. Keep compatibility machinery outside the normal host API.
 - Find opportunities to remove complexity and improve architecture/testability while developing. Make small relevant refactors with behavior checks. Report larger opportunities with target, proposed change and testing benefit; do not silently expand scope. Manager records them in the owning feature or roadmap idea and schedules follow-up. Chat-only notes are insufficient.
 - Preserve required behavior, correctness, security, host guarantees and meaningful verification.
 
