@@ -1,7 +1,7 @@
 ---
 id: "extension-approval-lifecycle"
 title: "Review, activate, disable and roll back exact extension revisions"
-status: "blocked"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -10,9 +10,9 @@ repo: "keir-demo-app"
 
 ## Summary
 
-**Hold:** The real-task lifecycle iteration is held for the user-directed base-design audit. Preserve exact revisions, approvals, selections, historical receipts and current user data; no new implementation, acceptance or rollout proceeds before corrected scope is reconciled.
+**Current assignment:** Real-task lifecycle implementation and verification resume under the reviewed host-contract correction. Preserve exact revisions, independent examples, separate approval/use, captured admissions, permanent revocation and historical receipts. The candidate must pass actual effect/4 runtime/browser and business-persona acceptance before normal rollout; old approvals never become write authority.
 
-Provide a manual source-to-simulation-to-approval-to-activation workflow before adding an AI author.
+Let a business user understand checked examples, approve an exact customization and separately turn it on, with later disable/restore and retained history. The demo authors through agent chat; manual source examples belong in core.
 
 Backend lifecycle work can proceed independently; its customer-facing UI follows the reviewed [Extension Studio design](extension-studio-design.md), including clear draft/active identities, approval invalidation and recoverable navigation.
 
