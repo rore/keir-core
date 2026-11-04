@@ -10,7 +10,7 @@ repo: "keir-demo-app"
 
 ## Summary
 
-Current iteration: the approved database upgrade is verified on the normal demo. An uninterrupted real-provider journey now covers fresh creation, clarification, actual compilation and four checked examples, exact approval, separate activation and observed results on saved tasks. Further business-persona trials and fixes are active, including naming, example relevance and ordinary revision usability. The second provider remains unqualified.
+Current iteration: [the usability correction](https://github.com/rore/keir-demo-app/commit/b4b0db646b17ab3fd0fc15db6966600b8c563039) is delivered on the preserved local demo. Independent real-AI business-persona and designer rechecks pass creation, naming, five checked examples, exact approval, separate switching, native Pending/Done and returning to saved work. Visible settings recovery preserves rejected text and makes no automatic call. [Combined CI](https://github.com/rore/keir-demo-app/actions/runs/41781837295) passes 199 fast tests and 105 browser cases. An ordinary-edit work-limit failure has a reviewed per-message policy proposal awaiting an exact human decision; current guards are unchanged. The second provider remains unqualified.
 
 Deliver the in-app AI-driven extension creation UI on top of the manual exact-revision review/activation flow. This is part of the complete demo; the customer need not write IR. The person running the app supplies their own AI provider configuration and credentials.
 

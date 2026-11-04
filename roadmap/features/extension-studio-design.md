@@ -10,7 +10,7 @@ repo: "keir-demo-app"
 
 ## Summary
 
-Current iteration: the real AI-driven journey is under task-based business-user review on the upgraded demo. The first complete journey worked, but exposed sentence-length saved names, a less relevant foregrounded example and policy-like explanations. The designer and developer are iterating on the actual interaction, including changes of mind and returning to saved work; fresh human visual acceptance remains open.
+Current iteration: real business-user trials drove [the delivered usability correction](https://github.com/rore/keir-demo-app/commit/b4b0db646b17ab3fd0fc15db6966600b8c563039): optional short names, a relevant example first, grouped Details, a compact responsive header, clearer current-versus-proposed wording and visible returning-user recovery. A fresh real-AI business-persona trial and designer desktop/phone/short-window recheck pass with no essential UI correction remaining; [combined CI](https://github.com/rore/keir-demo-app/actions/runs/41781837295) passes 199 fast tests and 105 browser cases. Human visual acceptance remains open. The normal-edit work-limit policy is a separate reviewed decision and remains unchanged pending approval.
 
 The Extension Studio is the centerpiece of the demo. Maintain the accepted working design baseline and refine each workflow's product, interaction and visual design as real functionality is implemented.
 
