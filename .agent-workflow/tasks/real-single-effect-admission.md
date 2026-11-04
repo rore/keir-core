@@ -48,4 +48,4 @@ The manager accepts independent architecture approval for admission document blo
 
 ## Implementation
 
-The small compiler parity fix is integrated with passing hosted CI. The core developer's next bounded offer is effect/3 source-impact discovery and concrete plan; no production code release yet. The demo developer owns native-host foundation discovery and the designer's real-task interaction handoff remains an input to eventual Studio wiring.
+The small compiler parity fix is integrated with passing hosted CI and verified cleanup. The core developer accepted effect/3 source-impact discovery and concrete planning in a separate isolated checkout, with exact feature participation verified; no production code release yet. The demo developer owns native-host foundation discovery and the designer's real-task interaction handoff remains an input to eventual Studio wiring.
