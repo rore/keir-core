@@ -4,6 +4,8 @@ This is the single roadmap for `keir-core` and `keir-demo-app`: delivered featur
 
 Current focus is the user-approved correction of the real-application design. The [published audit](../docs/internal/real-application-design-audit.md) guides the [corrective core work](../.agent-workflow/tasks/host-contract-alignment.md): exact generic binding/current-authority contract, real consumer/state inventory, explicit minimal compatibility choice, then reviewed core and demo changes. Retain host-certified guarantees, semantic pins, keys, current permission and honest outcomes; remove prescribed deployment-certification mechanisms. Superseded implementation/rollout stays held until the concrete corrected plan is released. Preserve source, evidence and user data. Unassigned follow-ups remain queued.
 
+After those corrections, continue the original real-task Studio delivery: actual authoring/checking/approval/activation, native task results and repeated nontechnical-user UX testing, then update the existing local demo with verified preservation. The user has authorized that continuation; the manager advances it through the existing review and test gates.
+
 ## Tracking progress
 
 - **Milestones describe outcomes; features own delivery.** Board order expresses priority; cards name actual dependencies. Milestones are not serial gates: native app work, tooling and experimental packaging may proceed independently.
