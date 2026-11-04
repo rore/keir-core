@@ -5,6 +5,7 @@
 - single-effect-followup
 - generic-hook-capability-contract
 - declared-error-limit-parity
+- model-json-bom-parity
 - native-task-app
 - real-task-reads
 - real-effect-admission
