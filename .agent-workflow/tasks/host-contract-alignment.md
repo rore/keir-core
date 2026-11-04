@@ -39,7 +39,7 @@ Owning feature: [Real-effect admission](../../roadmap/features/real-effect-admis
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Coordination
@@ -97,3 +97,10 @@ The assigned core developer explicitly accepted the source release and resumed i
 ## First source and focused-verification milestone
 
 Developer-reported in the released isolated checkout: compiler effect/4 support and four deterministic fixture variants are ready; GenericHookCompilerTest passes 16 tests; the Java corrected public API compiles; Node two-argument binding/preparation and fresh call context are implemented, with 39 focused legacy checks passing. Manager inspected the evolving compiler/runtime source path set and the corresponding demo stable-context/native-preservation changes. These are partial implementation checks, not shared new-profile conformance or package/result acceptance. New Node/Java public-API tests, independent shared outcomes, examples/scenarios, source/installed parity, package evidence and independent result/simplicity review remain. No committed correction or package handoff is claimed.
+## Frozen implementation and verification
+
+Corrected source is frozen at `e39b50b4cadb3584c8d5cee73e935eac977d5978`, based on reviewed release `e054f18`, with exactly 61 planned paths and a clean source checkout. Manager verified commit identity, parent and path count; all 25 frozen evidence files and 16,653,429 bytes match manifest SHA256 `9c013889118e572a4d5396073e0d30515927603cf61f61c0bac6770eb4acc19a`. The source bundle verifies against its named parent; it is not a self-contained cleanup archive.
+
+Reported final verification passes 271 Java tests (66 compiler, 172 runtime, 33 host; no failures/errors/skips; 28.134 seconds) and 454 Node tests (no failures/skips; 4.836 seconds; 100% lines, 98.30% branches). Source/installed replay passes the same 14 new Node API tests and four installed-host tests. Shared verification covers preserved profiles plus 11 effect4 scenarios, 25 new full protocol cases, 30 compiler processes and 12 packaged-host batches. Local/loopback checks cover each language and source/installed or packaged execution. The example mismatch ledger was repaired so ADAPTER_EXCEPTION cannot conceal corrupt fixture expectations. Separate read simulation/schema checks pass. These results remain subject to independent technical and simplicity review.
+
+Frozen package SHA256 values: Node `da779207d870f53d10ece3b66dc9b0adf735698ad410be9241ca60189cd46c55`; compiler CLI `64cd2507ed3bde34b99b14b1db16c9c0cfbf1bbd74f4cb7cd55ea213f2f60608`; Java runtime `ae0d17816602e89f40580e82d28bd60dfd82abcc8c8cfc245d6d9231c79a5673`; packaged host `b44170d99c7849d67da827a6894b9a76fd426d6d4bd310c8b6d69de268f2e39c`. Evidence verifies eight Node files across committed/source/archive/installed bytes and all 48 runtime plus 16 host classes, excluding compiler/parser dependencies. No integration, hosted CI, native demo execution or actual-provider acceptance is claimed. Independent result review is assigned against this exact freeze; manager retains integration and verified demo handoff.
