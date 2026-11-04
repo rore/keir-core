@@ -20,6 +20,7 @@ Backend lifecycle work can proceed independently; its customer-facing UI follows
 - Choose trustworthy selection storage or signing from an explicit threat model; content hashes alone are not authority.
 - Add scoped active selection, disable/revoke, rollback for new invocations and retention of approved dependencies/in-flight selections.
 - Keep sources, scenarios, approvals and active bindings isolated per demo user. Show the same hook with different customizations for two users; disabling or rolling back one user's binding must leave the other's behavior intact.
+- Let users delete unwanted customizations through an explicit confirmation, turning off the selected item while retaining audit and spending records.
 
 ## Out of Scope
 
@@ -30,8 +31,11 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 - [ ] Design/spec: define approval authority, invalidation/reapproval and lifecycle behavior, including selection versus event admission.
 - [x] Implementation: manually compile, simulate, inspect actual behavior, approve and activate an exact revision; disable and roll back it.
 - [x] Verification: tampering, unauthorized/cross-user approval or selection, edits after review, restart, revoked dependencies and old snapshot coexistence behave as specified. The owning demo user may approve their own extension where host policy permits; the agent cannot self-approve.
+- [ ] Customization deletion: confirmed removal, selected-item handling, owner isolation and protection against stale work or replay resurrecting the item.
 
 ## Notes
+
+**Current correction:** The user reports that customization deletion is missing. The [deletion Work Record](../../.agent-workflow/tasks/customization-deletion.md) owns the bounded lifecycle/API/UI correction, regression coverage and update of the normal demo. Planning is in progress; no deletion support is claimed yet.
 
 **Dependencies:** [real-task-reads](../features/real-task-reads.md); [reusable-simulation](../features/reusable-simulation.md).
 
