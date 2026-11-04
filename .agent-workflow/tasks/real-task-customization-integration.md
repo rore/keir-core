@@ -35,7 +35,7 @@ Owning feature: [Real task integration](../../roadmap/features/demo-task-integra
 
 **Plan review:** Manager accepts the bounded architect decisions and concrete developer plan, with the explicit demo-owned public-API simulation adapter closing the package-export gap. Independent clean-context implementation-plan review is requested; code remains unreleased. Accepted foundation, core contract and generic UI reviews are reused only within their exact scope.
 
-**Approvals:** User directs real task-management customization, simple actual Studio usage, thorough persona testing and continued parallel progress. Ordinary chat is used for any genuinely uncovered approval; existing authorization does not bypass qualification or preservation gates.
+**Approvals:** Exact user instructions include: 'also, we should get read of the "advice" thing.' and 'we should align to a proper task management capabilities and scenarios, not some invented thing no one understands'. Earlier: 'we said this should be a customization studio for creating extension, not a "task advice"'. Continued implementation authority includes: 'blanket approval to do all that is needed is given'. The manager applies these to retiring the invented advice customer execution/mutation path while preserving historical source/evidence/original operation recovery, safe Stop/disable/delete, accounting and native tasks. They do not authorize converting old approval into writes or bypassing qualification/preservation gates. Ordinary chat remains available for genuinely uncovered scope.
 
 **Exceptions:** —
 
@@ -47,6 +47,8 @@ Owning feature: [Real task integration](../../roadmap/features/demo-task-integra
 This owns the visible real-task outcome after the separately delivered foundations. The developer accepted bounded discovery in a new isolated checkout at f02932b and is mapping concrete integration paths. Targeted architect consultation is underway on qualification distribution and remaining interface decisions. Source implementation remains unreleased. The reviewed native foundation and UI correction remain pinned, and the normal demo is unchanged during planning.
 
 Concrete developer planning is complete at clean f02932bed14980e05d6843cbfff5370b247f3258. Manager verified the frozen plan SHA256 9c45fbdad9a0f206dfa52f9a2d40db87adaefbfb3084e31d5bb84b72cc2ada21 and inspected affected package, catalog/compiler, native binding/dispatch, lifecycle/proof, authoring, web, retirement and setup seams. The accepted decisions below supersede questions still marked pending in that frozen packet. The effect-simulation harness belongs to the demo for this increment and must use supported public runtime APIs; no expansion of the separately released core delivery is required. Exact delivered package pins remain a verification prerequisite, not an excuse to invent an export. Independent review now covers this reconciled plan, risk, preservation, test adequacy and proportionality before source release.
+
+The developer's unchanged interface addendum SHA256 0ef0d8d1f2e830aa17b52874c6942b3adf6bd2b3ec6bd6decfa48eb0d081d837 matches the accepted qualification, definition-selection, per-event key, retirement/recovery and bounded-dispatch decisions. Manager inspected it and supplied it to the same independent reviewer. Its pending package question is superseded by the explicit demo-owned simulation adapter choice above; it creates no additional implementation or approval gate.
 
 ## Accepted integration decisions
 
