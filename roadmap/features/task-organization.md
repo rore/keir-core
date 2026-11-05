@@ -1,7 +1,7 @@
 ---
 id: "task-organization"
 title: "Organize tasks with tags, priority, due dates and search"
-status: "queued"
+status: "active"
 priority: "medium"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -29,6 +29,8 @@ Calendars, notifications, recurring scheduling, shared accounts and Keir-specifi
 - [ ] Verification: persistence/UI tests cover search boundaries, absent dates, updates and validation without adding background scheduling.
 
 ## Notes
+
+**First slice:** Design native tags and bounded task search. Define task ownership, query completeness and pagination before implementation. Studio capability exposure is tracked under [richer customizations](rich-task-customizations.md).
 
 **Dependencies:** [native-task-app](../features/native-task-app.md).
 
