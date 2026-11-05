@@ -37,19 +37,19 @@ Design reference: [Review inside the conversation](../../docs/internal/studio-in
 - Exercise stale, missing, failed and historical evidence; another active version; interrupted and duplicate actions. Assert that chat and opening evidence do not approve, activate or rerun checks.
 - Preserve earlier results and typed text through reload and later conversation turns. Use independent technical and rendered reviews, revise concrete findings and recheck the working app before normal preview delivery.
 
-**Plan review:** Agent technical review: [Conditional client plan review](#conditional-client-plan-review). The exact-proof activation addendum needs independent review.
+**Plan review:** Agent technical review: [Client plan and exact-proof activation review](#client-plan-and-exact-proof-activation-review). Both reviewed plans passed.
 
 **Approvals:** Approved to integrate the reviewed in-conversation design in Daymark. Existing approval and activation requirements remain in force for each customization.
 
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Delivery
 
 The user approved moving the reviewed design into the working demo. The Daymark developer accepted implementation ownership and verified the clean base at `36ade85`. The split preview remains the deployed baseline.
 
-## Conditional client plan review
+## Client plan and exact-proof activation review
 
 The independent reviewer checked the client plan at SHA-256 `876bab48fa3fbbaad831901799a94030950280e10f62ac6e8beb8c81a43b8ca8`. It passes with a fresh owner-bound state read after loading the saved evidence and source. That read must be independent of active-version comparison. Scroll and focus intent are separate from decision freshness.
 
-Turn-on must use the evidence the person saw. The current host can replace passing approval evidence for the same revision without changing the selection generation. A client read cannot prevent that race. Prepare and independently review a narrow activation precondition that compares the displayed approved evidence ID inside the existing transaction and rejects a mismatch before selection changes. Preserve the current authorization, revision, draft, suite and generation checks. Show that an intervening approval causes a conflict and leaves the prior selection intact. This addendum must pass before implementing the decision path. Keep the remaining client design and validation scope.
+The current host can replace passing approval evidence for the same revision without changing the selection generation. The developer reproduced the race with two passing proofs. The reviewed addendum at SHA-256 `b6a69b61411eb0caff97fc52dd9a60f7f8c291b32289591e7840064e7fdcd111` requires Studio to send its reviewed evidence ID on activation. Daymark compares it to the approved ID inside the existing transaction and rejects a mismatch before selection or history writes. Preserve authorization, revision, draft, suite, generation and uncertain-response recovery. Test an intervening approval, explicit turn-on with the matching proof, and a committed response lost in transit. Deploy matching web and server assets together because older cached clients omit the new required field.
