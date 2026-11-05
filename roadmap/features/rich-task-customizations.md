@@ -12,6 +12,8 @@ repo: "keir-demo-app"
 
 Use the newly qualified language features and ordinary task services for the baseline invoice follow-up scenario.
 
+The first increment exposes the completed task's title for copying and exact matching while existing rules keep their pinned model. A fixed suffix becomes available after the [Keir expression update](enrich-followup-expressions.md). [Implementation record](../../.agent-workflow/tasks/daymark-title-aware-task-customizations.md).
+
 ## In Scope
 
 - Publish an explicitly revised generic catalog for bounded search and the selected task fields; project/title remain customer-authored.
