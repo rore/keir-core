@@ -30,7 +30,7 @@ Calendars, notifications, recurring scheduling, shared accounts and Keir-specifi
 
 ## Notes
 
-**First slice in implementation:** Native task tags and bounded search within the selected project. The [reviewed plan](../../.agent-workflow/tasks/daymark-native-tags-search.md) defines owner scope, live pagination, migration and recovery checks. Studio capability exposure is tracked under [richer customizations](rich-task-customizations.md).
+**First slice delivered:** Native task tags and bounded search within the selected project are on [Daymark main](https://github.com/rore/keir-demo-app/commit/9c36f0b34b4863f6bd673586cd30f0457365754c) and running in the verified demo. Tags and search work without AI or extensions. The [Work Record](../../.agent-workflow/tasks/daymark-native-tags-search.md) records browser and migration evidence. Priority, due dates and broader organization work remain open. Studio capability exposure is tracked under [richer customizations](rich-task-customizations.md).
 
 **Dependencies:** [native-task-app](../features/native-task-app.md).
 
