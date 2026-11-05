@@ -1,5 +1,7 @@
 package dev.keir.runtime;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -74,6 +76,39 @@ class BoundEffectRuntimeTest {
             assertEquals(List.of("READ","WRITE"),calls);
             assertTrue(result.trace().size()<=64);
         }
+    }
+
+    @Test void effect4StructuralArtifactRequiresNativePreparation() throws Exception {
+        Path fixtures=Path.of("..","conformance","effect4-structural");
+        byte[] bytes=Files.readAllBytes(fixtures.resolve("artifact-handler.json"));
+        assertEquals(Files.readString(fixtures.resolve("artifact-handler.sha256")).trim(),digest(bytes));
+        var calls=new ArrayList<String>();
+        var bound=bind(implementations("simulation",(a,h,ms,c)->{
+            calls.add("tasks.get"); return done(effectRead("COMPLETED"));
+        },(a,h,ms,c)->{
+            calls.add("tasks.create"); return done(Map.of("kind","BUSINESS_REJECTION","code","CREATE_REJECTED","effect","NONE"));
+        }));
+        for (Object value:list(parseJson(Files.readAllBytes(fixtures.resolve("residuals.json")),Profile.ARTIFACT_BYTES),"")) {
+            var row=map(value,"");
+            var artifact=document(bytes);
+            var path=list(row.get("path"),"");
+            Object target=artifact;
+            for (Object part:path.subList(0,path.size()-1)) {
+                target=part instanceof Number index ? list(target,"").get(index.intValue()) : map(target,"").get(part);
+            }
+            map(target,"").put((String)path.getLast(),row.get("value"));
+            denied(KeirRuntime.prepareProgram(canonical(artifact),bound),"ARTIFACT_INVALID",(String)row.get("javaPath"));
+            assertTrue(calls.isEmpty(),(String)row.get("id"));
+        }
+        var prepared=KeirRuntime.prepareProgram(bytes,bound);
+        assertTrue(prepared.succeeded(),()->String.valueOf(prepared.diagnostic()));
+        assertTrue(calls.isEmpty());
+        var outcome=invoke(prepared.prepared(),true);
+        assertEquals("BUSINESS_REJECTION",outcome.classification());
+        error(outcome,"CREATE_REJECTED","/steps/3");
+        assertEquals(Map.of("status","NO_OP"),outcome.result());
+        assertEquals(List.of("tasks.get","tasks.create"),calls);
+        receipt(outcome,"NONE");
     }
 
     @Test void completeCatalogRequiresExactCompatibleRegistrationsIncludingUnusedCapabilities() throws Exception {

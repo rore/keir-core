@@ -1,0 +1,23 @@
+[
+  {
+    "id": "guard-is-not-a-prior-boolean-bind",
+    "path": ["steps", 3, "when"],
+    "value": "missing",
+    "javaPath": "/artifact/steps/3/when",
+    "nodePath": "/artifact/steps/3/when"
+  },
+  {
+    "id": "handler-error-is-not-declared",
+    "path": ["steps", 3, "onError"],
+    "value": {"NOT_DECLARED": {"type": "FollowupResult", "fields": {"status": {"type": "FollowupStatus", "literal": "NO_OP"}}}},
+    "javaPath": "/artifact/steps/3/onError/NOT_DECLARED",
+    "nodePath": "/artifact/steps/3/onError"
+  },
+  {
+    "id": "checked-expression-is-not-valid-protobuf",
+    "path": ["expressions", "e0", "checked"],
+    "value": "/w==",
+    "javaPath": "/artifact/expressions",
+    "nodePath": "/artifact"
+  }
+]

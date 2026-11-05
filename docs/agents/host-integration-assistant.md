@@ -2,7 +2,7 @@
 
 **Status:** initial assistant guidance over read profiles and corrected host-bound `/4` single-write semantics. Host-integrated discovery, approval and activation tools remain host work. `/1`–`/3` retain their legacy requirements. Read the [agent overview](README.md) and [specification status](../specs/README.md).
 
-For decoded read/2 structural checks, use the shared [schema index](../../schemas/read-2/README.md); schema success does not grant host approval or execution authority.
+Use the schema for the host-selected profile when checking decoded values. Schema success establishes structure only. Host approval and execution authority still apply. [Read/2 schemas](../../schemas/read-2/README.md) · [Effect/4 schemas](../../schemas/effect-4/README.md)
 
 ## Task and inputs
 
