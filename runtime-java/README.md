@@ -1,10 +1,26 @@
 # Java runtime
 
+## Current host-bound profile
+
+Use these `KeirRuntime` entry points for `keir-effect/4`:
+
+1. Call `bindModel(dcmBytes, implementations)` with the exact host-selected model and one `BoundEffectAdapter` per capability. All registrations use the same mode and match the catalog's capability versions and native key type.
+2. Verify the selected artifact against a trusted digest in host code, then call `prepareProgram(artifactBytes, boundModel)`. Check `succeeded()` on both binding and preparation before using their handles.
+3. Call `invokeBoundEffectProgram(prepared, businessInput, new BoundEffectInvocation(bindings, deadline, requestKey, event))` to get a `CompletionStage<Outcome>`. Supply fresh context for every invocation. The host implementations check current permissions and authenticate the original key.
+
+See the [runnable quickstart](../docs/quickstart.md), [exact adapter and deadline types](../docs/specs/host-model-binding.md#corrected-host-bound-4-binding) and [verification evidence](../docs/testing.md#effect4-verification).
+
+## Legacy /2 APIs
+
 The explicit `/2` APIs bind a complete host-approved catalog once, then prepare reference-only programs against that immutable binding. Call `KeirRuntime.bindModel(dcmBytes, approval, invokers)` and check its `ModelBinding` before using `boundModel()`. Approval supplies the exact model reference, scope, profile, environment and mode; effect approval also supplies the typed `KeyBinding`. Register every catalog capability, including unused or policy-denied operations. Binding snapshots metadata and callable references without invoking them.
 
 Call `prepareProgram(artifactBytes, boundModel, admission)` with independent artifact/model pins, entrypoint, consumer, compiler, environment and mode. It directly validates the `/2` envelope and checked plan against reusable model descriptors. Optional `capabilityPolicy` and limits only narrow the hook; omitted effect ceilings inherit the default maximum of one potential WRITE. `/2` admission forbids legacy `grants` and preparation-time invokers or key bindings.
 
-For fresh execution, use `invokeProgram` with `Invocation2` for read/2, or `invokeEffectProgram` with `EffectInvocation2` for effect/2. Supply matching scope, current protected bindings, deadline, authorizer and `Optional.empty()` for an omitted policy. Effects additionally require the original native key, event and `OptionalLong.empty()` to inherit the admitted effect ceiling. Null Optional objects are invalid. The new and legacy invocation methods reject handles from the other profile generation. The existing execution engine retains authorization, limits and honest response/timeout receipts. The [generic host](../examples/java-host/README.md) uses the six shared compiler artifacts; combined Java/Node acceptance remains an integration check.
+For fresh execution, use `invokeProgram` with `Invocation2` for read/2, or `invokeEffectProgram` with `EffectInvocation2` for effect/2. Supply matching scope, current protected bindings, deadline, authorizer and `Optional.empty()` for an omitted policy. Effects additionally require the original native key, event and `OptionalLong.empty()` to inherit the admitted effect ceiling. Null Optional objects are invalid. Invocation methods reject handles from the other profile generation. The execution engine retains authorization, limits and response/timeout receipts.
+
+The [legacy /3 qualification protocol](../docs/specs/real-single-effect-admission.md) extends the legacy binding flow for `keir-effect/3`.
+
+## Legacy /1 APIs
 
 `keir-runtime-java` executes the shared `keir-read/1` artifact with JDK 21 and CEL Java 0.14.0. It has no dependency on the Keir compiler, CEL compiler/parser, ANTLR or YAML. Compilation belongs outside execution; see the independent [Java host](../examples/java-host/README.md) for a packaged simulation.
 
@@ -30,6 +46,8 @@ An effect outcome always adds immutable `effects()` / `effects` containing zero 
 
 Business rejection is terminal. A matching typed handler may add a result while retaining BUSINESS_REJECTION and its original error. Handler failure adds that rejection as the nonrecursive `error.cause`. False guards skip arguments, per-call authorization and dispatch. Trace reservation prevents writes unless intent, dispatch, settlement, possible success and termination can all fit.
 
+## Verification
+
 Async authorization and adapter waits have finite native timeouts even when an injected logical clock stays stationary. Expiry checks run on independent daemon workers so a blocking host clock does not occupy the shared scheduler; that clock can still retain its own worker/invocation. Expired or regressing clocks stop later work, and late completions are ignored. Synchronous CEL and synchronous host callbacks cannot be preempted. Checked-AST/data ceilings and before/after clock checks do not establish hard execution deadlines, CPU gas equivalence, memory isolation or production tenant containment. Stopping the wait does not cancel underlying host I/O.
 
 From the repository root, in a disposable PowerShell process with project-local caches:
@@ -52,6 +70,6 @@ Checkpoint verification on 2026-10-29: the canonical offline clean coverage buil
 
 Coverage review includes authority, callback failure and timeout paths. Uncovered paths include defensive checks behind preparation invariants, CEL planner/evaluator exception handling and native timeout rearming beyond a 2,147,483,647 ms chunk. Long-duration timer behavior and hard synchronous interruption remain unqualified; these measurements are regression evidence, not containment guarantees.
 
-Effect module checkpoint on 2026-10-30: 95 runtime tests passed independent offline clean coverage verification in 23.05 seconds, preserving all 56 existing read tests. Coverage is 869/875 lines and 808/939 branches. Tests execute the pinned primary artifact and load Node's same compiled handler-output fixture through existing test resources, including exact 8,192-byte success and 8,193-byte rejection with NONE and the original cause retained. They cover native key identity, separate key-label namespaces, prepared reuse, admission/authority rejection, false guards, terminal handlers, trace reservation, winning response evidence before invalid/expired clocks, timeout-first late responses and outer-envelope mutation. Shared effect scenarios, EVENT_REPORT host consumption and packaged effect hosts remain separate acceptance work.
+Effect module checkpoint on 2026-10-30: 95 runtime tests passed independent offline clean coverage verification in 23.05 seconds, preserving all 56 existing read tests. Coverage is 869/875 lines and 808/939 branches. Tests execute the pinned primary artifact and load Node's same compiled handler-output fixture through existing test resources, including exact 8,192-byte success and 8,193-byte rejection with NONE and the original cause retained. They cover native key identity, separate key-label namespaces, prepared reuse, admission/authority rejection, false guards, terminal handlers, trace reservation, winning response evidence before invalid/expired clocks, timeout-first late responses and outer-envelope mutation.
 
 See the [compiler build notes](../compiler-java/README.md) for pinned tooling and POSIX cache isolation.

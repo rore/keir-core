@@ -1,10 +1,14 @@
 # Java compiler
 
-Java library and standalone CLI for the [`keir-read/1` profile](../docs/specs/language.md) and compiler support for [`keir-effect/1`](../docs/specs/single-effect.md). It validates strict JSON/YAML source against a host-selected DCM, checks grants, dataflow and nominal/enum types, compiles real CEL-Java checked expressions, and emits one canonical portable artifact or safe diagnostics.
+The Java library and standalone CLI compile strict JSON/YAML source against a host-selected DCM. For `keir-effect/4`, use `new KeirCompiler().compile(sourceBytes, trustedDcmBytes, KeirCompiler.Environment.effect4())` or pass `--profile=keir-effect/4` after the CLI's source and DCM file arguments. The compiler accepts `keir-dcm/effect-4` and emits a `keir-artifact/effect-4` artifact referencing that exact model. The [quickstart](../docs/quickstart.md) shows the build, compilation and execution in both hosts.
+
+## Legacy profile selection
+
+The [`keir-read/1` profile](../docs/specs/language.md) remains the default. Select [`keir-effect/1`](../docs/specs/single-effect.md) explicitly with `KeirCompiler.Environment.effect()` or `--profile=keir-effect/1`. The legacy `keir-effect/3` profile uses `KeirCompiler.Environment.effect3()` or `--profile=keir-effect/3`.
 
 The explicit [`/2` profiles](../docs/specs/generic-hook-capability-contract.md) add optional narrowing `capabilityPolicy`, an omitted effect ceiling of one, and authored nominal String literals such as `{literal: project1, type: ProjectId}`. Select `Environment.read2()` or `Environment.effect2()` in Java, or pass exactly `--profile=keir-read/2` or `--profile=keir-effect/2` to the CLI. These require the corresponding `keir-dcm/read-2` or `keir-dcm/effect-2` model and emit reference-only artifacts containing the exact `modelRef` and `keir-record-descriptors/1` recipe. The trusted model is still required at compilation; runtime model binding and execution are separate checks. Compiler-derived reference programs and variants live under [`conformance/generic-hooks`](../conformance/generic-hooks/).
 
-Compilation does not approve activation, authenticate its own output, or certify host guarantees. Java/Node runtime conformance remains a separate checkpoint. Start with the [first milestone](../roadmap/board.md).
+## Build and run
 
 The build scaffold uses JDK 21, Maven 3.10.0 through the repository wrapper, and Maven Compiler Plugin 3.14.1 with `release=21`. These versions are documented by [Apache Maven](https://maven.apache.org/download.cgi) and the [compiler plugin](https://maven.apache.org/plugins-archives/maven-compiler-plugin-3.14.1/plugin-info.html). The `dev.keir` Maven coordinates are local development coordinates; release coordinates remain undecided.
 
@@ -23,11 +27,9 @@ MAVEN_USER_HOME="$PWD/.tools/maven" ./mvnw -Dmaven.repo.local=.tools/maven/repos
 
 Omit `-pl compiler-java -am` to build all Java modules. The wrapper downloads its pinned, checksum-verified Maven distribution; these commands keep its cache and dependencies under ignored `.tools/` without a global Maven installation.
 
-The normal module jar exposes `KeirCompiler.compile(sourceBytes, trustedDcmBytes, Environment.supported())`. Its result contains either immutable artifact bytes plus their SHA-256, or an ordered diagnostic list with no artifact. The caller owns finite compilation time/concurrency budgets. Dependency pins are CEL-Java `0.14.0`, protobuf-java `4.35.1`, Jackson Core `2.19.2` and SnakeYAML `2.4`; the supported environment also pins the qualified Node CEL/protobuf versions for later artifact admission. Unsupported environment/profile selections fail closed.
+The compiler returns artifact bytes and their SHA-256 on success, or an ordered diagnostic list on failure. The caller owns finite compilation time and concurrency budgets. The host separately verifies and approves the selected artifact before activation. Dependency pins are CEL-Java `0.14.0`, protobuf-java `4.35.1`, Jackson Core `2.19.2` and SnakeYAML `2.4`. The selected environment also pins the Node CEL/protobuf versions for later artifact admission. Unsupported environment/profile selections fail closed.
 
-Explicitly select the effect compiler with `KeirCompiler.Environment.effect()`. It requires `keir-dcm/effect-1` and emits `keir-artifact/effect-1`; source stays `keir/v0`. The compiler never infers this selection from source or DCM content. The original API and two-argument CLI continue selecting only the read profile, with unchanged golden bytes.
-
-Packaging also creates `target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar`, containing its dependencies. From the repository root, the CLI accepts exactly two file arguments and writes canonical artifact bytes to stdout only on success; failures write safe JSON diagnostics to stderr and return nonzero. Input reads stop at the raw-byte ceiling. It spawns no children; a host launching it must bound output, wall time and concurrency, terminate/reap the process on cancellation, and preserve stdout as bytes.
+Packaging also creates `target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar` with its dependencies. The CLI takes two file arguments in order (source, DCM) and an optional named third argument `--profile=PROFILE`. Without the selector, the CLI uses `keir-read/1`. On success it writes canonical artifact bytes to stdout. On failure it writes safe JSON diagnostics to stderr and returns nonzero. Input reads stop at the raw-byte ceiling. The CLI spawns no children. A host launching the CLI must bound output, wall time and concurrency, terminate and reap the process on cancellation, and preserve stdout as bytes.
 
 For the legacy effect profile, add the exact named third argument `--profile=keir-effect/1`. After building the compiler, create the ignored `.tools/compiler-example` directory and run from the repository root:
 
