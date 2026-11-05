@@ -5,7 +5,7 @@ This is the single roadmap for `keir-core` and `keir-demo-app`: delivered featur
 The next release target is a production-ready public Keir Core with **at most one mutation per run**. The three tracks can proceed in parallel.
 
 - **Core.** Set the supported compiler and runtime surface, prove Java and Node parity, qualify resource and failure behavior, and verify clean consumption. The existing host-owned key and authority rules apply to the single mutation. Multi-mutation composition and its idempotency protocol follow this release.
-- **Daymark.** Show what the library enables through real tasks and understandable authoring. The immediate work restores one visible conversation per customization across model upgrades and draft changes.
+- **Daymark.** Show what the library enables through real tasks and understandable authoring. Daymark has one visible conversation per customization. The current work checks live authoring and review for rules that create a follow-up in the completed task’s project.
 - **Documentation.** Start with a human-readable binding and runtime quickstart using the current Java and Node interfaces and runnable examples. Continue with compatibility guidance, host responsibilities and public-readiness review for both repositories.
 
 The [public release card](features/public-package-release.md) owns the release checklist. Repository visibility and registry publication require separate authorization after the supported scope, license and publication prerequisites are reviewed.
