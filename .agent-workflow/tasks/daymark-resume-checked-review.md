@@ -31,7 +31,7 @@
 
 **Verification plan:** Reproduce the user journey with a controlled provider and real compilation and simulation. Continue the same conversation through an explanation and a request to proceed. Check the same saved revision and evidence are presented, with no new compile, simulation, approval, activation or task write. Include a stale or mismatched proof and exercise the existing browser review entry. Run a scoped live provider walkthrough on isolated data before preview rollout if the provider is available.
 
-**Plan review:** Independent technical review requested before implementation.
+**Plan review:** Independent architecture review accepted the plan. Keep the exact in-turn evidence checks. Resolve saved proof only when the in-turn handle is absent, from the owner and extension's current draft and latest evidence. Check the authored suite and current dependency identity through the lifecycle. Keep failed checks visible with approval disabled and return missing or stale evidence as a recoverable result. Recheck current draft identity after the read.
 
 **Approvals:** No additional approval required for isolated development.
 
@@ -40,4 +40,6 @@
 
 ## Progress
 
-Discovery is complete. Implementation awaits independent plan review. The separate in-chat design remains in discovery.
+Independent plan review is complete. The regression covers the same conversation through review, explanation and a request to proceed. Exercise missing, failed, foreign and stale proof, including replacement during the evidence read. The separate in-chat design remains in discovery.
+
+The developer reproduced the browser failure on `8345a174` using synthetic provider transport and the real compiler and simulator. Initial review and an explanation succeeded. The subsequent request to proceed reached `offer_review` and ended with `HOST_RESULT_INVALID`. The fix must pass that same browser journey before the running preview is updated.
