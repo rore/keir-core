@@ -1,7 +1,7 @@
 <a id="read-and-decide-dcm-contract"></a>
 # Domain capability model
 
-The domain capability model (DCM) is the host's contract for an extension. It describes which entrypoints the host exposes, the data they pass, and the operations an extension may call. This page specifies the model for the current single-write profile, `keir-effect/4`. The [DCM schema](../../schemas/effect-4/dcm.schema.json) checks decoded structure. The compiler and runtimes also check references, UTF-8 byte limits and the relationships between fields.
+The domain capability model (DCM) is the host's contract for an extension. It describes which entrypoints the host exposes, the data they pass, and the operations an extension may call. The [`keir-dcm/1` schema](../../schemas/dcm-1/dcm.schema.json) checks decoded structure. The compiler and runtimes also check references, UTF-8 byte limits and the relationships between fields.
 
 ## Model fields and identity
 
@@ -9,12 +9,11 @@ Every top-level field below is required. Objects are closed, with unique keys an
 
 | Field | Meaning |
 | --- | --- |
-| `format` | The literal `keir-dcm/effect-4`, the serialized model format for the current contract. |
+| `format` | The literal `keir-dcm/1`. |
 | `domain` | Exactly `{id, version}`. Both are nonempty strings. Together with the model's canonical digest they identify the snapshot used to compile and run an extension. |
 | `types` | One to 16 named business types, in addition to built-in `String` and `Boolean`. |
 | `capabilities` | Zero to eight named host operations. An empty catalog supports extensions that use only their input and local bindings. |
 | `entrypoints` | One to four named hooks that can run an extension. |
-| `assurance` | The literal `HOST_BOUND_SINGLE_WRITE` required by the current host binding contract. The host establishes the guarantees of its implementations. |
 | `hostKey` | Exactly `{source, type}`. The source is `requestKey`. The type is a nonempty label for the host's native key contract. |
 
 The [source document](language.md#source-document) names the domain ID, version and canonical digest. The [compiled artifact](compiler-artifact.md) references the exact model, including its format and descriptor recipe. The digest covers the complete DCM, including unused types and operations. Changing a model field changes the digest. To adopt the new model, recompile and select the new artifact. Existing artifacts continue to require the model they reference.
@@ -82,9 +81,9 @@ All IDs must exist in the catalog. Lists contain unique IDs. Each list or quota 
 
 ## Complete example
 
-The [TaskCompleted DCM](../../conformance/generic-hooks/effect4/dcm.json) is the complete model used by the shared follow-up example. `TaskCompletedInput` exposes only the completed task ID. `tasks.get` reads the task and `tasks.create` requests a follow-up. Both operations take a protected `actorId`. The customer selects the project and title in [the source](language.md#example-source), while the host supplies the actor, event and original request key. The model omits both policy fields, so the default limits apply.
+The [TaskCompleted DCM](../../conformance/keir-1/dcm.json) is the complete model used by the shared follow-up example. `TaskCompletedInput` exposes only the completed task ID. `tasks.get` reads the task and `tasks.create` requests a follow-up. Both operations take a protected `actorId`. The customer selects the project and title in [the source](language.md#example-source), while the host supplies the actor, event and original request key. The model omits both policy fields, so the default limits apply.
 
-The [structural tests](../../conformance/effect4-structural/test_effect4_contracts.py) check model, event and policy shapes. The [Java](../../runtime-java/src/test/java/dev/keir/runtime/BoundEffectRuntimeTest.java) and [Node.js](../../runtime-node/test/bound-effect.test.js) tests check exact model binding, catalog registrations, and call and write ceilings.
+The [structural checker](../../scripts/check-keir-contracts.py) checks the current fixtures against the schemas. The [Java](../../runtime-java/src/test/java/dev/keir/runtime/BoundEffectRuntimeTest.java) and [Node.js](../../runtime-node/test/bound-effect.test.js) tests check exact model binding, catalog registrations, and call and write ceilings.
 
 <a id="legacy-read1-model"></a>
 <a id="implementation-reference-original-read-only-model"></a>

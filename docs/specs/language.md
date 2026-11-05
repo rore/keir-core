@@ -3,7 +3,7 @@
 <a id="keir-ir-source-and-expressions"></a>
 # Keir source and expressions
 
-Keir source defines how one host entrypoint combines typed data and approved operations. This page specifies source for the current single-write profile, `keir-effect/4`. The [source schema](../../schemas/effect-4/source.schema.json) checks decoded structure. The compiler also checks the trusted [domain capability model](domain-model.md), expression types, availability, and call limits.
+Keir source defines how one host entrypoint combines typed data and approved operations. The [`keir/1` source schema](../../schemas/source-1/source.schema.json) checks decoded structure. The compiler also checks the trusted [domain capability model](domain-model.md), expression types, availability, and call limits.
 
 ## Source document
 
@@ -11,7 +11,7 @@ The compiler accepts bounded UTF-8 JSON or YAML. The document and each nested ob
 
 | Required field | Meaning |
 | --- | --- |
-| `language` | The literal `keir/v0`. The host selects the execution contract in the compiler environment. |
+| `language` | The literal `keir/1`. |
 | `domain` | Exactly `id`, `version` and `fingerprint`. The first two must equal the trusted DCM's domain fields. The fingerprint is its canonical SHA-256 digest as `sha256:` plus 64 lowercase hexadecimal digits. |
 | `entrypoint` | The exact ID of a declared [entrypoint](domain-model.md#entrypoints). It determines the input and output records and call policy. |
 | `name` | A source label matching `[a-z][a-z0-9-]{0,63}`. |
@@ -74,11 +74,11 @@ Expressions are checked in step order. In a call, arguments come first in ASCII 
 
 For example, `when` pointing at a call or future step reports `DATAFLOW_UNAVAILABLE` at `/source/steps/<index>/when`. A guard pointing at an earlier non-Boolean `let` reports `TYPE_MISMATCH`. A second possible write reports `BUDGET_EXCEEDED`, and a write barred by the model's zero effect grant reports `ENTRY_GRANT_DENIED`. Malformed or ill-typed CEL reports `TYPE_MISMATCH`. A checked expression that uses forbidden CEL syntax reports `CEL_POLICY_DENIED`.
 
-The [structural tests](../../conformance/effect4-structural/test_effect4_contracts.py) check closed source and handler shapes. The [compiler tests](../../compiler-java/src/test/java/dev/keir/compiler/GenericHookCompilerTest.java) reproduce current artifacts with nominal literals and handlers byte for byte, and check the String concatenation overload. The [current shared scenarios](../../conformance/generic-hooks/effect4/scenarios.json) check what the emitted artifact does in Java and Node.js.
+The [structural checker](../../scripts/check-keir-contracts.py) checks the current fixtures against the schemas. The [compiler tests](../../compiler-java/src/test/java/dev/keir/compiler/GenericHookCompilerTest.java) reproduce current artifacts with nominal literals and handlers byte for byte, and check the String concatenation overload. The [current shared scenarios](../../conformance/keir-1/README.md) check what the emitted artifact does in Java and Node.js.
 
 ## Example source
 
-The [complete follow-up source](../../conformance/generic-hooks/effect4/source.yaml) uses a nominal project literal, reads a task, and guards creation using the task's status and project.
+The [complete follow-up source](../../conformance/keir-1/source.yaml) uses a nominal project literal, reads a task, and guards creation using the task's status and project.
 
 <a id="source-and-example"></a>
 <a id="implementation-reference-earlier-source-rules-and-example"></a>
