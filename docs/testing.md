@@ -64,6 +64,7 @@ Combined-invalid regressions also preserve safety/policy-before-binding diagnost
 - Initial warm targets: focused tests within 5 seconds; complete fast suite within 60 seconds. Measure duration/slowest cases; report cold dependency setup separately. These are investigation budgets, not timing assertions.
 - Investigate slowdowns: redundant builds/startup, sleeps/network, oversized fixtures and leaked workers. Fix causes instead of increasing timeouts.
 - Necessary slow tests use an explicit command/profile with a reason and trigger. Run relevant stress/fuzz/resource/real-infrastructure checks for affected changes and releases. Classify by measured cost, not test name. Moving required checks out of default regression cannot silently weaken coverage.
+- Run the opt-in [effect/4 resource qualification](../conformance/resource-qualification/README.md) when collecting compiler and runtime resource evidence for the scalar profile.
 - Product test failures fail their CI job; advisory governance does not make tests advisory.
 
 ## Coverage and regression

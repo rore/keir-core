@@ -30,7 +30,9 @@ Assuming worker limits cover all process memory, adopting an isolation platform 
 
 ## Notes
 
-**First slice:** [Measure the current effect/4 profile](../../.agent-workflow/tasks/effect4-resource-evidence.md) using the compiler and both runtimes. Use the results to choose any additional limits or isolation.
+**First slice delivered:** The [opt-in qualification harness](../../conformance/resource-qualification/README.md) measures the current `effect/4` profile using the compiler and both runtimes. Three runs matched 22 runtime checks, including settled write receipts after late responses. The [Work Record](../../.agent-workflow/tasks/effect4-resource-evidence.md) records scope and measurements.
+
+**Still open:** Define the supported production workload and qualify Java process-wide memory and synchronous evaluation containment. The 1 MiB probe isolates structural and byte rejection. The largest admitted artifact in the measured corpus was 26,157 bytes. Qualify a valid near-ceiling case or derive a tighter reachable bound. The harness does not independently exercise every step and call count boundary or sustained concurrency.
 
 **Dependencies:** [bound-cel-execution](../features/bound-cel-execution.md); [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
