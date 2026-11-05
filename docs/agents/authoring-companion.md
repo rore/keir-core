@@ -25,7 +25,7 @@ The verifier checks the pin before reading the archive. Load the guide named in 
 
 ## Record release assets
 
-For a release, record the qualified Core revision and the versions and SHA-256 pins for the compiler, Java runtime and Node runtime in the compatibility record. Each package has a `version` and an `assets` object keyed by filename. Include the Maven metadata with the Java runtime. Commit the record with `status` set to `release`. Build with `--core-assets <directory>` to require every listed file to match its pin. Consumers can pass the same option to `verify` when they also have the Core downloads.
+For a release, record the qualified Core revision and each package’s `version` and asset pin. The `assets` object uses the release filename as its key and a `sha256:<hex>` pin as its value. Use `keir-compiler-cli-<version>.zip`, `keir-java-runtime-maven-<version>.zip`, and `keir-runtime-node-<version>.tgz`. The Java Maven ZIP includes its POMs. Commit the record with `status` set to `release`. Build with `--core-assets <directory>` to check all three files. Consumers can pass the same option to `verify` when they also have the Core downloads.
 
 The digest check establishes byte identity. The [release checklist](../releasing.md) covers asset provenance and installation checks.
 

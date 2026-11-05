@@ -52,8 +52,11 @@ V3_FILES = (
     V3_ARTIFACT,
     *(f"{V3_FIXTURES}/scenarios/main/{case}.json" for case in SCENARIO_IDS),
 )
-PACKAGE_ROLES = {"compiler", "javaRuntime", "nodeRuntime"}
-REQUIRED_ASSETS = {"compiler": {".jar"}, "javaRuntime": {".jar", ".pom"}, "nodeRuntime": {".tgz"}}
+RELEASE_ASSETS = {
+    "compiler": "keir-compiler-cli-{}.zip",
+    "javaRuntime": "keir-java-runtime-maven-{}.zip",
+    "nodeRuntime": "keir-runtime-node-{}.tgz",
+}
 
 
 def source_paths(version):
@@ -71,7 +74,7 @@ def json_bytes(document):
 
 def read_blob(revision, path):
     return subprocess.check_output(
-        ["git", "cat-file", "blob", f"{revision}:{path}"],
+        ["git", "--no-replace-objects", "cat-file", "blob", f"{revision}:{path}"],
         cwd=Path(__file__).resolve().parents[1],
     )
 
@@ -117,21 +120,17 @@ def validate_compatibility(record):
     packages = record["packages"]
     if record["status"] == "candidate" and not packages:
         return
-    if record["status"] != "release" or packages.keys() != PACKAGE_ROLES:
+    if record["status"] != "release" or packages.keys() != RELEASE_ASSETS.keys():
         raise ValueError("Record either a Core source candidate or all three Core release packages.")
-    names = set()
     for role, package in packages.items():
         if (not isinstance(package, dict) or package.keys() != {"version", "assets"}
                 or not matches(r"[0-9][0-9A-Za-z.+-]{0,63}", package["version"])
-                or not isinstance(package["assets"], dict) or not package["assets"]):
+                or not isinstance(package["assets"], dict)):
             raise ValueError("Every Core release package needs a version and asset pins.")
-        for name, pin in package["assets"].items():
-            if (not matches(r"keir-[0-9A-Za-z._+-]{1,120}\.(?:jar|pom|tgz)", name)
-                    or name.lower() in names or not matches(r"sha256:[0-9a-f]{64}", pin)):
-                raise ValueError("Invalid or duplicate Core release asset pin.")
-            names.add(name.lower())
-        if not REQUIRED_ASSETS[role] <= {Path(name).suffix for name in package["assets"]}:
-            raise ValueError(f"Missing required Core assets for {role}.")
+        asset = RELEASE_ASSETS[role].format(package["version"])
+        pins = package["assets"]
+        if pins.keys() != {asset} or not matches(r"sha256:[0-9a-f]{64}", pins[asset]):
+            raise ValueError(f"Expected a SHA-256 pin for {asset}.")
 
 
 def check_core_assets(record, directory):
@@ -170,17 +169,21 @@ def build_v3(revision, core_assets):
     if not matches(r"[0-9a-f]{40}", revision):
         raise ValueError("Edition 3 requires --revision with a full Git commit.")
     root = Path(__file__).resolve().parents[1]
-    actual = subprocess.check_output(["git", "cat-file", "-t", revision], cwd=root, text=True).strip()
+    actual = subprocess.check_output(
+        ["git", "--no-replace-objects", "cat-file", "-t", revision], cwd=root, text=True,
+    ).strip()
     if actual != "commit":
         raise ValueError("Edition 3 source revision must be a Git commit.")
     compatibility = json.loads(read_blob(revision, V3_COMPATIBILITY))
     validate_compatibility(compatibility)
     core = compatibility["coreRevision"]
-    actual = subprocess.check_output(["git", "cat-file", "-t", core], cwd=root, text=True).strip()
+    actual = subprocess.check_output(
+        ["git", "--no-replace-objects", "cat-file", "-t", core], cwd=root, text=True,
+    ).strip()
     if actual != "commit":
         raise ValueError("Core compatibility revision must be a Git commit.")
     comparison = subprocess.run(
-        ["git", "diff", "--quiet", core, revision, "--", *V3_FILES[1:]], cwd=root,
+        ["git", "--no-replace-objects", "diff", "--quiet", core, revision, "--", *V3_FILES[1:]], cwd=root,
     )
     if comparison.returncode:
         raise ValueError("Edition 3 schemas or example files differ from the recorded Core revision.")
