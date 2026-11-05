@@ -4,18 +4,7 @@
 
 Run an extension that creates a follow-up whenever someone completes a task in the launch project. Then change the follow-up title and compile your version.
 
-The app’s [capability model](../examples/node-host/follow-up/dcm.json) exposes a task completion event and two operations for reading and creating tasks. The app supplies the authenticated actor separately. The [extension](../examples/node-host/follow-up/source.yaml) reads the completed task and calls `tasks.create` only when its project and status match.
-
-```yaml
-- id: created
-  call: tasks.create
-  when: eligible
-  args:
-    projectId: {cel: eligibleProject}
-    title: {literal: 'Follow up'}
-```
-
-The extension uses `project1` for the launch project. `when: eligible` checks the result of an earlier step. You can change the title using the same model and host code.
+The app sends the completed task’s ID. The [extension source](../examples/node-host/follow-up/source.yaml) reads that task, checks that it is complete and belongs to `project1`, then requests a follow-up titled `Follow up`. The [model walkthrough](specs/domain-model.md#complete-example) shows what the app exposes and what it keeps under its control.
 
 Use a local checkout, **Node.js 24 with npm**, and **JDK 21** to compile. The precompiled run only needs Node.js and npm. The first build and install need access to the Maven and npm dependencies unless they are already cached.
 
@@ -50,20 +39,20 @@ task3 UNCERTAIN UNKNOWN
 
 ## Change the extension and compile it
 
-Copy the source into `.tools` and change the title literal from `Follow up` to `Review launch task`. Keep the DCM, guard, and host unchanged.
+Copy the source into `.tools` and change the title literal from `Follow up` to `Review launch task`.
 
 ```sh
 mkdir -p .tools/follow-up
 cp examples/node-host/follow-up/source.yaml .tools/follow-up/source.yaml
-MAVEN_USER_HOME="$PWD/.tools/maven" ./mvnw -Dmaven.repo.local=.tools/maven/repository -pl compiler-java -am -DskipTests package
 ```
 
-After editing the copied source, compile it against the same model and run the new artifact.
+After editing the copy, build the compiler and run the new artifact. Each command runs only if the previous one succeeds. The compiler prints diagnostics on failure.
 
 ```sh
-java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar \
-  .tools/follow-up/source.yaml examples/node-host/follow-up/dcm.json > .tools/follow-up/artifact.json
-node examples/node-host/follow-up/run.mjs .tools/follow-up/artifact.json
+MAVEN_USER_HOME="$PWD/.tools/maven" ./mvnw -Dmaven.repo.local=.tools/maven/repository -pl compiler-java -am -DskipTests package &&
+  java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar \
+    .tools/follow-up/source.yaml examples/node-host/follow-up/dcm.json > .tools/follow-up/artifact.json &&
+  node examples/node-host/follow-up/run.mjs .tools/follow-up/artifact.json
 ```
 
 For PowerShell 7.4 or later, use the following commands. Edit the copied source after `Copy-Item` and before running the compiler.
