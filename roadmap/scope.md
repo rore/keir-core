@@ -2,9 +2,13 @@
 
 This is the single roadmap for `keir-core` and `keir-demo-app`: delivered features, planned deliveries and visible uncommitted proposals. The manager owns sequence and combined acceptance; each card identifies the repository that owns implementation.
 
-Current focus is the user-approved correction of the real-application design. The [published audit](../docs/internal/real-application-design-audit.md) guides the [corrective core work](../.agent-workflow/tasks/host-contract-alignment.md): exact generic binding/current-authority contract, real consumer/state inventory, explicit minimal compatibility choice, then reviewed core and demo changes. Retain host-certified guarantees, semantic pins, keys, current permission and honest outcomes; remove prescribed deployment-certification mechanisms. Superseded implementation/rollout stays held until the concrete corrected plan is released. Preserve source, evidence and user data. Unassigned follow-ups remain queued.
+The next release target is a production-ready public Keir Core with **at most one mutation per run**. The three tracks can proceed in parallel.
 
-After those corrections, continue the original real-task Studio delivery: actual authoring/checking/approval/activation, native task results and repeated nontechnical-user UX testing, then update the existing local demo with verified preservation. The user has authorized that continuation; the manager advances it through the existing review and test gates.
+- **Core.** Set the supported compiler and runtime surface, prove Java and Node parity, qualify resource and failure behavior, and verify clean consumption. The existing host-owned key and authority rules apply to the single mutation. Multi-mutation composition and its idempotency protocol follow this release.
+- **Daymark.** Show what the library enables through real tasks and understandable authoring. The immediate work restores one visible conversation per customization across model upgrades and draft changes.
+- **Documentation.** Start with a human-readable binding and runtime quickstart using the current Java and Node interfaces and runnable examples. Continue with compatibility guidance, host responsibilities and public-readiness review for both repositories.
+
+The [public release card](features/public-package-release.md) owns the release checklist. Repository visibility and registry publication require separate authorization after the supported scope, license and publication prerequisites are reviewed.
 
 ## Tracking progress
 
@@ -21,9 +25,9 @@ After those corrections, continue the original real-task Studio delivery: actual
 | **Customize a real task application** | Useful native app/organization; packaged real reads; explicitly qualified real single-effect admission plus native event/key/persistence evidence; a core guard contract and actual host enforcement. |
 | **Author and activate customizations through AI** | Manual exact-revision review/simulation/approval/activation, a host-design skill for the visitor's coding agent and an in-app customer extension-authoring UI using their configured AI provider. Supporting work includes machine-readable contracts and reusable scenario/conformance tools. Optional API import is not a prerequisite. |
 | **Extend host behavior safely** | Selected search/tag/168-hour language enhancement and real app integration. Broader types, projections, patches, multiple bindings, tenant endpoints and multiple effects remain individually visible proposals. |
-| **Release an embeddable Keir library** | Current schemas/API/compatibility references, clean consumers, authorized licensing/publication, measured resource containment, many-extension performance and safe operational evidence. Experimental release need not wait for AI or all optional features. |
+| **Release an embeddable Keir library** | Production-ready single-mutation profile, supported interfaces and schemas, clean Java and Node consumers, measured containment for the stated workload, human-readable examples and authorized publication. |
 
-The [delivered core](features/generic-hook-capability-contract.md) passes local and [CI verification](https://github.com/rore/keir-core/actions/runs/41280457363). It does not implement every type, hook, lifecycle service or assurance in the drafts. Effects are currently **simulation-only**; real adapters and production containment remain unqualified.
+The [delivered core](features/generic-hook-capability-contract.md) runs the same single-mutation artifact in Java and Node. Daymark has verified [native single-mutation execution](features/demo-task-integration.md) with host-owned authority and receipts. Broader [production containment](features/runtime-resource-qualification.md) still needs qualification.
 
 ## First deliveries
 
