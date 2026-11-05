@@ -81,7 +81,17 @@ All IDs must exist in the catalog. Lists contain unique IDs. Each list or quota 
 
 ## Complete example
 
-The [TaskCompleted DCM](../../conformance/keir-1/dcm.json) is the complete model used by the shared follow-up example. `TaskCompletedInput` exposes only the completed task ID. `tasks.get` reads the task and `tasks.create` requests a follow-up. Both operations take a protected `actorId`. The customer selects the project and title in [the source](language.md#example-source), while the host supplies the actor, event and original request key. The model omits both policy fields, so the default limits apply.
+Open the [readable task model](../../examples/node-host/follow-up/dcm.json) next to the [extension source](../../examples/node-host/follow-up/source.yaml).
+
+| Part of the model | What it does in the example |
+| --- | --- |
+| `entrypoints.TaskCompleted` | The app runs the extension after it saves a task completion. `TaskCompletedInput` gives the extension one field, `taskId`. The app supplies event provenance separately. |
+| `capabilities["tasks.get"]` | Reads the completed task by `taskId` and returns its ID, project, and status. |
+| `capabilities["tasks.create"]` | Accepts the project and title chosen by the extension. Returns the new task’s ID on success. |
+| `actorId` on both operations | A protected parameter. The app supplies the authenticated actor and passes the original request key in host context. |
+| `types.FollowupResult` | Reports `CREATED` or `NO_OP` when the extension completes. The runtime reports write evidence separately. |
+
+`TaskId` and `ProjectId` are distinct types, so the extension cannot pass a task ID where a project ID is expected. This model uses the default call and write limits. The [canonical model](../../conformance/keir-1/dcm.json) carries the same data as the readable copy and is pinned for conformance.
 
 The [structural checker](../../scripts/check-keir-contracts.py) checks the current fixtures against the schemas. The [Java](../../runtime-java/src/test/java/dev/keir/runtime/BoundEffectRuntimeTest.java) and [Node.js](../../runtime-node/test/bound-effect.test.js) tests check exact model binding, catalog registrations, and call and write ceilings.
 

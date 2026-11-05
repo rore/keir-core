@@ -24,7 +24,20 @@ The [structural checker](../../scripts/check-keir-contracts.py) checks document 
 
 ## Compatibility
 
-The current compiler accepts `keir/1` source and `keir-dcm/1` models. The runtimes bind `keir-dcm/1` and prepare `keir-artifact/1` against the exact model. See [documentation history](../internal/history/README.md) for earlier formats and APIs.
+Each identifier versions one contract. A change to its accepted structure or meaning changes the identity of that contract.
+
+| Identifier | What it governs |
+| --- | --- |
+| `keir/1` | Extension source syntax, typing and meaning. |
+| `keir-dcm/1` | The model's structure and the meaning of its types, hooks, capabilities and limits. |
+| `keir-artifact/1` | The compiler output's encoding and what runtimes do when they execute it. |
+| `keir-scenario/1` | The test document's structure and the meaning of its fixtures and expectations. |
+
+These contracts version independently. For example, a new source syntax can keep the same artifact format if it compiles to instructions with unchanged meaning. A change in the meaning of those instructions requires a new artifact identity even if their encoding stays the same.
+
+Package versions identify releases of the compiler and runtimes. Choose a tested combination from the release documentation. The shared `/1` suffix and matching package version numbers alone establish no compatibility. The compiler checks the source's exact model identity. At preparation, the runtime checks the artifact format, producer, dependency environment and model reference against the bound model. The host also supplies the exact capability versions declared in that model. A host-owned domain or capability version describes the host's business contract, independently of the Keir document formats. [Artifact identity](compiler-artifact.md#source-and-artifact-identity) · [Core package record](../agents/authoring-companion-v3-compatibility.json)
+
+Current tooling rejects earlier preview formats. To adopt the current contract, bring the source and model into the supported formats, compile again, and review the new artifact before approval. Keep old artifacts and approvals with their original bytes. [Earlier formats and APIs](../internal/history/README.md)
 
 ## Maintaining a contract
 

@@ -1,10 +1,10 @@
 # Keir Core
 
-Keir lets software teams offer AI-assisted customization inside their applications. A business user can ask for behavior the app has no setting for, such as “When someone completes a task in the launch project, create a follow-up.” AI can turn that request into a script. Running arbitrary scripts means the application has to contain untrusted code and control its access to data and resources.
+Keir is an embeddable framework for customer-defined extensions. It provides a constrained language, a compiler, and runtimes for Java and Node.js. Extensions combine operations your application exposes.
 
-An AI assistant can draft the extension in Keir’s constrained language. Developers can also write extensions by hand. The application defines when extensions can run, what data they receive, and which operations they can call. Keir’s compiler checks the extension against that contract and produces a program the user can try in simulation before approving it.
+In a task app, a customer might ask, “When someone completes a task in the launch project, create a follow-up.” An AI assistant can turn that request into a Keir extension using the app’s existing task operations. A developer can write the same extension by hand. Either way, the app can run the compiled extension without an AI service.
 
-Once approved, that same compiled program runs inside the application. Keir enforces execution limits and calls only the operations the application exposed. The application checks permissions and carries out each operation through its own services.
+Your application defines when an extension can run, what data it receives, and which operations it can call. Keir compiles the extension against that contract, so you can simulate it before approval and run the same compiled version with execution limits. Your application checks permissions and performs each operation through its own services.
 
 ## Start here
 
@@ -24,4 +24,4 @@ An extension can read data and contain at most one possible write, including gua
 - [Contributing](CONTRIBUTING.md)
 - [Roadmap](roadmap/scope.md)
 
-Keir Core is licensed under the [Apache License 2.0](LICENSE). Public package releases are planned.
+Keir Core is licensed under the [Apache License 2.0](LICENSE). See [GitHub Releases](https://github.com/rore/keir-core/releases) for packages.
