@@ -2,11 +2,16 @@
 
 import hashlib
 import json
+import os
 from pathlib import Path
+import posixpath
+import re
+import runpy
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import warnings
 import zipfile
 
@@ -18,6 +23,10 @@ V2_GUIDE_PIN = "sha256:22f3aba081b5653f7f5d4fff8861afe606c840ce56d9b26d7464ffc08
 
 def command(*args):
     return subprocess.run([sys.executable, SCRIPT, *args], capture_output=True, text=True)
+
+
+def git(*args):
+    return subprocess.check_output(["git", *args], cwd=SCRIPT.parent.parent)
 
 
 def digest(data):
@@ -138,6 +147,131 @@ class AuthoringCompanionTest(unittest.TestCase):
         for data in (self.data + b"trailing bytes", self.data[:-1], bytes(256 * 1024 + 1)):
             bad.write_bytes(data)
             self.assertNotEqual(command("verify", bad, "--sha256", digest(data)).returncode, 0)
+
+
+class AuthoringCompanionV3Test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        build = SCRIPT.resolve().parents[1] / "build"
+        build.mkdir(exist_ok=True)
+        directory = tempfile.TemporaryDirectory(dir=build)
+        cls.addClassCleanup(directory.cleanup)
+        cls.directory = Path(directory.name)
+        cls.revision = git("rev-parse", "HEAD").decode().strip()
+        cls.path = cls.directory / "companion-v3.zip"
+        assets = os.environ.get("KEIR_COMPANION_CORE_ASSETS")
+        cls.build_flags = ("--version", "3", "--revision", cls.revision, *(("--core-assets", assets) if assets else ()))
+        result = command("build", cls.path, *cls.build_flags)
+        if result.returncode:
+            raise AssertionError(result.stderr)
+        cls.data = cls.path.read_bytes()
+        cls.pin = result.stdout.strip()
+
+    def test_committed_inventory_links_and_offline_verification(self):
+        second = self.directory / "repeated.zip"
+        result = command("build", second, *self.build_flags)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(second.read_bytes(), self.data)
+        self.assertEqual(result.stdout.strip(), self.pin)
+        self.assertEqual(self.pin, digest(self.data))
+        result = subprocess.run(
+            [sys.executable, SCRIPT, "verify", self.path, "--version", "3", "--sha256", self.pin],
+            cwd=self.directory, env={**os.environ, "PATH": ""}, capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        with zipfile.ZipFile(self.path) as archive:
+            manifest = json.loads(archive.read("manifest.json"))
+            self.assertEqual(manifest["format"], "keir-authoring-companion/3")
+            self.assertEqual(manifest["sourceRevision"], self.revision)
+            self.assertEqual(manifest["compatibility"], json.loads(git(
+                "show", f"{self.revision}:docs/agents/authoring-companion-v3-compatibility.json")))
+            self.assertEqual(manifest["contracts"], {
+                "language": "keir/1", "dcm": "keir-dcm/1",
+                "artifact": "keir-artifact/1", "scenario": "keir-scenario/1",
+            })
+            guide = manifest["guide"]
+            self.assertEqual(guide, "docs/agents/customer-authoring-guide-v3.md")
+            links = re.findall(r"\]\(([^)]+)\)", archive.read(guide).decode("utf-8"))
+            self.assertEqual(len(links), 10)
+            resolved = {posixpath.normpath(posixpath.join(posixpath.dirname(guide), link)) for link in links}
+            self.assertEqual(resolved, set(manifest["files"]) - {guide})
+            self.assertEqual(archive.namelist(), sorted([*manifest["files"], "manifest.json"]))
+            for name, metadata in manifest["files"].items():
+                data = archive.read(name)
+                self.assertEqual(data, git("show", f"{self.revision}:{name}"), name)
+                self.assertEqual(metadata, {"bytes": len(data), "digest": digest(data)})
+            artifact = json.loads(archive.read("conformance/keir-1/artifact.json"))
+            self.assertEqual(manifest["producer"], artifact["compiler"])
+            self.assertEqual(manifest["environment"], artifact["environment"])
+
+    def test_rejects_wrong_pin_revision_and_archive_metadata(self):
+        bad = self.directory / "invalid-v3.zip"
+        self.assertNotEqual(command("build", bad, "--version", "3").returncode, 0)
+        self.assertNotEqual(command("build", bad, "--version", "3", "--revision", "HEAD").returncode, 0)
+        self.assertNotEqual(command("verify", self.path, "--version", "3", "--sha256", digest(b"old")).returncode, 0)
+        self.assertNotEqual(command("verify", self.path, "--version", "2", "--sha256", self.pin).returncode, 0)
+        bad.write_bytes(self.data)
+        with zipfile.ZipFile(bad, "a") as archive:
+            archive.writestr("extra.txt", b"unexpected")
+        result = command("verify", bad, "--version", "3", "--sha256", digest(bad.read_bytes()))
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("inventory", result.stderr)
+        with zipfile.ZipFile(self.path) as original, zipfile.ZipFile(bad, "w") as changed:
+            for entry in original.infolist():
+                data = original.read(entry)
+                if entry.filename == "manifest.json":
+                    manifest = json.loads(data)
+                    manifest["producer"] = "unrelated"
+                    data = json.dumps(manifest).encode()
+                changed.writestr(entry, data)
+        result = command("verify", bad, "--version", "3", "--sha256", digest(bad.read_bytes()))
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("manifest does not match", result.stderr)
+
+    def test_release_record_requires_all_exact_assets(self):
+        module = runpy.run_path(str(SCRIPT))
+        files = {
+            "compiler": ("keir-compiler-cli-0.1.0.zip", b"compiler"),
+            "javaRuntime": ("keir-java-runtime-maven-0.1.0.zip", b"java"),
+            "nodeRuntime": ("keir-runtime-node-0.1.0.tgz", b"node"),
+        }
+        release = {
+            "status": "release", "coreRevision": self.revision,
+            "packages": {
+                role: {"version": "0.1.0", "assets": {name: digest(value)}}
+                for role, (name, value) in files.items()
+            },
+        }
+        assets = self.directory / "core-assets"
+        assets.mkdir()
+        for name, value in files.values():
+            (assets / name).write_bytes(value)
+        with zipfile.ZipFile(self.path) as archive:
+            payload = {name: archive.read(name) for name in module["V3_FILES"]}
+        def read_blob(_revision, name):
+            return json.dumps(release).encode() if name == module["V3_COMPATIBILITY"] else payload[name]
+
+        build = module["build_v3"]
+        with patch.dict(build.__globals__, read_blob=read_blob):
+            with self.assertRaisesRegex(ValueError, "requires --core-assets"):
+                build(self.revision, None)
+            archive = self.directory / "release-v3.zip"
+            archive.write_bytes(build(self.revision, assets))
+        pin = digest(archive.read_bytes())
+        for flags in ((), ("--core-assets", assets)):
+            result = command("verify", archive, "--version", "3", "--sha256", pin, *flags)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        (assets / "keir-java-runtime-maven-0.1.0.zip").write_bytes(b"changed")
+        result = command("verify", archive, "--version", "3", "--sha256", pin, "--core-assets", assets)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Core asset digest does not match", result.stderr)
+        release["packages"]["javaRuntime"]["assets"] = {"keir-parent-0.1.0.pom": digest(b"pom")}
+        with self.assertRaisesRegex(ValueError, "keir-java-runtime-maven"):
+            module["validate_compatibility"](release)
+        del release["packages"]["nodeRuntime"]
+        with self.assertRaisesRegex(ValueError, "all three"):
+            module["validate_compatibility"](release)
 
 
 if __name__ == "__main__":
