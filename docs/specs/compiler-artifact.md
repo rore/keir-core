@@ -7,26 +7,26 @@
 
 The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-| Field or selector | Current value |
+| Field | Current value |
 | --- | --- |
-| Source `language` | `keir/v0` |
-| Compiler profile and artifact `profile` | `keir-effect/4` |
-| DCM `format` | `keir-dcm/effect-4` |
-| Artifact `format` | `keir-artifact/effect-4` |
-| Compiler identity | `keir-compiler-java/0.1.0-SNAPSHOT` |
+| Source `language` | `keir/1` |
+| DCM `format` | `keir-dcm/1` |
+| Artifact `format` | `keir-artifact/1` |
+| Verification scenario `format` | `keir-scenario/1` |
+| Compiler identity | `keir-compiler-java/0.1.0` |
 | Descriptor recipe | `keir-record-descriptors/1` |
 
 ### Compile source
 
-On JDK 21, use the [compiler CLI JAR](../../compiler-java/README.md#build-and-run). Give it the source path, trusted DCM path and explicit current selector, in that order.
+On JDK 21, use the [compiler CLI JAR](../../compiler-java/README.md#build-and-run). Pass the source path followed by the trusted DCM path.
 
 ```sh
-java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar source.yaml dcm.json --profile=keir-effect/4 > artifact.json
+java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar source.yaml dcm.json > artifact.json
 ```
 
-The CLI writes artifact bytes to stdout on exit 0. On failure it writes an array of `{code,path,message}` diagnostics to stderr and emits no artifact bytes. Exit 1 means the compiler rejected the inputs. Exit 2 means invalid arguments, an unsupported CLI selector, or an unreadable input file. Omitting the selector chooses the [original read-only contract](../internal/history/compatibility-reference.md#original-compiler-envelope). Use byte-preserving redirection, including PowerShell 7.4 or later on Windows.
+The CLI writes artifact bytes to stdout on exit 0. On failure it writes an array of `{code,path,message}` diagnostics to stderr. Exit 1 means the compiler rejected the inputs. Exit 2 means the number of arguments is wrong or an input file is unreadable. Use byte-preserving redirection, including PowerShell 7.4 or later on Windows.
 
-In Java, call `new KeirCompiler().compile(sourceBytes, trustedDcmBytes, KeirCompiler.Environment.effect4())`. A successful `Compilation` has `artifact()`, `artifactDigest()` and an empty `diagnostics()` list. A failed compilation returns diagnostics and null artifact bytes and digest. `succeeded()` distinguishes the two outcomes.
+In Java, call `new KeirCompiler().compile(sourceBytes, trustedDcmBytes, KeirCompiler.Environment.supported())`. A successful `Compilation` has `artifact()`, `artifactDigest()` and an empty `diagnostics()` list. A failed compilation returns diagnostics and null artifact bytes and digest. `succeeded()` distinguishes the two outcomes.
 
 ### Input encodings
 
@@ -52,7 +52,7 @@ See [source diagnostics](language.md#diagnostics-and-conformance) for examples o
 
 ## Artifact representation
 
-The artifact is exactly `{format,profile,compiler,environment,sourceDigest,modelRef,entrypoint,expressions,steps,return}`. The selected entrypoint names the DCM entrypoint and `sourceDigest` identifies the canonical decoded source. The `environment` object contains exactly `celJava`, `celNode`, `protobufJava` and `protobufNode` with the values in [Descriptor/type bridge](#descriptortype-bridge).
+The [artifact schema](../../schemas/artifact-1/artifact.schema.json) defines the envelope `{format,compiler,environment,sourceDigest,modelRef,entrypoint,expressions,steps,return}`. The selected entrypoint names the DCM entrypoint and `sourceDigest` identifies the canonical decoded source. The `environment` object contains exactly `celJava`, `celNode`, `protobufJava` and `protobufNode` with the values in [Descriptor/type bridge](#descriptortype-bridge).
 
 ### Model reference
 
@@ -81,13 +81,13 @@ The host selects approved artifact bytes and verifies their stored-byte integrit
 
 ## Canonical bytes and digest rules
 
-The shared [byte ceilings](runtime.md#limits) apply separately to each raw source/DCM document and to the complete DCM object serialized with the canonical JSON rules below. Each ceiling is 65,536 bytes, inclusive; canonical escaping can expand a raw DCM that fits its input ceiling. After validating the DCM and before artifact emission, the compiler must reject canonical DCM overflow with `BUDGET_EXCEEDED` at `/dcm` and emit no artifact. The current runtime enforces model bounds during binding and reports size failures under `/binding/dcm`. Runtimes that use embedded models check that ceiling during preparation at `/artifact/dcm`. Failure produces no handle or dispatch. The separate whole-artifact ceiling does not relax either DCM ceiling; do not truncate the model or discard unused definitions to make it fit.
+The shared [byte ceilings](runtime.md#limits) apply separately to each raw source/DCM document and to the complete DCM object serialized with the canonical JSON rules below. Each ceiling is 65,536 bytes, inclusive. Canonical escaping can expand a raw DCM that fits its input ceiling. The compiler rejects canonical DCM overflow with `BUDGET_EXCEEDED` at `/dcm`. The runtime enforces model bounds during binding and reports size failures under `/binding/dcm`. The whole-artifact ceiling is independent of both DCM ceilings.
 
 Canonical JSON is UTF-8, no BOM/trailing newline/whitespace, object keys sorted lexically by Unicode scalar value (schema keys and identifiers are ASCII), arrays retain order. Emit Boolean as `true`/`false`, integers as minimal unsigned decimal (metadata counts only), and strings with `"`/`\\` escaped, U+0000..U+001F encoded as lowercase `\u00xx`, all other valid Unicode scalars literally encoded in UTF-8. Do not normalize Unicode. Reject unpaired surrogates and numbers outside nonnegative safe integer metadata ranges; source binding numbers/null are unsupported. This recipe has no floats, negative zero or locale-dependent rendering.
 
 Digest is `sha256:` plus lowercase SHA-256 hex of exactly those bytes. Source digest includes CEL source strings verbatim after JSON/YAML decoding (no expression whitespace rewriting). DCM digest includes the whole validated DCM, including enum order and consumer definition. Artifact digest covers the entire canonical envelope, including base64 expressions and any embedded descriptors. There is **no** self-hash field to exclude. For example canonical bytes for `{"b":true,"a":"x"}` are `{"a":"x","b":true}` with no newline. Developers must add byte/hash vectors including escaped controls and non-ASCII values.
 
-Protobuf serialization must use deterministic ordering of maps/repeated definitions. Preserve source information in CheckedExpr only if deterministic and free of absolute paths; use a constant source description. Compile the same decoded source/model/environment twice and require identical full artifact bytes. Recompiling for each runtime is not conformance. Runners accept only the canonical envelope and standard base64; reject duplicate/unknown fields, extra trailing content and unsupported versions rather than guessing compatibility.
+Protobuf serialization uses deterministic ordering of maps and repeated definitions. The compiler writes `<input>` as the checked expression source location, and both runtimes require that value. The same decoded source, model and environment produce identical artifact bytes. Conformance runs those same bytes in both runtimes. Runtimes require the canonical envelope and standard base64 and reject duplicate or unknown fields, trailing content and unsupported versions.
 
 ## Descriptor/type bridge
 

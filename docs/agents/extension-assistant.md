@@ -7,7 +7,7 @@ This guide is for developers adding an assistant to their application. Use the [
 
 Give the assistant the exact model approved for the customer, including hooks, capabilities, result contracts, types and limits. Give it separate access to the authoring tools you want it to use. For example, the follow-up extension chooses a project and title and calls the app’s existing `tasks.create` operation. The project choice belongs in source. Resource permissions belong to the application.
 
-Use the [current structural schemas](../../schemas/effect-4/README.md) to check decoded documents. Use the [compiler and runtime contracts](../specs/README.md) to check what can compile and run.
+Use the [schemas and specification](../specs/README.md#current-behavior) to check decoded documents and determine what can compile and run.
 
 ## Workflow
 

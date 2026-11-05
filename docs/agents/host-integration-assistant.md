@@ -9,7 +9,7 @@ Supply the assistant with authorized host requirements and interface or source d
 
 Expose reusable native operations, not the customization being demonstrated: `tasks.create` creates a task; the extension supplies its project/title and decides that creation is a follow-up. Do not hide the program's eligibility or composition in a special adapter. Domain-specific atomic operations remain valid when they are actual host contracts. See the [capability ownership rule](../specs/generic-hook-capability-contract.md#responsibility-boundaries).
 
-Design hooks around inputs, outputs, lifecycle and write limits. Use the [DCM reference](../specs/domain-model.md) for the current model and the [structural schemas](../../schemas/effect-4/README.md) for decoded documents.
+Design hooks around inputs, outputs, lifecycle and write limits. Use the [DCM reference](../specs/domain-model.md) and its [schema](../../schemas/dcm-1/dcm.schema.json).
 
 An adapter can call a local service or a remote API. Keep routing, credentials, trusted identity propagation, deadlines and result mapping in the host. A timed-out remote write may still commit. Preserve that uncertainty for the host to reconcile. See the [dispatch boundary](../specs/generic-hook-capability-contract.md#capability-invocation-across-services).
 

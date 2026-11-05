@@ -3,7 +3,7 @@
 The Java library and standalone CLI compile Keir against the application’s domain capability model (DCM). The output is a compiled artifact that refers to the exact model used for validation. [Compile and run the follow-up rule](../examples/README.md#compile-the-rule)
 
 <a id="legacy-profile-selection"></a>
-For exact CLI selectors and Java compiler environments, see the [implementation reference](../docs/internal/implementation-reference.md#serialized-identifiers-and-compiler-selectors).
+For document identities and the Java compiler API, see the [compiler reference](../docs/specs/compiler-artifact.md).
 
 ## Build and run
 
@@ -26,7 +26,7 @@ Omit `-pl compiler-java -am` to build all Java modules. The wrapper downloads it
 
 The compiler returns artifact bytes and their SHA-256 on success, or an ordered diagnostic list on failure. The caller owns finite compilation time and concurrency budgets. The host separately verifies and approves the selected artifact before activation. Dependency pins are CEL-Java `0.14.0`, protobuf-java `4.35.1`, Jackson Core `2.19.2` and SnakeYAML `2.4`. The selected environment also pins the Node CEL/protobuf versions for later artifact admission. Unsupported environment/profile selections fail closed.
 
-Packaging also creates `target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar` with its dependencies. The CLI takes the source and DCM paths in that order. Use the [implementation reference](../docs/internal/implementation-reference.md#serialized-identifiers-and-compiler-selectors) to select the current single-write contract. On success the compiler writes canonical artifact bytes to stdout. On failure it writes safe JSON diagnostics to stderr and returns nonzero. Input reads stop at the raw-byte ceiling. The CLI spawns no children. A host launching the CLI must bound output, wall time and concurrency, terminate and reap the process on cancellation, and preserve stdout as bytes.
+Packaging also creates `target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar` with its dependencies. The CLI takes the source and DCM paths in that order. On success the compiler writes canonical artifact bytes to stdout. On failure it writes safe JSON diagnostics to stderr and returns nonzero. Input reads stop at the raw-byte ceiling. A host launching the CLI must bound output, wall time and concurrency, terminate and reap the process on cancellation, and preserve stdout as bytes.
 
 <a id="implementation-reference-for-earlier-examples"></a>
 

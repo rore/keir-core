@@ -1,7 +1,7 @@
 <a id="read-and-decide-runtime"></a>
 # Runtime execution and limits
 
-This page defines how the current single-write runtime executes a prepared program. See [Host model binding](host-model-binding.md#effect4-binding-and-preparation) for Java and Node APIs and [Compiler and artifact](compiler-artifact.md) for the artifact format.
+This page defines how the runtime executes a prepared program. See [Host model binding](host-model-binding.md#bind-the-dcm-and-prepare-a-compiled-rule) for Java and Node APIs and [Compiler and artifact](compiler-artifact.md) for the artifact format.
 
 Implementation evidence belongs in [testing](../testing.md); pending resource qualification belongs in the [resource roadmap](../../roadmap/features/runtime-resource-qualification.md). Neither changes the limits or guarantees specified here.
 
