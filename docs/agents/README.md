@@ -1,15 +1,16 @@
 <a id="agents-using-keir"></a>
-# Integrate an authoring assistant
+<a id="integrate-an-authoring-assistant"></a>
+# Use Keir with an assistant
 
-An application can use Keir directly or give an assistant tools for drafting, checking and reviewing rules. The application supplies the tools, scoped data and permission checks.
+Keir’s compiler and runtime work independently of an assistant. Start with the guide for the work you’re doing.
 
-| Integration | Who it helps and what it does | Guide |
+| Audience | What you’re doing | Start here |
 | --- | --- | --- |
-| Host integration assistant | Helps the application developer define when rules run, what operations they can use and how the app implements those operations | [Host integration](host-integration-assistant.md) |
-| Customer authoring assistant | Helps a customer draft a rule and review simulated results before approval and activation | [Customer authoring integration](extension-assistant.md) |
+| Application developer with a coding assistant | Define when extensions run, what operations they can call, and how your app implements those operations. | [Design a host integration](host-integration-assistant.md) |
+| Application developer building an in-app assistant | Give customers a way to draft extensions and review simulated behavior before approval and activation. | [Build a customer authoring assistant](extension-assistant.md) |
+| Customer authoring assistant | Follow model-facing instructions for drafting, checking and handing back a proposed extension. | [Authoring guide v2](customer-authoring-guide-v2.md) · [Build and verify the companion](authoring-companion.md) |
+| Contributor working on Keir itself | Build and test the repository and follow its development workflow. | [Contributing](../../CONTRIBUTING.md) · [Repository agent instructions](../../AGENTS.md) |
 
-For instructions to supply to a customer-facing model, use the [Keir customer authoring guide](customer-authoring-guide-v2.md). Pair it with the host's exact published DCM and scoped tools. The [version 2 authoring companion](authoring-companion.md) includes the guide, schemas and example scenarios.
+The [v2 companion](authoring-companion.md) is a versioned ZIP you can build and verify from a checkout. It contains the model-facing guide, schemas and example scenarios. When loading the guide, supply your application’s exact published domain capability model (DCM), policy and scoped tool definitions separately.
 
-Use the [Keir specification](../specs/README.md) and [structural schemas](../../schemas/effect-4/README.md) to define tool inputs and diagnostics. Authoring tools such as compilation and simulation are separate from the operations a rule can call at runtime. Approval and activation stay with the application and its authorized users.
-
-For the earlier read-only contract, see the [offline simulation guide](read-simulation.md).
+The [Keir specification](../specs/README.md) defines the compiler and runtime interfaces. The assistant guides describe tool responsibilities for your application to implement. The application owns tool access, approval and activation.

@@ -1,20 +1,22 @@
 # Keir Core
 
-Keir is an embeddable framework for customer-defined rules. An application exposes the events and operations a rule can use. Customers can combine them into behavior the application has no built-in setting for, such as creating a follow-up when a task is completed in a particular project.
+Keir lets software teams offer AI-assisted customization inside their applications. A business user can ask for behavior the app has no setting for, such as “When someone completes a task in the launch project, create a follow-up.” AI can turn that request into a script. Running arbitrary scripts means the application has to contain untrusted code and control its access to data and resources.
 
-Developers write rules in Keir, a controlled extension intermediate representation, and compile them for Java and Node.js runtimes. An AI assistant can help draft rules and check examples before a customer enables them. The application controls permissions and performs changes through its own services.
+An AI assistant can draft the extension in Keir’s constrained language. Developers can also write extensions by hand. The application defines when extensions can run, what data they receive, and which operations they can call. Keir’s compiler checks the extension against that contract and produces a program the user can try in simulation before approving it.
+
+Once approved, that same compiled program runs inside the application. Keir enforces execution limits and calls only the operations the application exposed. The application checks permissions and carries out each operation through its own services.
 
 ## Start here
 
-- [Guided tour](docs/guided-tour.md). Follow one rule from the application contract through authoring, review, and execution.
-- [Quickstart](docs/quickstart.md). Run the follow-up rule on sample data.
+- [Getting started](docs/quickstart.md). Run a follow-up extension, edit it, and compile your change.
 - [Embed Keir](docs/embedding.md). Expose application operations and run a compiled rule from your own code.
+- [Keir specification](docs/specs/README.md). Look up the language, model, compiler, and runtime contracts.
 - [Explore Daymark](https://github.com/rore/keir-demo-app). See how a task application uses Keir for customer authoring, review, and execution.
 
 <a id="supported-contract"></a>
 ## Current scope
 
-A rule can read data and request at most one change per run. Java and Node.js run the same compiled format. See the [Keir specification](docs/specs/README.md) for supported behavior, [verification](docs/testing.md) for measured results and their limits, and the [release plan](roadmap/features/public-package-release.md) for package availability.
+An extension can read data and contain at most one possible write, including guarded calls. Java and Node.js run the same compiled format. See the [Keir specification](docs/specs/README.md) for supported behavior, [verification](docs/testing.md) for measured results and their limits, and the [release plan](roadmap/features/public-package-release.md) for package availability.
 
 ## Documentation
 

@@ -76,13 +76,13 @@ On POSIX, use the same CLI arguments and redirect stdout. Check the compiler exi
 
 The first authoring companion reads the [original guide at its pinned revision](https://github.com/rore/keir-core/blob/57a74a57e6c5fec2e74d3561d4b2ad1da2e650c1/docs/agents/customer-authoring-guide-v1.md) and the other committed inputs named in its manifest. The [public v1 page](../agents/customer-authoring-guide-v1.md) is an archival notice. Version 2 uses the [revised guide](../agents/customer-authoring-guide-v2.md) with the same schemas, examples and runtime compatibility. See [build and verify](../agents/authoring-companion.md) for explicit version selection and trusted digest verification.
 
-The [Node.js runtime package README](../../runtime-node/README.md) ships inside the runtime tarball. A README change updates the Core example's archive integrity pin. The [earlier Node APIs](compatibility-reference.md#earlier-node-runtime-apis) document the historical package interfaces.
+The [Node.js runtime package README](../../runtime-node/README.md) ships inside the runtime tarball. A README change updates the Core example's archive integrity pin. The [earlier Node APIs](history/compatibility-reference.md#earlier-node-runtime-apis) document the historical package interfaces.
 
 The [single-write schema index](../../schemas/effect-4/README.md) and [read-only schema index](../../schemas/read-2/README.md) list the literal schema IDs used by validators. Fixture paths, archive names and existing Markdown anchors keep their exact spelling so commands and links continue to resolve.
 
 ## Earlier contracts and examples
 
-See the [compatibility reference](compatibility-reference.md) for the original read-only and simulated-write contracts, the catalog-bound extensions, and the earlier qualification protocol.
+See the [compatibility reference](history/compatibility-reference.md) for the original read-only and simulated-write contracts, the catalog-bound extensions, and the earlier qualification protocol.
 
 <a id="original-compiler-examples"></a>
 ## Build the original read and simulated-write artifacts

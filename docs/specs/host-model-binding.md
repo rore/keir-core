@@ -1,21 +1,31 @@
 <a id="binding-a-host-model-to-capability-invokers"></a>
 # Host model binding
 
+Bind a trusted [DCM](domain-model.md) and its host implementations, prepare an approved [artifact](compiler-artifact.md), and reuse the prepared handle with fresh invocation context. These are the current single-write APIs.
+
 <a id="corrected-host-bound-4-binding"></a>
 <a id="effect4-binding-and-preparation"></a>
 <a id="binding-a-host-dcm-and-preparing-keir-ir"></a>
 ## Bind the DCM and prepare a compiled rule
 
-For the current single-write contract, initialize with `bindModel(dcmBytes, implementations)`. Validate the complete catalog, including unused capabilities, matching versions and key types, callable implementations, and homogeneous real or simulation mode. An empty capability catalog and empty implementation map are valid and mode-neutral. The DCM still has its required domain and entrypoint definitions. Binding invokes no implementation and performs no live authorization or key authentication.
+### Bind the model
 
-Prepare with `prepareProgram(artifactBytes, boundModel)`. The runtime derives model identity from the DCM, checks the artifact format, exact model compatibility and supported compiler environment, and enforces program and resource limits. The host selects approved bytes and verifies stored-byte integrity before calling this API. Invoke with fresh trusted bindings, deadline, original non-null request key and typed event. Stable host implementations enforce current permission, key authenticity and native commit conditions. The [API shapes](#api-shapes) specify the complete inputs for these operations.
+Supply the DCM as UTF-8 JSON bytes. Formatted JSON is accepted. Binding derives the model identity from the canonical form, so the input bytes do not have to be canonical. If you compile against a YAML model, bind its [equivalent JSON](compiler-artifact.md#input-encodings).
 
-Preparation can be reused with distinct fresh invocation contexts. Event data is snapshotted and the original opaque request key is passed unchanged. Node snapshots the deadline's expiry and captures the `nowMs` function with its source receiver in a wrapper; it does not freeze or mutate the source clock object. Java creates a `Deadline` with the same `LongSupplier` and expiry. Neither runtime resets the deadline. Java uses distinct adapter and invocation types with `invokeBoundEffectProgram`.
+The runtime validates the DCM, derives the type descriptors and checks the complete implementation map. The map has exactly one callable registration per published capability ID, including unused capabilities. Each registration's `version` matches that capability and its `keyType` matches `hostKey.type` in the DCM. Every registration has the same mode, either `real` or `simulation`. An empty catalog with an empty implementation map is valid and mode-neutral.
+
+Binding snapshots the model and registration metadata and captures callable references. It makes no capability calls and performs no live authorization or key authentication. Replacing a callable requires a new binding. Existing prepared handles retain their original binding. Bindings for different exact models or modes can coexist.
+
+### Prepare an artifact
+
+The host selects and verifies approved artifact bytes before calling `prepareProgram`. The runtime checks canonical encoding, exact model compatibility, the compiler and package identities, the complete plan, checked expressions, and [limits](runtime.md#limits). It validates guard and handler references, types, definite availability and static call and write counts. A write prohibited by the entrypoint's zero allowance fails with `ENTRY_GRANT_DENIED` at `/artifact/steps/<index>`. A second possible write exceeds the hard limit and fails with `BUDGET_EXCEEDED`, including when its guard is false. No implementation runs during preparation.
+
+The current API takes no extra admission record. The host verifies stored-byte integrity and chooses which artifact to enable. The runtime independently checks the artifact against the model supplied at binding.
 
 <a id="exact-corrected-api-shapes"></a>
 ### API shapes
 
-Node registration values are `{version, mode, keyType, invoke}` with mode `simulation` or `real`. The invoke function receives `(args, protectedArgs, remainingMs, context)`, where context is `{requestKey, event: {id, source}, deadline: {clock: {nowMs}, expiresAtMs}}`. The only invocation shape is:
+**Node.js.** Import the functions from `@keir/runtime-node`. Both byte inputs are `Uint8Array` values. Registration values are `{version,mode,keyType,invoke}`. The callback receives `(args, protectedArgs, remainingMs, context)` and may return the [adapter response](runtime.md#adapter-responses) directly or through a promise. Its context is `{requestKey,event:{id,source},deadline:{clock:{nowMs},expiresAtMs}}`.
 
 ```javascript
 bindModel(dcmBytes, implementations) // {boundModel, diagnostic}
@@ -23,7 +33,7 @@ prepareProgram(artifactBytes, boundModel) // {prepared, diagnostic}
 invokeProgram(prepared, businessInput, {bindings, deadline, requestKey, event}) // Promise<Outcome>
 ```
 
-Java uses the following nested `KeirRuntime` types and distinct invocation method. Every catalog capability, including READ entries, maps to a `BoundEffectAdapter`:
+**Java.** The runtime's static methods and nested types live in `dev.keir.runtime.KeirRuntime`. Every capability maps to a `BoundEffectAdapter`.
 
 ```java
 @FunctionalInterface
@@ -35,6 +45,7 @@ public record BoundEffectAdapter(String version, String mode, String keyType, Bo
 public record BoundEffectContext(Object requestKey, Map<String,Object> event, Deadline deadline) {}
 public record BoundEffectInvocation(Map<String,Object> bindings, Deadline deadline,
     Object requestKey, Map<String,Object> event) {}
+public record Deadline(LongSupplier clock, long expiresAtMs) {}
 
 public static ModelBinding bindModel(byte[] dcmBytes, Map<String,BoundEffectAdapter> implementations)
 public static Preparation prepareProgram(byte[] artifactBytes, BoundModel boundModel)
@@ -42,15 +53,38 @@ public static CompletionStage<Outcome> invokeBoundEffectProgram(Prepared prepare
     Object businessInput, BoundEffectInvocation invocation)
 ```
 
-`Deadline` reuses the existing `(LongSupplier clock, long expiresAtMs)` record. Java snapshots the event map and retains the original opaque key by reference.
+Java `ModelBinding` and `Preparation` expose `boundModel()` and `prepared()`, respectively, with `diagnostic()` and `succeeded()` on both. In either runtime, a successful result contains a handle and a null diagnostic. A failure contains a null handle and `{code,path,message}`. Binding rejects invalid input with `ADMISSION_INVALID` under `/binding`, or `BUDGET_EXCEEDED` for a size or resource limit. Preparation diagnoses invalid binding or artifact data, incompatible compiler and environment pins, policy violations and limits. Check diagnostics before invoking. Java's `Outcome` exposes the [runtime outcome](runtime.md#outcome) through `toMap()` and `toJson()` as well as accessors for its individual fields.
 
-The [runtime contract](runtime.md#effect4-execution) defines invocation and limits. [Write evidence](real-single-effect-admission.md#effect-outcomes-and-key-identity) defines receipts and late responses. The artifact contains the exact model reference using the current [wire identifiers](../internal/implementation-reference.md#serialized-identifiers-and-compiler-selectors) and [reference fields and descriptor recipe](#exact-reference-artifact). Exact model versions may coexist. Existing prepared handles retain their binding. Host code owns implementation thread safety, storage, transport and lifecycle.
+## Invocation inputs and adapter context
 
-Binding snapshots model and registration metadata and callable references. Missing or extra implementations, wrong version/key type, non-callable implementations and mixed modes reject the complete binding before any handle is returned. Changing a callable requires a new binding. Binding failures use `ADMISSION_INVALID` under `/binding`; byte-limit failures use `BUDGET_EXCEEDED`. Preparation validates canonical artifact bytes, exact model reference, supported compiler/environment, checked expressions and the complete plan before returning a handle. Neither operation calls a capability implementation.
+| Input | Contract |
+| --- | --- |
+| `businessInput` | Exact record declared by the entrypoint's input type. The rule reads this as `input`. |
+| `bindings` | Closed map of the protected parameter names required by the plan. See [Protected bindings](#protected-bindings). |
+| `event` | Exact `{id,source}` object, typed by the entrypoint's `event.idType` and `event.sourceType`. The runtime snapshots the validated fields. |
+| `requestKey` | Original non-null host key, treated as opaque by the runtime. |
+| `deadline` | Absolute expiry and a clock in the same time base. See [Deadlines](runtime.md#deadlines). |
+
+The current invocation accepts only these host context fields. The runtime passes separate immutable business and protected arguments to each implementation. It supplies the remaining milliseconds and the context holding the original key, copied event and deadline. Node captures the expiry and the original `nowMs` callable with its receiver in a wrapper. Java constructs a `Deadline` using the original clock supplier and expiry. Neither resets the deadline.
+
+### Protected bindings
+
+Supply exactly the union of the parameters marked `binding: host` across all calls in the prepared plan. The runtime checks them before any step runs, including parameters used only by guarded calls whose guard will be false. One value supplies a name shared by several calls and must satisfy every declared type for that name. Missing, extra or mistyped fields fail with `HOST_BINDING_INVALID` at `/hostBindings`.
+
+For the [follow-up rule](../../conformance/generic-hooks/effect4/source.yaml), supply `{actorId: "user1"}` in Node or `Map.of("actorId", "user1")` in Java. For the [no-call rule](../../conformance/generic-hooks/effect4/source-no-call.yaml) against the same [DCM](../../conformance/generic-hooks/effect4/dcm.json), supply `{}` or `Map.of()`. The no-call plan still needs the other invocation fields and a complete implementation map at binding.
+
+<a id="request-key"></a>
+### Original request key and authority
+
+The host supplies one immutable native key. Every reached READ or WRITE implementation receives that exact original value or object, separately from business and protected arguments. The runtime never substitutes a source value, hashes, stringifies or appends a step suffix. The host owns persistent serialization and rehydration. A rehydrated key must represent the same original native identity.
+
+The host implementation checks current permissions, key authenticity and event provenance before performing an operation. The host also owns its domain invariants, transport, storage and concurrency. The current runtime has no separate authorization callback or key validator. A plan that reaches no capability can complete without calling a native authorization or key-authentication check, while invocation and resource validation still apply. Keep caller identity, keys and authorization decisions out of shared prepared handles.
+
+Implementations can call local code or remote services. The host owns service routing, credentials, identity propagation and transport. Pass the remaining budget without restarting it, and check the absolute deadline before native commit. An implementation denial counts as an attempted call. It establishes a definite no-effect outcome only when the implementation supplies the evidence defined in [Write evidence](runtime.md#write-evidence). Native reconciliation is a separate host observation. It cannot replace the original runtime receipt.
 
 ## Exact reference artifact
 
-The artifact's `modelRef` is exactly `{domainId, domainVersion, format, digest, descriptorRecipe}`. The domain fields and format match the bound DCM. The digest covers the complete [canonical DCM](compiler-artifact.md#canonical-bytes-and-digest-rules). The descriptor recipe identifies the [record descriptor rules](compiler-artifact.md#descriptortype-bridge). Reject unsupported recipes and any mismatch. See [exact values](../internal/implementation-reference.md#serialized-identifiers-and-compiler-selectors) for the format and recipe identifiers.
+See [Model reference](compiler-artifact.md#model-reference) for the exact fields and identity. Preparation compares all of them against the bound DCM.
 
 <a id="legacy-read1-effect1-read2-effect2-and-effect3"></a>
 <a id="implementation-reference-earlier-binding-contracts"></a>
@@ -60,4 +94,4 @@ The artifact's `modelRef` is exactly `{domainId, domainVersion, format, digest, 
 <a id="equivalent-host-sketches"></a>
 <a id="conformance-obligations"></a>
 
-[Earlier binding and invocation contracts](../internal/compatibility-reference.md#earlier-binding).
+[Earlier binding and invocation contracts](../internal/history/compatibility-reference.md#earlier-binding).

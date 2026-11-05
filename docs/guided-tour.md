@@ -1,28 +1,18 @@
 <a id="how-keir-works-a-guided-tour"></a>
 <a id="what-keir-does"></a>
+<a id="how-keir-works"></a>
 # How Keir works
 
-Keir is a framework for adding customer-defined rules to an application. A developer decides which events and operations the application exposes. Customers can use those operations to define behavior that the application has no built-in setting for.
-
-For example, a task app already knows when a task is completed and how to create a task. A customer wants to combine those features into a rule:
-
-> When a task is completed in the launch project, create a follow-up task.
+The follow-up walkthrough is now in [Getting started](quickstart.md). It shows the model, the extension, and how to edit and run it.
 
 <a id="host-design-time"></a>
-## Define what a rule can do
-
-The application developer adds a **hook**, a point where the application can run a rule. This hook runs after a task is completed and passes the task’s ID to the rule. The developer exposes two operations the rule can call: read a task and create a task.
+<a id="define-what-a-rule-can-do"></a>
+See [define what the host exposes](embedding.md#1-define-what-the-host-exposes) for the application’s model and operations.
 
 <a id="customer-extension-design"></a>
-## Write and review a rule
-
-An AI assistant can write a Keir rule from the customer’s request. The rule reads the completed task, checks its project, and requests a follow-up when the project matches. Keir’s compiler checks the rule against the application’s contract, including which operations it can call and what data they accept.
-
-Before enabling the rule, the customer can review a simulation. A completed launch task should get a follow-up. A completed task in another project should leave the task list unchanged. The simulation uses sample data to show what the rule would request.
+<a id="write-and-review-a-rule"></a>
+See [change the extension and compile it](quickstart.md#change-the-extension-and-compile-it) for the authoring steps.
 
 <a id="runtime"></a>
-## Run the approved rule
-
-When a task is completed, the application passes the event to Keir. Keir runs the compiled rule and passes any requested operation back to the application. The application checks permissions and performs the operation through its own services. If follow-up creation fails, the original task remains completed.
-
-[Run the example](quickstart.md) · [Read the integration contracts](specs/README.md)
+<a id="run-the-approved-rule"></a>
+See [bind, prepare and run](embedding.md#3-bind-prepare-and-run) for execution and host responsibilities.

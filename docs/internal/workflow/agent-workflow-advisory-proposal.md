@@ -83,7 +83,7 @@ These paths describe files that exist today or will be created by this bootstrap
 3. Run a local checker/reporter probe with explicit evidence and report any prerequisites that are unavailable. The current uncommitted repository prevents a complete Git-diff probe; do not claim one succeeded.
 4. Leave `.claude/settings.json`, `.claude/hooks/`, `.codex/hooks.json`, `.github/workflows/`, `.github/CODEOWNERS`, branch protection, pre-push hooks, and global tool settings untouched. Write no CI workflow proposal that implies it has been approved for installation. Revisit enforcement separately when the user wants it.
 
-The installed files and probe results are recorded in [the bootstrap summary](agent-workflow-bootstrap-summary.md).
+The installed files and probe results are recorded in [the bootstrap summary](../history/workflow-bootstrap-summary.md).
 
 This is an intentional advisory subset of the upstream bootstrap. Its ordinary full path assumes PR-running CI and installs native hooks; those would conflict with the current direct-to-`main` requirement. Skill files are present, but this proposal does not call that a completed full integration.
 

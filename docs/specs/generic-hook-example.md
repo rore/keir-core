@@ -8,4 +8,4 @@
 <a id="run-the-example"></a>
 <a id="acceptance-obligations"></a>
 
-[Earlier follow-up walkthrough](../internal/compatibility-reference.md#earlier-follow-up).
+[Earlier follow-up walkthrough](../internal/history/compatibility-reference.md#earlier-follow-up).
