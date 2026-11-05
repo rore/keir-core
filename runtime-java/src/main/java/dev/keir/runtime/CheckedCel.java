@@ -47,7 +47,7 @@ final class CheckedCel {
         int descriptorBytes() { return descriptorBytes; }
     }
 
-    static Model bindModel2(Map<String,Object> dcm) {
+    static Model bindModel(Map<String,Object> dcm) {
         var descriptors = expectedDescriptors(dcm);
         int size = descriptors.getSerializedSize();
         if (size > 65_536) throw new RuntimeFault("BUDGET_EXCEEDED","/binding/dcm/types");
@@ -95,22 +95,7 @@ final class CheckedCel {
         }
     }
 
-    static Bundle prepare(Artifact.Plan plan) {
-        if (Set.of("keir-read/2","keir-effect/2","keir-effect/3","keir-effect/4").contains(plan.document().get("profile")))
-            return prepare2(plan,bindModel2(plan.dcm()));
-        Map<String,Object> dcm = plan.dcm();
-        byte[] descriptors = base64(plan.document().get("descriptors"), 65_536, "/artifact/descriptors");
-        DescriptorProtos.FileDescriptorSet decoded = decode(DescriptorProtos.FileDescriptorSet.parser(),
-                DescriptorProtos.FileDescriptorSet.getDescriptor(), descriptors, "/artifact/descriptors");
-        require(Arrays.equals(descriptors, deterministic(expectedDescriptors(dcm))), "/artifact/descriptors");
-        try {
-            var file = Descriptors.FileDescriptor.buildFrom(decoded.getFile(0), new Descriptors.FileDescriptor[0]);
-            return prepare2(plan,new Model(dcm,file,descriptors.length));
-        } catch (RuntimeFault failure) { throw failure; }
-        catch (Exception failure) { throw new RuntimeFault("ARTIFACT_INVALID", EXPRESSIONS); }
-    }
-
-    static Bundle prepare2(Artifact.Plan plan, Model model) {
+    static Bundle prepare(Artifact.Plan plan, Model model) {
         require(model != null && model.dcm.equals(plan.dcm()),"/artifact/modelRef");
         Map<String,Object> dcm = model.dcm;
         try {
@@ -124,11 +109,11 @@ final class CheckedCel {
                 var source = checked.getSourceInfo();
                 require(source.getSyntaxVersion().isEmpty() && source.getExtensionsCount() == 0
                         && source.getMacroCallsCount() == 0
-                        && Set.of("<input>", "keir-read/1").contains(source.getLocation()), EXPRESSIONS);
+                        && "<input>".equals(source.getLocation()), EXPRESSIONS);
                 require(source.getLineOffsetsList().stream().allMatch(n -> n >= 0 && n <= 513)
                         && source.getPositionsMap().values().stream().allMatch(n -> n >= 0 && n <= 512), EXPRESSIONS);
                 Map<String,Object> variables = map(context.get("variables"), EXPRESSIONS);
-                var gate = new Gate(dcm, checked, variables, "keir-effect/4".equals(plan.document().get("profile")));
+                var gate = new Gate(dcm, checked, variables);
                 Value result = gate.visit(checked.getExpr(), 1);
                 String resultType = (String)context.get("resultType");
                 require(Artifact.scalar(dcm, resultType) && gate.assignable(result, resultType), EXPRESSIONS);
@@ -166,12 +151,10 @@ final class CheckedCel {
     private static final class Gate {
         private final Map<String,Object> dcm, variables;
         private final CheckedExpr checked;
-        private final boolean allowStringConcatenation;
         private final Set<Long> ids = new HashSet<>(), references = new HashSet<>();
 
-        Gate(Map<String,Object> dcm, CheckedExpr checked, Map<String,Object> variables, boolean allowStringConcatenation) {
+        Gate(Map<String,Object> dcm, CheckedExpr checked, Map<String,Object> variables) {
             this.dcm = dcm; this.checked = checked; this.variables = variables;
-            this.allowStringConcatenation = allowStringConcatenation;
         }
 
         Value visit(Expr expression, int depth) {
@@ -205,7 +188,7 @@ final class CheckedCel {
             } else if (expression.hasCallExpr()) {
                 var call = expression.getCallExpr();
                 String function = call.getFunction();
-                boolean concatenate = allowStringConcatenation && function.equals("_+_");
+                boolean concatenate = function.equals("_+_");
                 String overload = concatenate ? "add_string" : OVERLOADS.get(function);
                 int arity = function.equals("!_") ? 1 : function.equals("_?_:_") ? 3 : 2;
                 require(overload != null && !call.hasTarget() && call.getArgsCount() == arity, EXPRESSIONS);
