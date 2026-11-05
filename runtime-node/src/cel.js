@@ -7,6 +7,7 @@ import { Fault, requireThat as ok, validateValue } from './validation.js';
 
 const pairs = { '_==_': ['equals', 2], '_!=_': ['not_equals', 2], '!_': ['logical_not', 1], '_&&_': ['logical_and', 2], '_||_': ['logical_or', 2], '_?_:_': ['conditional', 3] };
 const p = '/artifact/expressions';
+const stringConcatenation = ['add_string', 2];
 function base64(value, max, path) {
   ok(typeof value === 'string' && value.length > 0 && value.length <= Math.ceil(max / 3) * 4 && /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value), path);
   const bytes = Buffer.from(value, 'base64');
@@ -123,12 +124,14 @@ export function prepareExpressions(artifact, contexts, model) {
         ok(record?.kind === 'record' && Object.hasOwn(record.fields, value.field), p);
         inferred = { type: record.fields[value.field] };
       } else if (kind.case === 'callExpr') {
-        const pair = pairs[value.function];
-        ok(Object.hasOwn(pairs, value.function) && !value.target && value.args.length === pair[1], p);
+        const concatenate = artifact.profile === 'keir-effect/4' && value.function === '_+_';
+        const pair = concatenate ? stringConcatenation : Object.hasOwn(pairs, value.function) ? pairs[value.function] : undefined;
+        ok(pair && !value.target && value.args.length === pair[1], p);
         const ref = checked.referenceMap[node];
         ok(ref && ref.name === '' && ref.value === undefined && ref.overloadId.length === 1 && ref.overloadId[0] === pair[0], p); references.add(node);
         const args = value.args.map(arg => visit(arg, depth + 1));
-        if (['_==_', '_!=_'].includes(value.function)) { equality(args[0], args[1]); inferred = { type: 'Boolean' }; }
+        if (concatenate) { ok(args.every(arg => arg.type === 'String'), p); inferred = { type: 'String' }; }
+        else if (['_==_', '_!=_'].includes(value.function)) { equality(args[0], args[1]); inferred = { type: 'Boolean' }; }
         else if (value.function === '_?_:_') { ok(args[0].type === 'Boolean', p); inferred = joinBranches(args[1], args[2]); }
         else { ok(args.every(arg => arg.type === 'Boolean'), p); inferred = { type: 'Boolean' }; }
       } else throw new Fault('ARTIFACT_INVALID', p);

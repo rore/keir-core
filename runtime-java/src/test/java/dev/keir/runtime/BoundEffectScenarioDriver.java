@@ -23,7 +23,9 @@ public final class BoundEffectScenarioDriver {
     private static final Set<String> CASES=Set.of("simulation-main","simulation-zero","simulation-after-write-read","simulation-no-call",
             "real-main","real-zero","real-after-write-read","real-no-call","missing-implementation","mixed-mode","unsupported-compiler",
             "empty-catalog","denied-entry","invalid-key","denied-write","denied-pending-native","denied-after-confirmed","expired-entry",
-            "false-guard","definite-mismatch","transient-none","unknown-commit","lost-response","malformed-confirmed-value","confirmed-response-expired");
+            "false-guard","definite-mismatch","transient-none","unknown-commit","lost-response","malformed-confirmed-value","confirmed-response-expired",
+            "title-unicode","title-256","title-257","title-max","title-forged","title-nominal","title-enum",
+            "title-composed-valid","title-composed-overflow","title-simulation");
     private BoundEffectScenarioDriver() {}
     public static void main(String[] args) { System.exit(run(args,System.out,System.err)); }
 
@@ -70,12 +72,14 @@ public final class BoundEffectScenarioDriver {
         volatile long now;
 
         Fixture(String id) throws IOException {
-            this.id=id;program=id.endsWith("-no-call") || id.equals("empty-catalog")?"no-call":id.endsWith("-zero")?"zero":
+            this.id=id;program=id.startsWith("title-composed-")?"title-composed":id.equals("title-max")?"title-max":id.startsWith("title-")?"title":
+                    id.endsWith("-no-call") || id.equals("empty-catalog")?"no-call":id.endsWith("-zero")?"zero":
                     id.contains("after-write-read") || id.equals("denied-after-confirmed")?"after-write-read":"main";
             String name=program.equals("main")?"artifact":"artifact-"+program;
-            bytes=resource(name+".json",Profile.ARTIFACT_BYTES);dcmBytes=resource("dcm.json",Profile.DCM_BYTES);
-            check(digest(bytes).equals(pin(name+".sha256")) && digest(dcmBytes).equals(pin("dcm.sha256")),"Independent host-bound pin differs");
-            dcm=map(parseJson(dcmBytes,Profile.DCM_BYTES),"");String mode=id.startsWith("simulation-")?"simulation":"real";
+            String model=program.startsWith("title")?"dcm-title":"dcm";
+            bytes=resource(name+".json",Profile.ARTIFACT_BYTES);dcmBytes=resource(model+".json",Profile.DCM_BYTES);
+            check(digest(bytes).equals(pin(name+".sha256")) && digest(dcmBytes).equals(pin(model+".sha256")),"Independent host-bound pin differs");
+            dcm=map(parseJson(dcmBytes,Profile.DCM_BYTES),"");String mode=id.startsWith("simulation-")||id.equals("title-simulation")?"simulation":"real";
             for(var registration:map(dcm.get("capabilities"),"").entrySet()) {
                 String capability=registration.getKey();Map<String,Object> cap=map(registration.getValue(),"");
                 String version=(String)cap.get("version"),keyType=(String)map(dcm.get("hostKey"),"").get("type");
@@ -94,7 +98,9 @@ public final class BoundEffectScenarioDriver {
                         nativeActions.add(capability);
                         if(!write) {
                             if(id.equals("denied-write"))allowed=false;
-                            return Map.of("kind","SUCCESS","value",Map.of("id",args.get("taskId"),"projectId",id.equals("false-guard")?"project2":"project1","status","COMPLETED"));
+                            var task=new LinkedHashMap<>(Map.of("id",args.get("taskId"),"projectId",id.equals("false-guard")||id.equals("title-composed-overflow")?"project2":"project1","status","COMPLETED"));
+                            if(program.startsWith("title"))task.put("title",id.equals("title-unicode")||id.equals("title-simulation")?"Résumé 🚀":"x".repeat(id.equals("title-256")?255:256));
+                            return Map.of("kind","SUCCESS","value",task);
                         }
                         if(id.equals("denied-after-confirmed"))allowed=false;
                         if(id.equals("confirmed-response-expired"))now=1000;
@@ -131,6 +137,25 @@ public final class BoundEffectScenarioDriver {
             fixture.dcm.put("capabilities",Map.of());dcmBytes=canonical(fixture.dcm);implementations=Map.of();
             var artifact=map(parseCanonical(bytes),"");artifact.put("modelRef",Artifact.modelRef(fixture.dcm));bytes=canonical(artifact);
         }
+        if(Set.of("title-forged","title-nominal","title-enum").contains(id)) {
+            var artifact=map(parseCanonical(bytes),"");
+            if(id.equals("title-forged")) {
+                var context=map(map(artifact.get("expressions"),"").get("e3"),"");
+                var checked=dev.cel.expr.CheckedExpr.parseFrom(Base64.getDecoder().decode((String)context.get("checked")));
+                var ref=checked.getReferenceMapMap().get(checked.getExpr().getId());
+                check(ref.getOverloadIdList().equals(List.of("add_string")),"Unexpected compiler overload");
+                checked=checked.toBuilder().putReferenceMap(checked.getExpr().getId(),ref.toBuilder().setOverloadId(0,"add_uint64").build()).build();
+                var output=new java.io.ByteArrayOutputStream();
+                var wire=com.google.protobuf.CodedOutputStream.newInstance(output);
+                wire.useDeterministicSerialization();checked.writeTo(wire);wire.flush();
+                context.put("checked",Base64.getEncoder().encodeToString(output.toByteArray()));
+            } else {
+                var task=map(map(fixture.dcm.get("types"),"").get("Task"),"");
+                map(task.get("fields"),"").put("title",id.equals("title-nominal")?"TaskId":"TaskStatus");
+                dcmBytes=canonical(fixture.dcm);artifact.put("modelRef",Artifact.modelRef(fixture.dcm));
+            }
+            bytes=canonical(artifact);
+        }
         var binding=KeirRuntime.bindModel(dcmBytes,implementations);
         if(!binding.succeeded())return rejected(id,"binding",binding.diagnostic(),fixture.calls.size());
         if(id.equals("unsupported-compiler")) {var artifact=map(parseCanonical(bytes),"");artifact.put("compiler","unsupported");bytes=canonical(artifact);}
@@ -144,6 +169,7 @@ public final class BoundEffectScenarioDriver {
         facts.put("calls",fixture.calls.stream().map(call->call.get("capability")).toList());facts.put("effects",outcome.effects().stream().map(effect->effect.get("state")).toList());
         facts.put("nativeActions",fixture.nativeActions);facts.put("reported",consumption.get("status"));
         if(outcome.result()!=null)facts.put("result",outcome.result());if(outcome.error()!=null)facts.put("error",outcome.error());
+        if(fixture.program.startsWith("title")&&fixture.calls.size()==2)facts.put("createdTitle",map(fixture.calls.get(1).get("args"),"").get("title"));
         return Map.of("id",id,"facts",facts,"outcome",outcome.toMap(),"calls",fixture.calls,"consumption",consumption);
     }
 

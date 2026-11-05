@@ -37,6 +37,22 @@ export function verifyGeneric({ repo = repository, run }) {
     expected[profile] = scenarios.map(row => ({ id: row.id, ...row.expect }));
   }
   const javaRows = parse(run(java, ['-cp', `${hostJar}${delimiter}${classes}`, 'dev.keir.runtime.GenericScenarioDriver'], 'Java generic shared batch'));
+  const titleDirectory = directories.effect4;
+  const titleDcm = resolve(titleDirectory, 'dcm-title.json');
+  const titleFiles = ['dcm-title.json', 'dcm-title.sha256'];
+  assert.equal(`sha256:${createHash('sha256').update(readFileSync(titleDcm)).digest('hex')}`,
+    readFileSync(resolve(titleDirectory, 'dcm-title.sha256'), 'utf8').trim());
+  for (const variant of ['title', 'title-max', 'title-composed']) {
+    const artifactFile = `artifact-${variant}.json`, pinFile = `artifact-${variant}.sha256`;
+    const args = ['-jar', compiler, resolve(titleDirectory, `source-${variant}.yaml`), titleDcm, '--profile=keir-effect/4'];
+    const first = run(java, args, `First ${variant} compiler run`);
+    assert.deepEqual(first, run(java, args, `Second ${variant} compiler run`));
+    compilerRuns += 2;
+    assert.deepEqual(first, readFileSync(resolve(titleDirectory, artifactFile)));
+    assert.equal(`sha256:${createHash('sha256').update(first).digest('hex')}`, readFileSync(resolve(titleDirectory, pinFile), 'utf8').trim());
+    titleFiles.push(artifactFile, pinFile);
+  }
+  for (const file of titleFiles) assert.deepEqual(readFileSync(resolve(classes, 'generic-hooks/effect4', file)), readFileSync(resolve(titleDirectory, file)));
   const nodeRows = parse(run(process.execPath, [resolve(repo, 'conformance/generic-hooks/run-node.mjs')], 'Node generic shared batch'));
   assert.deepEqual(javaRows, Object.fromEntries(Object.entries(expected).filter(([profile]) => profile !== 'effect4')), 'Java legacy generic results differ from independently authored expectations');
   for (const profile of ['read', 'effect', 'effect3', 'effect4']) {

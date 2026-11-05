@@ -468,5 +468,181 @@
         "path": "/steps/3"
       }
     }
+  },
+  {
+    "id": "title-unicode",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "CREATED"
+      },
+      "createdTitle": "Résumé 🚀!"
+    }
+  },
+  {
+    "id": "title-256",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "CREATED"
+      },
+      "createdTitle": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx!"
+    }
+  },
+  {
+    "id": "title-257",
+    "expect": {
+      "phase": "invocation",
+      "classification": "LIMIT_EXCEEDED",
+      "calls": [
+        "tasks.get"
+      ],
+      "effects": [],
+      "nativeActions": [
+        "tasks.get"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "BUDGET_EXCEEDED",
+        "path": "/steps/3"
+      }
+    }
+  },
+  {
+    "id": "title-max",
+    "expect": {
+      "phase": "invocation",
+      "classification": "LIMIT_EXCEEDED",
+      "calls": [
+        "tasks.get"
+      ],
+      "effects": [],
+      "nativeActions": [
+        "tasks.get"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "BUDGET_EXCEEDED",
+        "path": "/steps/4"
+      }
+    }
+  },
+  {
+    "id": "title-forged",
+    "expect": {
+      "phase": "preparation",
+      "code": "ARTIFACT_INVALID",
+      "path": "/artifact/expressions",
+      "calls": 0
+    }
+  },
+  {
+    "id": "title-nominal",
+    "expect": {
+      "phase": "preparation",
+      "code": "ARTIFACT_INVALID",
+      "path": "/artifact/expressions",
+      "calls": 0
+    }
+  },
+  {
+    "id": "title-enum",
+    "expect": {
+      "phase": "preparation",
+      "code": "ARTIFACT_INVALID",
+      "path": "/artifact/expressions",
+      "calls": 0
+    }
+  },
+  {
+    "id": "title-composed-valid",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "CREATED"
+      },
+      "createdTitle": "Valid title"
+    }
+  },
+  {
+    "id": "title-composed-overflow",
+    "expect": {
+      "phase": "invocation",
+      "classification": "LIMIT_EXCEEDED",
+      "calls": [
+        "tasks.get"
+      ],
+      "effects": [],
+      "nativeActions": [
+        "tasks.get"
+      ],
+      "reported": "REPORTED",
+      "error": {
+        "code": "BUDGET_EXCEEDED",
+        "path": "/steps/3"
+      }
+    }
+  },
+  {
+    "id": "title-simulation",
+    "expect": {
+      "phase": "invocation",
+      "classification": "COMPLETED",
+      "calls": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "effects": [
+        "CONFIRMED"
+      ],
+      "nativeActions": [
+        "tasks.get",
+        "tasks.create"
+      ],
+      "reported": "REPORTED",
+      "result": {
+        "status": "CREATED"
+      },
+      "createdTitle": "Résumé 🚀!"
+    }
   }
 ]

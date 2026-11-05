@@ -15,6 +15,23 @@ import static dev.keir.runtime.RuntimeData.*;
 import static dev.keir.runtime.GenericRuntimeTest.*;
 
 class BoundEffectRuntimeTest {
+    @Test void pinnedCelEvaluatesTheLargestAdmittedConcatenationTreeTo8192Bytes() throws Exception {
+        var artifact=document(file("effect4","artifact-title-max.json"));
+        var step=map(list(artifact.get("steps"),"").getLast(),"");
+        var title=map(map(step.get("args"),"").get("title"),"");
+        var expression=map(map(artifact.get("expressions"),"").get(title.get("expr")),"");
+        var checked=CheckedExpr.parseFrom(Base64.getDecoder().decode((String)expression.get("checked")));
+        assertEquals(63,checked.getTypeMapCount());
+        assertEquals(31,checked.getReferenceMapMap().values().stream().filter(ref->ref.getOverloadIdList().equals(List.of("add_string"))).count());
+        var runtime=dev.cel.runtime.CelRuntimeFactory.plannerRuntimeBuilder()
+                .setOptions(dev.cel.common.CelOptions.current().enableHeterogeneousNumericComparisons(true)
+                        .comprehensionMaxIterations(0).build()).build();
+        var program=runtime.createProgram(dev.cel.common.CelProtoAbstractSyntaxTree.fromCheckedExpr(checked).getAst());
+        String value=(String)program.eval(Map.of("base","é".repeat(128)));
+        assertEquals("é".repeat(4096),value);
+        assertEquals(8192,value.getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
+    }
+
     private static Map<String,Object> model() throws Exception {
         return map(parseJson(file("effect4","dcm.json"),Profile.DCM_BYTES),"");
     }

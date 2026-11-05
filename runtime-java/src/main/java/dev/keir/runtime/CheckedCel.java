@@ -128,7 +128,7 @@ final class CheckedCel {
                 require(source.getLineOffsetsList().stream().allMatch(n -> n >= 0 && n <= 513)
                         && source.getPositionsMap().values().stream().allMatch(n -> n >= 0 && n <= 512), EXPRESSIONS);
                 Map<String,Object> variables = map(context.get("variables"), EXPRESSIONS);
-                var gate = new Gate(dcm, checked, variables);
+                var gate = new Gate(dcm, checked, variables, "keir-effect/4".equals(plan.document().get("profile")));
                 Value result = gate.visit(checked.getExpr(), 1);
                 String resultType = (String)context.get("resultType");
                 require(Artifact.scalar(dcm, resultType) && gate.assignable(result, resultType), EXPRESSIONS);
@@ -166,10 +166,12 @@ final class CheckedCel {
     private static final class Gate {
         private final Map<String,Object> dcm, variables;
         private final CheckedExpr checked;
+        private final boolean allowStringConcatenation;
         private final Set<Long> ids = new HashSet<>(), references = new HashSet<>();
 
-        Gate(Map<String,Object> dcm, CheckedExpr checked, Map<String,Object> variables) {
+        Gate(Map<String,Object> dcm, CheckedExpr checked, Map<String,Object> variables, boolean allowStringConcatenation) {
             this.dcm = dcm; this.checked = checked; this.variables = variables;
+            this.allowStringConcatenation = allowStringConcatenation;
         }
 
         Value visit(Expr expression, int depth) {
@@ -202,7 +204,9 @@ final class CheckedCel {
                 value = new Value((String)fields.get(select.getField()));
             } else if (expression.hasCallExpr()) {
                 var call = expression.getCallExpr();
-                String function = call.getFunction(), overload = OVERLOADS.get(function);
+                String function = call.getFunction();
+                boolean concatenate = allowStringConcatenation && function.equals("_+_");
+                String overload = concatenate ? "add_string" : OVERLOADS.get(function);
                 int arity = function.equals("!_") ? 1 : function.equals("_?_:_") ? 3 : 2;
                 require(overload != null && !call.hasTarget() && call.getArgsCount() == arity, EXPRESSIONS);
                 var reference = checked.getReferenceMapMap().get(id);
@@ -211,7 +215,10 @@ final class CheckedCel {
                 references.add(id);
                 List<Value> args = new ArrayList<>();
                 for (Expr argument : call.getArgsList()) args.add(visit(argument, depth + 1));
-                if (function.equals("_==_") || function.equals("_!=_")) {
+                if (concatenate) {
+                    require(args.stream().allMatch(arg -> arg.type().equals("String")), EXPRESSIONS);
+                    value = new Value("String");
+                } else if (function.equals("_==_") || function.equals("_!=_")) {
                     Value left = args.get(0), right = args.get(1);
                     require(Artifact.scalar(dcm, left.type()) && Artifact.scalar(dcm, right.type()), EXPRESSIONS);
                     require(left.type().equals(right.type()) || isEnum(left.type()) && right.literals() != null && assignable(right, left.type())

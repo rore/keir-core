@@ -176,7 +176,8 @@ final class Expressions {
             if (!expr.hasCallExpr()) throw new CompileFailure("CEL_POLICY_DENIED", path);
             var call = expr.getCallExpr();
             String function = call.getFunction();
-            String overload = OVERLOADS.get(function);
+            boolean concatenate = function.equals("_+_") && "keir-dcm/effect-4".equals(dcm.root().get("format"));
+            String overload = concatenate ? "add_string" : OVERLOADS.get(function);
             int arity = function.equals("!_") ? 1 : function.equals("_?_:_") ? 3 : 2;
             var reference = checked.getReferenceMapMap().get(expr.getId());
             if (overload == null || call.hasTarget() || call.getArgsCount() != arity
@@ -184,6 +185,10 @@ final class Expressions {
                 fail("CEL_POLICY_DENIED", path);
             var args = new ArrayList<Value>();
             for (Expr arg : call.getArgsList()) args.add(visit(arg, depth + 1));
+            if (concatenate) {
+                if (args.stream().anyMatch(arg -> !arg.type().equals("String"))) fail("CEL_POLICY_DENIED", path);
+                return new Value("String");
+            }
             if (function.equals("_?_:_")) {
                 if (!args.get(0).type().equals("Boolean")) fail("TYPE_MISMATCH", path);
                 return branches(args.get(1), args.get(2));
