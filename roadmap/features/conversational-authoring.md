@@ -62,6 +62,8 @@ Arbitrary generated application UI/code, agent certification, automatic approval
 
 **Same-project follow-ups:** Studio guidance now explains how to reuse a completed task's project and title for a new task. Isolated tests verified native execution in two projects and no duplicate on replay. A from-empty OpenAI run on synthetic tasks reached review with three passing examples. Both completed tasks got a correctly titled follow-up in their source project, and the unfinished task produced no write. The run preserved tasks, approvals and selections. See the [Work Record](../../.agent-workflow/tasks/daymark-same-project-followup.md).
 
+**Saved review continuity:** The same conversation can reopen the current checked draft after a follow-up question. The browser replay verified the exact evidence and kept checks, tasks, approval and activation unchanged. The correction is on Daymark main and in the existing preview. An isolated live-provider attempt timed out before invoking the reopened review. See the [Work Record](../../.agent-workflow/tasks/daymark-resume-checked-review.md).
+
 **Dependencies:** [extension-studio-design](extension-studio-design.md); [extension-approval-lifecycle](../features/extension-approval-lifecycle.md); [machine-readable-contracts](../features/machine-readable-contracts.md); [reusable-simulation](../features/reusable-simulation.md).
 
 **Design input:** [Customer authoring and approval, sections 1 and 6-7](../../docs/internal/design-baseline/public/simulation-and-authoring-v0.md); [Application authoring UX, section 5](../../docs/internal/design-baseline/public/task-management-poc.md).
