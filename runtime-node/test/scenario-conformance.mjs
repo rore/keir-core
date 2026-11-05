@@ -207,7 +207,7 @@ async function run(entry) {
     assert.equal(entry.schemaValid, true, 'Scenario schema');
     phase = 'byte-fields';
     byteFields(document);
-    if (entry.expected === 'accept-byte-fields') return { phase: 'accept-byte-fields' };
+    if (entry.expected === 'accept-byte-fields') return { phase: 'accept-byte-fields', dispatchCount: captures.length };
 
     phase = 'compatibility';
     const pair = groups.get(entry.group);
@@ -282,13 +282,17 @@ async function run(entry) {
     });
     const consumption = consumeEffect(outcome);
     assert.deepEqual({ outcome, calls, consumption }, document.expect, 'Scenario runtime report');
-    return { phase: 'accept', report: { id: document.id, outcome, calls, consumption } };
+    return {
+      phase: 'accept',
+      dispatchCount: captures.length,
+      report: { group: entry.group, id: document.id, calls, outcome, consumption },
+    };
   } catch (error) {
     if (!(error instanceof assert.AssertionError) || phase !== entry.expected) {
       throw new Error(entry.label + ' at ' + phase + ': ' + error.message, { cause: error });
     }
     assert.equal(captures.length, 0, 'Rejected scenario dispatched a native stub');
-    return { phase };
+    return { phase, dispatchCount: captures.length };
   }
 }
 
@@ -322,9 +326,9 @@ const scenarioReports = [];
 const ids = new Set();
 for (const scenario of scenarios) {
   if (!scenario.schemaValid) continue;
-  const { id } = scenario.document;
-  assert.ok(!ids.has(id), 'Duplicate scenario id ' + id);
-  ids.add(id);
+  const key = scenario.group + '/' + scenario.document.id;
+  assert.ok(!ids.has(key), 'Duplicate scenario id ' + key);
+  ids.add(key);
 }
 for (const scenario of scenarios) {
   const { report } = await run(scenario);
@@ -332,8 +336,8 @@ for (const scenario of scenarios) {
 }
 const vectorReports = [];
 for (const entry of vectors) {
-  const { phase } = await run(entry);
+  const { phase, dispatchCount } = await run(entry);
   assert.equal(phase, entry.expected, entry.label);
-  vectorReports.push({ id: entry.label, phase });
+  vectorReports.push({ id: entry.label, phase, dispatchCount });
 }
 process.stdout.write(JSON.stringify({ scenarios: scenarioReports, vectors: vectorReports }) + '\n');
