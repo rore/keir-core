@@ -22,4 +22,4 @@ A rule can read data and request at most one change per run. Java and Node.js ru
 - [Contributing](CONTRIBUTING.md)
 - [Roadmap](roadmap/scope.md)
 
-License selection and public release are pending. No open-source license grant is implied.
+Keir Core is licensed under the [Apache License 2.0](LICENSE). Public package releases are planned.
