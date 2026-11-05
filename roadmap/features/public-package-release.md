@@ -16,7 +16,7 @@ The first public milestone supports at most one mutation per run with the existi
 
 ## In Scope
 
-- Choose license, coordinates/version policy, support scope and publication authority; keep experimental versus production claims explicit.
+- Use Apache 2.0. Set package coordinates, version and support policy, and publication authority.
 - Publish Java compiler/runtime and Node runtime packages, checked quickstarts and a supported dependency/profile compatibility matrix.
 - Ship a versioned authoring package with the matching agent guide, schemas and examples. Record compatible compiler and runtime releases, profiles and DCM formats so a host can pin the package alongside its exact published model.
 - When a release changes what an agent can author, update the affected guidance, schemas and examples with the feature. Verify the packaged guide can teach an agent to use that behavior through the published model and host tools.
@@ -28,11 +28,13 @@ Requiring AI or every optional proposal before an experimental release, silently
 
 ## Done When
 
-- [ ] Design/spec: settle license/release authority, supported profiles, compatibility/deprecation policy and user-facing limits.
+- [ ] Design/spec: settle release authority, supported contracts, compatibility and deprecation policy, and user-facing limits.
 - [ ] Implementation: clean Java and Node consumers compile once and run the same artifact through documented package interfaces.
 - [ ] Verification: reproducible install/package checks, upgrade conformance and examples pass. A reference host consumes the compatible pinned authoring package. Publishing uses a separately authorized release action.
 
 ## Notes
+
+**GitHub release candidate:** Keir Core uses Apache 2.0. The first release will use GitHub Releases for the compiler CLI, npm tarball, Java Maven bundle, and authoring companion, with checksums and installation guidance. A draft pairs Java development builds and the Node development package with authoring companion version 2. The compiler and runtimes passed their regression suites and shared conformance. Independent package consumers ran the same compiled rule without the compiler installed and matched outcomes and traces. Final package versions, third-party compiler notices, and qualification of the final downloads are still open.
 
 **Authoring companion available from source:** Build and verify the versioned guide, schemas and examples as a deterministic ZIP. The verifier checks a trusted archive digest before inspecting its contents. The example compiled to the pinned artifact and its three cases match Java and Node conformance. The first reference-host integration is still open. [Authoring companion guide](../../docs/agents/authoring-companion.md)
 
