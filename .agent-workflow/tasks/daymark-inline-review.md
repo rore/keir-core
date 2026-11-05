@@ -37,7 +37,7 @@ Design reference: [Review inside the conversation](../../docs/internal/studio-in
 - Exercise stale, missing, failed and historical evidence; another active version; interrupted and duplicate actions. Assert that chat and opening evidence do not approve, activate or rerun checks.
 - Preserve earlier results and typed text through reload and later conversation turns. Use independent technical and rendered reviews, revise concrete findings and recheck the working app before normal preview delivery.
 
-**Plan review:** Pending independent review of the concrete implementation boundary.
+**Plan review:** Agent technical review: [Conditional client plan review](#conditional-client-plan-review). The exact-proof activation addendum needs independent review.
 
 **Approvals:** Approved to integrate the reviewed in-conversation design in Daymark. Existing approval and activation requirements remain in force for each customization.
 
@@ -46,4 +46,10 @@ Design reference: [Review inside the conversation](../../docs/internal/studio-in
 
 ## Delivery
 
-The user approved moving the reviewed design into the working demo. The Daymark developer accepted implementation ownership and verified the clean base at `36ade85`. Discovery maps the written design to the existing saved-review controller and evidence. The next checkpoint is the concrete implementation plan and its independent technical review. The split preview remains the deployed baseline.
+The user approved moving the reviewed design into the working demo. The Daymark developer accepted implementation ownership and verified the clean base at `36ade85`. The split preview remains the deployed baseline.
+
+## Conditional client plan review
+
+The independent reviewer checked the client plan at SHA-256 `876bab48fa3fbbaad831901799a94030950280e10f62ac6e8beb8c81a43b8ca8`. It passes with a fresh owner-bound state read after loading the saved evidence and source. That read must be independent of active-version comparison. Scroll and focus intent are separate from decision freshness.
+
+Turn-on must use the evidence the person saw. The current host can replace passing approval evidence for the same revision without changing the selection generation. A client read cannot prevent that race. Prepare and independently review a narrow activation precondition that compares the displayed approved evidence ID inside the existing transaction and rejects a mismatch before selection changes. Preserve the current authorization, revision, draft, suite and generation checks. Show that an intervening approval causes a conflict and leaves the prior selection intact. This addendum must pass before implementing the decision path. Keep the remaining client design and validation scope.
