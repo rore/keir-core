@@ -12,6 +12,8 @@ repo: "keir-core"
 
 Extend the existing scalar program to the selected invoice example: get/search, tag membership, conditional create and a due date 168 elapsed hours later.
 
+The first increment lets a task rule append a fixed suffix to a title using bounded string concatenation. Its compiler and runtime work can proceed alongside Daymark's versioned title read. [Implementation record](../../.agent-workflow/tasks/bounded-followup-title-concatenation.md).
+
 ## In Scope
 
 - Mature only the required bounded list, presence/optional, size, one non-nested exists, timestamp and elapsed-duration semantics.
