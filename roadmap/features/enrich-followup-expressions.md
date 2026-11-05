@@ -1,7 +1,7 @@
 ---
 id: "enrich-followup-expressions"
 title: "Add bounded tags, search and due dates to the follow-up example"
-status: "active"
+status: "queued"
 priority: "medium"
 commitment: "committed"
 milestone: "Extend host behavior safely"
@@ -12,7 +12,7 @@ repo: "keir-core"
 
 Extend the existing scalar program to the selected invoice example: get/search, tag membership, conditional create and a due date 168 elapsed hours later.
 
-The active increment lets a task rule append a fixed suffix to a title using bounded string concatenation. Its compiler and runtime work can proceed alongside Daymark's versioned title read. The invoice example remains queued. [Implementation record](../../.agent-workflow/tasks/bounded-followup-title-concatenation.md).
+The first increment delivered bounded string concatenation in the compiler and both runtimes. It supports appending a fixed suffix to a title. The shared contract suite passed, and Daymark consumed the verified packages for its [title rule](rich-task-customizations.md). The invoice example remains queued. [Implementation record](../../.agent-workflow/tasks/bounded-followup-title-concatenation.md).
 
 ## In Scope
 

@@ -57,3 +57,7 @@ Agent technical review: The independent architect accepted the checked expressio
 Reviewed revision: `9d7b5651b18f646c30e0efc448036579dad991e2`, directly above production candidate `84763506ad501ca0c6cb01103c8053803ad8adf1`.
 
 Verification adequacy: Both reviews and exact frozen evidence support core integration. The focused Java package run uses the current test driver and fixtures with the previously built production package. Daymark's compatibility and live suffix journey require separate verification.
+
+The [integrated revision](https://github.com/rore/keir-core/commit/9be8eb4af5694e14ab3efdc84c111c9449c0e68f) matches all 23 reviewed source and test paths. The [hosted contract suite](https://github.com/rore/keir-core/actions/runs/41997584091) and [Agent Workflow checks](https://github.com/rore/keir-core/actions/runs/41997583852) passed. Daymark consumed the verified packages for isolated integration.
+
+The core increment is delivered. After confirming package consumption, the developer removed the task checkout with Git. The manager verified its removal and the retained branch, source bundle and recovery evidence.
