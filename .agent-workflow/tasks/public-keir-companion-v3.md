@@ -35,7 +35,7 @@
 
 **Approvals:** Not required at this risk level.
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 [Owning feature](../../roadmap/features/public-package-release.md) · [Contract cutover design](../../docs/internal/public-contract-normalization.md)
@@ -45,6 +45,21 @@
 Discovery and scope are recorded above. The plan review narrowed links to bundled current inputs and separated asset checks from release qualification.
 
 The command now reads an explicit commit for edition 3 and checks the bundled contract inputs against the compatibility revision. The candidate row, guide, and archive tests are in place. Historical reproduction passed before candidate verification.
+
+## Evidence
+
+- Archive inputs at `117494fe3c5b18bde9ed72b4da1a79c663f67155` produced `sha256:5e2ca73cc56e1d36005928f8c00a83b47863ede4001a8283e725a211be9cb134`. Repeated builds matched. The candidate row names Core `94bdbb7` and has no release asset pins.
+- All seven companion tests passed. They cover v1 and v2 reproduction, v3 byte identity, the exact inventory, all ten guide links, offline verification, malformed metadata and complete release asset pins. Edition 2 also matched the previously verified release download byte for byte at `sha256:f073feaefe99e9dfe3b1dd818347f97cdca46c22a780bfb7e70992913aceac04`.
+- The bundled schemas validated all six example documents. The compiler rebuilt the archived artifact byte for byte at `sha256:fa5d170dc989e4cc59695ba84e1a8b68648599f07914a2843ad2fe671ef6605b`. The Java and Node packaged verification paths matched all three archived outcomes, traces, ordered calls and consumer reports. All ten schema and example members were identical in the final candidate and the qualified inputs.
+- The scope and privacy scan passed. Redline reported gray in shadow mode with zero boundary violations. The actual Java Maven ZIP inventory contains the runtime JAR and both the runtime and parent POMs.
+
+## Result review
+
+Agent technical review: Independent edition 3 result review.
+
+Reviewed revision: `117494fe3c5b18bde9ed72b4da1a79c663f67155`.
+
+Verification adequacy: Passed after disabling Git replacement objects, binding each release role to its versioned asset filename, explaining the lost-response fixture and correcting the companion navigation. Candidate checks and unchanged historical builds passed. The release owner still selects and qualifies the exact versioned assets, commits their compatibility row, and verifies the resulting archive pin before publication.
 
 ## Edition 3 plan review
 
