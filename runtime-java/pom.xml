@@ -19,6 +19,7 @@
   <build>
     <testResources>
       <testResource><directory>${project.basedir}/../conformance/keir-1</directory><targetPath>keir-1</targetPath></testResource>
+      <testResource><directory>${project.basedir}/../conformance/model-binding</directory><targetPath>model-binding</targetPath></testResource>
     </testResources>
   </build>
 </project>
