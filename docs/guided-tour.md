@@ -1,211 +1,57 @@
 # How Keir works: a guided tour
 
-Keir lets customers compose a host application's approved capabilities into new behavior. The host defines where extensions run and what they can access. Keir validates and executes the resulting programs. A host-integrated AI agent helps a customer describe, test and review a customization without writing code.
+Keir lets customers turn a host application's approved operations into custom behavior. The host defines where extensions run and what they can do. Customers choose the business logic, and Keir checks and runs it.
 
-This tour follows three stages: [host design time](#host-design-time), when the application developer defines the integration; [customer extension design](#customer-extension-design), when a customer authors and tests a customization; and [runtime](#runtime), when an event executes the selected program. For exact schemas and language rules, use the [specifications](specs/README.md) and [complete worked example](specs/generic-hook-example.md).
+> When a task completes in project `project1`, create a follow-up titled “Follow up.” For other projects, do nothing.
 
-**The scenario**
-
-A task-management application wants customers to customize what happens after a task completes. One customer asks:
-
-> When a task completes in project `project1`, create a follow-up task titled "Follow up". For other projects, do nothing.
-
-The host exposes a generic `TaskCompleted` event hook. The extension reads the task, checks its status and project, and conditionally requests a follow-up. It runs after the original completion commits, so it cannot undo that completion.
-
-| Role | Owns |
-| --- | --- |
-| Host application | Hook payload and result contract, approved capability catalog, service integrations, permissions, activation and result consumption |
-| Customer | The customization's business logic, selected project and follow-up title |
-| Keir | Source validation, compilation, simulation execution, runtime checks and execution outcomes |
-| Host-integrated agents | Help the host developer define the integration, or help the customer author and test a program; neither grants itself authority |
+This is the same `keir-effect/4` example used in the [Node and Java quickstart](quickstart.md). Follow it from [host design](#host-design-time) through [customer customization](#customer-extension-design) to [runtime](#runtime).
 
 ## Host design time
 
-### 1. The host defines the hook and domain model
+The application developer defines a **domain capability model (DCM)**. The `TaskCompleted` hook is the integration point. The host invokes it after task completion commits, supplies a `taskId` as input, and expects a program result with status `CREATED` or `NO_OP`. It reports the extension's outcome separately. The original completion stands even if the extension fails.
 
-The host describes its domain in a **domain capability model (DCM)**: types, capabilities, hooks and their contracts.
-
-For this example, the host defines:
-
-| Hook property | Host choice |
-| --- | --- |
-| Name | `TaskCompleted` |
-| Timing | Event, after the task completion commits |
-| Business input | A record containing `taskId` |
-| Program output | A record containing `status`, either `CREATED` or `NO_OP` |
-| Result consumer | An event report; it cannot veto the completed operation |
-
-These payload and result types are this application's choices. Another host can define different inputs and outputs.
-
-The customer-selected project is not part of the event payload. The event identifies what happened; the customer's program defines which project interests them.
-
-### 2. The host publishes capabilities and binds their invokers
-
-The host publishes approved operations independently of any particular extension:
+The DCM catalog makes these ordinary task operations available to extensions.
 
 | Capability | Effect | Business arguments | Successful result |
 | --- | --- | --- | --- |
-| `tasks.get` | READ | `taskId` | Task ID, project ID and status |
+| `tasks.get` | READ | Task ID | Task ID, project ID and status |
 | `tasks.create` | WRITE | Project ID and title | Created task ID |
 
-The host offers ordinary task creation. The extension makes it a follow-up by choosing when to call it, which project to use and what title to give the task. This example does not create an implicit parent link; a relationship would need a generic field explicitly exposed by the host.
+The host supplies protected values such as the authenticated actor's ID. The program supplies the business arguments. Calling an ordinary task creation operation at the right time is what makes the new task a follow-up.
 
-The host also declares errors and supplies protected context such as authenticated actor identity. A program cannot choose another actor or supply credentials.
+The host selects the exact DCM bytes and binds them with `bindModel(dcmBytes, implementations)`. Each catalog entry gets one callable, including entries a particular program never uses. Registrations match the declared capability version and native key type and share a mode, either simulation or real. The callable can use a local implementation or call an internal service over HTTP or RPC. The host owns routing, credentials and response mapping. A host integration assistant can help design the model and bindings. The application owner approves them.
 
-The DCM describes logical contracts. The host binds an exact approved DCM snapshot together with compatible capability invokers into a reusable bound host model. See the [binding interface](specs/host-model-binding.md) for the technical contract. An invoker bridges the runner to an internal service, usually through a host-owned HTTP/RPC client:
-
-```text
-tasks.get instruction -> registered invoker -> internal task service
-```
-
-Routing, credentials, trusted identity propagation and response mapping belong to the host integration. A capability's business implementation need not run in the runner's process. The host can reuse the bound model and service clients across many extensions without retaining a customer's identity in shared program state.
-
-The hook does not need a list of the calls this particular program will make. Extensions compose the published catalog, subject to current authorization and resource bounds. Explicit capability filters can narrow access. Reads can be repeated within aggregate budgets; the default write policy permits at most one mutation.
-
-A **host integration assistant** can help the developer define these contracts and bindings. The host owner approves publication and remains responsible for the services' actual guarantees.
-
-**Checkpoint:** the host has published a reusable hook and catalog, bound service invokers and established permissions and guarantees. It has not implemented a customer's follow-up rule. Different customer programs can use this same approved integration.
+[Example DCM](../conformance/generic-hooks/effect4/dcm.json) · [Host model binding](specs/host-model-binding.md#corrected-host-bound-4-binding)
 
 ## Customer extension design
 
-### 1. The customer authors the extension
+A customer can describe the rule to an authoring assistant, which helps turn it into a constrained program and test it. The program reads the task, checks its status and project, then calls `tasks.create` only when both match. The project and title are constants in the customer's source. Changing them leaves the hook and capability catalog reusable. [Example source](../conformance/generic-hooks/effect4/source.yaml)
 
-A separate **customer extension assistant** clarifies the request, discovers the approved contract and generates a constrained Keir program. It can help resolve a project name to an ID, but the customer's chosen ID becomes a program constant.
+The compiler checks the source against the host-selected DCM. It rejects a second possible WRITE even if the two calls have mutually exclusive conditions. A valid program can skip its one WRITE or reach it once. The portable artifact carries the program's instructions, constants and checked expressions, with a reference to the exact model. Java and Node can run the same artifact. [Compiled artifact](../conformance/generic-hooks/effect4/artifact.json)
 
-The program body looks like this:
+The host selects the exact artifact bytes and checks their integrity against a separately stored digest. It calls `prepareProgram(artifactBytes, boundModel)` to check compatibility and get a reusable handle. This checks the program and its dependencies without calling a service. Approval and activation belong to the host. An active selection ties the reviewed artifact to its exact model, so a new catalog version requires a compatible, reviewed selection before it can be used.
 
-```yaml
-steps:
-  - id: eligibleProject
-    let: {literal: 'project1', type: ProjectId}
-  - id: source
-    call: tasks.get
-    args:
-      taskId: {cel: input.taskId}
-  - id: eligible
-    let: {cel: 'source.status == "COMPLETED" && source.projectId == eligibleProject'}
-  - id: created
-    call: tasks.create
-    when: eligible
-    args:
-      projectId: {cel: eligibleProject}
-      title: {literal: 'Follow up'}
-return:
-  record:
-    status: {cel: 'eligible ? "CREATED" : "NO_OP"'}
-```
-
-The [complete source](specs/generic-hook-example.md#customer-authors-the-program) also identifies its language, domain model and hook. The `ProjectId` annotation makes the constant a business identifier of the declared type; it does not establish that the project exists or that the caller may access it.
-
-Changing `project1` to another project changes the customer's source. It does not change the host's hook payload, service code or catalog.
-
-### 2. The compiler validates the source and emits an artifact
-
-The compiler receives the source, a separately trusted DCM and the selected compiler profile/environment. There is no actual task event at compile time. `input.taskId` means a typed value that a future invocation will supply.
-
-The compiler checks source structure, types, capability calls, protected argument boundaries, expressions and resource/effect constraints. Invalid source produces diagnostics rather than an executable artifact.
-
-Successful compilation produces a portable artifact containing the program's instructions, constants, checked expressions and exact model/environment references. Java and Node execute the same artifact. The DCM is shared host-supplied model data rather than copied into each program; each program references its exact snapshot, not whichever version is newest.
-
-CEL expressions are parsed and type-checked into a structured expression representation, not arbitrary generated Java or JavaScript. The artifact does not contain service implementations, endpoints or credentials.
-
-The host prepares the artifact against its bound model, checking the artifact's identity, compatible environment and capability bindings. Preparation binds an executable plan; it performs no business service calls and does not cache current user authorization.
-
-### 3. Simulation checks intended behavior
-
-The authoring flow runs the same compiled program through the runner with simulation invokers. These return controlled service responses and record requested writes without performing real mutations.
-
-| Scenario | Expected behavior |
-| --- | --- |
-| Completed task in `project1` | Request a follow-up titled `Follow up`; return `CREATED` |
-| Completed task in another project | Skip the write; return `NO_OP` |
-| Task with status OPEN | Skip the write; return `NO_OP` |
-| Read service rejects with declared `ACCESS_DENIED` | Stop with a business rejection |
-| Write dispatched but its commit outcome is unknown | Report uncertainty, not success or proof of no effect |
-
-The customer and agent inspect outcomes, call arguments and traces. Simulation checks program behavior under supplied scenarios. It does not certify real service authorization, idempotency or commit behavior; those need host integration tests.
-
-### 4. The host activates the reviewed revision
-
-After the required review, the host records the exact artifact revision, hook and customer scope to activate, together with its approved bound model. The agent can request activation through host tools; approval and activation follow host policy.
-
-The host persists and routes this selection. Keir does not become an activation database. Changing source requires compiling and reviewing the new revision. Publishing a new DCM does not silently relink an existing program; its exact approved dependency must remain available or preparation fails closed.
-
-**Checkpoint:** before any live event, we have a host contract, service bindings, a compiled customer program and a reviewed activation selection. No actual event data has been needed to compile it.
+In simulation, the same compiled artifact runs against controlled implementations. A completed task in `project1` should request a follow-up. An open task or a task in another project should skip the write. A lost response after dispatch should report uncertainty. These scenarios show what the program does with the supplied responses. In Daymark, users can review simulated examples, approve the exact checked revision and then enable it for future completions.
 
 ## Runtime
 
-### 1. A real event supplies facts and fresh authority
+After `task1` completes, the host invokes the selected prepared program with `{ "taskId": "task1" }`. It supplies fresh context separately from that business input. The context contains protected bindings, one absolute deadline on the host's clock, the original native request key, and an event with an ID and source. Keir passes the key unchanged to each reached implementation.
 
-Task `task1` completes and commits. The host reaches `TaskCompleted`, selects the customer's active extension and invokes its prepared program with business input:
+Keir validates the input, context and call arguments, and enforces resource limits, the deadline and the single-write limit. The host's registered implementations enforce current permissions and authenticate the key. In Daymark's real mode, the task implementations check that the event can still run and that the owner can access the relevant resources. Task creation checks the original key and commits the task and its receipt in one database transaction. The quickstart uses simulated implementations with fixture data.
 
-```json
-{"taskId":"task1"}
-```
+1. Keir evaluates `input.taskId` and passes `task1` to the registered `tasks.get` implementation. The returned task becomes the input to the program's condition.
+2. The program compares the task's status and project with `COMPLETED` and its own `project1` constant.
+3. If both match, Keir dispatches `tasks.create` with `{ "projectId": "project1", "title": "Follow up" }`. Otherwise the program skips the write.
+4. Keir returns the program result and any write evidence separately. The host decides how to present or act on the outcome.
 
-Separately, the host supplies fresh trusted context: authenticated actor/scope, current authorization, deadline, event identity/provenance and the original native idempotency key required by the write contract. These values are not customer-authored source or CEL variables.
-
-The selected project and title are already inside the program. The host does not infer them from the event or inject them as customer-specific payload fields. Each invocation has fresh execution state; prepared plans and compatible model data can be reused.
-
-### 2. The runner binds the constant and reads the task
-
-The runner validates the input/context and checks invocation authorization. It then binds `eligibleProject` to the typed constant `project1`. This local assignment makes no service call.
-
-For `tasks.get`, it evaluates `input.taskId`, validates the arguments, checks policy/budget/deadline and current capability authorization, then dispatches through the registered invoker. The host service enforces actual task access and returns the requested task or a declared rejection.
-
-Suppose the adapter reports success with:
-
-```json
-{"id":"task1","projectId":"project1","status":"COMPLETED"}
-```
-
-The runner validates the record against the DCM and stores it in the variable `source`. The adapter must ensure it represents the requested task; type checking alone cannot prove that relationship.
-
-### 3. The program evaluates its condition
-
-The checked expression compares the returned status with `COMPLETED` and the returned project with the authored constant. Both match, so `eligible` becomes true. This is local computation.
-
-For another project, or an OPEN task, `eligible` is false and the guarded write is skipped. This condition is business logic, not an authorization decision.
-
-### 4. The runner requests the follow-up
-
-With `eligible` true, the write's evaluated business arguments are:
-
-```json
-{"projectId":"project1","title":"Follow up"}
-```
-
-The runner validates these arguments, checks current authority, the remaining deadline and the single-write allowance, then dispatches `tasks.create` to the ordinary task-creation service. Protected identity and original native key/event context travel through the host-owned channel rather than customer arguments. The service remains responsible for resource access, business invariants and its declared native guarantees; it does not implement this extension's project condition or follow-up logic.
-
-Suppose the adapter returns:
-
-```json
-{"kind":"SUCCESS","value":{"id":"task2"},"effect":"CONFIRMED"}
-```
-
-The runner validates the response and retains the confirmed effect evidence. A timeout or lost response after a possible commit means UNKNOWN/UNCERTAIN unless the native contract establishes a definite outcome. Stopping the wait does not undo a remote write; Keir does not automatically retry it.
-
-### 5. The runner returns an outcome; the host consumes it
-
-After a successful call, the return expression produces `{"status":"CREATED"}`. The runner validates that output and returns it with execution classification, effect evidence and trace:
-
-| Part | Successful path | Write skipped |
+| Scenario | Program outcome | Write evidence |
 | --- | --- | --- |
-| Classification | `COMPLETED` | `COMPLETED` |
-| Program result | `{"status":"CREATED"}` | `{"status":"NO_OP"}` |
-| Effect evidence | Confirmed write | No write dispatched |
-| Trace | Reached steps and call outcomes | Reached steps without write dispatch |
+| Follow-up succeeds | `COMPLETED` with status `CREATED` | `CONFIRMED` receipt |
+| Condition is false | `COMPLETED` with status `NO_OP` | No write dispatched |
+| Response is lost after dispatch | `UNCERTAIN` with no ordinary result | `UNKNOWN` receipt |
 
-The application result and execution evidence are separate. Returning `CREATED` cannot establish a commit by itself. Rejection or uncertainty stops this ordinary success path; it cannot be relabeled by the return expression.
+A program's `CREATED` label expresses its own result. A confirmed receipt is the evidence for the write. When a receipt is unknown, the host can use the original key to reconcile the outcome before deciding how to proceed. Daymark offers a receipt lookup for that purpose.
 
-The trace records execution events without exposing credentials or protected argument values. The host consumes the event report, for example by recording it in an extension activity log. It decides presentation and follow-up handling. Failure does not roll back the original task completion.
-
-**Checkpoint:** the host supplied facts and authority, the customer program chose the behavior, internal services performed the operations, and Keir enforced the execution boundary and reported what is known about the result.
-
-**Continue reading**
-
-- [Complete example with DCM and source](specs/generic-hook-example.md)
-- [Hook, catalog and ownership contracts](specs/generic-hook-capability-contract.md)
-- [Guidance for the two host-integrated agent personas](agents/README.md)
-- [Runnable embedding examples](../examples/README.md)
-- [Specification and implementation status](specs/README.md)
+- [Run the example in Node and Java](quickstart.md)
+- [Read the hook and capability contract](specs/generic-hook-capability-contract.md)
+- [Explore the host and customer assistant roles](agents/README.md)
