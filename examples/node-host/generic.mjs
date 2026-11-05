@@ -1,19 +1,12 @@
 import assert from 'node:assert/strict';
-import { openSync, readSync, closeSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import * as api from '@keir/runtime-node';
+import { readBoundedFixture } from './generic-capacity.mjs';
 import { runBatch } from './generic-simulation.mjs';
 
 export async function runGeneric(directory) {
-  const load = (name, max) => {
-    const descriptor = openSync(resolve(directory, name), 'r');
-    try {
-      const buffer = Buffer.alloc(max + 1); let length = 0;
-      while (length < buffer.length) { const read = readSync(descriptor, buffer, length, buffer.length - length, null); if (!read) break; length += read; }
-      assert.ok(length <= max, 'Bounded trusted fixture file'); return Buffer.from(buffer.subarray(0, length));
-    } finally { closeSync(descriptor); }
-  };
+  const load = (name, max) => readBoundedFixture(resolve(directory, name), max);
   const dcmBytes = load('dcm.json', 65536);
   const dcm = JSON.parse(dcmBytes), effect = dcm.format.startsWith('keir-dcm/effect-'), effect3 = dcm.format === 'keir-dcm/effect-3', effect4 = dcm.format === 'keir-dcm/effect-4';
   assert.ok(['keir-dcm/read-2', 'keir-dcm/effect-2', 'keir-dcm/effect-3', 'keir-dcm/effect-4'].includes(dcm.format));
