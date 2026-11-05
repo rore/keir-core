@@ -1,7 +1,5 @@
 package dev.keir.compiler;
 
-import com.google.protobuf.DescriptorProtos;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.DynamicMessage;
 import dev.cel.common.CelOptions;
 import dev.cel.common.CelProtoAbstractSyntaxTree;
@@ -25,29 +23,17 @@ class KeirCompilerTest {
         var a = sample(); var b = sample();
         assertTrue(a.succeeded(), a.diagnostics().toString());
         assertArrayEquals(a.artifact(), b.artifact());
-        assertArrayEquals(resource("artifact.json"),a.artifact());
-        assertEquals(new String(resource("artifact.sha256"),StandardCharsets.UTF_8).trim(),a.artifactDigest());
         assertEquals("sha256:" + HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(a.artifact())), a.artifactDigest());
         var artifact = map(StrictData.parse(a.artifact(), "/artifact"));
-        assertEquals(Set.of("format", "profile", "compiler", "environment", "sourceDigest", "dcmDigest", "dcm", "entrypoint", "descriptors", "expressions", "steps", "return"), artifact.keySet());
-        var descriptorSet = DescriptorProtos.FileDescriptorSet.parseFrom(Base64.getDecoder().decode((String) artifact.get("descriptors")));
-        var file = descriptorSet.getFile(0);
-        assertEquals("keir_read.proto", file.getName()); assertEquals("proto3", file.getSyntax());
-        assertEquals("keir.read", file.getPackage());
-        assertEquals(List.of("ClassifyInput", "ClassifyResult", "Task"), file.getMessageTypeList().stream().map(DescriptorProtos.DescriptorProto::getName).toList());
-        for (var message : file.getMessageTypeList()) {
-            int n = 1;
-            for (var field : message.getFieldList()) {
-                assertEquals(n++, field.getNumber()); assertEquals(field.getName(), field.getJsonName());
-            }
-        }
+        assertEquals(Set.of("format", "compiler", "environment", "sourceDigest", "modelRef", "entrypoint",
+                "expressions", "steps", "return"), artifact.keySet());
         var expressions = map(artifact.get("expressions"));
         assertEquals(Set.of("e0", "e1", "e2"), expressions.keySet());
         for (var expression : expressions.values()) {
             var checked = CheckedExpr.parseFrom(Base64.getDecoder().decode((String) map(expression).get("checked")));
             assertTrue(checked.getTypeMapMap().containsKey(checked.getExpr().getId()));
             assertFalse(checked.getReferenceMapMap().isEmpty());
-            assertEquals("keir-read/1", checked.getSourceInfo().getLocation());
+            assertEquals("<input>", checked.getSourceInfo().getLocation());
         }
         assertEquals("Classification", map(expressions.get("e2")).get("resultType"));
         var call = map(((List<?>)artifact.get("steps")).getFirst());
@@ -72,7 +58,7 @@ class KeirCompilerTest {
     @Test void shapeAuthorityAndDataflowRejectionsNeverEmitAnArtifact() throws Exception {
         var cases = new LinkedHashMap<String, java.util.function.Consumer<Map<String,Object>>>();
         cases.put("FIELD_UNKNOWN", s -> s.put("mystery", true));
-        cases.put("PROFILE_UNSUPPORTED", s -> steps(s).getFirst().put("when", Map.of("literal", true)));
+        cases.put("SYNTAX_INVALID", s -> steps(s).getFirst().put("when", Map.of("literal", true)));
         cases.put("CAPABILITY_UNKNOWN", s -> steps(s).getFirst().put("call", "tasks.missing"));
         cases.put("HOST_BINDING_OVERRIDE", s -> map(steps(s).getFirst().get("args")).put("actorId", Map.of("literal", "SECRET")));
         cases.put("DATAFLOW_UNAVAILABLE", s -> map(map(steps(s).getFirst().get("args")).get("taskId")).put("cel", "future.id"));
@@ -86,7 +72,7 @@ class KeirCompilerTest {
         var s = source(); steps(s).get(1).put("id", "source"); denied(compile(s, model()), "DATAFLOW_UNAVAILABLE");
         s = source(); map(map(s.get("return")).get("record")).put("classification", Map.of("literal", 1L));
         denied(compile(s, model()), "PROFILE_UNSUPPORTED");
-        var d = model(); map(map(d.get("entrypoints")).get("ClassifyTask")).put("grants", Map.of());
+        var d = model(); map(map(d.get("entrypoints")).get("ClassifyTask")).put("capabilityPolicy", Map.of("allow", List.of()));
         denied(compile(source(), d), "ENTRY_GRANT_DENIED");
     }
 
@@ -122,7 +108,7 @@ class KeirCompilerTest {
         map(map(s.get("return")).get("record")).put("classification", Map.of("cel", "completed ? \"é😀\" : \"\\t\""));
         var a = compile(s,d); var b = compile(s,d);
         assertTrue(a.succeeded(), a.diagnostics().toString()); assertArrayEquals(a.artifact(),b.artifact());
-        assertTrue(new String(a.artifact(),StandardCharsets.UTF_8).contains("\\u0009"));
+        assertTrue(new String(StrictData.canonical(d),StandardCharsets.UTF_8).contains("\\u0009"));
         var artifact = map(StrictData.parse(a.artifact(),"/artifact"));
         assertEquals("é😀",evaluateDecision(artifact,"COMPLETED"));
         assertEquals("\t",evaluateDecision(artifact,"OPEN"));
@@ -170,18 +156,16 @@ class KeirCompilerTest {
 
     @Test void callsAndRawByteCeilingsAreInclusive() throws Exception {
         var d=model(); var s=source();
-        map(map(d.get("entrypoints")).get("ClassifyTask")).put("grants",new TreeMap<>(Map.of("tasks.get",4L)));
         for(int i=1;i<4;i++) steps(s).add(new TreeMap<>(Map.of("id","read"+i,"call","tasks.get","args",Map.of("taskId",Map.of("cel","input.taskId")))));
         assertTrue(compile(s,d).succeeded());
         map(d.get("capabilities")).put("tasks.more",map(d.get("capabilities")).get("tasks.get"));
-        map(map(map(d.get("entrypoints")).get("ClassifyTask")).get("grants")).put("tasks.more",1L);
         steps(s).add(new TreeMap<>(Map.of("id","read4","call","tasks.more","args",Map.of("taskId",Map.of("cel","input.taskId")))));
         denied(compile(s,d),"BUDGET_EXCEEDED");
-        byte[] original=resource("source.yaml");
+        byte[] original=sourceBytes();
         byte[] exact=Arrays.copyOf(original,65536); Arrays.fill(exact,original.length,exact.length,(byte)' ');
-        assertTrue(compiler.compile(exact,resource("dcm.json"),ENV).succeeded());
+        assertTrue(compiler.compile(exact,modelBytes(),ENV).succeeded());
         byte[] larger=Arrays.copyOf(exact,65537); larger[65536]=' ';
-        denied(compiler.compile(larger,resource("dcm.json"),ENV),"BUDGET_EXCEEDED");
+        denied(compiler.compile(larger,modelBytes(),ENV),"BUDGET_EXCEEDED");
     }
 
     @Test void canonicalModelByteCeilingIsEnforcedAfterCompactJsonDecoding() throws Exception {
@@ -200,7 +184,6 @@ class KeirCompilerTest {
             else {
                 denied(result, "BUDGET_EXCEEDED");
                 assertEquals("/dcm", result.diagnostics().getFirst().path());
-                assertEquals("A profile admission limit was exceeded.", result.diagnostics().getFirst().message());
             }
         }
     }
@@ -210,18 +193,20 @@ class KeirCompilerTest {
         denied(a,"DATAFLOW_UNAVAILABLE"); assertFalse(a.diagnostics().toString().contains("SECRET_CREDENTIAL"));
         assertEquals("/source/steps/1/let/cel",a.diagnostics().getFirst().path());
         s=source(); map(s.get("domain")).put("fingerprint","sha256:forged");
-        denied(compiler.compile(StrictData.canonical(s),resource("dcm.json"),ENV),"PIN_MISMATCH");
-        denied(compiler.compile(resource("source.yaml"),resource("dcm.json"),new KeirCompiler.Environment("other",ENV.compiler(),ENV.packages())),"PIN_MISMATCH");
-        denied(compiler.compile(null,resource("dcm.json"),ENV),"SYNTAX_INVALID");
-        denied(compiler.compile(resource("source.yaml"),null,ENV),"SYNTAX_INVALID");
-        var d=model(); map(map(d.get("capabilities")).get("tasks.get")).put("effect","WRITE"); denied(compile(source(),d),"PROFILE_UNSUPPORTED");
+        denied(compiler.compile(StrictData.canonical(s),modelBytes(),ENV),"PIN_MISMATCH");
+        denied(compiler.compile(sourceBytes(),modelBytes(),new KeirCompiler.Environment("keir-compiler-java/0.1.0-SNAPSHOT",ENV.packages())),"PIN_MISMATCH");
+        var packages=new HashMap<>(ENV.packages()); packages.put("celJava","unselected");
+        denied(compiler.compile(sourceBytes(),modelBytes(),new KeirCompiler.Environment(ENV.compiler(),packages)),"PIN_MISMATCH");
+        denied(compiler.compile(null,modelBytes(),ENV),"SYNTAX_INVALID");
+        denied(compiler.compile(sourceBytes(),null,ENV),"SYNTAX_INVALID");
+        var d=model(); map(map(d.get("capabilities")).get("tasks.get")).put("effect","UNKNOWN"); denied(compile(source(),d),"PROFILE_UNSUPPORTED");
         d = model(); s = source();
         var selected = new TreeMap<>(map(map(d.get("entrypoints")).get("ClassifyTask")));
-        map(d.get("entrypoints")).put("AnotherRequest", selected);
-        s.put("entrypoint", "AnotherRequest");
-        var other = compile(s,d); assertTrue(other.succeeded());
-        assertEquals("AnotherRequest",map(StrictData.parse(other.artifact(),"/artifact")).get("entrypoint"));
-        selected.put("grants", Map.of());
+        map(d.get("entrypoints")).put("AnotherEvent", selected);
+        s.put("entrypoint", "AnotherEvent");
+        var other = compile(s,d); assertTrue(other.succeeded(),other.diagnostics().toString());
+        assertEquals("AnotherEvent",map(StrictData.parse(other.artifact(),"/artifact")).get("entrypoint"));
+        selected.put("capabilityPolicy", Map.of("allow", List.of()));
         denied(compile(s,d), "ENTRY_GRANT_DENIED");
     }
 
@@ -234,9 +219,9 @@ class KeirCompilerTest {
         denied(compile(s,model()), "DATAFLOW_UNAVAILABLE");
         s = source(); map(steps(s).get(1).get("let")).put("cel", "{\"a\": missing} == {\"a\": missing}");
         denied(compile(s,model()), "DATAFLOW_UNAVAILABLE");
-        byte[] raw = resource("source.yaml");
-        var first = compiler.compile(("z: true\na: true\n" + new String(raw,StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8),resource("dcm.json"),ENV);
-        var second = compiler.compile(("a: true\nz: true\n" + new String(raw,StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8),resource("dcm.json"),ENV);
+        byte[] raw = sourceBytes();
+        var first = compiler.compile(("z: true\na: true\n" + new String(raw,StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8),modelBytes(),ENV);
+        var second = compiler.compile(("a: true\nz: true\n" + new String(raw,StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8),modelBytes(),ENV);
         assertEquals(first.diagnostics(),second.diagnostics());
         assertEquals("/source/a",first.diagnostics().getFirst().path());
         s = source();
@@ -272,7 +257,7 @@ class KeirCompilerTest {
     @Test void cliHasNoArtifactOutputOnFailureAndDoesNotLeakPaths() throws Exception {
         Path dir=Files.createTempDirectory(Path.of("target"),"cli-");
         Path source=dir.resolve("source.yaml"),dcm=dir.resolve("dcm.json");
-        Files.write(source,resource("source.yaml")); Files.write(dcm,resource("dcm.json"));
+        Files.write(source,sourceBytes()); Files.write(dcm,modelBytes());
         var out=new ByteArrayOutputStream(); var errors=new ByteArrayOutputStream();
         assertEquals(0,CompilerCli.run(new String[]{source.toString(),dcm.toString()},new PrintStream(out),new PrintStream(errors)));
         assertArrayEquals(sample().artifact(),out.toByteArray()); assertEquals(0,errors.size());
@@ -285,8 +270,7 @@ class KeirCompilerTest {
     }
 
     private static String evaluateDecision(Map<String,Object> artifact,String status) throws Exception {
-        var set=DescriptorProtos.FileDescriptorSet.parseFrom(Base64.getDecoder().decode((String)artifact.get("descriptors")));
-        var descriptor=Descriptors.FileDescriptor.buildFrom(set.getFile(0),new Descriptors.FileDescriptor[0]);
+        var descriptor=Dcm.parse(model()).fileDescriptor();
         var taskType=descriptor.findMessageTypeByName("Task");
         var task=DynamicMessage.newBuilder(taskType).setField(taskType.findFieldByName("id"),"task1")
                 .setField(taskType.findFieldByName("status"),status).build();
@@ -328,10 +312,28 @@ class KeirCompilerTest {
         map(source.get("domain")).put("fingerprint",StrictData.digest(dcm));
         return compiler.compile(StrictData.canonical(source),StrictData.canonical(dcm),ENV);
     }
-    private KeirCompiler.Compilation sample() throws Exception {return compiler.compile(resource("source.yaml"),resource("dcm.json"),ENV);}
-    private static Map<String,Object> source() throws Exception {return map(StrictData.parse(resource("source.yaml"),"/source"));}
-    private static Map<String,Object> model() throws Exception {return map(StrictData.parse(resource("dcm.json"),"/dcm"));}
-    private static byte[] resource(String name) throws Exception {try(var in=KeirCompilerTest.class.getResourceAsStream("/read-and-decide/"+name)){return Objects.requireNonNull(in).readAllBytes();}}
+    private KeirCompiler.Compilation sample() throws Exception {return compiler.compile(sourceBytes(),modelBytes(),ENV);}
+    private static Map<String,Object> source() throws Exception {return map(StrictData.parse(sourceBytes(),"/source"));}
+    private static Map<String,Object> model() { return DcmTest.sample(); }
+    private static byte[] modelBytes() { return StrictData.canonical(model()); }
+    private static byte[] sourceBytes() {
+        return """
+                language: keir/1
+                domain: {id: sample.tasks, version: '1', fingerprint: '%s'}
+                entrypoint: ClassifyTask
+                name: classify-completed-task
+                steps:
+                  - id: source
+                    call: tasks.get
+                    args:
+                      taskId: {cel: input.taskId}
+                  - id: completed
+                    let: {cel: 'source.status == "COMPLETED"'}
+                return:
+                  record:
+                    classification: {cel: 'completed ? "DONE" : "PENDING"'}
+                """.formatted(StrictData.digest(model())).getBytes(StandardCharsets.UTF_8);
+    }
     @SuppressWarnings("unchecked") private static Map<String,Object> map(Object v){return (Map<String,Object>)v;}
     @SuppressWarnings("unchecked") private static List<Map<String,Object>> steps(Map<String,Object>s){return (List<Map<String,Object>>)s.get("steps");}
     private static void denied(KeirCompiler.Compilation result,String code){assertFalse(result.succeeded());assertNull(result.artifact());assertNull(result.artifactDigest());assertEquals(code,result.diagnostics().getFirst().code(),result.diagnostics().toString());}

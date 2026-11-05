@@ -40,7 +40,7 @@ final class Expressions {
         if (text.getBytes(StandardCharsets.UTF_8).length > 512) fail("BUDGET_EXCEEDED", path);
         try {
             var parsed = CelCompilerFactory.standardCelCompilerBuilder().setOptions(OPTIONS)
-                    .setStandardMacros(Set.of()).build().parse(text, "keir-read/1").getAst();
+                    .setStandardMacros(Set.of()).build().parse(text, "<input>").getAst();
             available(CelProtoAbstractSyntaxTree.fromCelAst(parsed).getExpr(), variables, path);
             return parsed;
         } catch (CelValidationException e) { throw new CompileFailure("TYPE_MISMATCH", path); }
@@ -176,7 +176,7 @@ final class Expressions {
             if (!expr.hasCallExpr()) throw new CompileFailure("CEL_POLICY_DENIED", path);
             var call = expr.getCallExpr();
             String function = call.getFunction();
-            boolean concatenate = function.equals("_+_") && "keir-dcm/effect-4".equals(dcm.root().get("format"));
+            boolean concatenate = function.equals("_+_");
             String overload = concatenate ? "add_string" : OVERLOADS.get(function);
             int arity = function.equals("!_") ? 1 : function.equals("_?_:_") ? 3 : 2;
             var reference = checked.getReferenceMapMap().get(expr.getId());

@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:keir:schema:source:1",
+  "title": "Keir decoded source structure",
+  "description": "Native parsing, UTF-8 bounds, model references, CEL typing and dataflow supplement decoded structure.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "language",
+    "domain",
+    "entrypoint",
+    "name",
+    "steps",
+    "return"
+  ],
+  "properties": {
+    "language": {
+      "const": "keir/1"
+    },
+    "domain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "fingerprint"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/text"
+        },
+        "version": {
+          "$ref": "#/$defs/text"
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+        }
+      }
+    },
+    "entrypoint": {
+      "$ref": "#/$defs/id"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}(?![\\s\\S])"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/call"
+          },
+          {
+            "$ref": "#/$defs/let"
+          }
+        ]
+      }
+    },
+    "return": {
+      "$ref": "#/$defs/return"
+    }
+  },
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9]{0,63}(?![\\s\\S])"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9.]{0,99}(?![\\s\\S])"
+    },
+    "binding": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cel"
+          ],
+          "properties": {
+            "cel": {
+              "type": "string",
+              "maxLength": 512
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "literal"
+          ],
+          "properties": {
+            "literal": {
+              "type": [
+                "boolean",
+                "string"
+              ],
+              "maxLength": 256
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "literal",
+            "type"
+          ],
+          "properties": {
+            "literal": {
+              "type": "string",
+              "maxLength": 256
+            },
+            "type": {
+              "$ref": "#/$defs/name"
+            }
+          }
+        }
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "maxProperties": 16,
+      "propertyNames": {
+        "$ref": "#/$defs/name"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/binding"
+      }
+    },
+    "call": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "call",
+        "args"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/name"
+        },
+        "call": {
+          "$ref": "#/$defs/id"
+        },
+        "args": {
+          "$ref": "#/$defs/bindings"
+        },
+        "when": {
+          "$ref": "#/$defs/name"
+        },
+        "onError": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 16,
+          "propertyNames": {
+            "pattern": "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/return"
+          }
+        }
+      }
+    },
+    "let": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "let"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/name"
+        },
+        "let": {
+          "$ref": "#/$defs/binding"
+        }
+      }
+    },
+    "return": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record"
+      ],
+      "properties": {
+        "record": {
+          "$ref": "#/$defs/bindings"
+        }
+      }
+    }
+  }
+}

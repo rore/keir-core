@@ -1,0 +1,22 @@
+language: keir/1
+domain: {id: sample.tasks, version: '4-title', fingerprint: 'sha256:ad69c4a87455752bda130a5e38acb285b9f46b14b029805ec91c683750bb3765'}
+entrypoint: TaskCompleted
+name: follow-up-with-composed-title
+steps:
+  - id: eligibleProject
+    let: {literal: 'project1', type: ProjectId}
+  - id: source
+    call: tasks.get
+    args:
+      taskId: {cel: input.taskId}
+  - id: eligible
+    let: {cel: 'source.status == "COMPLETED" && !(source.title + "!" == "Other title")'}
+  - id: created
+    call: tasks.create
+    when: eligible
+    args:
+      projectId: {cel: eligibleProject}
+      title: {cel: 'source.projectId == eligibleProject ? "Valid title" : source.title + "!"'}
+return:
+  record:
+    status: {cel: 'eligible ? "CREATED" : "NO_OP"'}
