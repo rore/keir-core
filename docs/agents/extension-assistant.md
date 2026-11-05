@@ -7,7 +7,7 @@ Use the [model-facing guide](customer-authoring-guide-v3.md) as instructions for
 
 Give the assistant the exact model approved for the customer, including hooks, capabilities, result contracts, types and limits. Give it separate access to the authoring tools you want it to use. For example, the follow-up extension chooses a project and title and calls the app’s existing `tasks.create` operation. The project choice belongs in source. Resource permissions belong to the application.
 
-Use the [schemas bundled with the guide](customer-authoring-guide-v3.md#follow-up-example) to check decoded documents. Use the compiler and runtimes to check what can compile and run.
+Use the [language reference](../specs/language.md) and [domain capability model reference](../specs/domain-model.md) to understand expression, type and call rules. Use the [schemas bundled with the guide](customer-authoring-guide-v3.md#follow-up-example) to check document structure.
 
 ## Workflow
 
@@ -19,6 +19,15 @@ Use the [schemas bundled with the guide](customer-authoring-guide-v3.md#follow-u
 4. Present the exact checked revision to the authorized reviewer. Record approval and activation as separate decisions. Changes to the revision require renewed checks and approval.
 
 Keep the conversation usable without a dashboard. If the application offers a separate example view, open it on request and preserve the customer’s place and unsent text when a new response arrives.
+
+### Example authoring session
+
+A customer asks for a follow-up when someone completes a task in the launch project. These tool names illustrate an API the application defines.
+
+1. **`discoverExtensionContext`** returns the approved task model, `TaskCompleted` entrypoint and permitted operations. **`findProject`** resolves “launch” within the customer’s scope and returns its `ProjectId`.
+2. **`compileDraft`** compiles against that exact model. If the draft declares the selected project as a plain string, the compiler reports `NOMINAL_MISMATCH` at the project comparison. The assistant changes the declaration to a typed `ProjectId` literal and compiles again.
+3. **`simulateDraft`** takes the compiled artifact and runs it with the app’s simulated operations. The assistant compares against agreed expectations for a matching task, a task in another project, and a lost write response.
+4. **`submitForReview`** presents the exact artifact, the expected and observed outcomes, and the write receipts. The customer can review the result. The host handles approval and activation separately for that revision.
 
 ## Authority and tools
 
