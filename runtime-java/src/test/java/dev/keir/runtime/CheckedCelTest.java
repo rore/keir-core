@@ -1,7 +1,6 @@
 package dev.keir.runtime;
 
 import com.google.protobuf.CodedOutputStream;
-import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Message;
 import com.google.protobuf.UnknownFieldSet;
 import dev.cel.expr.CheckedExpr;
@@ -29,7 +28,13 @@ class CheckedCelTest {
             return map(RuntimeData.parseCanonical(input.readAllBytes()));
         }
     }
-    private static Artifact.Plan sample() throws IOException { return Artifact.validate(fixture("/read-and-decide/artifact.json")); }
+    private static Artifact.Plan sample() throws IOException {
+        var model=fixture("/keir-1/dcm.json");
+        return Artifact.validateProgram(fixture("/keir-1/artifact.json"),model,CapabilityPolicy.catalog(model),1);
+    }
+    private static CheckedCel.Bundle prepare(Artifact.Plan plan) {
+        return CheckedCel.prepare(plan,CheckedCel.bindModel(plan.dcm()));
+    }
     private static byte[] bytes(Message message) throws IOException {
         byte[] bytes = new byte[message.getSerializedSize()];
         var output = CodedOutputStream.newInstance(bytes); output.useDeterministicSerialization();
@@ -40,61 +45,60 @@ class CheckedCelTest {
         return CheckedExpr.parseFrom(Base64.getDecoder().decode((String)context.get("checked")));
     }
     private static Artifact.Plan contexts(Artifact.Plan base, Map<String,Map<String,Object>> contexts) {
-        return new Artifact.Plan(base.document(), base.dcm(), base.entrypoint(), contexts, base.calls(), base.callCount());
+        return new Artifact.Plan(base.document(), base.dcm(), base.entrypoint(), contexts, base.calls());
     }
     private static Artifact.Plan one(Artifact.Plan base, CheckedExpr checked, Map<String,Object> variables, String type) throws IOException {
         return contexts(base, new LinkedHashMap<>(Map.of("e0", Map.of("checked", encoded(checked), "variables", variables, "resultType", type))));
     }
     private static RuntimeFault denied(Artifact.Plan plan, String code) {
-        RuntimeFault fault = assertThrows(RuntimeFault.class, () -> CheckedCel.prepare(plan));
+        RuntimeFault fault = assertThrows(RuntimeFault.class, () -> prepare(plan));
         assertEquals(code, fault.code); assertNull(fault.getCause()); return fault;
     }
     private static Map<String,Object> state(boolean completed) {
-        return Map.of("input", Map.of("taskId", "task1"), "source", Map.of("id", "task1", "status", completed ? "COMPLETED" : "OPEN"), "completed", completed);
+        return Map.of("input",Map.of("taskId","task1"),"eligibleProject","project1",
+                "source",Map.of("id","task1","projectId","project1","status",completed?"COMPLETED":"OPEN"),"eligible",completed);
     }
 
     @Test void evaluatesTheSameRealCompilerArtifactWithFreshValues() throws Exception {
-        Artifact.Plan plan = sample(); var bundle = CheckedCel.prepare(plan);
-        assertTrue(bundle.totalNodes() > 0);
-        assertEquals("task1", bundle.evaluate(Map.of("expr", "e0", "type", "TaskId"), state(true), "/steps/0"));
-        assertEquals(true, bundle.evaluate(Map.of("expr", "e1", "type", "Boolean"), state(true), "/steps/1"));
-        assertEquals(false, bundle.evaluate(Map.of("expr", "e1", "type", "Boolean"), state(false), "/steps/1"));
-        assertEquals("DONE", bundle.evaluate(Map.of("expr", "e2", "type", "Classification"), state(true), "/return"));
-        assertEquals("PENDING", bundle.evaluate(Map.of("expr", "e2", "type", "Classification"), state(false), "/return"));
-        var literal = CheckedCel.prepare(Artifact.validate(fixture("/supplemental/literal.artifact.json")));
-        assertEquals(0, literal.totalNodes());
-        assertEquals(false, literal.evaluate(Map.of("literal", false, "type", "Boolean"), Map.of(), "/steps/0"));
-        assertEquals("", literal.evaluate(Map.of("literal", "", "type", "String"), Map.of(), "/return"));
+        var bundle=prepare(sample());
+        assertTrue(bundle.totalNodes()>0);
+        assertEquals("task1",bundle.evaluate(Map.of("expr","e0"),state(true),"/steps/1"));
+        assertEquals(true,bundle.evaluate(Map.of("expr","e1"),state(true),"/steps/2"));
+        assertEquals(false,bundle.evaluate(Map.of("expr","e1"),state(false),"/steps/2"));
+        assertEquals("CREATED",bundle.evaluate(Map.of("expr","e3"),state(true),"/return"));
+        assertEquals("NO_OP",bundle.evaluate(Map.of("expr","e3"),state(false),"/return"));
+        assertEquals(false,bundle.evaluate(Map.of("literal",false,"type","Boolean"),Map.of(),"/steps/0"));
+        assertEquals("",bundle.evaluate(Map.of("literal","","type","String"),Map.of(),"/return"));
     }
 
     @Test void projectionPreservesFalseEmptyUnicodeControlsAndReservedFieldNames() throws Exception {
-        Artifact.Plan plan = Artifact.validate(fixture("/supplemental/scalars.artifact.json"));
-        var bundle = CheckedCel.prepare(plan);
-        Map<String,Object> input = new LinkedHashMap<>();
-        map(Artifact.definition(plan.dcm(), "ClassifyInput").get("fields")).forEach((name,type) -> input.put(name,
-                switch ((String)type) { case "Boolean" -> false; case "Classification" -> "DONE"; default -> ""; }));
-        input.put("text0", "é😀"); input.put("text1", "\u0000\t\n\u001f");
-        input.put("text2", "é".repeat(128)); input.put("text3", "e\u0301");
-        Map<String,Object> values = new HashMap<>(Map.of("input", input, "source", Map.of("id", "", "status", "COMPLETED"), "completed", false));
-        Map<String,Object> fields = map(map(plan.document().get("return")).get("fields"));
-        for (String name : List.of("constructor", "input", "toJSON", "toString", "valueOf", "text0", "text1", "text2", "text3"))
-            assertEquals(input.get(name), bundle.evaluate(map(fields.get(name)), values, "/return"), name);
-        var decision = map(RuntimeData.list(plan.document().get("steps"), "/test").get(1));
-        assertEquals(false, bundle.evaluate(map(decision.get("value")), values, "/steps/1"));
-        assertEquals("PENDING", bundle.evaluate(map(fields.get("leftEnum")), values, "/return"));
-        assertEquals("DONE", bundle.evaluate(map(fields.get("rightEnum")), values, "/return"));
-        input.put("toString", "next");
-        assertEquals("next", bundle.evaluate(map(fields.get("toString")), values, "/return"));
-        assertNotEquals("next", bundle.evaluate(map(fields.get("toJSON")), values, "/return"));
-        var changed = CheckedCel.prepare(Artifact.validate(fixture("/supplemental/changed-condition.artifact.json")));
-        input.put("flag", true);
-        assertEquals(false, changed.evaluate(Map.of("expr", "e1", "type", "Boolean"), values, "/steps/1"));
+        var base=sample();
+        var model=fixture("/keir-1/dcm.json");
+        var message=Type.newBuilder().setMessageType("keir.read.TaskCompletedInput").build();
+        Map<String,Object> values=Map.of("constructor",false,"input","","toJSON","é😀","toString","\0\t\n\u001f",
+                "valueOf","é".repeat(128),"text","e\u0301");
+        var fields=new LinkedHashMap<String,Object>();
+        values.forEach((key,value)->fields.put(key,value instanceof Boolean?"Boolean":"String"));
+        Artifact.definition(model,"TaskCompletedInput").put("fields",fields);
+        var plan=new Artifact.Plan(base.document(),model,base.entrypoint(),Map.of(),base.calls());
+        var expressions=new LinkedHashMap<String,Map<String,Object>>();
+        for(String name:fields.keySet()) {
+            var select=Expr.newBuilder().setId(1).setSelectExpr(Expr.Select.newBuilder().setOperand(ident(2,"input")).setField(name)).build();
+            String type=(String)fields.get(name);
+            var checked=synthetic(select,Map.of(1L,type.equals("Boolean")?BOOL:STRING,2L,message));
+            expressions.put(name,one(plan,checked,Map.of("input","TaskCompletedInput"),type).contexts().get("e0"));
+        }
+        var bundle=prepare(contexts(plan,expressions));
+        for(String name:fields.keySet())
+            assertEquals(values.get(name),bundle.evaluate(Map.of("expr",name),Map.of("input",values),"/return"),name);
+        var fresh=new LinkedHashMap<>(values); fresh.put("toString","next");
+        assertEquals("next",bundle.evaluate(Map.of("expr","toString"),Map.of("input",fresh),"/return"));
     }
 
     @Test void projectionRejectsMissingOrInvalidValuesBeforeProtobufDefaults() throws Exception {
-        var bundle = CheckedCel.prepare(sample());
+        var bundle = prepare(sample());
         for (Map<String,Object> values : List.<Map<String,Object>>of(Map.of("input", Map.of()), Map.of("input", Map.of("taskId", true)), Map.of("input", Map.of("taskId", "x", "extra", "y")))) {
-            RuntimeFault fault = assertThrows(RuntimeFault.class, () -> bundle.evaluate(Map.of("expr", "e0", "type", "TaskId"), values, "/steps/0"));
+            RuntimeFault fault = assertThrows(RuntimeFault.class, () -> bundle.evaluate(Map.of("expr", "e0", "type", "TaskId"), Map.of("input",values.get("input"),"eligibleProject","project1"), "/steps/0"));
             assertEquals("EXPRESSION_FAILED", fault.code); assertEquals("/steps/0", fault.path);
         }
         RuntimeFault missing = assertThrows(RuntimeFault.class, () -> bundle.evaluate(Map.of("expr", "absent", "type", "Boolean"), Map.of(), "/return"));
@@ -119,7 +123,7 @@ class CheckedCelTest {
         var identity = checked(base.contexts().get("e0")).toBuilder();
         long identifier = identity.getReferenceMapMap().keySet().iterator().next();
         identity.putReferenceMap(identifier, Reference.newBuilder().setName("other").build());
-        denied(one(base, identity.build(), Map.of("input", "ClassifyInput"), "TaskId"), "ARTIFACT_INVALID");
+        denied(one(base, identity.build(), Map.of("input", "TaskCompletedInput"), "TaskId"), "ARTIFACT_INVALID");
     }
 
     @Test void rejectsInvalidNodeIdentityAndPresenceSelections() throws Exception {
@@ -143,6 +147,7 @@ class CheckedCelTest {
                 b -> b.setExprVersion("future"), b -> b.clearSourceInfo(),
                 b -> b.setSourceInfo(b.getSourceInfo().toBuilder().setSyntaxVersion("future")),
                 b -> b.setSourceInfo(b.getSourceInfo().toBuilder().setLocation("untrusted-location")),
+                b -> b.setSourceInfo(b.getSourceInfo().toBuilder().setLocation("keir-read/1")),
                 b -> b.setSourceInfo(b.getSourceInfo().toBuilder().addExtensions(SourceInfo.Extension.getDefaultInstance())),
                 b -> b.setSourceInfo(b.getSourceInfo().toBuilder().putMacroCalls(1, Expr.getDefaultInstance())),
                 b -> b.setSourceInfo(b.getSourceInfo().toBuilder().addLineOffsets(-1)),
@@ -155,7 +160,7 @@ class CheckedCelTest {
         }
         var boundary = checked(context).toBuilder();
         boundary.setSourceInfo(boundary.getSourceInfo().toBuilder().setLocation("<input>").addLineOffsets(513).putPositions(1, 512));
-        CheckedCel.prepare(one(base, boundary.build(), map(context.get("variables")), "TaskId"));
+        prepare(one(base, boundary.build(), map(context.get("variables")), "TaskId"));
     }
 
     @Test void rejectsUnknownProtobufFieldsAtNestedLevelsAndAlternateEncodings() throws Exception {
@@ -181,25 +186,13 @@ class CheckedCelTest {
             var selected = new LinkedHashMap<>(base.contexts()); var changed = new HashMap<>(selected.get("e0")); changed.put("checked", value); selected.put("e0", changed);
             denied(contexts(base, selected), "ARTIFACT_INVALID");
         }
-        Map<String,Object> artifact = new HashMap<>(base.document()); artifact.put("descriptors", Base64.getEncoder().encodeToString(new byte[65_537]));
-        denied(new Artifact.Plan(artifact, base.dcm(), base.entrypoint(), base.contexts(), base.calls(), base.callCount()), "ARTIFACT_INVALID");
     }
 
-    @Test void descriptorsMustExactlyMatchTheDcmIncludingJsonNamesAndFieldNumbers() throws Exception {
-        Artifact.Plan base = sample();
-        var descriptor = DescriptorProtos.FileDescriptorSet.parseFrom(Base64.getDecoder().decode((String)base.document().get("descriptors")));
-        List<Consumer<DescriptorProtos.FileDescriptorSet.Builder>> changes = List.of(
-                b -> b.getFileBuilder(0).setPackage("other"), b -> b.getFileBuilder(0).setSyntax("proto2"),
-                b -> b.getFileBuilder(0).getMessageTypeBuilder(0).getFieldBuilder(0).setJsonName("other"),
-                b -> b.getFileBuilder(0).getMessageTypeBuilder(0).getFieldBuilder(0).setNumber(2),
-                b -> b.getFileBuilder(0).getMessageTypeBuilder(0).getFieldBuilder(0).setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_BOOL),
-                b -> b.getFileBuilder(0).addDependency("unavailable.proto"));
-        for (var change : changes) {
-            var modified = descriptor.toBuilder(); change.accept(modified);
-            Map<String,Object> document = new HashMap<>(base.document()); document.put("descriptors", encoded(modified.build()));
-            RuntimeFault failure = denied(new Artifact.Plan(document, base.dcm(), base.entrypoint(), base.contexts(), base.calls(), base.callCount()), "ARTIFACT_INVALID");
-            assertEquals("/artifact/descriptors", failure.path);
-        }
+    @Test void derivedModelMustMatchThePlanModel() throws Exception {
+        var plan=sample();
+        var other=fixture("/keir-1/dcm-title.json");
+        var fault=assertThrows(RuntimeFault.class,()->CheckedCel.prepare(plan,CheckedCel.bindModel(other)));
+        assertEquals("/artifact/modelRef",fault.path);
     }
 
     private static Expr bool(long id) { return Expr.newBuilder().setId(id).setConstExpr(Constant.newBuilder().setBoolValue(true)).build(); }
@@ -209,7 +202,7 @@ class CheckedCelTest {
         return Expr.newBuilder().setId(id).setCallExpr(Expr.Call.newBuilder().setFunction(function).addAllArgs(Arrays.asList(args))).build();
     }
     private static CheckedExpr synthetic(Expr expression, Map<Long,Type> types) {
-        var checked = CheckedExpr.newBuilder().setExpr(expression).setSourceInfo(SourceInfo.newBuilder().setLocation("keir-read/1"));
+        var checked = CheckedExpr.newBuilder().setExpr(expression).setSourceInfo(SourceInfo.newBuilder().setLocation("<input>"));
         annotate(expression, types, checked); return checked.build();
     }
     private static void annotate(Expr expression, Map<Long,Type> types, CheckedExpr.Builder checked) {
@@ -231,22 +224,22 @@ class CheckedCelTest {
         for (String literal : List.of("OPEN", "MISSING")) {
             var equality = synthetic(call(1, "_==_", ident(2, "status"), string(3, literal)), Map.of(2L, STRING, 3L, STRING));
             var selected = one(base, equality, Map.of("status", "TaskStatus"), "Boolean");
-            if (literal.equals("OPEN")) assertEquals(true, CheckedCel.prepare(selected).evaluate(Map.of("expr", "e0"), Map.of("status", "OPEN"), "/return"));
+            if (literal.equals("OPEN")) assertEquals(true, prepare(selected).evaluate(Map.of("expr", "e0"), Map.of("status", "OPEN"), "/return"));
             else denied(selected, "ARTIFACT_INVALID");
         }
         var enumValue = synthetic(ident(1, "status"), Map.of(1L, STRING));
         denied(one(base, enumValue, Map.of("status", "TaskStatus"), "String"), "ARTIFACT_INVALID");
-        denied(one(base, synthetic(ident(1, "raw"), Map.of(1L, STRING)), Map.of("raw", "String"), "Classification"), "ARTIFACT_INVALID");
+        denied(one(base, synthetic(ident(1, "raw"), Map.of(1L, STRING)), Map.of("raw", "String"), "FollowupStatus"), "ARTIFACT_INVALID");
         var conditional = synthetic(call(1, "_?_:_", bool(2), ident(3, "taskId"), ident(4, "taskId")), Map.of(1L, STRING, 3L, STRING, 4L, STRING));
-        assertEquals("same", CheckedCel.prepare(one(base, conditional, Map.of("taskId", "TaskId"), "TaskId"))
+        assertEquals("same", prepare(one(base, conditional, Map.of("taskId", "TaskId"), "TaskId"))
                 .evaluate(Map.of("expr", "e0"), Map.of("taskId", "same"), "/return"));
     }
 
     @Test void rejectsRecordConditionalBranchesAndForbiddenAstShapes() throws Exception {
-        Artifact.Plan base = sample(); Type input = Type.newBuilder().setMessageType("keir.read.ClassifyInput").build();
+        Artifact.Plan base = sample(); Type input = Type.newBuilder().setMessageType("keir.read.TaskCompletedInput").build();
         Expr recordConditional = call(2, "_?_:_", bool(3), ident(4, "input"), ident(5, "input"));
         Expr selection = Expr.newBuilder().setId(1).setSelectExpr(Expr.Select.newBuilder().setOperand(recordConditional).setField("taskId")).build();
-        denied(one(base, synthetic(selection, Map.of(1L, STRING, 2L, input, 4L, input, 5L, input)), Map.of("input", "ClassifyInput"), "TaskId"), "ARTIFACT_INVALID");
+        denied(one(base, synthetic(selection, Map.of(1L, STRING, 2L, input, 4L, input, 5L, input)), Map.of("input", "TaskCompletedInput"), "TaskId"), "ARTIFACT_INVALID");
         for (Expr invalid : List.of(Expr.newBuilder().setId(1).setListExpr(Expr.CreateList.getDefaultInstance()).build(),
                 Expr.newBuilder().setId(1).setStructExpr(Expr.CreateStruct.getDefaultInstance()).build(),
                 Expr.newBuilder().setId(1).setConstExpr(Constant.newBuilder().setInt64Value(1)).build(),
@@ -266,33 +259,15 @@ class CheckedCelTest {
     @Test void enforcesAstNodeDepthAggregateAndWireRecursionBounds() throws Exception {
         Artifact.Plan base = sample();
         CheckedExpr nodes64 = synthetic(call(64, "!_", tree(32, new long[]{0})), Map.of());
-        var selected = one(base, nodes64, Map.of(), "Boolean"); assertEquals(64, CheckedCel.prepare(selected).totalNodes());
-        assertEquals(16, CheckedCel.prepare(one(base, synthetic(deep(16), Map.of()), Map.of(), "Boolean")).totalNodes());
+        var selected = one(base, nodes64, Map.of(), "Boolean"); assertEquals(64, prepare(selected).totalNodes());
+        assertEquals(16, prepare(one(base, synthetic(deep(16), Map.of()), Map.of(), "Boolean")).totalNodes());
         denied(one(base, synthetic(tree(33, new long[]{0}), Map.of()), Map.of(), "Boolean"), "BUDGET_EXCEEDED");
         denied(one(base, synthetic(deep(17), Map.of()), Map.of(), "Boolean"), "BUDGET_EXCEEDED");
         denied(one(base, synthetic(deep(40), Map.of()), Map.of(), "Boolean"), "BUDGET_EXCEEDED");
         var contexts = new LinkedHashMap<String,Map<String,Object>>();
         for (int i = 0; i < 8; i++) contexts.put("e"+i, selected.contexts().get("e0"));
-        assertEquals(512, CheckedCel.prepare(contexts(base, contexts)).totalNodes());
+        assertEquals(512, prepare(contexts(base, contexts)).totalNodes());
         contexts.put("e8", selected.contexts().get("e0")); denied(contexts(base, contexts), "BUDGET_EXCEEDED");
     }
 
-    @Test void wireGuardEnforcesItsOwnInclusiveDepthBeforeDecodingRecursiveMessages() throws Exception {
-        Artifact.Plan base = sample();
-        for (int messageDepth : List.of(34, 35)) {
-            var nested = DescriptorProtos.DescriptorProto.newBuilder().setName("Nested").build();
-            for (int i = 1; i < messageDepth; i++)
-                nested = DescriptorProtos.DescriptorProto.newBuilder().setName("Level" + i).addNestedType(nested).build();
-            var descriptor = DescriptorProtos.FileDescriptorSet.newBuilder().addFile(
-                    DescriptorProtos.FileDescriptorProto.newBuilder().setName("nested.proto").addMessageType(nested)).build();
-            // FileDescriptorSet and FileDescriptorProto add two levels to the named messages.
-            byte[] encoded = bytes(descriptor);
-            assertArrayEquals(encoded, bytes(DescriptorProtos.FileDescriptorSet.parseFrom(encoded)));
-            Map<String,Object> document = new HashMap<>(base.document()); document.put("descriptors", Base64.getEncoder().encodeToString(encoded));
-            RuntimeFault failure = denied(new Artifact.Plan(document, base.dcm(), base.entrypoint(), base.contexts(), base.calls(), base.callCount()),
-                    messageDepth == 34 ? "ARTIFACT_INVALID" : "BUDGET_EXCEEDED");
-            assertEquals(messageDepth == 34 ? "/artifact/descriptors" : "/artifact/expressions", failure.path);
-        }
-        denied(one(base, synthetic(deep(18), Map.of()), Map.of(), "Boolean"), "BUDGET_EXCEEDED");
-    }
 }

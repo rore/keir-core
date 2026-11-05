@@ -26,6 +26,14 @@ final class RuntimeData {
     }
 
     static Object parseJson(byte[] bytes, int max) {
+        return parseJson(bytes, max, false);
+    }
+
+    static Object parseScenario(byte[] bytes) {
+        return parseJson(bytes, 65_536, true);
+    }
+
+    private static Object parseJson(byte[] bytes, int max, boolean scenario) {
         if (bytes == null || max < 0 || bytes.length > max || bytes.length > MAX_BYTES) throw invalid();
         try {
             String text = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
@@ -33,28 +41,28 @@ final class RuntimeData {
             if (text.startsWith("\ufeff")) throw invalid();
             try (JsonParser parser = JSON.createParser(text)) {
                 if (parser.nextToken() == null) throw invalid();
-                Object result = read(parser, 1, new int[]{0});
+                Object result = read(parser, 1, new int[]{0}, scenario);
                 if (parser.nextToken() != null) throw invalid();
                 return result;
             }
         } catch (Exception error) { throw invalid(); }
     }
 
-    private static Object read(JsonParser parser, int depth, int[] nodes) throws java.io.IOException {
-        if (depth > 16 || ++nodes[0] > MAX_BYTES) throw invalid();
+    private static Object read(JsonParser parser, int depth, int[] nodes, boolean scenario) throws java.io.IOException {
+        if ((depth > 16 && (!scenario || parser.currentToken().isStructStart())) || ++nodes[0] > MAX_BYTES) throw invalid();
         return switch (parser.currentToken()) {
             case START_OBJECT -> {
                 Map<String,Object> result = new LinkedHashMap<>();
                 while (parser.nextToken() != JsonToken.END_OBJECT) {
                     if (parser.currentToken() != JsonToken.FIELD_NAME) throw invalid();
                     String key = parser.currentName(); unicode(key);
-                    parser.nextToken(); result.put(key, read(parser, depth + 1, nodes));
+                    parser.nextToken(); result.put(key, read(parser, depth + 1, nodes, scenario));
                 }
                 yield result;
             }
             case START_ARRAY -> {
                 List<Object> result = new ArrayList<>();
-                while (parser.nextToken() != JsonToken.END_ARRAY) result.add(read(parser, depth + 1, nodes));
+                while (parser.nextToken() != JsonToken.END_ARRAY) result.add(read(parser, depth + 1, nodes, scenario));
                 yield result;
             }
             case VALUE_STRING -> { String result = parser.getText(); unicode(result); yield result; }
@@ -64,11 +72,16 @@ final class RuntimeData {
             case VALUE_NUMBER_INT -> {
                 String raw = parser.getText();
                 BigInteger integer = new BigInteger(raw);
-                if (raw.equals("-0") || integer.signum() < 0 || integer.compareTo(BigInteger.valueOf(MAX_INTEGER)) > 0)
+                if (raw.equals("-0") || integer.signum() < 0 || integer.compareTo(BigInteger.valueOf(MAX_INTEGER)) > 0) {
+                    if (scenario) throw invalid();
                     yield new BigDecimal(raw);
+                }
                 yield integer.longValueExact();
             }
-            case VALUE_NUMBER_FLOAT -> new BigDecimal(parser.getText());
+            case VALUE_NUMBER_FLOAT -> {
+                if (scenario) throw invalid();
+                yield new BigDecimal(parser.getText());
+            }
             default -> throw invalid();
         };
     }

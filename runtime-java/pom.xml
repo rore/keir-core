@@ -18,11 +18,7 @@
   </dependencies>
   <build>
     <testResources>
-      <testResource><directory>${project.basedir}/../conformance/read-simulation</directory><targetPath>read-simulation</targetPath></testResource>
-      <testResource><directory>${project.basedir}/../conformance/generic-hooks</directory><targetPath>generic-hooks</targetPath></testResource>
-      <testResource><directory>${project.basedir}/../conformance/single-effect</directory><targetPath>single-effect</targetPath></testResource>
-      <testResource><directory>${project.basedir}/../conformance/read-and-decide</directory><targetPath>read-and-decide</targetPath></testResource>
-      <testResource><directory>${project.basedir}/../runtime-node/test/fixtures</directory><targetPath>supplemental</targetPath></testResource>
+      <testResource><directory>${project.basedir}/../conformance/keir-1</directory><targetPath>keir-1</targetPath></testResource>
     </testResources>
   </build>
 </project>
