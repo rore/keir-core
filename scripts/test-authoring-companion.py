@@ -231,19 +231,21 @@ class AuthoringCompanionV3Test(unittest.TestCase):
 
     def test_release_record_requires_all_exact_assets(self):
         module = runpy.run_path(str(SCRIPT))
+        files = {
+            "compiler": ("keir-compiler-cli-0.1.0.zip", b"compiler"),
+            "javaRuntime": ("keir-java-runtime-maven-0.1.0.zip", b"java"),
+            "nodeRuntime": ("keir-runtime-node-0.1.0.tgz", b"node"),
+        }
         release = {
             "status": "release", "coreRevision": self.revision,
             "packages": {
-                "compiler": {"version": "0.1.0", "assets": {"keir-compiler.jar": digest(b"compiler")}},
-                "javaRuntime": {"version": "0.1.0", "assets": {
-                    "keir-runtime.jar": digest(b"java"), "keir-parent.pom": digest(b"pom")}},
-                "nodeRuntime": {"version": "0.1.0", "assets": {"keir-runtime.tgz": digest(b"node")}},
+                role: {"version": "0.1.0", "assets": {name: digest(value)}}
+                for role, (name, value) in files.items()
             },
         }
         assets = self.directory / "core-assets"
         assets.mkdir()
-        for name, value in (("keir-compiler.jar", b"compiler"), ("keir-runtime.jar", b"java"),
-                            ("keir-parent.pom", b"pom"), ("keir-runtime.tgz", b"node")):
+        for name, value in files.values():
             (assets / name).write_bytes(value)
         with zipfile.ZipFile(self.path) as archive:
             payload = {name: archive.read(name) for name in module["V3_FILES"]}
@@ -260,10 +262,13 @@ class AuthoringCompanionV3Test(unittest.TestCase):
         for flags in ((), ("--core-assets", assets)):
             result = command("verify", archive, "--version", "3", "--sha256", pin, *flags)
             self.assertEqual(result.returncode, 0, result.stderr)
-        (assets / "keir-parent.pom").write_bytes(b"changed")
+        (assets / "keir-java-runtime-maven-0.1.0.zip").write_bytes(b"changed")
         result = command("verify", archive, "--version", "3", "--sha256", pin, "--core-assets", assets)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Core asset digest does not match", result.stderr)
+        release["packages"]["javaRuntime"]["assets"] = {"keir-parent-0.1.0.pom": digest(b"pom")}
+        with self.assertRaisesRegex(ValueError, "keir-java-runtime-maven"):
+            module["validate_compatibility"](release)
         del release["packages"]["nodeRuntime"]
         with self.assertRaisesRegex(ValueError, "all three"):
             module["validate_compatibility"](release)

@@ -22,7 +22,7 @@ Keep the conversation usable without a dashboard. If the application offers a se
 
 ## Authority and tools
 
-The application selects the DCM and capabilities available for authoring. It supplies protected values at execution and owns permissions, native commits, approval and activation. Keep catalog publication and capability registration outside the assistant’s authority. [Host binding](../specs/host-model-binding.md) defines runtime setup separately.
+The application selects the DCM and capabilities available for authoring. It supplies protected values at execution and owns permissions, native commits, approval and activation. Keep catalog publication and capability registration outside the assistant’s authority. See the [embedding guide](../embedding.md) for runtime setup.
 
 | Authoring responsibility | What the application supplies |
 | --- | --- |
@@ -31,7 +31,7 @@ The application selects the DCM and capabilities available for authoring. It sup
 | Simulation and review | The [same compiled artifact](../embedding.md) with simulated implementations, independent expectations and a result the customer can inspect. |
 | Approval and activation | Separate host-owned operations for the authorized user and the exact reviewed revision. |
 
-These are responsibilities for tools your application defines. The compiler and runtime APIs are listed in the [specification](../specs/README.md). Keep tool permissions separate from the capabilities a rule can call, and surface missing tools, failed validation or uncertain outcomes in the review.
+These are responsibilities for tools your application defines. Keep tool permissions separate from the capabilities a rule can call, and surface missing tools, failed validation or uncertain outcomes in the review.
 
 <a id="first-worked-customization-classify-a-task"></a>
 <a id="implementation-reference-earlier-task-examples"></a>

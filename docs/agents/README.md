@@ -13,4 +13,4 @@ Keir’s compiler and runtime work independently of an assistant. Start with the
 
 The [authoring companion](authoring-companion.md) packages the guide, schemas and example scenarios as a versioned ZIP. Supply your application’s exact published domain capability model (DCM), policy and scoped tool definitions separately.
 
-The [Keir specification](../specs/README.md) defines the compiler and runtime interfaces. The assistant guides describe tool responsibilities for your application to implement. The application owns tool access, approval and activation.
+The [embedding guide](../embedding.md) shows how an application calls the compiler and runtime. The application implements its authoring tools and owns tool access, approval and activation.
