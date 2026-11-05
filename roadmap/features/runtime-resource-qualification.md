@@ -1,7 +1,7 @@
 ---
 id: "runtime-resource-qualification"
 title: "Qualify CPU, memory and deadline containment"
-status: "queued"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Release an embeddable Keir library"
