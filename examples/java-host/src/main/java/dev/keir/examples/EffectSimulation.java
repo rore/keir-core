@@ -12,16 +12,11 @@ final class EffectSimulation {
             "invalid-key","wrong-origin","read-throws","lost-response","response-expired","response-bad-clock",
             "trace-after-confirmed","simulated-duplicate","simulated-payload-mismatch");
     private EffectSimulation() {}
-    static void check(boolean valid,String message) { if(!valid) throw new IllegalArgumentException(message); }
-    @SuppressWarnings("unchecked") static Map<String,Object> object(Object value) {
-        check(value instanceof Map<?,?> map && map.keySet().stream().allMatch(key->key instanceof String),"Expected scenario record");
-        return (Map<String,Object>)value;
-    }
-    @SuppressWarnings("unchecked") static List<Object> array(Object value) {
-        check(value instanceof List<?>,"Expected scenario array"); return (List<Object>)value;
-    }
+    static void check(boolean valid,String message) { ScenarioData.check(valid,message); }
+    static Map<String,Object> object(Object value) { return ScenarioData.object(value); }
+    static List<Object> array(Object value) { return ScenarioData.array(value); }
     static void shape(Object value,String... fields) { check(object(value).keySet().equals(Set.of(fields)),"Closed scenario fields"); }
-    static void same(Object actual,Object expected,String message) { check(Arrays.equals(EffectJson.encode(actual),EffectJson.encode(expected)),message); }
+    static void same(Object actual,Object expected,String message) { ScenarioData.same(actual,expected,message); }
     private static void scalar(Object value) {
         check(value instanceof String text && text.getBytes(java.nio.charset.StandardCharsets.UTF_8).length<=256,"Bounded scenario scalar");
         EffectJson.encode(value);
@@ -69,16 +64,7 @@ final class EffectSimulation {
         same(receipt,expect.get("consumption"),"Invalid expected consumer receipt"); check("REPORTED".equals(receipt.get("status")),"Invalid expected outcome");
     }
     static List<Map<String,Object>> reconcile(List<Map<String,Object>> captures,List<Map<String,Object>> trace,List<Object> stubs,List<String> violations) {
-        var dispatches=trace.stream().filter(event->"CALL_DISPATCHED".equals(event.get("event"))).toList();
-        if(captures.size()!=dispatches.size()||captures.size()!=stubs.size()) violations.add("Dispatch/capture/stub count mismatch");
-        var calls=new ArrayList<Map<String,Object>>();
-        for(int i=0;i<captures.size();i++) {
-            var call=captures.get(i); var event=i<dispatches.size()?dispatches.get(i):Map.<String,Object>of();
-            if(!Objects.equals(event.get("capability"),call.get("capability"))) violations.add("Dispatch capability mismatch");
-            if(i>=stubs.size()||!Objects.equals(event.get("step"),object(stubs.get(i)).get("step"))) violations.add("Dispatch step mismatch");
-            var actual=new LinkedHashMap<String,Object>(call); if(event.containsKey("step")) actual.put("step",event.get("step")); calls.add(actual);
-        }
-        return calls;
+        return ScenarioData.reconcile(captures,trace,stubs,violations);
     }
     static Map<String,Object> run(byte[] bytes,String artifactPin,String dcmPin,Object value) {
         validateScenario(value); var row=object(value); var given=object(row.get("given")); var input=object(given.get("input"));
