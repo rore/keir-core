@@ -63,32 +63,11 @@ final class Dcm {
     }
 
     static Dcm parse(Object value) {
-        return parse(value,false);
-    }
-
-    static Dcm parse(Object value, boolean effectProfile) {
-        return parse(value, effectProfile, false);
-    }
-
-    static Dcm parse(Object value, boolean effectProfile, boolean generic) {
-        return parse(value, effectProfile, generic, false);
-    }
-
-    static Dcm parse(Object value, boolean effectProfile, boolean generic, boolean effect3) {
-        return parse(value, effectProfile, generic, effect3, false);
-    }
-
-    static Dcm parse(Object value, boolean effectProfile, boolean generic, boolean effect3, boolean effect4) {
-        var root = effectProfile
-                ? shape(value,"/dcm","format","domain","types","capabilities","entrypoints","hostKey","assurance")
-                : shape(value,"/dcm","format","domain","types","capabilities","entrypoints");
-        supported(root.get("format"),"keir-dcm/" + (effectProfile ? "effect-" : "read-") + (effect4 ? "4" : effect3 ? "3" : generic ? "2" : "1"),"/dcm/format");
-        if (effectProfile) {
-            if (!(effect4 ? "HOST_BOUND_SINGLE_WRITE" : effect3 ? "HOST_QUALIFIED_SINGLE_WRITE" : "SIMULATION_ONLY").equals(root.get("assurance"))) throw invalid("/dcm/assurance");
-            var key = shape(root.get("hostKey"),"/dcm/hostKey","source","type");
-            if (!"requestKey".equals(key.get("source"))) throw invalid("/dcm/hostKey/source");
-            metadataText(key.get("type"),"/dcm/hostKey/type");
-        }
+        var root = shape(value,"/dcm","format","domain","types","capabilities","entrypoints","hostKey");
+        supported(root.get("format"),"keir-dcm/1","/dcm/format");
+        var key = shape(root.get("hostKey"),"/dcm/hostKey","source","type");
+        if (!"requestKey".equals(key.get("source"))) throw invalid("/dcm/hostKey/source");
+        metadataText(key.get("type"),"/dcm/hostKey/type");
         var domain = shape(root.get("domain"),"/dcm/domain","id","version");
         text(domain.get("id"),"/dcm/domain/id");
         text(domain.get("version"),"/dcm/domain/version");
@@ -138,7 +117,7 @@ final class Dcm {
             var cap = shape(entry.getValue(),path,"version","parameters","result","effect","errors");
             String version = text(cap.get("version"),child(path,"version"));
             String effect = text(cap.get("effect"),child(path,"effect"));
-            if (!effect.equals("READ") && !((effectProfile || generic) && effect.equals("WRITE"))) throw unsupported(child(path,"effect"));
+            if (!effect.equals("READ") && !effect.equals("WRITE")) throw unsupported(child(path,"effect"));
             String result = reference(cap.get("result"),child(path,"result"));
             requireType(types,result,child(path,"result"),true);
             var parameters = new TreeMap<String,Parameter>();
@@ -152,65 +131,43 @@ final class Dcm {
                 if (!binding.equals("agent") && !binding.equals("host")) throw invalid(child(pp,"binding"));
                 parameters.put(param.getKey(),new Parameter(type,binding));
             }
-            var errors = strings(cap.get("errors"),child(path,"errors"),(effectProfile || generic) ? 16 : Integer.MAX_VALUE,false,true);
+            var errors = strings(cap.get("errors"),child(path,"errors"),16,false,true);
             capabilities.put(entry.getKey(),new Capability(version,immutable(parameters),result,effect,errors));
         }
         var entries = new TreeMap<String,Entrypoint>();
         for (var entry : boundedMap(root.get("entrypoints"),"/dcm/entrypoints",4).entrySet()) {
             String path = child("/dcm/entrypoints",entry.getKey());
             identifier(entry.getKey(),path,true);
-            var ep = generic ? entryShape(entry.getValue(),path,effectProfile) : effectProfile
-                    ? shape(entry.getValue(),path,"input","output","trigger","placement","consumer","grants","effectGrant","event")
-                    : shape(entry.getValue(),path,"input","output","trigger","consumer","grants");
+            var ep = entryShape(entry.getValue(),path);
             String input = reference(ep.get("input"),child(path,"input"));
             String output = reference(ep.get("output"),child(path,"output"));
             requireType(types,input,child(path,"input"),true);
             requireType(types,output,child(path,"output"),true);
-            if (effectProfile) {
-                if (!"EVENT".equals(ep.get("trigger"))) throw invalid(child(path,"trigger"));
-                if (!"AFTER_COMMIT".equals(ep.get("placement"))) throw invalid(child(path,"placement"));
-            } else supported(ep.get("trigger"),"REQUEST",child(path,"trigger"));
+            if (!"EVENT".equals(ep.get("trigger"))) throw invalid(child(path,"trigger"));
+            if (!"AFTER_COMMIT".equals(ep.get("placement"))) throw invalid(child(path,"placement"));
             var consumer = shape(ep.get("consumer"),child(path,"consumer"),"id","version","kind");
             String consumerIdPath = child(child(path,"consumer"),"id");
             identifier(text(consumer.get("id"),consumerIdPath),consumerIdPath,true);
             text(consumer.get("version"),child(child(path,"consumer"),"version"));
-            if (effectProfile) {
-                if (!"EVENT_REPORT".equals(consumer.get("kind"))) throw invalid(child(child(path,"consumer"),"kind"));
-            } else supported(consumer.get("kind"),"DISPLAY",child(child(path,"consumer"),"kind"));
-            int effectGrant = 0;
-            if (effectProfile) {
-                String gp = child(path,"effectGrant");
-                Object n = generic && !ep.containsKey("effectGrant") ? 1L : ep.get("effectGrant");
-                if (!(n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long || n instanceof BigInteger)) throw invalid(gp);
-                var count = new BigInteger(n.toString());
-                if (count.signum() < 0 || count.compareTo(BigInteger.ONE) > 0) throw invalid(gp);
-                effectGrant = count.intValue();
-                var event = shape(ep.get("event"),child(path,"event"),"idType","sourceType");
-                for (String field : List.of("idType","sourceType")) {
-                    String type = metadataText(event.get(field),child(child(path,"event"),field));
-                    if (!types.containsKey(type) || !types.get(type).kind.equals("nominal")) throw invalid(child(child(path,"event"),field));
-                }
+            if (!"EVENT_REPORT".equals(consumer.get("kind"))) throw invalid(child(child(path,"consumer"),"kind"));
+            String gp = child(path,"effectGrant");
+            Object n = ep.getOrDefault("effectGrant", 1L);
+            if (!(n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long || n instanceof BigInteger)) throw invalid(gp);
+            var count = new BigInteger(n.toString());
+            if (count.signum() < 0 || count.compareTo(BigInteger.ONE) > 0) throw invalid(gp);
+            var event = shape(ep.get("event"),child(path,"event"),"idType","sourceType");
+            for (String field : List.of("idType","sourceType")) {
+                String type = metadataText(event.get(field),child(child(path,"event"),field));
+                if (!types.containsKey(type) || !types.get(type).kind.equals("nominal")) throw invalid(child(child(path,"event"),field));
             }
-            var grants = new TreeMap<String,Integer>();
-            if (generic) grants.putAll(policy(ep, capabilities, path));
-            else for (var grant : boundedMap(ep.get("grants"),child(path,"grants"),8).entrySet()) {
-                String gp = child(child(path,"grants"),grant.getKey());
-                if (!capabilities.containsKey(grant.getKey())) throw invalid(gp);
-                Object n = grant.getValue();
-                if (!(n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long || n instanceof BigInteger)) throw invalid(gp);
-                var count = new BigInteger(n.toString());
-                if (count.signum() <= 0) throw invalid(gp);
-                if (count.compareTo(BigInteger.valueOf(4)) > 0) throw budget(gp);
-                grants.put(grant.getKey(),count.intValue());
-            }
-            entries.put(entry.getKey(),new Entrypoint(input,output,effectProfile ? "EVENT" : "REQUEST",freezeMap(consumer),immutable(grants),effectGrant));
+            var grants = policy(ep, capabilities, path);
+            entries.put(entry.getKey(),new Entrypoint(input,output,"EVENT",freezeMap(consumer),immutable(grants),count.intValue()));
         }
         if (entries.isEmpty()) throw invalid("/dcm/entrypoints");
         return new Dcm(root,types,capabilities,entries);
     }
 
     Map<String,Object> root() { return root; }
-    boolean generic() { return root.get("format").equals("keir-dcm/read-2") || root.get("format").equals("keir-dcm/effect-2") || root.get("format").equals("keir-dcm/effect-3") || root.get("format").equals("keir-dcm/effect-4"); }
     Map<String,Type> types() { return types; }
     Map<String,Capability> capabilities() { return capabilities; }
     Map<String,Entrypoint> entrypoints() { return entrypoints; }
@@ -231,13 +188,12 @@ final class Dcm {
         return bytes;
     }
 
-    private static Map<String,Object> entryShape(Object value,String path,boolean effect) {
+    private static Map<String,Object> entryShape(Object value,String path) {
         var ep = object(value,path);
-        var required = new TreeSet<>(List.of("input","output","trigger","consumer"));
-        if (effect) required.addAll(List.of("placement","event"));
+        var required = new TreeSet<>(List.of("input","output","trigger","consumer","placement","event"));
         var allowed = new TreeSet<>(required);
         allowed.add("capabilityPolicy");
-        if (effect) allowed.add("effectGrant");
+        allowed.add("effectGrant");
         for (String key : ep.keySet()) if (!allowed.contains(key)) throw new CompileFailure("FIELD_UNKNOWN",child(path,key));
         for (String key : required) if (!ep.containsKey(key)) throw invalid(child(path,key));
         return ep;

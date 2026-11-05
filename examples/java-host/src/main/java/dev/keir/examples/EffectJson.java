@@ -17,35 +17,43 @@ final class EffectJson {
     private EffectJson() {}
 
     static Object parse(byte[] bytes) {
-        if(bytes==null || bytes.length>MAX_BYTES) throw invalid();
+        return parse(bytes, false);
+    }
+
+    static Object parseScenario(byte[] bytes) {
+        return parse(bytes, true);
+    }
+
+    private static Object parse(byte[] bytes, boolean scenario) {
+        if(bytes==null || bytes.length>(scenario?65_536:MAX_BYTES)) throw invalid();
         try {
             String text=StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
                 .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString();
             if(text.startsWith("\ufeff")) throw invalid();
             try(JsonParser parser=JSON.createParser(text)) {
                 if(parser.nextToken()==null) throw invalid();
-                Object value=read(parser,1,new int[]{0});
+                Object value=read(parser,1,new int[]{0},scenario);
                 if(parser.nextToken()!=null) throw invalid();
                 return value;
             }
         } catch(Exception error) { throw invalid(); }
     }
 
-    private static Object read(JsonParser parser,int depth,int[] nodes) throws java.io.IOException {
-        if(depth>16 || ++nodes[0]>MAX_BYTES) throw invalid();
+    private static Object read(JsonParser parser,int depth,int[] nodes,boolean scenario) throws java.io.IOException {
+        if((!scenario&&depth>16) || ++nodes[0]>MAX_BYTES) throw invalid();
         return switch(parser.currentToken()) {
             case START_OBJECT -> {
                 Map<String,Object> value=new LinkedHashMap<>();
                 while(parser.nextToken()!=JsonToken.END_OBJECT) {
                     if(parser.currentToken()!=JsonToken.FIELD_NAME || ++nodes[0]>MAX_BYTES) throw invalid();
                     String key=parser.currentName(); unicode(key);
-                    parser.nextToken(); value.put(key,read(parser,depth+1,nodes));
+                    parser.nextToken(); value.put(key,read(parser,depth+1,nodes,scenario));
                 }
                 yield value;
             }
             case START_ARRAY -> {
                 List<Object> value=new ArrayList<>();
-                while(parser.nextToken()!=JsonToken.END_ARRAY) value.add(read(parser,depth+1,nodes));
+                while(parser.nextToken()!=JsonToken.END_ARRAY) value.add(read(parser,depth+1,nodes,scenario));
                 yield value;
             }
             case VALUE_STRING -> { String value=parser.getText(); unicode(value); yield value; }
@@ -54,7 +62,7 @@ final class EffectJson {
             case VALUE_NULL -> null;
             case VALUE_NUMBER_INT -> {
                 String raw=parser.getText(); long value=Long.parseLong(raw);
-                if(raw.equals("-0") || value < -MAX_INTEGER || value>MAX_INTEGER) throw invalid();
+                if(raw.equals("-0") || value < (scenario?0:-MAX_INTEGER) || value>MAX_INTEGER) throw invalid();
                 yield value;
             }
             default -> throw invalid();

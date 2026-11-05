@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fromBinary, toBinary } from '@bufbuild/protobuf';
 import { CheckedExprSchema } from '@bufbuild/cel-spec/cel/expr/checked_pb.js';
-import { evaluateBinding, prepareExpressions } from '../src/cel.js';
+import { evaluateBinding, prepareExpressions, prepareModelTypes } from '../src/cel.js';
 
 const here = new URL('../../conformance/cel-profile/', import.meta.url);
 const bundle = JSON.parse(readFileSync(new URL('evidence/bundle.json', here), 'utf8'));
@@ -16,11 +16,11 @@ const contexts = new Map(bundle.expressions.map(({ id, checkedBase64, javaOutput
 }]));
 const qualifiedIds = new Set(fixtures.expressions.map(expression => expression.id));
 const qualifiedContexts = new Map([...contexts].filter(([id]) => qualifiedIds.has(id)));
-const artifact = { dcm, descriptors: bundle.descriptorBase64 };
+const model = { dcm, types: prepareModelTypes(dcm) };
 const tasks = Object.fromEntries(fixtures.inputs.map(input => [input.name, input.task]));
 
-function prepare(selected = contexts, inputArtifact = artifact) {
-  return prepareExpressions(inputArtifact, selected);
+function prepare(selected = contexts) {
+  return prepareExpressions(selected, model);
 }
 
 test('accepts Java qualification checked expressions and matches their fixture results', () => {
@@ -71,9 +71,14 @@ test('rejects unknown variables and malformed checked bytes', () => {
   assert.throws(() => prepare(new Map([['bad', { ...contexts.get('status'), checked: Buffer.from([0xff]).toString('base64') }]])));
 });
 
-test('requires the descriptor to match the DCM-generated closed schema', () => {
-  assert.throws(() => prepare(contexts, { ...artifact, descriptors: Buffer.from('not a descriptor').toString('base64') }));
-  assert.throws(() => prepare(contexts, { ...artifact, descriptors: artifact.descriptors.slice(0, -4) + 'AAAA' }));
+test('requires the current checked expression source location', () => {
+  const context = contexts.get('status');
+  for (const location of ['keir-read/1', 'untrusted']) {
+    const checked = fromBinary(CheckedExprSchema, Buffer.from(context.checked, 'base64'));
+    checked.sourceInfo.location = location;
+    const encoded = Buffer.from(toBinary(CheckedExprSchema, checked)).toString('base64');
+    assert.throws(() => prepare(new Map([['status', { ...context, checked: encoded }]])));
+  }
 });
 
 test('rejects checked-expression size above the limit and accepts qualified AST boundaries', () => {

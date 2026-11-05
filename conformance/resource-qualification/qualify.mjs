@@ -7,7 +7,7 @@ import { canonicalBytes, digest } from '../../runtime-node/src/canonical.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const here = dirname(fileURLToPath(import.meta.url));
-const fixture = join(root, 'conformance/generic-hooks/effect4');
+const fixture = join(root, 'conformance/keir-1');
 const compiler = join(root, 'compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar');
 const host = join(root, 'examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar');
 const jdk = name => process.env.JAVA_HOME
@@ -70,7 +70,7 @@ function requireExit(run, code = 0) {
 
 async function runJvm(args) {
   if (!soak) return child(jdk('java'), args);
-  let sampler;
+  let sampler, sampled;
   const run = await child(jdk('java'), args, { started(pid) {
     sampler = child('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', [
       "$ErrorActionPreference = 'Stop'",
@@ -83,8 +83,7 @@ async function runJvm(args) {
       "Start-Sleep -Milliseconds " + soak.sampleIntervalMs + " }",
       "@{samples=$samples} | ConvertTo-Json -Depth 4 -Compress",
     ].join('\n')]).then(result => ({ result }), error => ({ error }));
-  } });
-  const sampled = await sampler;
+  } }).finally(async () => { sampled = await sampler; });
   if (sampled?.error) throw sampled.error;
   requireExit(run);
   assert.ok(sampled, 'JVM sampler failed to start');
@@ -117,11 +116,16 @@ const temporary = mkdtempSync(join(resolvedBuild, 'resource-'));
 const output = { limits, platform: process.platform, arch: process.arch, compiler: {}, runtimes: {}, children: {} };
 try {
   const write = (name, bytes) => { writeFileSync(join(temporary, name), bytes); return name; };
+  const pinned = name => {
+    const bytes = readFileSync(join(fixture, name + '.json'));
+    assert.equal(digest(bytes), readFileSync(join(fixture, name + '.sha256'), 'ascii').trim(), name);
+    return bytes;
+  };
   const source = readFileSync(join(fixture, 'source-no-call.yaml'));
-  const dcm = readFileSync(join(fixture, 'dcm.json'));
+  const dcm = pinned('dcm');
   const model = JSON.parse(dcm);
   const program = (steps, returned = { literal: 'NO_OP' }, dcmBytes = dcm) => canonicalBytes({
-    language: 'keir/v0', domain: { ...model.domain, fingerprint: digest(dcmBytes) }, name: 'resource-probe',
+    language: 'keir/1', domain: { ...model.domain, fingerprint: digest(dcmBytes) }, name: 'resource-probe',
     entrypoint: 'TaskCompleted', steps: steps.map((binding, index) => ({ id: 'step' + index, let: binding })),
     return: { record: { status: returned } },
   });
@@ -136,7 +140,7 @@ try {
     return id + '.json';
   }
   const dcmName = write('base.dcm', dcm);
-  const titleDcm = readFileSync(join(fixture, 'dcm-title.json'));
+  const titleDcm = pinned('dcm-title');
   const titleModel = write('title.dcm', titleDcm);
   const dcmMax = write('dcm-max.dcm', padded(dcm, DOC));
   const dcmOver = write('dcm-over.dcm', padded(dcm, DOC + 1));
@@ -205,13 +209,13 @@ try {
   output.compiler = { process: metrics(measured), workingSet: measured.workingSet, ...JSON.parse(measured.stdout) };
 
   const cli = await child(jdk('java'), ['-Xmx256m', '-jar', compiler, join(temporary, 'source-max.source'),
-    join(temporary, dcmName), '--profile=keir-effect/4']);
+    join(temporary, dcmName)]);
   requireExit(cli);
   const read = name => readFileSync(join(temporary, name));
   assert.deepEqual(cli.stdout, read('source-max.json'));
-  assert.deepEqual(cli.stdout, readFileSync(join(fixture, 'artifact-no-call.json')));
+  assert.deepEqual(cli.stdout, pinned('artifact-no-call'));
   for (const [id, file] of [['title', 'title'], ['concat', 'title-max'], ['boolean', 'title-composed'], ['main', ''], ['confirmed', 'after-write-read']])
-    assert.deepEqual(read(id + '.json'), readFileSync(join(fixture, 'artifact' + (file ? '-' + file : '') + '.json')), id);
+    assert.deepEqual(read(id + '.json'), pinned('artifact' + (file ? '-' + file : '')), id);
   output.compiler.cli = metrics(cli);
 
   if (soak) {

@@ -1,5 +1,25 @@
+import assert from 'node:assert/strict';
+import { closeSync, openSync, readSync } from 'node:fs';
+
 const MODEL_BYTES = 65_536;
 const ARTIFACT_BYTES = 1_048_576;
+
+export function readBoundedFixture(file, max) {
+  const descriptor = openSync(file, 'r');
+  try {
+    const buffer = Buffer.alloc(max + 1);
+    let length = 0;
+    while (length < buffer.length) {
+      const count = readSync(descriptor, buffer, length, buffer.length - length, null);
+      if (!count) break;
+      length += count;
+    }
+    assert.ok(length <= max, 'Bounded trusted fixture file');
+    return Buffer.from(buffer.subarray(0, length));
+  } finally {
+    closeSync(descriptor);
+  }
+}
 
 function capacityError() {
   return Object.assign(new Error('Harness capacity exceeded.'), { reason: 'CAPACITY_EXCEEDED' });
