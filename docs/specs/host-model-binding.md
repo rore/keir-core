@@ -71,7 +71,7 @@ The current invocation accepts only these host context fields. The runtime passe
 
 Supply exactly the union of the parameters marked `binding: host` across all calls in the prepared plan. The runtime checks them before any step runs, including parameters used only by guarded calls whose guard will be false. One value supplies a name shared by several calls and must satisfy every declared type for that name. Missing, extra or mistyped fields fail with `HOST_BINDING_INVALID` at `/hostBindings`.
 
-For the [follow-up rule](../../conformance/generic-hooks/effect4/source.yaml), supply `{actorId: "user1"}` in Node or `Map.of("actorId", "user1")` in Java. For the [no-call rule](../../conformance/generic-hooks/effect4/source-no-call.yaml) against the same [DCM](../../conformance/generic-hooks/effect4/dcm.json), supply `{}` or `Map.of()`. The no-call plan still needs the other invocation fields and a complete implementation map at binding.
+For the [follow-up rule](../../conformance/keir-1/source.yaml), supply `{actorId: "user1"}` in Node or `Map.of("actorId", "user1")` in Java. For the [no-call rule](../../conformance/keir-1/source-no-call.yaml) against the same [DCM](../../conformance/keir-1/dcm.json), supply `{}` or `Map.of()`. The no-call plan still needs the other invocation fields and a complete implementation map at binding.
 
 <a id="request-key"></a>
 ### Original request key and authority

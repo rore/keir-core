@@ -5,13 +5,9 @@ Use [Contributing](../CONTRIBUTING.md#build-and-test) to build the repository an
 <a id="effect4-verification"></a>
 ## Current single-write behavior verification
 
-> Internal engineering reference: this page records implementation and compatibility evidence. See [the Keir specification](specs/README.md) for the supported behavior. Exact profile selectors and wire identifiers are implementation details; see [the implementation reference](internal/implementation-reference.md).
+The public contract passed local and hosted checks on 2026-11-05. The local coverage build passed 144 Java tests, including 59 compiler, 69 runtime and 16 teaching-host tests. Node passed 49 runtime tests and seven installed teaching-host tests. The structural checker passed 31 fixtures and 19 rejection cases.
 
-The current single-write implementation passed focused, shared, source/installed and packaged local verification on 2026-11-04. Java clean coverage build: 271 tests (66 compiler, 172 runtime, 33 host), zero failures/errors/skips, 28.134 seconds. Coverage: compiler 857/902 lines and 760/875 branches; runtime 1417/1429 lines and 1349/1563 branches; host 554/577 lines and 750/888 branches. Node: 454 tests, zero failures/skips, 4.8357868 seconds, 100% lines and 98.30% branches. Fourteen public-API tests against the installed tarball passed in 0.723 seconds; four installed-host tests passed in 0.723 seconds.
-
-Combined verification passed with exact Java/Node/source/installed parity: 61 legacy read cases/52 invocations, 25 legacy effect, 9 generic read, 19 generic effect, 19 earlier qualified-write and 11 current single-write scenarios; 28 legacy qualification and 25 host-bound protocol cases; 30 fresh compiler processes and 12 packaged-host batches. Each Node and Java source/installed or packaged driver passed eight local/loopback native-host cases covering confirmed, denied, wrong-key and lost-response outcomes. Separate packaged read-simulation verification passed 19 reports and two recompiled artifacts; schema validation passed 29 fixtures/reports.
-
-The eight Node archive files matched source and installed contents (six source files, README and package metadata). Independent result and simplicity review passed, and the reviewed implementation was integrated. On 2026-11-04, the hosted contract check passed on `decaa2820c35e496d56e0e81bbf99d7e4e5ef2a0`, including Java and Node regression and coverage, packaged hosts, shared runtime comparisons, read simulation and offline schema checks. [GitHub Actions run 41899243002](https://github.com/rore/keir-core/actions/runs/41899243002)
+Java and Node matched across 20 scenarios, 45 raw verification vectors and eight packaged scenario groups. The compiler reproduced the pinned artifact byte for byte, and the installed Node files matched the checked tarball. The Windows resource soak ran 3,000 timed invocations per runtime. [Merged Core contract run](https://github.com/rore/keir-core/actions/runs/42072587793) · [Resource qualification](../conformance/resource-qualification/README.md)
 
 This evidence covers the tested source, packages and controlled hosts. Native-provider qualification, production resource containment and public package release have separate acceptance criteria. [Resource qualification](../roadmap/features/runtime-resource-qualification.md) · [Public release plan](../roadmap/features/public-package-release.md)
 
@@ -26,9 +22,9 @@ See [earlier verification and coverage results](internal/history/verification.md
 
 ## Fast feedback
 
-### Generic-hook regression
+### Historical generic-hook regression
 
-The [generic hook acceptance matrix](specs/generic-hook-capability-contract.md#examples-and-rejection-obligations) is exercised by separate [generic fixtures](../conformance/generic-hooks/README.md) and compiler/Java/Node component negatives; the legacy corpus remains unchanged. Preserve these regression obligations:
+The [generic hook acceptance matrix](specs/generic-hook-capability-contract.md#examples-and-rejection-obligations) records earlier obligations and [fixtures](../conformance/generic-hooks/README.md). Use the [Keir 1 corpus](../conformance/keir-1/README.md) for the current suite. The earlier checks covered the following cases:
 
 - Run two programs against one unchanged hook/DCM: select a different already-published compatible READ, then repeat READs within the aggregate bound. Omit advanced policy at hook, admission and invocation. Do not add sample-specific named grants to make these pass.
 - Distinguish omitted/empty policy and quota maps from `allow: []`; prove inherited restrictions, explicit allow/deny/quota narrowing, zero quotas, rejected widening, unknown IDs, null/malformed controls and per-call authorization. No source-controlled policy or binding can widen scope.
