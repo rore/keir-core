@@ -27,4 +27,6 @@ Use a `sha256:` prefix followed by the lowercase hexadecimal digest. The verifie
 
 After verification, load `customer-authoring-guide-v2.md` from the archive for your authoring assistant. Supply your own scoped domain capability model (DCM), tool definitions and policy separately. Pin your model’s exact identity independently. The host still owns access, approval, activation, and native operations. The bundled model and cases are examples.
 
+For a rendered copy of the guide, open the [guide at the pinned source revision](https://github.com/rore/keir-core/blob/74d128f04a5fd76d744e3b7705f6614e64846b38/docs/agents/customer-authoring-guide-v2.md). Its specification links are repository-relative. From the ZIP alone, open the [pinned specification](https://github.com/rore/keir-core/blob/74d128f04a5fd76d744e3b7705f6614e64846b38/docs/specs/README.md) separately.
+
 When a release adds authorable behavior, update the guide and an example with the code. Update schemas when the accepted document structure changes. Add an offline check that compiles and simulates the exact rule against independent expectations. Review the package’s compatibility and pins with those changes.

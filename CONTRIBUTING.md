@@ -34,4 +34,4 @@ Use [GitHub Releases](https://github.com/rore/keir-core/releases) to distribute 
 - Keep framework changes here and application behavior in Daymark. Both repositories use the [shared roadmap](roadmap/board.md).
 - Maintainers use the [development workflow](docs/internal/workflow/current-process.md) for review, records and integration. That guide defines which changes need a Work Record and how CI findings are handled.
 
-License choice is pending. Resolve it before inviting public contributions or publishing packages.
+Keir Core is licensed under the [Apache License 2.0](LICENSE).

@@ -5,22 +5,79 @@
 <a id="keir-ir-and-artifact-identity"></a>
 ## Source and artifact identity
 
-Select the single-write contract in trusted compiler configuration. One compiler produces the same artifact for Java and Node. [Exact wire identifiers](../internal/implementation-reference.md#serialized-identifiers-and-compiler-selectors)
+The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-Conceptual API: `compile(sourceBytes, trustedDcmBytes, trustedEnvironment) -> ArtifactBytes | Diagnostics`. The environment selects exact compiler/CEL/protobuf identities. The source chooses a declared entrypoint; its domain fingerprint must match the canonical trusted DCM. Compilation validates the complete source, model, type/dataflow rules and static bounds before emitting an artifact. Failure emits diagnostics and no artifact. Runtime execution never requires the compiler.
+| Field or selector | Current value |
+| --- | --- |
+| Source `language` | `keir/v0` |
+| Compiler profile and artifact `profile` | `keir-effect/4` |
+| DCM `format` | `keir-dcm/effect-4` |
+| Artifact `format` | `keir-artifact/effect-4` |
+| Compiler identity | `keir-compiler-java/0.1.0-SNAPSHOT` |
+| Descriptor recipe | `keir-record-descriptors/1` |
 
-The compiled artifact envelope is exactly `{format, profile, compiler, environment, sourceDigest, modelRef, entrypoint, expressions, steps, return}`. `modelRef` is the exact [model reference](host-model-binding.md#exact-reference-artifact) for the current DCM format and descriptor recipe. The host supplies the referenced model locally. `environment` is `{celJava,celNode,protobufJava,protobufNode}` with exact supported values. Effect CALL instructions and expression availability follow [single-write lowering](single-effect.md#artifact).
+### Compile source
 
-The [language contract](language.md#types-and-cel-bridge) defines Keir operators, including bounded plain String concatenation. The current contract supports [explicit nominal literals](generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority). Canonical encoding, digest and descriptor recipe rules below apply across versions. Earlier profiles embed or derive descriptors according to their own contracts.
+On JDK 21, use the [compiler CLI JAR](../../compiler-java/README.md#build-and-run). Give it the source path, trusted DCM path and explicit current selector, in that order.
 
-[Preparation](host-model-binding.md#effect4-binding-and-preparation) derives and checks model/compiler/environment compatibility internally. The host selects approved bytes and owns stored-byte integrity; it supplies no expected digest, scope, consumer, compiler or environment admission metadata. This does not remove those fields from artifact/model contracts. Implementation and package evidence are recorded in [testing](../testing.md).
+```sh
+java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar source.yaml dcm.json --profile=keir-effect/4 > artifact.json
+```
+
+The CLI writes artifact bytes to stdout on exit 0. On failure it writes an array of `{code,path,message}` diagnostics to stderr and emits no artifact bytes. Exit 1 means the compiler rejected the inputs. Exit 2 means invalid arguments, an unsupported CLI selector, or an unreadable input file. Omitting the selector chooses the [original read-only contract](../internal/history/compatibility-reference.md#original-compiler-envelope). Use byte-preserving redirection, including PowerShell 7.4 or later on Windows.
+
+In Java, call `new KeirCompiler().compile(sourceBytes, trustedDcmBytes, KeirCompiler.Environment.effect4())`. A successful `Compilation` has `artifact()`, `artifactDigest()` and an empty `diagnostics()` list. A failed compilation returns diagnostics and null artifact bytes and digest. `succeeded()` distinguishes the two outcomes.
+
+### Input encodings
+
+Both compiler inputs accept a single UTF-8 JSON document or Keir's restricted YAML data syntax. Use UTF-8 without a byte order mark. YAML supports mappings with string keys, sequences and scalar values. The compiler rejects duplicate keys, aliases, anchors, merge keys, explicit tags and multiple documents. Quote strings that would otherwise be decoded as Boolean, null or numeric values. The source and DCM rules still determine which values each field accepts.
+
+The runtime's [model binding](host-model-binding.md#bind-the-model) accepts JSON. Use a JSON DCM to share one file between the compiler and runtime. If you maintain a YAML DCM, supply its equivalent JSON to the runtime. The model identity hashes the decoded model in canonical JSON. Changes to formatting or key order preserve that identity, while a conversion that changes a value, type or array order changes it. With the same decoded source, model and compiler configuration, equivalent YAML and JSON produce identical artifact bytes.
+
+The host selects the compiler configuration and trusted model independently of the source. The source names a declared entrypoint and supplies its model's domain ID, version and canonical digest. The compiler checks the source, model, matching identities, types, data flow and [static limits](runtime.md#limits). A host running the compiler as a subprocess bounds time, concurrency and output, and reaps the process on cancellation.
+
+### Diagnostics
+
+Compilation currently returns the first failure. The diagnostic path identifies the source or model location. For example, `/source/steps/2/when` identifies the guard on the third step. Messages are safe summaries. Use the code and path to classify a rejection.
+
+| Rejection | Codes |
+| --- | --- |
+| Input syntax, shape or construct | `SYNTAX_INVALID`, `FIELD_UNKNOWN`, `PROFILE_UNSUPPORTED` |
+| Model or compiler environment | `DCM_INVALID`, `PIN_MISMATCH` |
+| Capability selection or protected input | `CAPABILITY_UNKNOWN`, `ENTRY_GRANT_DENIED`, `HOST_BINDING_OVERRIDE` |
+| Type or binding | `TYPE_MISMATCH`, `NOMINAL_MISMATCH`, `ENUM_MISMATCH`, `DATAFLOW_UNAVAILABLE` |
+| Expression or resource policy | `CEL_POLICY_DENIED`, `BUDGET_EXCEEDED` |
+
+See [source diagnostics](language.md#diagnostics-and-conformance) for examples of these rules on a source document.
+
+## Artifact representation
+
+The artifact is exactly `{format,profile,compiler,environment,sourceDigest,modelRef,entrypoint,expressions,steps,return}`. The selected entrypoint names the DCM entrypoint and `sourceDigest` identifies the canonical decoded source. The `environment` object contains exactly `celJava`, `celNode`, `protobufJava` and `protobufNode` with the values in [Descriptor/type bridge](#descriptortype-bridge).
+
+### Model reference
+
+`modelRef` is exactly `{domainId,domainVersion,format,digest,descriptorRecipe}`. The domain ID, version and format match the bound DCM. The digest covers the complete canonical DCM. The descriptor recipe identifies how to derive record descriptors from that DCM. The artifact carries neither the model bytes nor their descriptors.
+
+### Lowered steps and expressions
+
+| Item | Representation |
+| --- | --- |
+| Literal or expression binding | Exactly `{literal,type}` or `{expr,type}`. The type retains the resolved scalar or nominal identity. |
+| Binding step | `{op:"BIND",id,value,resultType}`, where `value` is the lowered binding. |
+| Call step | `{op:"CALL",id,capability,version,args,resultType,when?,onError?}`. Arguments contain only source-supplied parameters. `when` names the earlier Boolean BIND. `onError` maps declared codes to lowered return records. |
+| Return record | `{type,fields}`, where `type` is the entrypoint's output type and `fields` maps every output field to its lowered binding. This shape is used for both the root return and each handler. |
+| Checked expression | `{checked,variables,resultType}`. `checked` contains standard base64 of the protobuf `CheckedExpr`. `variables` maps every definitely available name, including unused names, to its type. A guarded call never adds a variable. |
+
+Assign expression IDs `e0`, `e1` and so on while visiting steps in source order. Visit call arguments by name, handler codes by code and handler fields by name, all in ASCII order. Visit root return fields last, also in ASCII order. A literal consumes no expression ID. The runtimes recompute availability and check the expression IDs and metadata during [preparation](host-model-binding.md#prepare-an-artifact).
+
+The host selects approved artifact bytes and verifies their stored-byte integrity before preparation. The compiler-produced digest identifies the bytes. It does not establish who approved them or authenticate them on its own. Execution uses the prepared artifact and bound model without a compiler or source parser.
 
 <a id="legacy-read1-envelope-and-compiler-boundary"></a>
 <a id="implementation-reference-earlier-compiler-and-artifact-contracts"></a>
 <a id="compiler-boundary"></a>
 <a id="legacy-read-compiler-boundary"></a>
 
-[Original read-only compiler and artifact](../internal/compatibility-reference.md#original-compiler-envelope).
+[Original read-only compiler and artifact](../internal/history/compatibility-reference.md#original-compiler-envelope).
 
 ## Canonical bytes and digest rules
 
@@ -44,4 +101,4 @@ Supported artifact environment pins are `celJava: "0.14.0"`, `celNode: "0.6.1"`,
 
 <a id="admission-and-trust"></a>
 
-[Earlier admission and trust checks](../internal/compatibility-reference.md#external-admission-pins).
+[Earlier admission and trust checks](../internal/history/compatibility-reference.md#external-admission-pins).
