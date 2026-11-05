@@ -1,37 +1,24 @@
 # Keir Core
 
-Keir enables SaaS applications to offer safe, AI-assisted customization to business users.
-
-The hosting application defines extension points and exposes approved capabilities. Keir provides a constrained programming language, compiler, simulation and runtimes that let customers compose those capabilities into new application behavior without executing arbitrary generated code. A host-integrated AI agent helps business users express requirements, clarify intended behavior, generate extensions, test scenarios and review results before activation. Keir's core remains usable without an agent.
-
-**Status: the corrected `/4` host-binding contract is implemented and locally verified.** Java, Node, source/installed packages and shared conformance agree; [testing evidence](docs/testing.md) records the measured scope. Independent result/simplicity review and manager integration remain pending. Native-provider qualification and hosted CI are not claimed. Existing `/1`–`/3` contracts retain their documented behavior; `/4` is a distinct host-bound single-write contract.
-
-## Components
-
-The corrected contract uses explicit `keir-effect/4`, `keir-dcm/effect-4`, `keir-artifact/effect-4` and `HOST_BOUND_SINGLE_WRITE` identities. The host supplies the complete DCM and compatible implementations at binding; preparation derives compatibility checks internally; invocation supplies fresh host context. `/1`–`/3` remain separate legacy behavior. See the [generic-hook contract](docs/specs/generic-hook-capability-contract.md) and [model binding](docs/specs/host-model-binding.md).
-
-| Path | Responsibility |
-| --- | --- |
-| [compiler-java/](compiler-java/README.md) | Validate source IR against a trusted domain model and emit a portable artifact; library and CLI |
-| [runtime-java/](runtime-java/README.md) | Embed artifact execution and simulation in Java hosts |
-| [runtime-node/](runtime-node/README.md) | Embed artifact execution and simulation in Node hosts |
-| [conformance/](conformance/README.md) | Shared fixtures and expected behavior for both runtimes |
-| [examples/](examples/README.md) | Minimal Java and Node host integrations |
-| [docs/](docs/README.md) | Public specifications and guides, with separate internal engineering records |
-
-Compile once, execute the same artifact in either runtime. Each runtime is separately consumable and does not require the compiler for execution. Task-specific services, persistence, AI authoring and activation UX belong to the separate `keir-demo-app` repository.
+Keir lets application developers offer customer-written extensions over a host-defined set of operations. A Java compiler checks the extension and produces an artifact that runs in Java or Node. The host defines where extensions run, owns permissions and service behavior, and can integrate an AI assistant to help customers author and test them.
 
 ## Start here
 
-- [Guided tour: host design, customer extension design and runtime](docs/guided-tour.md)
-- [Public documentation](docs/README.md)
-- [Specification status and contracts](docs/specs/README.md)
-- [Host and customer agent guides](docs/agents/README.md)
-- [Roadmap and milestones](roadmap/scope.md)
-- [Contribution workflow](CONTRIBUTING.md)
-- [Development team and role guides](roles/README.md)
-- [Internal design and decisions](docs/internal/README.md)
+- [Run your first extension](docs/quickstart.md). Compile a follow-up rule from a source checkout and run the same artifact in the packaged Node and Java hosts with simulated task services.
+- [Take the guided tour](docs/guided-tour.md). Follow that rule from host design through customer customization to runtime.
+- [Try Daymark](https://github.com/rore/keir-demo-app). The separate demo app shows how a task application uses Keir for approved customizations that can create real tasks.
 
-Start with the [generic follow-up example](docs/specs/generic-hook-example.md), [combined verification command](conformance/read-and-decide/README.md#verify-both-runtimes-and-packaged-hosts) and [testing evidence](docs/testing.md). Recorded scenario counts describe earlier profiles and are not `/4` verification results. The [CEL qualification](conformance/cel-profile/README.md) records the earlier expression bridge. Governance CI remains advisory; product test failures fail their check.
+## What runs today
+
+The experimental `keir-effect/4` profile supports bounded reads and at most one potential write per program. The host binds the complete capability model and its implementations, selects the exact artifact, and supplies fresh context when an event invokes it. Keir checks compatibility, types and execution limits. The registered implementations enforce current permissions and own the write and its receipt. See the [host model binding contract](docs/specs/host-model-binding.md#corrected-host-bound-4-binding).
+
+Local checks verified matching outcomes for 11 shared `effect/4` scenarios in Java and Node, including packaged hosts. The evidence covers local packages and controlled host integrations. Production CPU, memory and deadline containment are still being qualified. Public package compatibility and registry publication remain pending. See the [test evidence](docs/testing.md), [resource qualification](roadmap/features/runtime-resource-qualification.md) and [public release plan](roadmap/features/public-package-release.md).
+
+## Documentation
+
+- [Documentation index](docs/README.md) and [maintained specifications](docs/specs/README.md)
+- [Java compiler](compiler-java/README.md), [Java runtime](runtime-java/README.md) and [Node runtime](runtime-node/README.md)
+- [Host examples](examples/README.md) and [shared conformance fixtures](conformance/README.md)
+- [Roadmap](roadmap/scope.md) and [contributing](CONTRIBUTING.md)
 
 License selection and public release are pending. No open-source license grant is implied.
