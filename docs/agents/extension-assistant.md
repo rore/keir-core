@@ -1,8 +1,8 @@
 # Customer extension assistant
 
-**Status:** assistant guidance for read profiles and corrected host-bound `/4` single-write semantics. `/1`–`/3` preserve explicit legacy requirements. The [demo host](https://github.com/rore/keir-demo-app/blob/main/docs/ai-authoring.md) owns authoring, customer approval and activation. Tool interfaces remain host-defined, outside Keir core. Read the [agent overview](README.md) and [specification status](../specs/README.md).
+Use this guide to design an assistant that helps customers author rules in Keir. The application defines the tool interfaces and owns approval and activation. See the [agent overview](README.md), [model-facing guide](customer-authoring-guide-v2.md) and [Keir specification](../specs/README.md).
 
-Use the schema for the host-selected profile when checking decoded values. Schema success establishes structure only. Host approval and execution authority still apply. [Read/2 schemas](../../schemas/read-2/README.md) · [Effect/4 schemas](../../schemas/effect-4/README.md)
+Use the schema for the selected contract when checking decoded values. Schema success establishes structure only. Host approval and execution authority still apply. [Read-only schemas](../../schemas/read-2/README.md) · [Current schemas](../../schemas/effect-4/README.md)
 
 ## Task and inputs
 
@@ -10,7 +10,7 @@ Help a customer clarify application behavior, author a constrained extension and
 
 Compose the customization from native operations: when the scoped catalog exposes `tasks.create`, use it with authored project/title to implement a follow-up rule. Do not ask the host to add an operation that pre-implements that rule or assume task relationships the catalog does not expose.
 
-The corrected [host-bound `/4` contract](../specs/generic-hook-capability-contract.md) lets a program compose the host-published catalog within DCM operation and effect limits. The host supplies fresh context and each implementation checks current permission and key authenticity. Do not ask the host to prewire a call list or add approval/qualification callbacks to the Keir API. `/1`–`/3` retain legacy contracts; choose a profile explicitly. Simulation is not native-effect evidence.
+The [single-write contract](../specs/generic-hook-capability-contract.md) lets a rule compose the host-published catalog within the DCM limits. The host supplies fresh context and each implementation checks current permission and key authenticity. Simulation shows how the rule behaves against the supplied examples.
 
 ## Workflow
 
@@ -23,7 +23,7 @@ The corrected [host-bound `/4` contract](../specs/generic-hook-capability-contra
 - Offer a named example from its explaining reply; open the host-owned canvas on request and preserve the customer's place, focus and unsent text. New replies must not replace an example being read. Keep technical inspection secondary; the conversation works without a dashboard.
 - Present the exact checked behavior and one current decision together in plain language: explicit human approval, then separate activation. Preserve authority and evidence without requiring the customer to understand their internal representation.
 
-Author customer-selected project/title constants in source unless explicit logic obtains them elsewhere. Keep host payload unchanged. `/2` [nominal literals](../specs/generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority) supply business typing, not authority; `/1` retains its restrictions. Do not invent hook inputs or a configuration channel.
+Keep fixed customer choices in the rule and preserve the hook payload. Use [nominal literals](../specs/generic-hook-capability-contract.md#event-facts-extension-choices-and-protected-authority) for fixed identifiers. A type check does not verify resource access.
 
 1. Clarify the requirement, expected outcomes, missing-data behavior and error cases.
 2. Discover the host-published catalog, hook contract, supported profile and explicit restrictive policies. Compose compatible operations within existing limits. Explain current implementation limits rather than widening the catalog.
@@ -33,7 +33,7 @@ Author customer-selected project/title constants in source unless explicit logic
 
 ## Authority and tools
 
-Under `/4` [host binding](../specs/host-model-binding.md), the host supplies the exact DCM and complete compatible implementations together. Author against that published reference; do not select clients or substitute models/adapters. Preparations may be reused with fresh invocation context. A changed catalog needs explicit recompilation/selection. Host selection and current permission remain host responsibilities; never fall back from an unavailable dependency to the latest version.
+The [host binding](../specs/host-model-binding.md) pairs the exact DCM with a complete set of implementations. Author against that published model. Preparations may be reused with fresh invocation context. A changed catalog needs explicit recompilation and selection.
 
 Do not change the authoritative DCM, register capabilities/endpoints, widen grants, select protected identity/key values, certify adapters or approve your own activation. Host metadata is not ordinary source input. Successful simulation cannot establish real authorization, duplicate suppression or commit guarantees.
 
@@ -41,11 +41,14 @@ The authoring surface needs scoped discovery, compilation, simulation, diagnosti
 
 If tools, capabilities or facts are unavailable, explain the limitation or ask the user. Do not invent results or convert partial/unknown effects into success. Respect failed validation and changed catalog compatibility.
 
-## First worked customization: classify a task
+<a id="first-worked-customization-classify-a-task"></a>
+## Implementation reference: earlier task examples
 
-The [complete worked example](../specs/generic-hook-example.md) and runnable `/2` fixtures trace host definitions, authored constants, compilation and invocation. A changed constant changes source/artifact and needs normal review/selection; hook schema and host code stay fixed.
+For the current contract, [run the follow-up example](../../examples/README.md).
 
-The examples below are legacy `/1` demonstrations. New-profile acceptance must cover different published reads and repeated reads under one unchanged hook, plus denial/budget cases. Keep at most one WRITE; future idempotency proposals do not enable multi-write or recovery now.
+The [complete worked example](../specs/generic-hook-example.md) and runnable catalog-bound fixtures trace host definitions, authored constants, compilation and invocation. A changed constant changes source/artifact and needs normal review/selection; hook schema and host code stay fixed.
+
+The examples below are original read-only demonstrations. New-profile acceptance must cover different published reads and repeated reads under one unchanged hook, plus denial/budget cases. Keep at most one WRITE; future idempotency proposals do not enable multi-write or recovery now.
 
 The [single-effect follow-up](../internal/single-effect-followup-design.md) is **implemented for controlled simulation**; use the [worked scenarios](../../conformance/single-effect/README.md). Discover its separately approved profile/model; compare native scalar status and nominal project fields in source, use one Boolean guard, and never reference its guarded result. Propose created, no-op, handled rejection and lost-response scenarios. Explain that BUSINESS_REJECTION remains rejection even with a displayed record, and UNKNOWN is neither success nor proof of no effect. Never author or derive a host key, override protected event origin, infer authorization from project equality, or treat passing fakes as permission to activate real writes.
 

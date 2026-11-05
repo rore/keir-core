@@ -2,17 +2,21 @@
 
 ## Corrected host-bound single-write initialization
 
-The host defines the full capability catalog in the DCM, then initializes Keir with the DCM and a complete compatible implementation map. Keir validates static compatibility and prepares exact artifact bytes against the binding. Each invocation carries fresh host bindings, original request key, typed event and absolute deadline. The `/4` API has no separate admission service, deployment certificate, qualification/currentness callback, per-call authorizer or key-validator callback. Host implementations perform current permission and key-authenticity checks at the operation and before native commit. They may call local or HTTP/RPC services; transport remains host-owned.
+The host defines the full capability catalog in the DCM, then initializes Keir with the DCM and a complete compatible implementation map. Keir validates static compatibility and prepares exact artifact bytes against the binding. Each invocation carries fresh host bindings, the original request key, a typed event and an absolute deadline. The [binding API](host-model-binding.md#api-shapes) defines the inputs. Host implementations perform current permission and key-authenticity checks at the operation and before native commit. They may call local or HTTP/RPC services. Transport remains host-owned.
 
 Preparation cannot verify a host-held expected digest it never receives. The host selects and integrity-checks the bytes it passes. No-call programs need not perform native permission or key-authenticity checks, while runtime structural, deadline and resource checks still apply. See [host model binding](host-model-binding.md) for the exact corrected API and compatibility boundary.
 
-For new integration design, use the implemented experimental [generic hook responsibility boundaries](generic-hook-capability-contract.md#responsibility-boundaries): publish the approved catalog separately from hook input/output/lifecycle and optional restrictions. The `/1` sample and its required grant-map tests below remain compatibility evidence. Do not generate sample-specific grants as the default design for a generic hook.
+For new integrations, publish the approved catalog separately from the hook’s inputs, outputs, lifecycle and optional restrictions. See the [responsibility boundaries](generic-hook-capability-contract.md#responsibility-boundaries).
 
-Status: implemented local REQUEST/read/classify/display checkpoint. Both packaged hosts exercise completed/open/missing/wrong-resource cases. A full task application, transactional guard, activation system and live agent integration remain later work.
+<a id="legacy-read1-example"></a>
+## Implementation reference: original read-only example
 
-## Definition, invocation and consumption
+The packaged original read-only hosts exercise completed, open, missing and wrong-resource cases. The [embedding guide](../embedding.md) covers the current profile. [Daymark](https://github.com/rore/keir-demo-app) demonstrates the authoring and activation flow in a task application.
 
-The implemented [TaskCompleted walkthrough](generic-hook-example.md) separates host payload/catalog/adapters/authority from customer logic/constants, compiler output and runtime invocation. Its `/2` fixtures pass shared Java/Node and packaged-host verification; the `/1` example below is retained unchanged. Host payload is defined by the application independently of each extension; a customer's project choice does not require a new hook field.
+<a id="definition-invocation-and-consumption"></a>
+### Definition, invocation and consumption
+
+The implemented [TaskCompleted walkthrough](generic-hook-example.md) separates host payload/catalog/adapters/authority from customer logic/constants, compiler output and runtime invocation. Its catalog-bound fixtures pass shared Java/Node and packaged-host verification; the original read-only example is a separate compatibility check. Host payload is defined by the application independently of each extension; a customer's project choice does not require a new hook field.
 
 Host owner approves the [DCM](domain-model.md), adapter registration, caller scope and DISPLAY consumer. Host constructs trusted input and protected bindings, selects the artifact through an independently held digest, prepares once, and invokes through the [runtime API](runtime.md). Only a validated COMPLETED result is displayed. Failure displays a safe error, not a default classification. No result grants permission to perform a native operation.
 

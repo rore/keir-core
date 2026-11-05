@@ -1,6 +1,6 @@
 # Contributing
 
-Start with the [quickstart](docs/quickstart.md) to compile and run one extension. Check the [maintained specification](docs/specs/README.md) for the profile you are changing and the [shared roadmap](roadmap/board.md) for planned work.
+Start with the [quickstart](docs/quickstart.md) to see a rule run. Check the [Keir specification](docs/specs/README.md) for the behavior you are changing and the [shared roadmap](roadmap/board.md) for planned work.
 
 ## Build and test
 
@@ -12,7 +12,16 @@ npm ci --prefix runtime-node --cache .tools/npm-cache --ignore-scripts --no-audi
 npm test --prefix runtime-node
 ```
 
-On Windows, use the [PowerShell setup](docs/quickstart.md#compile-and-run) with the same Maven goal and Node test script. See the [testing guide](docs/testing.md) for shared conformance, package verification and opt-in resource checks.
+On Windows, run from PowerShell:
+
+```powershell
+$env:MAVEN_USER_HOME = "$PWD/.tools/maven"
+.\mvnw.cmd "-Dmaven.repo.local=.tools/maven/repository" verify
+npm.cmd ci --prefix runtime-node --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
+npm.cmd test --prefix runtime-node
+```
+
+See the [testing guide](docs/testing.md) for shared conformance, package verification and opt-in resource checks.
 
 ## Prepare a change
 

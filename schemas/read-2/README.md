@@ -1,6 +1,8 @@
-# Read/2 structural schemas
+<a id="read-2-structural-schemas"></a>
+<a id="read2-structural-schemas"></a>
+# Structural schemas for the earlier read-only contract
 
-These Draft 2020-12 schemas describe decoded JSON instances for the supported read/2 profile. The IDs identify these schema documents; they do not select a profile or imply native acceptance.
+Internal engineering reference: these Draft 2020-12 schemas describe decoded JSON instances for a supported read profile. Their IDs identify schema documents; they do not select behavior or imply native acceptance. See the [implementation reference](../../docs/internal/implementation-reference.md) for exact wire identifiers.
 
 | Instance | Schema | ID |
 | --- | --- | --- |
@@ -10,7 +12,7 @@ These Draft 2020-12 schemas describe decoded JSON instances for the supported re
 
 The artifact schema's environment tuple records the current qualified snapshot: CEL Java `0.14.0`, CEL Node `0.6.1`, protobuf Java `4.35.1`, and protobuf Node `2.6.2`. Native pin and environment checks remain authoritative.
 
-These maintained structural definitions accompany the [language](../../docs/specs/language.md), [DCM](../../docs/specs/domain-model.md), [compiler artifact](../../docs/specs/compiler-artifact.md), [generic `/2` delta](../../docs/specs/generic-hook-capability-contract.md) and [bound-model contract](../../docs/specs/host-model-binding.md). A changed schema meaning requires a new schema-document revision. Source remains `keir/v0`; select `keir-read/2` in trusted compiler configuration. Do not add schema IDs or profile fields to source. Read catalogs can publish unused WRITE operations, but a read program cannot call them. Optional policy is a restriction, not authorization.
+These maintained structural definitions accompany the [Keir specification](../../docs/specs/language.md), [DCM](../../docs/specs/domain-model.md), [compiler artifact](../../docs/specs/compiler-artifact.md), [generic capability compatibility details](../../docs/specs/generic-hook-capability-contract.md) and [bound-model contract](../../docs/specs/host-model-binding.md). A changed schema meaning requires a new schema-document revision. Source remains `keir/v0`; select the corresponding profile in trusted compiler configuration. Do not add schema IDs or profile fields to source. Read catalogs can publish unused WRITE operations, but a read program cannot call them. Optional policy is a restriction, not authorization.
 
 Schema success checks structure only. It does not validate raw JSON/YAML syntax, duplicate keys, token spelling (including numeric token `1.0`), Unicode handling, parser depth, canonical bytes, UTF-8 byte limits, hashes or pins, CEL, types, references, dataflow, policy composition, host approval, authority, or native callbacks. These checks remain with the native compiler, runtimes, and host. No Python YAML decoder is used, and schemas add no runtime dependency.
 

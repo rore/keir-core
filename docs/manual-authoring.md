@@ -1,6 +1,8 @@
-# Write and check an extension without an agent
+<a id="write-and-check-a-read2-rule"></a>
+<a id="write-and-check-an-extension-without-an-agent"></a>
+# Write and check a read-only rule
 
-This developer example shows the Keir tools that a host-integrated authoring agent uses. You supply source and independent expected scenarios yourself. The [Daymark demo](https://github.com/rore/keir-demo-app) presents the customer experience through its assistant chat instead of a source editor.
+This tutorial uses an earlier read-only contract. You supply Keir source and independent expected scenarios. For the current contract, [compile and run the follow-up rule](../examples/README.md) or read [Embed Keir](embedding.md).
 
 Use the existing [task-advice example](../conformance/read-simulation/task-advice/). It classifies a saved task: OPEN produces PENDING advice; COMPLETED produces DONE advice. Advice does not change the task's native status. No AI account, provider key, task server or database is needed for this example.
 
@@ -27,21 +29,7 @@ This excerpt is the program body; use the linked complete source for its languag
 
 First follow the [packaged-host setup](agents/host-integration-assistant.md#run-the-packaged-hosts) to build the Java compiler/host and install the locally packed Node runtime. It uses project-local caches and requires the documented JDK, Node and npm versions.
 
-From the repository root, using PowerShell 7.4 or later for byte-preserving native redirection:
-
-```powershell
-New-Item -Force -ItemType Directory .tools/manual-authoring | Out-Null
-java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar `
-  conformance/read-simulation/task-advice/source.yaml `
-  conformance/read-simulation/task-advice/dcm.json `
-  --profile=keir-read/2 > .tools/manual-authoring/artifact.json
-if ($LASTEXITCODE -ne 0) { throw 'Compilation failed; do not execute the output.' }
-$compiled = Get-FileHash .tools/manual-authoring/artifact.json -Algorithm SHA256
-$expected = Get-FileHash conformance/read-simulation/task-advice/artifact.json -Algorithm SHA256
-if ($compiled.Hash -ne $expected.Hash) { throw 'Compiled bytes differ from this reviewed example.' }
-```
-
-On POSIX, use the same CLI arguments with ordinary native redirection and check its exit status. The [compiler reference](../compiler-java/README.md) also describes the library interface and safe process limits for an embedding host.
+Follow the [read-only compiler commands](internal/implementation-reference.md#compile-the-earlier-read-only-example) to reproduce the pinned artifact. The [compiler guide](../compiler-java/README.md) describes the library interface and process limits for an embedding host.
 
 Success produces canonical portable artifact bytes. Expressions contain checked CEL metadata; the artifact references the exact host model rather than copying its complete catalog. Failure produces diagnostics, not an executable artifact. Compilation grants no permission to activate a program.
 
@@ -64,7 +52,7 @@ Each report should have `status: PASS`, a `COMPLETED` native classification and 
 
 Inspect [the Node simulation host](../examples/node-host/read-simulation.mjs). It imports `runReadSimulation` from the packaged runtime, reads the independent [selection](../conformance/read-simulation/task-advice/selection.json), supplies the exact DCM/artifact bytes and builds a trusted fixture containing authorization, protected bindings, a deadline and a result consumer. Scenario stubs stand in for capability invokers. The runner executes the compiled program; the consumer translates its validated classification into a display receipt.
 
-A live host binds the complete approved DCM and its real invokers together. Those invokers can call local services or internal HTTP/RPC APIs. It supplies current authorization, identity and deadlines for each invocation, and owns approval and activation storage. See the [binding contract](specs/host-model-binding.md) and [three-stage guided tour](guided-tour.md). The command-line fixture does not implement a customer approval service or prove real service permissions.
+The host binds the complete approved DCM and its operation implementations. Under this earlier contract, it supplies current authorization, identity and deadlines for each invocation and owns approval and activation storage. See the [earlier binding contract](specs/host-model-binding.md#one-binding-boundary). This fixture verifies simulated behavior and display results.
 
 ## 5. Verify the complete example
 

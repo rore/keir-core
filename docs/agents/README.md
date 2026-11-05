@@ -1,18 +1,15 @@
-# Agents using Keir
+<a id="agents-using-keir"></a>
+# Integrate an authoring assistant
 
-Keir has two product-facing agent personas. Both are host integrations over Keir's contracts; core remains usable without an agent.
+An application can use Keir directly or give an assistant tools for drafting, checking and reviewing rules. The application supplies the tools, scoped data and permission checks.
 
-| Persona | User and task | Guide |
+| Integration | Who it helps and what it does | Guide |
 | --- | --- | --- |
-| Host integration assistant | Helps the host developer define the domain, DCM, hooks, capabilities, adapters and contracts | [Host integration](host-integration-assistant.md) |
-| Customer extension assistant | Helps a customer describe a customization, author an extension/scenarios and review simulation before requesting activation | [Extension authoring](extension-assistant.md) |
+| Host integration assistant | Helps the application developer define when rules run, what operations they can use and how the app implements those operations | [Host integration](host-integration-assistant.md) |
+| Customer authoring assistant | Helps a customer draft a rule and review simulated results before approval and activation | [Customer authoring integration](extension-assistant.md) |
 
-For instructions to supply to a customer-facing model, use the [Keir customer authoring guide v1](customer-authoring-guide-v1.md). Pair it with the host's exact published DCM and scoped tools. The [release plan](../../roadmap/features/public-package-release.md) tracks packaging the guide with compatible schemas and examples.
+For instructions to supply to a customer-facing model, use the [Keir customer authoring guide](customer-authoring-guide-v2.md). Pair it with the host's exact published DCM and scoped tools. The [pinned authoring companion](authoring-companion.md) includes schemas, examples and the earlier guide selected by its manifest.
 
-The current [specification](../specs/README.md) defines the `effect/4` host-bound contract and earlier profiles. The host owns permissions and native effects. See [verification](../testing.md#effect4-verification) for the tested scope.
+Use the [Keir specification](../specs/README.md) and [structural schemas](../../schemas/effect-4/README.md) to define tool inputs and diagnostics. Authoring tools such as compilation and simulation are separate from the operations a rule can call at runtime. Approval and activation stay with the application and its authorized users.
 
-For offline read/2 checks, use the shared [simulation operator guide](read-simulation.md) and its exact-artifact examples. Scenarios supply data and independent expectations; authority and consumer behavior remain host-owned.
-
-Each guide explains the system, task, inputs, allowed actions and approvals. Both reference one [specification set](../specs/README.md); prompts must not contain a competing language/DCM specification. As APIs are implemented, provide structured schemas, scoped discovery, diagnostics and valid/invalid examples from the same contracts.
-
-These personas are separate from [our engineering team roles](../../roles/README.md). Host-specific tools, credentials and policy belong to the host. Discovery, compilation, simulation and activation requests are authoring operations; they are not automatically runtime capabilities callable by a customer extension.
+For the earlier read-only contract, see the [offline simulation guide](read-simulation.md).

@@ -1,6 +1,7 @@
-# Read/2 simulation tooling
+<a id="read2-simulation-tooling"></a>
+# Compatibility reference: simulation reporting
 
-`keir-read-simulation/1` runs a compiled read/2 artifact through the native runtime against ordered data-only responses. It is an optional authoring tool; it does not change runtime admission or authorize live adapters.
+`keir-read-simulation/1` runs a compiled catalog-bound read-only artifact through the native runtime against ordered data-only responses. It is an optional authoring tool; it does not change runtime admission or authorize live adapters.
 
 The operator selects DCM/artifact bytes and independent SHA-256 pins, compiler identity, entrypoint and consumer. The host separately supplies scope, protected bindings, a deterministic deadline/clock, current authorizer, consumer callback and receipt allowlist. An optional host response check can enforce domain relationships. Cases cannot select these objects, functions, paths or modules. Each call creates a fresh binding/preparation; all adapters are constructed by the tooling in simulation mode. Unused WRITE catalog entries receive unreachable failing adapters; read admission still rejects WRITE execution.
 
