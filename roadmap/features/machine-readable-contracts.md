@@ -1,7 +1,7 @@
 ---
 id: "machine-readable-contracts"
 title: "Publish current schemas and agent-consumable contracts"
-status: "queued"
+status: "active"
 priority: "medium"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -30,7 +30,7 @@ A second language specification in prompts, an agent framework in core or an aut
 
 ## Notes
 
-The remaining cross-profile/API coverage has no active implementation assignment. Keep it queued and pull the exact subset required by the reviewed real-effect contract; preserve the delivered read/2 evidence below.
+**Current discovery:** Identify the smallest structural schema and example set for the supported `effect/4` source, DCM and artifact. Compare it with the actual compiler and Java/Node loaders and identify checks that remain native. Broader cross-profile and API coverage remains queued.
 
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
