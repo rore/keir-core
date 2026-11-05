@@ -1,7 +1,7 @@
 ---
 id: "rich-task-customizations"
 title: "Run the search, tag and due-date customization in the real app"
-status: "active"
+status: "queued"
 priority: "medium"
 commitment: "committed"
 milestone: "Extend host behavior safely"
@@ -12,7 +12,7 @@ repo: "keir-demo-app"
 
 Use the newly qualified language features and ordinary task services for the baseline invoice follow-up scenario.
 
-The active increment exposes the completed task's title for copying and exact matching while existing rules keep their pinned model. A fixed suffix becomes available after the [Keir expression update](enrich-followup-expressions.md). Search, tags and due dates remain queued. [Implementation record](../../.agent-workflow/tasks/daymark-title-aware-task-customizations.md).
+The first increment delivered title copying, exact matching and fixed suffixes in Daymark. A live rule created the expected follow-up title, and upgrade checks verified that prior approvals and pending completions still execute. Search, tags and due dates remain queued. [Implementation record](../../.agent-workflow/tasks/daymark-title-aware-task-customizations.md).
 
 ## In Scope
 
