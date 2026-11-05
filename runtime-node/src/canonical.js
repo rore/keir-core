@@ -125,7 +125,8 @@ export function digest(bytes) {
 
 // Model input may be formatted JSON; detect duplicate keys before JSON.parse loses them.
 export function parseModelJson(bytes) {
-  const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  // Preserve a BOM so the JSON scanner rejects it.
+  const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
   let offset = 0;
   const whitespace = () => { while (offset < text.length && /[ \t\r\n]/.test(text[offset])) offset++; };
   const take = token => { whitespace(); if (text[offset++] !== token) throw new Error('Invalid model JSON'); };
