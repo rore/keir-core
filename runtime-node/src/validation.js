@@ -97,7 +97,7 @@ export function validateModel(dcm, p) {
       requireThat(scalar(cap.parameters[param].type) && ['agent', 'host'].includes(cap.parameters[param].binding), p);
     }
     requireThat(Array.isArray(cap.errors) && new Set(cap.errors).size === cap.errors.length, p);
-    requireThat(cap.errors.length <= 16, p);
+    requireThat(cap.errors.length <= 16, p, 'BUDGET_EXCEEDED');
     for (const error of cap.errors) requireThat(typeof error === 'string' && /^[A-Z][A-Z0-9_]{0,63}$/.test(error), p);
   }
   const entries = keys(dcm.entrypoints, p + '/entrypoints', 4); requireThat(entries.length > 0, p);

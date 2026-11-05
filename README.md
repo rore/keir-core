@@ -1,10 +1,14 @@
-# Keir Core
+# Keir
 
-Keir is an embeddable framework for customer-defined extensions. It provides a constrained language, a compiler, and runtimes for Java and Node.js. Extensions combine operations your application exposes.
+Keir is an embeddable framework for AI-assisted application extensions. It provides a controlled extension language, a compiler and a runtime, so an agent can turn a business user’s request into behavior the application can safely execute.
 
-In a task app, a customer might ask, “When someone completes a task in the launch project, create a follow-up.” An AI assistant can turn that request into a Keir extension using the app’s existing task operations. A developer can write the same extension by hand. Either way, the app can run the compiled extension without an AI service.
+The application defines where extensions can run, what data they can use, and which capabilities they can call. The agent builds an extension from those approved pieces; Keir checks it against the application’s model and runs it through the application’s own operations. The application remains in control of its data, permissions and effects.
 
-Your application defines when an extension can run, what data it receives, and which operations it can call. Keir compiles the extension against that contract, so you can simulate it before approval and run the same compiled version with execution limits. Your application checks permissions and performs each operation through its own services.
+For example, a user of a task application might ask: “When a task in the launch project is completed, create a follow-up task.” The agent expresses that request as a Keir extension, using the task data and task-creation capability exposed by the application.
+
+**Let AI extend your app. Keep the app in control.**
+
+![An AI assistant drafts a Keir extension from a customer request and the app’s model. Keir compiles it. At execution, the app checks permissions and performs the operation.](docs/images/extension-flow.svg)
 
 ## Start here
 

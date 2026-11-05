@@ -1,0 +1,6 @@
+[
+  {"file": "valid.json", "diagnostic": null},
+  {"file": "bom.json", "diagnostic": {"code": "ADMISSION_INVALID", "path": "/binding/dcm"}},
+  {"file": "errors-16.json", "diagnostic": null},
+  {"file": "errors-17.json", "diagnostic": {"code": "BUDGET_EXCEEDED", "path": "/binding/dcm"}}
+]
