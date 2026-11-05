@@ -1,0 +1,23 @@
+{
+  "language": "keir/1",
+  "domain": {
+    "id": "sample.tasks",
+    "version": "4",
+    "fingerprint": "sha256:2259c2ba0c57c066db7049a7c92779c3dee9083c248ef77f92d9f7138d11e292"
+  },
+  "entrypoint": "TaskCompleted",
+  "name": "follow-up-in-selected-project",
+  "steps": [
+    {"id": "eligibleProject", "let": {"literal": "project1", "type": "ProjectId"}},
+    {"id": "source", "call": "tasks.get", "args": {"taskId": {"cel": "input.taskId"}}},
+    {"id": "eligible", "let": {"cel": "source.status == \"COMPLETED\" && source.projectId == eligibleProject"}},
+    {
+      "id": "created",
+      "call": "tasks.create",
+      "when": "eligible",
+      "args": {"projectId": {"cel": "eligibleProject"}, "title": {"literal": "Follow up"}},
+      "onError": {"CREATE_REJECTED": {"record": {"status": {"literal": "NO_OP"}}}}
+    }
+  ],
+  "return": {"record": {"status": {"cel": "eligible ? \"CREATED\" : \"NO_OP\""}}}
+}
