@@ -19,8 +19,8 @@ The compiler takes the profile from trusted configuration, such as the CLI's `--
 | --- | --- |
 | Hooks, capabilities, and ownership | [Generic hooks and capability composition](generic-hook-capability-contract.md#corrected-host-bound-effect4) |
 | Source and compilation | [Compiler and artifact](compiler-artifact.md#effect4-identity), with the [language rules](language.md) and the [effect/4 reference fixture](../../conformance/generic-hooks/effect4/) |
-| Binding and invocation | [Host model binding](host-model-binding.md#corrected-host-bound-4-binding) and [runtime](runtime.md#corrected-effect4-invocation-boundary) |
-| Native effects and receipts | [Host-bound single-write contract](real-single-effect-admission.md#current-host-bound-contract-effect4) |
+| Binding and invocation | [Host model binding](host-model-binding.md#effect4-binding-and-preparation) and [runtime](runtime.md#effect4-execution) |
+| Native effects and receipts | [Host-bound single-write contract](real-single-effect-admission.md#effect4-contract) |
 | Verified scope | [Conformance and test evidence](../testing.md#effect4-verification) and [resource qualification](../../roadmap/features/runtime-resource-qualification.md) |
 
 ## Compatibility
