@@ -1,6 +1,6 @@
 # Shared generic-hook simulations
 
-The `effect4/` corpus is the corrected host-bound single-effect contract. Local verification passed 11 shared scenarios and 25 host-bound protocol cases with Java/Node/source/installed parity. Independent result/simplicity review and manager integration remain pending; no native-provider qualification or hosted CI result is claimed. The separate `effect3/` corpus below remains a legacy admission-protocol check. A program-authored CREATED label in a zero-WRITE case still carries no confirmed effect.
+The `effect4/` corpus exercises the current host-bound single-write contract. A program-authored `CREATED` label in a zero-WRITE case carries no confirmed effect. The separate `effect3/` corpus is a legacy admission-protocol check. See the [effect/4 verification record](../../docs/testing.md#effect4-verification) for local and hosted results.
 
 The `/3` `admission-cases.json` supplies 28 independently authored facts for fixed trusted host fixtures. Its driver and results describe only legacy `/3`. Under `/4`, permission denial inside an implementation is an attempted call and definite NONE only when no effect is established. Exceptions, timeout and response loss after dispatch remain UNKNOWN.
 

@@ -1,12 +1,14 @@
 # Testing instructions
 
-## Effect/4 local verification
+## Effect/4 verification
 
 The corrected `/4` implementation passed focused, shared, source/installed and packaged local verification on 2026-11-04. Java clean coverage build: 271 tests (66 compiler, 172 runtime, 33 host), zero failures/errors/skips, 28.134 seconds. Coverage: compiler 857/902 lines and 760/875 branches; runtime 1417/1429 lines and 1349/1563 branches; host 554/577 lines and 750/888 branches. Node: 454 tests, zero failures/skips, 4.8357868 seconds, 100% lines and 98.30% branches. Fourteen public-API tests against the installed tarball passed in 0.723 seconds; four installed-host tests passed in 0.723 seconds.
 
 Combined verification passed with exact Java/Node/source/installed parity: 61 legacy read cases/52 invocations, 25 legacy effect, 9 generic read, 19 generic effect, 19 effect/3 and 11 effect/4 scenarios; 28 legacy qualification and 25 host-bound protocol cases; 30 fresh compiler processes and 12 packaged-host batches. Each Node and Java source/installed or packaged driver passed eight local/loopback native-host cases covering confirmed, denied, wrong-key and lost-response outcomes. Separate packaged read-simulation verification passed 19 reports and two recompiled artifacts; schema validation passed 29 fixtures/reports.
 
-The eight Node archive files match source and installed contents (six source files, README and package metadata). Independent result/simplicity review and manager integration remain pending. These controlled hosts do not establish native-provider qualification; no hosted CI result is claimed.
+The eight Node archive files matched source and installed contents (six source files, README and package metadata). Independent result and simplicity review passed, and the reviewed implementation was integrated. On 2026-11-04, the hosted contract check passed on `decaa2820c35e496d56e0e81bbf99d7e4e5ef2a0`, including Java and Node regression and coverage, packaged hosts, shared runtime comparisons, read simulation and offline schema checks. [GitHub Actions run 41899243002](https://github.com/rore/keir-core/actions/runs/41899243002)
+
+This evidence covers the tested source, packages and controlled hosts. Native-provider qualification, production resource containment and public package release have separate acceptance criteria. [Resource qualification](../roadmap/features/runtime-resource-qualification.md) · [Public release plan](../roadmap/features/public-package-release.md)
 
 ### Historical `/3` qualification verification (2026-11-04)
 
