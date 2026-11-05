@@ -37,9 +37,13 @@ Design: [Public contract normalization](../../docs/internal/public-contract-norm
 - Verify nominal types, concatenation, guard and handler behavior, and second possible write rejection. Check obsolete inputs, selectors and stray fields fail closed.
 - Share committed artifact and scenario bytes with both runtime owners. Require shared conformance before integrating the release change.
 
-**Plan review:** Pending the concrete compiler plan and independent technical review.
+**Plan review:** Agent technical review: [Reviewed implementation plan](#reviewed-implementation-plan). The exact plan passed.
 
 **Approvals:** The user approved the single public contract and clean cutover for Core and Daymark.
 
-**State:** Blocked or returned to planning
+**State:** Ready to implement
 <!-- agent-workflow:end -->
+
+## Reviewed implementation plan
+
+The independent review passed for plan SHA-256 `ae9609c61835dc58e54c5487af1980b01e93043fcee63fc7634805647032ff37` against compiler base `1e96300`. The plan matches the accepted compiler and scenario rules in Core `4a7b59c`. It ports current compiler behavior, tests strict scenario bytes at their boundaries, and freezes one compiler-produced corpus for both runtimes. Compiler-only checks can run before integration. The combined release must also port or retire the old callers in the runtime tests, teaching hosts, qualification tools, and CI before it moves to main.
