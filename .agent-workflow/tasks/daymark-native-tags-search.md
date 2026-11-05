@@ -38,9 +38,19 @@
 
 **Approvals:** Not required at this risk level. Updating the running preview and its data requires separately scoped authorization.
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Plan review
 
 Clean-context review against Daymark `b0e5e429` required explicit text-byte preservation, historical fixture repair and rollback, query completeness, and UI retry and focus checks. The reviewer accepted the revised plan after those corrections. The pinned SQLite probe matched text after an embedded NUL. Daymark `60d0853` changes the authoring route in the shared app module and leaves the native route, task service and Tasks UI unchanged. The reviewed plan applies to that base.
+
+## Implementation and verification
+
+Native tags and project search were implemented at candidate `7e16a2b098f5fdcd0c2d95565253f095a755eea8` and integrated unchanged in Daymark `9c36f0b34b4863f6bd673586cd30f0457365754c`. The additive v9 migration preserves existing task text and effect projections. Search matches literal text and exact normalized tags within the selected project, with 25 results per page and a retryable cursor.
+
+The exact candidate passed 354 fast tests with 13 existing skips, 15 native browser journeys, build/type checks and a desktop and phone task walkthrough with AI disabled. Populated v8 upgrade and injected rollback passed. A synthetic 20,000-task project returned all 31 sparse matches in two pages. Median combined query time was 11 ms over ten runs. Shared Redline and Workflow checks reported no blocking finding.
+
+## Result review
+
+Independent review accepted the final candidate after fixes to distinct-tag limits and delayed saves. The integrated build matched the tested index and asset bytes. An isolated rehearsal migrated a copy of the preview database. The existing preview then upgraded from a verified backup. Readback confirmed unchanged original contents across 19 tables and unchanged settings, and a signed-in search returned an existing task. The pre-upgrade database and previous build remain recoverable.
