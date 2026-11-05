@@ -7,7 +7,7 @@ import { canonicalBytes, digest } from '../../runtime-node/src/canonical.js';
 import { consumeEffect } from '../../examples/node-host/effect-consumer.mjs';
 
 const read = name => readFileSync(new URL(`effect4/${name}`, import.meta.url));
-const programs = new Set(['main', 'zero', 'after-write-read', 'no-call']);
+const programs = new Set(['main', 'zero', 'after-write-read', 'no-call', 'title', 'title-max', 'title-composed']);
 export const boundCases = JSON.parse(read('admission-cases.json'));
 
 // Fixed host-owned native checks; these examples do not qualify a deployment.
@@ -15,8 +15,9 @@ export function boundFixture(api, { mode = 'real', program = 'main' } = {}) {
   assert.ok(programs.has(program)); assert.ok(['real', 'simulation'].includes(mode));
   const name = program === 'main' ? 'artifact' : `artifact-${program}`;
   const bytes = read(`${name}.json`), pin = read(`${name}.sha256`).toString().trim();
-  const dcmBytes = read('dcm.json'), dcm = JSON.parse(dcmBytes);
-  assert.equal(digest(bytes), pin); assert.equal(digest(dcmBytes), read('dcm.sha256').toString().trim());
+  const model = program.startsWith('title') ? 'dcm-title' : 'dcm';
+  const dcmBytes = read(`${model}.json`), dcm = JSON.parse(dcmBytes);
+  assert.equal(digest(bytes), pin); assert.equal(digest(dcmBytes), read(`${model}.sha256`).toString().trim());
   const calls = [], nativeActions = [], contexts = [], budgets = [], keys = new WeakMap();
   const state = { now: 0, allowed: true, checks: 0 };
   function invocationFor({ actor = 'user1', event = 'event1', source = 'task1', expiresAtMs = 1000 } = {}) {
@@ -43,7 +44,8 @@ export function boundFixture(api, { mode = 'real', program = 'main' } = {}) {
       nativeActions.push(capability);
       if (!write) {
         await state.afterRead?.();
-        return { kind: 'SUCCESS', value: { id: args.taskId, projectId: state.project ?? 'project1', status: 'COMPLETED' } };
+        return { kind: 'SUCCESS', value: { id: args.taskId, projectId: state.project ?? 'project1', status: 'COMPLETED',
+          ...(model === 'dcm-title' ? { title: state.title } : {}) } };
       }
       await state.afterWrite?.();
       if (state.writeError) throw Error('Native response lost');
@@ -56,11 +58,30 @@ export function boundFixture(api, { mode = 'real', program = 'main' } = {}) {
 
 export async function runBoundCase(api, row) {
   assert.ok(boundCases.some(candidate => candidate.id === row.id), 'Unknown fixed host-bound case');
-  const id = row.id, mode = id.startsWith('simulation-') ? 'simulation' : 'real';
-  const program = id.endsWith('-no-call') || id === 'empty-catalog' ? 'no-call' : id.endsWith('-zero') ? 'zero' :
+  const id = row.id, mode = id.startsWith('simulation-') || id === 'title-simulation' ? 'simulation' : 'real';
+  const program = id.startsWith('title-composed-') ? 'title-composed' : id === 'title-max' ? 'title-max' : id.startsWith('title-') ? 'title' :
+    id.endsWith('-no-call') || id === 'empty-catalog' ? 'no-call' : id.endsWith('-zero') ? 'zero' :
     id.includes('after-write-read') || id === 'denied-after-confirmed' ? 'after-write-read' : 'main';
   const f = boundFixture(api, { mode, program });
   let dcmBytes = f.dcmBytes, bytes = f.bytes, implementations = f.implementations;
+  if (program.startsWith('title')) {
+    f.state.title = id === 'title-unicode' || id === 'title-simulation' ? 'Résumé 🚀' : 'x'.repeat(id === 'title-256' ? 255 : 256);
+    if (id === 'title-composed-overflow') f.state.project = 'project2';
+    if (['title-forged', 'title-nominal', 'title-enum'].includes(id)) {
+      const artifact = JSON.parse(bytes);
+      if (id === 'title-forged') {
+        const checked = Buffer.from(artifact.expressions.e3.checked, 'base64');
+        const offset = checked.indexOf('add_string');
+        assert.ok(offset >= 0);
+        checked.write('add_uint64', offset, 'ascii');
+        artifact.expressions.e3.checked = checked.toString('base64');
+      } else {
+        f.dcm.types.Task.fields.title = id === 'title-nominal' ? 'TaskId' : 'TaskStatus';
+        dcmBytes = canonicalBytes(f.dcm); artifact.modelRef.digest = digest(dcmBytes);
+      }
+      bytes = canonicalBytes(artifact);
+    }
+  }
   if (id === 'missing-implementation') delete implementations['tasks.create'];
   if (id === 'mixed-mode') implementations['tasks.get'].mode = 'simulation';
   if (id === 'empty-catalog') {
@@ -90,6 +111,7 @@ export async function runBoundCase(api, row) {
   const facts = { phase: 'invocation', classification: outcome.classification, calls: f.calls.map(call => call.capability),
     effects: outcome.effects.map(effect => effect.state), nativeActions: f.nativeActions, reported: consumption.status,
     ...(outcome.result ? { result: outcome.result } : {}), ...(outcome.error ? { error: outcome.error } : {}) };
+  if (program.startsWith('title') && f.calls.length === 2) facts.createdTitle = f.calls[1].args.title;
   return { id, facts, outcome, calls: f.calls, consumption };
 }
 

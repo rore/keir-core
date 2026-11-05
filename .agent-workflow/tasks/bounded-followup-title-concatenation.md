@@ -35,5 +35,25 @@
 
 **Approvals:** Not required at this risk level.
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
+
+## Implementation candidate
+
+Candidate `84763506ad501ca0c6cb01103c8053803ad8adf1` adds effect/4 string concatenation in the compiler and both runtimes. The developer reported 273 Java and 455 Node tests passing, shared source and installed package parity, and rejection of both new artifacts by the previous packages before dispatch. The largest tested concatenation tree produced 8,192 UTF-8 bytes in both evaluators, and the shared cases verify the 256-byte result boundary and no write after rejection.
+
+The manager verified the frozen revision, all 16 evidence files and the package digests.
+
+## Review findings
+
+The initial independent review found the three checked expression gates consistent with the agreed limits and prior profile behavior. It asked for shared coverage of an oversized intermediate used in Boolean equality, an unselected oversized branch and the normal title artifact in simulation.
+
+Candidate `9d7b5651b18f646c30e0efc448036579dad991e2` adds those cases through the existing drivers. The manager verified the six evidence files and compared all 35 complete rows across Java and Node source and package runs.
+
+## Result review
+
+Agent technical review: The independent architect accepted the checked expression gates, resource bounds, previous-profile compatibility and the added shared cases. The selected oversized result fails before the create call. The unselected oversized branch preserves the valid title, and the normal simulation matches the complete real-mode fixture result.
+
+Reviewed revision: `9d7b5651b18f646c30e0efc448036579dad991e2`, directly above production candidate `84763506ad501ca0c6cb01103c8053803ad8adf1`.
+
+Verification adequacy: Both reviews and exact frozen evidence support core integration. The focused Java package run uses the current test driver and fixtures with the previously built production package. Daymark's compatibility and live suffix journey require separate verification.

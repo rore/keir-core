@@ -44,6 +44,35 @@ class GenericHookCompilerTest {
         assertEquals(path,result.diagnostics().getFirst().path());
     }
 
+    @Test void titleConcatenationUsesOnlyTheEffect4StringOverload() throws Exception {
+        var dcmBytes=bytes("effect4","dcm-title.json");
+        var model=map(StrictData.parse(dcmBytes,"/dcm"));
+        for(String variant:List.of("title","title-max")) {
+            var compiled=COMPILER.compile(bytes("effect4","source-"+variant+".yaml"),dcmBytes,environment("effect4"));
+            var document=artifact(compiled);
+            assertArrayEquals(bytes("effect4","artifact-"+variant+".json"),compiled.artifact());
+            var call=steps(document).getLast();
+            var title=map(map(call.get("args")).get("title"));
+            var expression=map(map(document.get("expressions")).get(title.get("expr")));
+            var checked=CheckedExpr.parseFrom(Base64.getDecoder().decode((String)expression.get("checked")));
+            assertEquals("_+_",checked.getExpr().getCallExpr().getFunction());
+            assertEquals(List.of("add_string"),checked.getReferenceMapMap().get(checked.getExpr().getId()).getOverloadIdList());
+            assertEquals("String",expression.get("resultType"));
+        }
+        for(String invalid:List.of("1 + 2","[1] + [2]","source.id + \"!\"","source.status + \"!\"")) {
+            var rule=map(StrictData.parse(bytes("effect4","source-title.yaml"),"/source"));
+            map(steps(rule).getLast().get("args")).put("title",Map.of("cel",invalid));
+            var rejected=compile("effect4",rule,model);
+            assertFalse(rejected.succeeded(),invalid);
+            assertEquals("CEL_POLICY_DENIED",rejected.diagnostics().getFirst().code(),rejected.diagnostics().toString());
+        }
+        for(String profile:List.of("effect","effect3")) {
+            var rule=source(profile);
+            map(steps(rule).getLast().get("args")).put("title",Map.of("cel","\"a\" + \"b\""));
+            assertEquals("CEL_POLICY_DENIED",compile(profile,rule,model(profile)).diagnostics().getFirst().code());
+        }
+    }
+
     @Test void declaredErrorsAreBoundedAcrossGenericProfilesAndTheCompleteCatalog() throws Exception {
         for (String profile:List.of("read","effect")) for (String id:List.of("tasks.get","tasks.create")) {
             var model=model(profile);

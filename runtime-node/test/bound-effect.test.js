@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fromJson, toBinary } from '@bufbuild/protobuf';
+import { fromBinary, fromJson, toBinary } from '@bufbuild/protobuf';
+import { celEnv, CelScalar, plan } from '@bufbuild/cel';
 import { CheckedExprSchema } from '@bufbuild/cel-spec/cel/expr/checked_pb.js';
 import * as api from '../src/index.js';
 import { canonicalBytes, digest } from '../src/canonical.js';
@@ -8,6 +9,20 @@ import { boundFixture, runBoundCases, verifyBoundTransports } from '../../confor
 import { realFixture } from '../../conformance/generic-hooks/real-effect.mjs';
 
 const input = { taskId: 'task1' };
+
+test('pinned CEL evaluates the largest admitted concatenation tree to 8192 bytes', () => {
+  const f = boundFixture(api, { program: 'title-max' });
+  const artifact = JSON.parse(f.bytes);
+  const title = artifact.expressions[artifact.steps.at(-1).args.title.expr];
+  const checked = fromBinary(CheckedExprSchema, Buffer.from(title.checked, 'base64'));
+  assert.equal(Object.keys(checked.typeMap).length, 63);
+  assert.equal(checked.expr.exprKind.value.function, '_+_');
+  assert.equal(Object.keys(checked.referenceMap).filter(id => checked.referenceMap[id].overloadId[0] === 'add_string').length, 31);
+  const evaluate = plan(celEnv({ variables: { base: CelScalar.STRING } }), checked);
+  const value = evaluate({ base: 'é'.repeat(128) });
+  assert.equal(value, 'é'.repeat(4096));
+  assert.equal(Buffer.byteLength(value), 8192);
+});
 function prepared(f) {
   const binding = f.bind(); assert.equal(binding.diagnostic, null);
   const result = api.prepareProgram(f.bytes, binding.boundModel); assert.equal(result.diagnostic, null);
@@ -20,11 +35,15 @@ const denied = (result, path, code = 'ADMISSION_INVALID') => {
 
 test('shared host-bound protocol and identical real/simulation artifact results', async () => {
   const rows = await runBoundCases(api);
-  for (const program of ['main', 'zero', 'after-write-read', 'no-call']) {
-    const real = rows.find(row => row.id === `real-${program}`), simulation = rows.find(row => row.id === `simulation-${program}`);
+  const pairs = ['main', 'zero', 'after-write-read', 'no-call'].map(program => [`real-${program}`, `simulation-${program}`]);
+  pairs.push(['title-unicode', 'title-simulation']);
+  for (const [realId, simulationId] of pairs) {
+    const real = rows.find(row => row.id === realId), simulation = rows.find(row => row.id === simulationId);
     assert.deepEqual(real.outcome, simulation.outcome); assert.deepEqual(real.calls, simulation.calls);
     assert.deepEqual(real.consumption, simulation.consumption);
   }
+  const overflow = rows.find(row => row.id === 'title-composed-overflow');
+  assert.equal(overflow.outcome.trace.some(row => row.event === 'EFFECT_INTENT'), false);
 });
 
 test('complete compatible registrations include unused capabilities and remain snapshotted', async () => {
