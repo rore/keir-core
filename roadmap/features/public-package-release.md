@@ -14,7 +14,7 @@ Let an external developer install and embed a documented, explicitly supported K
 
 The first public milestone supports at most one mutation per run with the existing host-owned key, authorization and outcome contract. Multi-mutation composition follows later. The documentation track begins with a source-checkout binding and runtime guide for Java and Node while release qualification proceeds. Opening the repositories and publishing registry packages are separate release actions.
 
-Core 0.1.0 introduces the public format versions for Keir source, the domain capability model, compiled artifacts, and verification scenarios. Define their compatibility independently of package versions. Use the new contracts in public examples and for new Daymark customizations before releasing Core 0.1.0.
+Core 0.1.0 establishes the first supported public formats for Keir source, the domain capability model, compiled artifacts, and verification scenarios. Define their compatibility independently of package versions. Use these formats throughout Core and Daymark before releasing Core 0.1.0.
 
 ## In Scope
 
@@ -22,21 +22,21 @@ Core 0.1.0 introduces the public format versions for Keir source, the domain cap
 - Publish Java compiler/runtime and Node runtime packages, checked quickstarts and a supported dependency/profile compatibility matrix.
 - Ship a versioned authoring package with the matching agent guide, schemas and examples. Record compatible compiler and runtime releases, profiles and DCM formats so a host can pin the package alongside its exact published model.
 - When a release changes what an agent can author, update the affected guidance, schemas and examples with the feature. Verify the packaged guide can teach an agent to use that behavior through the published model and host tools.
-- Test clean isolated installs, artifact integrity, compiler-free execution, old-profile migration and release/security provenance.
+- Test clean isolated installs, artifact integrity, compiler-free execution, rejection of obsolete formats, and release provenance.
 
 ## Out of Scope
 
-Requiring AI or every optional proposal before an experimental release, silently granting a license, or labeling an unqualified adapter production-safe.
+Supporting or migrating development formats, requiring AI or every optional proposal for the first release, or labeling an unqualified adapter production-safe.
 
 ## Done When
 
-- [ ] Design/spec: define the public format identities and compatibility matrix, including the supported legacy readers, producer and environment pins, and user-facing limits.
+- [ ] Design/spec: define the supported public format combination, producer and environment pins, and user-facing limits.
 - [ ] Implementation: clean Java and Node consumers compile once and run the same artifact through documented package interfaces.
-- [ ] Verification: reproducible install/package checks, mixed-version rejection, upgrade conformance and examples pass. Daymark creates and runs a new customization using the published compiler, runtime, model and matching authoring companion. Verify existing saved revisions and selections remain valid. Repository visibility is a separate launch decision.
+- [ ] Verification: reproducible install and package checks, rejection of obsolete formats, and shared Java and Node conformance pass. Daymark creates and runs a new customization from fresh isolated demo data using the published compiler, runtime, model and matching authoring companion. Repository visibility is a separate launch decision.
 
 ## Notes
 
-**Public format transition:** The current draft proves package installation but precedes the public format changes. Replace its candidate downloads once the compiler, both runtimes, schemas, examples and authoring guide agree on the public contracts. Preserve earlier companion editions and saved Daymark evidence. Moving an earlier customization to new artifact bytes requires fresh checks, approval and explicit activation.
+**Public format transition:** Core and Daymark will switch to the public contracts together. Remove development format readers and selectors from the release path. Replace the draft downloads once the compiler, both runtimes, schemas, examples and authoring guide agree on the public contracts. Keep earlier published artifacts and existing local preview data intact. Qualify the new Daymark build with a separate seeded data directory.
 
 **Release channel in use:** [GitHub Releases](https://github.com/rore/keir-core/releases) is the distribution channel. The [release checklist](../../docs/releasing.md) defines when to ship and how to verify each package. [Authoring companion v2](https://github.com/rore/keir-core/releases/tag/authoring-v2) is available with its license and checksums. A download from the release passed the verifier against the expected digest. Daymark pins the exact guide from this release and supplies it to both supported authoring providers alongside its own model and tools. Isolated tests verified guide integrity, saved review continuity and the same-project follow-up against the pinned compiler and runtime.
 
