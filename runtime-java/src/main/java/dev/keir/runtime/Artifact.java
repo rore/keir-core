@@ -12,12 +12,7 @@ final class Artifact {
     private Artifact() {}
 
     record Plan(Map<String,Object> document, Map<String,Object> dcm, Map<String,Object> entrypoint,
-                Map<String,Map<String,Object>> contexts, Map<String,Integer> calls, int callCount,
-                boolean effect, int writeCount) {
-        Plan(Map<String,Object> document, Map<String,Object> dcm, Map<String,Object> entrypoint,
-             Map<String,Map<String,Object>> contexts, Map<String,Integer> calls, int callCount) {
-            this(document,dcm,entrypoint,contexts,calls,callCount,false,0);
-        }
+                Map<String,Map<String,Object>> contexts, Map<String,Integer> calls) {
         Plan {
             document = snapshot(document); dcm = snapshot(dcm); entrypoint = snapshot(entrypoint);
             LinkedHashMap<String,Map<String,Object>> copied = new LinkedHashMap<>();
@@ -25,7 +20,6 @@ final class Artifact {
             contexts = Collections.unmodifiableMap(copied);
             calls = Collections.unmodifiableMap(new LinkedHashMap<>(calls));
         }
-
     }
 
     @SuppressWarnings("unchecked")
@@ -51,18 +45,6 @@ final class Artifact {
     private static boolean scalarType(Map<String,Object> dcm, Object type) { return type instanceof String text && scalar(dcm, text); }
     private static boolean recordType(Map<String,Object> dcm, Object type) { return type instanceof String text && record(dcm, text); }
 
-    private static void model(Map<String,Object> dcm, boolean effect) {
-        model(dcm,effect,false);
-    }
-
-    static void validateModel2(Map<String,Object> dcm, boolean effect) {
-        model(dcm,effect,true);
-    }
-
-    static void validateModel2(Map<String,Object> dcm, String profile) {
-        model(dcm,!"keir-read/2".equals(profile),true,"keir-effect/3".equals(profile),"keir-effect/4".equals(profile));
-    }
-
     static Map<String,Object> modelRef(Map<String,Object> dcm) {
         Map<String,Object> domain = map(dcm.get("domain"),MODEL);
         return Map.of("domainId",domain.get("id"),"domainVersion",domain.get("version"),
@@ -70,34 +52,21 @@ final class Artifact {
                 "descriptorRecipe","keir-record-descriptors/1");
     }
 
-    private static void model(Map<String,Object> dcm, boolean effect, boolean generic) {
-        model(dcm,effect,generic,false);
-    }
-
-    private static void model(Map<String,Object> dcm, boolean effect, boolean generic, boolean qualified) {
-        model(dcm,effect,generic,qualified,false);
-    }
-
-    private static void model(Map<String,Object> dcm, boolean effect, boolean generic, boolean qualified, boolean bound) {
+    static void validateModel(Map<String,Object> dcm) {
         String p = MODEL;
-        if (effect) exact(dcm,p,"format","domain","types","capabilities","entrypoints","hostKey","assurance");
-        else exact(dcm, p, "format", "domain", "types", "capabilities", "entrypoints");
-        require((effect ? (bound ? "keir-dcm/effect-4" : qualified ? "keir-dcm/effect-3" : generic ? "keir-dcm/effect-2" : "keir-dcm/effect-1")
-                : (generic ? "keir-dcm/read-2" : "keir-dcm/read-1")).equals(dcm.get("format")), p);
+        exact(dcm, p, "format", "domain", "types", "capabilities", "entrypoints", "hostKey");
+        require("keir-dcm/1".equals(dcm.get("format")), p);
         require(canonical(dcm).length <= Profile.DCM_BYTES, p, "BUDGET_EXCEEDED");
-        if (effect) {
-            require((bound ? "HOST_BOUND_SINGLE_WRITE" : qualified ? "HOST_QUALIFIED_SINGLE_WRITE" : "SIMULATION_ONLY").equals(dcm.get("assurance")),p+"/assurance","DCM_INVALID");
-            exact(dcm.get("hostKey"),p+"/hostKey","source","type");
-            Map<String,Object> key = map(dcm.get("hostKey"),p+"/hostKey");
-            require("requestKey".equals(key.get("source")),p+"/hostKey/source","DCM_INVALID");
-            metadataText(key.get("type"),p+"/hostKey/type");
-        }
+        exact(dcm.get("hostKey"),p+"/hostKey","source","type");
+        Map<String,Object> key = map(dcm.get("hostKey"),p+"/hostKey");
+        require("requestKey".equals(key.get("source")),p+"/hostKey/source","DCM_INVALID");
+        metadataText(key.get("type"),p+"/hostKey/type");
         exact(dcm.get("domain"), p + "/domain", "id", "version");
         Map<String,Object> domain = map(dcm.get("domain"), p);
         text(domain.get("id"), p, true, 256); text(domain.get("version"), p, true, 256);
         Map<String,Object> types = bounded(dcm.get("types"), p + "/types", 16);
         require(!types.isEmpty(), p);
-        for (var item : (generic ? new TreeMap<>(types) : types).entrySet()) {
+        for (var item : new TreeMap<>(types).entrySet()) {
             named(item.getKey(), p, false); require(!BUILTINS.contains(item.getKey()), p);
             Map<String,Object> type = map(item.getValue(), p);
             Object kind = type.get("kind");
@@ -114,53 +83,43 @@ final class Artifact {
         for (String name : types.keySet()) if (record(dcm, name))
             for (Object type : map(definition(dcm,name).get("fields"), p).values()) require(scalarType(dcm,type),p);
         Map<String,Object> caps = bounded(dcm.get("capabilities"), p + "/capabilities", 8);
-        for (var item : (generic ? new TreeMap<>(caps) : caps).entrySet()) {
+        for (var item : new TreeMap<>(caps).entrySet()) {
             named(item.getKey(), p, true); Map<String,Object> cap = map(item.getValue(),p);
             exact(cap,p,"version","parameters","result","effect","errors"); text(cap.get("version"),p,true,256);
-            require(("READ".equals(cap.get("effect")) || (effect || generic) && "WRITE".equals(cap.get("effect"))) && recordType(dcm,cap.get("result")),p);
+            require(("READ".equals(cap.get("effect")) || "WRITE".equals(cap.get("effect"))) && recordType(dcm,cap.get("result")),p);
             for (var parameter : bounded(cap.get("parameters"),p,16).entrySet()) {
                 named(parameter.getKey(),p,false); exact(parameter.getValue(),p,"type","binding");
                 Map<String,Object> param = map(parameter.getValue(),p);
                 require(scalarType(dcm,param.get("type")) && ("agent".equals(param.get("binding")) || "host".equals(param.get("binding"))),p);
             }
             List<Object> errors = list(cap.get("errors"),p); require(new HashSet<>(errors).size() == errors.size(),p);
-            if (effect || generic) require(errors.size()<=16,p+"/capabilities/"+item.getKey()+"/errors","BUDGET_EXCEEDED");
+            require(errors.size()<=16,p+"/capabilities/"+item.getKey()+"/errors","BUDGET_EXCEEDED");
             for (Object error : errors) require(error instanceof String text && text.matches("[A-Z][A-Z0-9_]{0,63}"),p);
         }
         Map<String,Object> entries = bounded(dcm.get("entrypoints"),p + "/entrypoints",4); require(!entries.isEmpty(),p);
-        for (var item : (generic ? new TreeMap<>(entries) : entries).entrySet()) {
+        for (var item : new TreeMap<>(entries).entrySet()) {
             named(item.getKey(),p,true); Map<String,Object> entry = map(item.getValue(),p);
-            if (generic) {
-                Set<String> fields = new HashSet<>(effect ? Set.of("input","output","trigger","placement","consumer","event")
-                        : Set.of("input","output","trigger","consumer"));
-                if (entry.containsKey("capabilityPolicy")) fields.add("capabilityPolicy");
-                if (effect && entry.containsKey("effectGrant")) fields.add("effectGrant");
-                shape(entry,fields,p);
-            }
-            else if (effect) exact(entry,p,"input","output","trigger","placement","consumer","grants","effectGrant","event");
-            else exact(entry,p,"input","output","trigger","consumer","grants");
+            Set<String> fields = new HashSet<>(Set.of("input","output","trigger","placement","consumer","event"));
+            if (entry.containsKey("capabilityPolicy")) fields.add("capabilityPolicy");
+            if (entry.containsKey("effectGrant")) fields.add("effectGrant");
+            shape(entry,fields,p);
             require(recordType(dcm,entry.get("input")) && recordType(dcm,entry.get("output")),p);
-            if (effect) {
-                String path = p+"/entrypoints/"+item.getKey();
-                require("EVENT".equals(entry.get("trigger")),path+"/trigger","DCM_INVALID");
-                require("AFTER_COMMIT".equals(entry.get("placement")),path+"/placement","DCM_INVALID");
-                try { if (!generic || entry.containsKey("effectGrant")) number(entry.get("effectGrant"),0,1,path+"/effectGrant"); }
-                catch (RuntimeFault failure) { throw new RuntimeFault("DCM_INVALID",path+"/effectGrant"); }
-                exact(entry.get("event"),path+"/event","idType","sourceType");
-                Map<String,Object> event = map(entry.get("event"),path+"/event");
-                for (String field : List.of("idType","sourceType")) {
-                    String type = metadataText(event.get(field),path+"/event/"+field);
-                    require("nominal".equals(definition(dcm,type).get("kind")),path+"/event/"+field,"DCM_INVALID");
-                }
-            } else require("REQUEST".equals(entry.get("trigger")),p);
+            String path = p+"/entrypoints/"+item.getKey();
+            require("EVENT".equals(entry.get("trigger")),path+"/trigger","DCM_INVALID");
+            require("AFTER_COMMIT".equals(entry.get("placement")),path+"/placement","DCM_INVALID");
+            try { if (entry.containsKey("effectGrant")) number(entry.get("effectGrant"),0,1,path+"/effectGrant"); }
+            catch (RuntimeFault failure) { throw new RuntimeFault("DCM_INVALID",path+"/effectGrant"); }
+            exact(entry.get("event"),path+"/event","idType","sourceType");
+            Map<String,Object> event = map(entry.get("event"),path+"/event");
+            for (String field : List.of("idType","sourceType")) {
+                String type = metadataText(event.get(field),path+"/event/"+field);
+                require("nominal".equals(definition(dcm,type).get("kind")),path+"/event/"+field,"DCM_INVALID");
+            }
             exact(entry.get("consumer"),p,"id","version","kind"); Map<String,Object> consumer = map(entry.get("consumer"),p);
             named(consumer.get("id"),p,true); text(consumer.get("version"),p,true,256);
-            if (effect) require("EVENT_REPORT".equals(consumer.get("kind")),p+"/entrypoints/"+item.getKey()+"/consumer/kind","DCM_INVALID");
-            else require("DISPLAY".equals(consumer.get("kind")),p);
-            if (generic) {
-                if (entry.containsKey("capabilityPolicy")) CapabilityPolicy.narrow(CapabilityPolicy.catalog(dcm),entry.get("capabilityPolicy"),
-                        pointer(p+"/entrypoints",item.getKey())+"/capabilityPolicy","DCM_INVALID");
-            } else for (var grant : bounded(entry.get("grants"),p,8).entrySet()) { require(caps.containsKey(grant.getKey()),p); number(grant.getValue(),1,4,p); }
+            require("EVENT_REPORT".equals(consumer.get("kind")),path+"/consumer/kind","DCM_INVALID");
+            if (entry.containsKey("capabilityPolicy")) CapabilityPolicy.narrow(CapabilityPolicy.catalog(dcm),entry.get("capabilityPolicy"),
+                    pointer(p+"/entrypoints",item.getKey())+"/capabilityPolicy","DCM_INVALID");
         }
     }
 
@@ -189,71 +148,23 @@ final class Artifact {
         }
     }
 
-    static Plan validate(Map<String,Object> artifact) {
-        return validate(artifact,false);
-    }
-
-    static Plan validate(Map<String,Object> artifact, boolean effect) {
-        exact(artifact,"/artifact","format","profile","compiler","environment","sourceDigest","dcmDigest","dcm","entrypoint","descriptors","expressions","steps","return");
-        require((effect ? "keir-artifact/effect-1" : "keir-artifact/read-1").equals(artifact.get("format")) &&
-                (effect ? "keir-effect/1" : "keir-read/1").equals(artifact.get("profile")),"/artifact");
-        text(artifact.get("compiler"),"/artifact/compiler",true,256);
-        shape(artifact.get("environment"),Profile.ENVIRONMENT.keySet(),"/artifact/environment");
-        require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment","PIN_MISMATCH");
-        for (String key : List.of("sourceDigest","dcmDigest")) require(artifact.get(key) instanceof String text && text.matches("sha256:[0-9a-f]{64}"),"/artifact/"+key);
-        require(digest(canonical(artifact.get("dcm"))).equals(artifact.get("dcmDigest")),"/artifact/dcmDigest");
-        Map<String,Object> dcm = map(artifact.get("dcm"),MODEL); model(dcm,effect);
-        return plan(artifact,dcm,effect,false);
-    }
-
-    static void validateEnvelope2(Map<String,Object> artifact, Map<String,Object> dcm, boolean effect) {
-        validateEnvelope2(artifact,dcm,effect ? "keir-effect/2" : "keir-read/2");
-    }
-
-    static void validateEnvelope2(Map<String,Object> artifact, Map<String,Object> dcm, String profile) {
-        boolean effect=!"keir-read/2".equals(profile), qualified="keir-effect/3".equals(profile), bound="keir-effect/4".equals(profile);
-        exact(artifact,"/artifact","format","profile","compiler","environment","sourceDigest","modelRef","entrypoint","expressions","steps","return");
+    static void validateEnvelope(Map<String,Object> artifact, Map<String,Object> dcm) {
+        exact(artifact,"/artifact","format","compiler","environment","sourceDigest","modelRef","entrypoint","expressions","steps","return");
         text(artifact.get("compiler"),"/artifact/compiler",true,256);
         require(map(dcm.get("entrypoints"),MODEL).containsKey(artifact.get("entrypoint")),"/artifact/entrypoint");
-        require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment",bound?"PIN_MISMATCH":"ARTIFACT_INVALID");
-        if (bound) require("keir-compiler-java/0.1.0-SNAPSHOT".equals(artifact.get("compiler")),"/artifact/compiler","PIN_MISMATCH");
-        require((bound ? "keir-artifact/effect-4" : qualified ? "keir-artifact/effect-3" : effect ? "keir-artifact/effect-2" : "keir-artifact/read-2").equals(artifact.get("format")),"/artifact/format");
+        require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment","PIN_MISMATCH");
+        require("keir-compiler-java/0.1.0".equals(artifact.get("compiler")),"/artifact/compiler","PIN_MISMATCH");
+        require("keir-artifact/1".equals(artifact.get("format")),"/artifact/format");
         require(modelRef(dcm).equals(artifact.get("modelRef")),"/artifact/modelRef");
-        require(profile.equals(artifact.get("profile")),"/artifact/profile");
         require(artifact.get("sourceDigest") instanceof String text && text.matches("sha256:[0-9a-f]{64}"),"/artifact/sourceDigest");
     }
 
-    static Plan validateProgram2(Map<String,Object> artifact, Map<String,Object> dcm, boolean effect) {
-        validateEnvelope2(artifact,dcm,effect);
-        return plan(artifact,dcm,effect,true);
-    }
-
-    static Plan validateProgram2(Map<String,Object> artifact, Map<String,Object> dcm, boolean effect,
-                                 Map<String,Long> limits, CapabilityPolicy.State admissionPolicy, long admissionEffectGrant) {
-        validateEnvelope2(artifact,dcm,effect);
-        return plan(artifact,dcm,effect,true,limits,admissionPolicy,admissionEffectGrant);
-    }
-
-    static Plan validateProgram2(Map<String,Object> artifact, Map<String,Object> dcm, String profile,
-                                 Map<String,Long> limits, CapabilityPolicy.State admissionPolicy, long admissionEffectGrant) {
-        validateEnvelope2(artifact,dcm,profile);
-        return plan(artifact,dcm,!"keir-read/2".equals(profile),true,limits,admissionPolicy,admissionEffectGrant);
-    }
-
-    private static Plan plan(Map<String,Object> artifact, Map<String,Object> dcm, boolean effect, boolean generic) {
-        return plan(artifact,dcm,effect,generic,Map.of(),null,1);
-    }
-
-    private static Plan plan(Map<String,Object> artifact, Map<String,Object> dcm, boolean effect, boolean generic,
-                             Map<String,Long> limits, CapabilityPolicy.State admissionPolicy, long admissionEffectGrant) {
-        Map<String,Object> entries = map(dcm.get("entrypoints"),MODEL); require(entries.containsKey(artifact.get("entrypoint")),"/artifact/entrypoint");
+    static Plan validateProgram(Map<String,Object> artifact, Map<String,Object> dcm,
+                                CapabilityPolicy.State policy, long effectGrant) {
+        Map<String,Object> entries = map(dcm.get("entrypoints"),MODEL);
         Map<String,Object> entry = map(entries.get(artifact.get("entrypoint")),MODEL);
-        CapabilityPolicy.State policy = generic ? CapabilityPolicy.narrow(CapabilityPolicy.catalog(dcm),
-                entry.containsKey("capabilityPolicy") ? entry.get("capabilityPolicy") : Map.of(),
-                "/artifact/entrypoint/capabilityPolicy","ARTIFACT_INVALID") : null;
         require(artifact.get("steps") instanceof List<?> steps && !steps.isEmpty() && steps.size() <= Profile.STEPS,"/artifact/steps","BUDGET_EXCEEDED");
         List<Object> steps = list(artifact.get("steps"),"/artifact/steps");
-        if (generic) require(steps.size()<=limits.getOrDefault("steps",(long)Profile.STEPS),"/artifact/steps","BUDGET_EXCEEDED");
         Map<String,Object> expressions = bounded(artifact.get("expressions"),"/artifact/expressions",Profile.TOTAL_AST_NODES);
         Map<String,Object> variables = new LinkedHashMap<>(); variables.put("input",entry.get("input"));
         LinkedHashMap<String,Map<String,Object>> contexts = new LinkedHashMap<>();
@@ -265,30 +176,24 @@ final class Artifact {
             require(!Set.of("input","Boolean","String").contains(id) && ids.add(id) && !types(dcm).containsKey(id),p);
             if ("CALL".equals(step.get("op"))) {
                 Set<String> fields = new HashSet<>(Set.of("op","id","capability","version","args","resultType"));
-                if (effect) for (String optional : List.of("when","onError")) if (step.containsKey(optional)) fields.add(optional);
+                for (String optional : List.of("when","onError")) if (step.containsKey(optional)) fields.add(optional);
                 shape(step,fields,p);
                 if (step.containsKey("when")) require(booleanBinds.contains(step.get("when")),p+"/when");
                 Map<String,Object> caps = map(dcm.get("capabilities"),MODEL);
-                require(caps.containsKey(step.get("capability")),p,generic && step.get("capability") instanceof String?"CAPABILITY_UNKNOWN":"ARTIFACT_INVALID");
+                require(caps.containsKey(step.get("capability")),p,step.get("capability") instanceof String?"CAPABILITY_UNKNOWN":"ARTIFACT_INVALID");
                 Map<String,Object> cap = map(caps.get(step.get("capability")),p);
                 require(Objects.equals(step.get("version"),cap.get("version")) && Objects.equals(step.get("resultType"),cap.get("result")),p);
                 Map<String,Object> params = map(cap.get("parameters"),p); Set<String> agent = new TreeSet<>();
                 params.forEach((key,param)-> { if ("agent".equals(map(param,p).get("binding"))) agent.add(key); });
                 shape(step.get("args"),agent,p+"/args");
-                if (generic) {
-                    String capability = (String)step.get("capability"); calls.merge(capability,1,Integer::sum); callCount++;
-                    require(callCount <= Profile.CALLS,p,"BUDGET_EXCEEDED");
-                    require(callCount <= limits.getOrDefault("calls",(long)Profile.CALLS),"/artifact/steps","BUDGET_EXCEEDED");
-                    if ("WRITE".equals(cap.get("effect"))) {
-                        require(++writeCount<=1,p,"BUDGET_EXCEEDED");
-                        require(effect && writeCount<=((Number)entry.getOrDefault("effectGrant",1L)).intValue(),p,"ENTRY_GRANT_DENIED");
-                        require(writeCount<=admissionEffectGrant,"/admission/effectGrant","AUTHORITY_DENIED");
-                    }
-                    require(CapabilityPolicy.permits(policy,capability,calls.get(capability)),p,"ENTRY_GRANT_DENIED");
-                    if (admissionPolicy!=null) require(CapabilityPolicy.permits(admissionPolicy,capability,calls.get(capability)),
-                            "/admission/capabilityPolicy","AUTHORITY_DENIED");
+                String capability = (String)step.get("capability"); calls.merge(capability,1,Integer::sum); callCount++;
+                require(callCount <= Profile.CALLS,p,"BUDGET_EXCEEDED");
+                if ("WRITE".equals(cap.get("effect"))) {
+                    require(++writeCount<=1,p,"BUDGET_EXCEEDED");
+                    require(writeCount<=effectGrant,p,"ENTRY_GRANT_DENIED");
                 }
-                for (String arg : agent) binding(dcm,expressions,variables,contexts,map(step.get("args"),p).get(arg),map(params.get(arg),p).get("type"),p+"/args/"+arg,generic);
+                require(CapabilityPolicy.permits(policy,capability,calls.get(capability)),p,"ENTRY_GRANT_DENIED");
+                for (String arg : agent) binding(dcm,expressions,variables,contexts,map(step.get("args"),p).get(arg),map(params.get(arg),p).get("type"),p+"/args/"+arg);
                 if (step.containsKey("onError")) {
                     Map<String,Object> handlers = map(step.get("onError"),p+"/onError");
                     require(!handlers.isEmpty(),p+"/onError");
@@ -296,46 +201,36 @@ final class Artifact {
                     for (String code : new TreeSet<>(handlers.keySet())) {
                         String path = pointer(p+"/onError",code);
                         require(list(cap.get("errors"),path).contains(code),path);
-                        output(dcm,entry,expressions,variables,contexts,handlers.get(code),path,generic);
-                    }
-                }
-                if (!generic) {
-                    String capability = (String)step.get("capability"); calls.merge(capability,1,Integer::sum); callCount++;
-                    Object grant = map(entry.get("grants"),p).get(capability);
-                    require(callCount <= Profile.CALLS && grant instanceof Number && calls.get(capability) <= ((Number)grant).longValue(),p,"BUDGET_EXCEEDED");
-                    if (effect && "WRITE".equals(cap.get("effect"))) {
-                        require(++writeCount<=1,p,"BUDGET_EXCEEDED");
-                        require(writeCount<=((Number)entry.get("effectGrant")).intValue(),p,"ENTRY_GRANT_DENIED");
+                        output(dcm,entry,expressions,variables,contexts,handlers.get(code),path);
                     }
                 }
             } else if ("BIND".equals(step.get("op"))) {
                 exact(step,p,"op","id","value","resultType");
-                binding(dcm,expressions,variables,contexts,step.get("value"),step.get("resultType"),p+"/value",generic);
+                binding(dcm,expressions,variables,contexts,step.get("value"),step.get("resultType"),p+"/value");
                 if ("Boolean".equals(step.get("resultType"))) booleanBinds.add(id);
             } else throw new RuntimeFault("ARTIFACT_INVALID",p);
             if (!step.containsKey("when")) variables.put(id,step.get("resultType"));
         }
-        output(dcm,entry,expressions,variables,contexts,artifact.get("return"),"/artifact/return",generic);
+        output(dcm,entry,expressions,variables,contexts,artifact.get("return"),"/artifact/return");
         require(contexts.size() == expressions.size(),"/artifact/expressions");
-        return new Plan(artifact,dcm,entry,contexts,calls,callCount,effect,writeCount);
+        return new Plan(artifact,dcm,entry,contexts,calls);
     }
 
     private static void output(Map<String,Object> dcm,Map<String,Object> entry,Map<String,Object> expressions,
-                               Map<String,Object> variables,LinkedHashMap<String,Map<String,Object>> contexts,Object value,String path, boolean generic) {
+                               Map<String,Object> variables,LinkedHashMap<String,Map<String,Object>> contexts,Object value,String path) {
         Map<String,Object> returned = map(value,path); exact(returned,path,"type","fields");
         require(Objects.equals(returned.get("type"),entry.get("output")),path);
         Map<String,Object> fields = map(definition(dcm,(String)entry.get("output")).get("fields"),MODEL);
         shape(returned.get("fields"),fields.keySet(),path+"/fields");
-        for (String field : new TreeSet<>(fields.keySet())) binding(dcm,expressions,variables,contexts,map(returned.get("fields"),path).get(field),fields.get(field),pointer(path+"/fields",field),generic);
+        for (String field : new TreeSet<>(fields.keySet())) binding(dcm,expressions,variables,contexts,map(returned.get("fields"),path).get(field),fields.get(field),pointer(path+"/fields",field));
     }
 
     private static void binding(Map<String,Object> dcm, Map<String,Object> expressions, Map<String,Object> variables,
-                                LinkedHashMap<String,Map<String,Object>> contexts, Object value, Object type, String path, boolean generic) {
+                                LinkedHashMap<String,Map<String,Object>> contexts, Object value, Object type, String path) {
         Map<String,Object> binding = map(value,path); boolean literal = binding.containsKey("literal");
         exact(binding,path,literal ? "literal" : "expr","type");
         require(Objects.equals(binding.get("type"),type) && scalarType(dcm,type),path);
         if (literal) {
-            require(generic || !"nominal".equals(definition(dcm,(String)type).get("kind")),path);
             value(dcm,(String)type,binding.get("literal"),path,"ARTIFACT_INVALID");
         } else {
             String id = "e"+contexts.size(); require(id.equals(binding.get("expr")) && expressions.containsKey(id),path);

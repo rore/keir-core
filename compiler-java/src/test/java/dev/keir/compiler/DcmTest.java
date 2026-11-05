@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 final class DcmTest {
     @Test void validatesSampleAndBuildsSortedDescriptors() throws Exception {
         Dcm dcm = Dcm.parse(sample());
-        assertEquals(7,dcm.types().size());
+        assertEquals(9,dcm.types().size());
         assertEquals("TaskId",dcm.capabilities().get("tasks.get").parameters().get("taskId").type());
         assertEquals("host",dcm.capabilities().get("tasks.get").parameters().get("actorId").binding());
         assertTrue(dcm.type("Boolean").scalar());
@@ -43,11 +43,11 @@ final class DcmTest {
         assertThrows(UnsupportedOperationException.class,() -> dcm.type("TaskStatus").values().clear());
     }
 
-    @Test void acceptsNoParametersErrorsOrGrantsAndBooleanFields() {
+    @Test void acceptsNoParametersErrorsOrCapabilitiesAndBooleanFields() {
         var model = sample();
         map(model,"capabilities","tasks.get").put("parameters",new LinkedHashMap<>());
         map(model,"capabilities","tasks.get").put("errors",List.of());
-        map(model,"entrypoints","ClassifyTask").put("grants",Map.of());
+        map(model,"entrypoints","ClassifyTask").put("capabilityPolicy",Map.of());
         map(model,"types","Task","fields").put("input","Boolean");
         map(model,"types","Task","fields").put("plain","String");
         Dcm dcm = Dcm.parse(model);
@@ -103,14 +103,14 @@ final class DcmTest {
         map(model,"types").put("Unused",Map.of("kind","list"));
         failure(model,"PROFILE_UNSUPPORTED","/dcm/types/Unused/kind");
         model = sample();
-        map(model,"capabilities","tasks.get").put("effect","WRITE");
+        map(model,"capabilities","tasks.get").put("effect","UNKNOWN");
         failure(model,"PROFILE_UNSUPPORTED","/dcm/capabilities/tasks.get/effect");
         model = sample();
-        map(model,"entrypoints","ClassifyTask").put("trigger","EVENT");
-        failure(model,"PROFILE_UNSUPPORTED","/dcm/entrypoints/ClassifyTask/trigger");
+        map(model,"entrypoints","ClassifyTask").put("trigger","REQUEST");
+        failure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/trigger");
         model = sample();
         map(model,"entrypoints","ClassifyTask","consumer").put("kind","WRITE");
-        failure(model,"PROFILE_UNSUPPORTED","/dcm/entrypoints/ClassifyTask/consumer/kind");
+        failure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/consumer/kind");
     }
 
     @Test void rejectsBadEnumsErrorsBindingsAndShapes() {
@@ -130,24 +130,6 @@ final class DcmTest {
         map(model,"capabilities","tasks.get","parameters","actorId").put("binding","source");
         failure(model,"DCM_INVALID","/dcm/capabilities/tasks.get/parameters/actorId/binding");
         failure(null,"DCM_INVALID","/dcm");
-    }
-
-    @Test void grantsAreExactPositiveBoundedIntegersForKnownCapabilities() {
-        for (Object count : List.of(0,-1,1.0,"1",true)) {
-            var model = sample();
-            map(model,"entrypoints","ClassifyTask","grants").put("tasks.get",count);
-            failure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/grants/tasks.get");
-        }
-        for (Object count : List.of(5,Long.MAX_VALUE,new BigInteger("9007199254740992"))) {
-            var model = sample();
-            map(model,"entrypoints","ClassifyTask","grants").put("tasks.get",count);
-            failure(model,"BUDGET_EXCEEDED","/dcm/entrypoints/ClassifyTask/grants/tasks.get");
-        }
-        var model = sample();
-        map(model,"entrypoints","ClassifyTask","grants").put("tasks.get",4L);
-        assertEquals(4,Dcm.parse(model).entrypoints().get("ClassifyTask").grants().get("tasks.get"));
-        map(model,"entrypoints","ClassifyTask","grants").put("unknown",1);
-        failure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/grants/unknown");
     }
 
     @Test void enforcesCollectionBoundsInclusively() {
@@ -202,17 +184,16 @@ final class DcmTest {
         failure(model,"DCM_INVALID","/dcm/domain/id");
     }
 
-    @Test void effectProfileRetainsReadAndWriteCapabilitiesAndImmutableMetadata() {
-        var model = effectSample();
-        assertEquals("READ",Dcm.parse(model,true).capabilities().get("tasks.get").effect());
+    @Test void modelRetainsReadAndWriteCapabilitiesAndImmutableMetadata() {
+        var model = sample();
+        assertEquals("READ",Dcm.parse(model).capabilities().get("tasks.get").effect());
         map(model,"capabilities","tasks.get").put("effect","WRITE");
-        Dcm dcm = Dcm.parse(model,true);
+        Dcm dcm = Dcm.parse(model);
         assertEquals("WRITE",dcm.capabilities().get("tasks.get").effect());
         assertEquals("EVENT",dcm.entrypoints().get("ClassifyTask").trigger());
         assertEquals(1,dcm.entrypoints().get("ClassifyTask").effectGrant());
-        assertEquals(0,Dcm.parse(sample()).entrypoints().get("ClassifyTask").effectGrant());
         map(model,"entrypoints","ClassifyTask").put("effectGrant",0);
-        assertEquals(0,Dcm.parse(model,true).entrypoints().get("ClassifyTask").effectGrant());
+        assertEquals(0,Dcm.parse(model).entrypoints().get("ClassifyTask").effectGrant());
         map(model,"hostKey").put("type","changed");
         map(model,"entrypoints","ClassifyTask","event").put("idType","changed");
         assertEquals("sample.RequestUuid/1",map(dcm.root(),"hostKey").get("type"));
@@ -221,106 +202,87 @@ final class DcmTest {
         assertThrows(UnsupportedOperationException.class,()->map(dcm.root(),"entrypoints","ClassifyTask","event").clear());
     }
 
-    @Test void selectedProfileRejectsMixedFormatsAndUnknownEffectFields() {
-        var model = effectSample();
+    @Test void rejectsObsoleteFormatsAndUnknownFields() {
+        var model = sample();
         model.put("format","keir-dcm/read-1");
-        effectFailure(model,"PROFILE_UNSUPPORTED","/dcm/format");
+        failure(model,"PROFILE_UNSUPPORTED","/dcm/format");
         model = sample(); model.put("format","keir-dcm/effect-1");
         failure(model,"PROFILE_UNSUPPORTED","/dcm/format");
-        effectFailure(sample(),"DCM_INVALID","/dcm/hostKey");
-        failure(effectSample(),"FIELD_UNKNOWN","/dcm/assurance");
-        model = effectSample(); model.put("extra",true);
-        effectFailure(model,"FIELD_UNKNOWN","/dcm/extra");
-        model = effectSample(); map(model,"hostKey").put("extra",true);
-        effectFailure(model,"FIELD_UNKNOWN","/dcm/hostKey/extra");
-        model = effectSample(); map(model,"entrypoints","ClassifyTask").put("extra",true);
-        effectFailure(model,"FIELD_UNKNOWN","/dcm/entrypoints/ClassifyTask/extra");
-        model = effectSample(); map(model,"entrypoints","ClassifyTask","event").put("extra",true);
-        effectFailure(model,"FIELD_UNKNOWN","/dcm/entrypoints/ClassifyTask/event/extra");
-        model = effectSample(); map(model,"entrypoints","ClassifyTask","event").remove("sourceType");
-        effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/event/sourceType");
+        model = sample(); model.remove("hostKey");
+        failure(model,"DCM_INVALID","/dcm/hostKey");
+        model = sample(); model.put("extra",true);
+        failure(model,"FIELD_UNKNOWN","/dcm/extra");
+        model = sample(); map(model,"hostKey").put("extra",true);
+        failure(model,"FIELD_UNKNOWN","/dcm/hostKey/extra");
+        model = sample(); map(model,"entrypoints","ClassifyTask").put("extra",true);
+        failure(model,"FIELD_UNKNOWN","/dcm/entrypoints/ClassifyTask/extra");
+        model = sample(); map(model,"entrypoints","ClassifyTask","event").put("extra",true);
+        failure(model,"FIELD_UNKNOWN","/dcm/entrypoints/ClassifyTask/event/extra");
+        model = sample(); map(model,"entrypoints","ClassifyTask","event").remove("sourceType");
+        failure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/event/sourceType");
     }
 
     @Test void effectLifecycleAndKeyMetadataFailAsInvalidDcm() {
-        var model = effectSample(); model.put("assurance","REAL");
-        effectFailure(model,"DCM_INVALID","/dcm/assurance");
-        model = effectSample(); map(model,"hostKey").put("source","input");
-        effectFailure(model,"DCM_INVALID","/dcm/hostKey/source");
+        var model = sample(); model.put("assurance","REAL");
+        failure(model,"FIELD_UNKNOWN","/dcm/assurance");
+        model = sample(); map(model,"hostKey").put("source","input");
+        failure(model,"DCM_INVALID","/dcm/hostKey/source");
         for (Object value : Arrays.asList(null,true,"","\ud800","é".repeat(129))) {
-            model = effectSample(); map(model,"hostKey").put("type",value);
-            effectFailure(model,"DCM_INVALID","/dcm/hostKey/type");
+            model = sample(); map(model,"hostKey").put("type",value);
+            failure(model,"DCM_INVALID","/dcm/hostKey/type");
         }
-        model = effectSample(); map(model,"hostKey").put("type","é".repeat(128));
-        Dcm.parse(model,true);
-        model = effectSample(); map(model,"entrypoints","ClassifyTask").put("trigger","REQUEST");
-        effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/trigger");
+        model = sample(); map(model,"hostKey").put("type","é".repeat(128));
+        Dcm.parse(model);
+        model = sample(); map(model,"entrypoints","ClassifyTask").put("trigger","REQUEST");
+        failure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/trigger");
         for (Object placement : Arrays.asList(null,1,"BEFORE_COMMIT","UNKNOWN")) {
-            model = effectSample(); map(model,"entrypoints","ClassifyTask").put("placement",placement);
-            effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/placement");
+            model = sample(); map(model,"entrypoints","ClassifyTask").put("placement",placement);
+            failure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/placement");
         }
-        model = effectSample(); map(model,"entrypoints","ClassifyTask","consumer").put("kind","DISPLAY");
-        effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/consumer/kind");
+        model = sample(); map(model,"entrypoints","ClassifyTask","consumer").put("kind","DISPLAY");
+        failure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/consumer/kind");
     }
 
     @Test void effectGrantIsOnlyAnExactZeroOrOneIncludingNativeIntegers() {
         for (Object value : List.of((byte)0,(short)1,0,1L,BigInteger.ZERO,BigInteger.ONE)) {
-            var model = effectSample(); map(model,"entrypoints","ClassifyTask").put("effectGrant",value);
-            assertEquals(((Number)value).intValue(),Dcm.parse(model,true).entrypoints().get("ClassifyTask").effectGrant());
+            var model = sample(); map(model,"entrypoints","ClassifyTask").put("effectGrant",value);
+            assertEquals(((Number)value).intValue(),Dcm.parse(model).entrypoints().get("ClassifyTask").effectGrant());
         }
         for (Object value : Arrays.asList(null,-1,2,1.0,"1",true,new BigInteger("9007199254740992"))) {
-            var model = effectSample(); map(model,"entrypoints","ClassifyTask").put("effectGrant",value);
-            effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/effectGrant");
+            var model = sample(); map(model,"entrypoints","ClassifyTask").put("effectGrant",value);
+            failure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/effectGrant");
         }
     }
 
     @Test void effectEventsRequireDeclaredNominalStringTypes() {
         for (String field : List.of("idType","sourceType")) for (Object type : Arrays.asList(null,true,"String","Boolean","TaskStatus","Task","Missing")) {
-            var model = effectSample(); map(model,"entrypoints","ClassifyTask","event").put(field,type);
-            effectFailure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/event/"+field);
+            var model = sample(); map(model,"entrypoints","ClassifyTask","event").put(field,type);
+            failure(model,"DCM_INVALID","/dcm/entrypoints/ClassifyTask/event/"+field);
         }
-        var model = effectSample(); map(model,"types","EventId").put("base","Boolean");
-        effectFailure(model,"DCM_INVALID","/dcm/types/EventId/base");
+        var model = sample(); map(model,"types","EventId").put("base","Boolean");
+        failure(model,"DCM_INVALID","/dcm/types/EventId/base");
     }
 
-    @Test void effectErrorsAreCappedWithoutNarrowingReadErrorLists() {
+    @Test void readAndWriteErrorsAreCapped() {
         var errors = new ArrayList<String>();
         for (int i=0;i<16;i++) errors.add("ERROR"+i);
-        var model = effectSample(); map(model,"capabilities","tasks.get").put("errors",errors);
-        assertEquals(16,Dcm.parse(model,true).capabilities().get("tasks.get").errors().size());
+        var model = sample(); map(model,"capabilities","tasks.get").put("errors",errors);
+        assertEquals(16,Dcm.parse(model).capabilities().get("tasks.get").errors().size());
         errors.add("EXTRA");
-        effectFailure(model,"BUDGET_EXCEEDED","/dcm/capabilities/tasks.get/errors");
-        model = sample(); map(model,"capabilities","tasks.get").put("errors",errors);
-        assertEquals(17,Dcm.parse(model).capabilities().get("tasks.get").errors().size());
-        model = effectSample(); map(model,"capabilities","tasks.get").put("effect","UNKNOWN");
-        effectFailure(model,"PROFILE_UNSUPPORTED","/dcm/capabilities/tasks.get/effect");
+        failure(model,"BUDGET_EXCEEDED","/dcm/capabilities/tasks.get/errors");
+        map(model,"capabilities","tasks.get").put("effect","WRITE");
+        failure(model,"BUDGET_EXCEEDED","/dcm/capabilities/tasks.get/errors");
+        model = sample(); map(model,"capabilities","tasks.get").put("effect","UNKNOWN");
+        failure(model,"PROFILE_UNSUPPORTED","/dcm/capabilities/tasks.get/effect");
     }
 
     @Test void nativeKeyContractDoesNotBecomeABusinessTypeOrDescriptor() {
-        var model = effectSample();
-        assertNull(Dcm.parse(model,true).fileDescriptor().findMessageTypeByName("sample.RequestUuid/1"));
-        map(model,"types","Task","fields").put("id","sample.RequestUuid/1");
-        effectFailure(model,"DCM_INVALID","/dcm/types/Task/fields/id");
-        model = effectSample(); map(model,"capabilities","tasks.get","parameters","actorId").put("type","sample.RequestUuid/1");
-        effectFailure(model,"DCM_INVALID","/dcm/capabilities/tasks.get/parameters/actorId/type");
-    }
-
-    private static void effectFailure(Object model,String code,String path) {
-        CompileFailure error = assertThrows(CompileFailure.class,() -> Dcm.parse(model,true));
-        assertEquals(code,error.code);
-        assertEquals(path,error.path);
-        assertEquals(code,error.getMessage());
-    }
-    private static Map<String,Object> effectSample() {
         var model = sample();
-        model.put("format","keir-dcm/effect-1"); model.put("assurance","SIMULATION_ONLY");
-        model.put("hostKey",new LinkedHashMap<>(Map.of("source","requestKey","type","sample.RequestUuid/1")));
-        map(model,"types").put("EventId",new LinkedHashMap<>(Map.of("kind","nominal","base","String")));
-        map(model,"types").put("EventSource",new LinkedHashMap<>(Map.of("kind","nominal","base","String")));
-        var entry = map(model,"entrypoints","ClassifyTask");
-        entry.put("trigger","EVENT"); entry.put("placement","AFTER_COMMIT"); entry.put("effectGrant",1);
-        entry.put("event",new LinkedHashMap<>(Map.of("idType","EventId","sourceType","EventSource")));
-        map(entry,"consumer").put("kind","EVENT_REPORT");
-        return model;
+        assertNull(Dcm.parse(model).fileDescriptor().findMessageTypeByName("sample.RequestUuid/1"));
+        map(model,"types","Task","fields").put("id","sample.RequestUuid/1");
+        failure(model,"DCM_INVALID","/dcm/types/Task/fields/id");
+        model = sample(); map(model,"capabilities","tasks.get","parameters","actorId").put("type","sample.RequestUuid/1");
+        failure(model,"DCM_INVALID","/dcm/capabilities/tasks.get/parameters/actorId/type");
     }
 
     private static void failure(Object model,String code,String path) {
@@ -352,9 +314,12 @@ final class DcmTest {
         return result;
     }
     @SuppressWarnings("unchecked") private static Map<String,?> stringMap(Map<?,?> value) { return (Map<String,?>)value; }
-    private static Map<String,Object> sample() {
-        return mutable(Map.of("format","keir-dcm/read-1","domain",Map.of("id","sample.tasks","version","1"),
+    static Map<String,Object> sample() {
+        return mutable(Map.of("format","keir-dcm/1","hostKey",Map.of("source","requestKey","type","sample.RequestUuid/1"),
+            "domain",Map.of("id","sample.tasks","version","1"),
             "types",Map.of(
+                "EventId",Map.of("kind","nominal","base","String"),
+                "EventSource",Map.of("kind","nominal","base","String"),
                 "TaskId",Map.of("kind","nominal","base","String"),
                 "UserId",Map.of("kind","nominal","base","String"),
                 "TaskStatus",Map.of("kind","enum","values",List.of("OPEN","COMPLETED")),
@@ -365,7 +330,8 @@ final class DcmTest {
             "capabilities",Map.of("tasks.get",Map.of("version","1","parameters",Map.of(
                 "taskId",Map.of("type","TaskId","binding","agent"),"actorId",Map.of("type","UserId","binding","host")),
                 "result","Task","effect","READ","errors",List.of("TASK_NOT_FOUND","ACCESS_DENIED"))),
-            "entrypoints",Map.of("ClassifyTask",Map.of("input","ClassifyInput","output","ClassifyResult","trigger","REQUEST",
-                "consumer",Map.of("id","sample.classification","version","1","kind","DISPLAY"),"grants",Map.of("tasks.get",1)))));
+            "entrypoints",Map.of("ClassifyTask",Map.of("input","ClassifyInput","output","ClassifyResult","trigger","EVENT",
+                "placement","AFTER_COMMIT","event",Map.of("idType","EventId","sourceType","EventSource"),
+                "consumer",Map.of("id","sample.classification","version","1","kind","EVENT_REPORT")))));
     }
 }

@@ -14,22 +14,13 @@ public final class CompilerCli {
     public static void main(String[] args) { System.exit(run(args, System.out, System.err)); }
 
     static int run(String[] args, PrintStream output, PrintStream errors) {
-        var environment = args.length == 2 ? KeirCompiler.Environment.supported() : args.length == 3 ? switch (args[2]) {
-            case "--profile=keir-effect/1" -> KeirCompiler.Environment.effect();
-            case "--profile=keir-read/2" -> KeirCompiler.Environment.read2();
-            case "--profile=keir-effect/2" -> KeirCompiler.Environment.effect2();
-            case "--profile=keir-effect/3" -> KeirCompiler.Environment.effect3();
-            case "--profile=keir-effect/4" -> KeirCompiler.Environment.effect4();
-            case null, default -> null;
-        } : null;
-        if (environment == null) return error(errors, "SYNTAX_INVALID", "/source");
+        if (args.length != 2) return error(errors, "SYNTAX_INVALID", "/source");
         byte[] source, model;
         try { source = read(args[0]); }
         catch (IOException | RuntimeException e) { return error(errors, "SYNTAX_INVALID", "/source"); }
         try { model = read(args[1]); }
         catch (IOException | RuntimeException e) { return error(errors, "SYNTAX_INVALID", "/dcm"); }
-        var result = new KeirCompiler().compile(source, model,
-                environment);
+        var result = new KeirCompiler().compile(source, model, KeirCompiler.Environment.supported());
         if (result.succeeded()) {
             output.writeBytes(result.artifact());
             return 0;
