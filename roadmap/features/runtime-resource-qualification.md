@@ -32,9 +32,9 @@ Assuming worker limits cover all process memory, adopting an isolation platform 
 
 **First slice delivered:** The [opt-in qualification harness](../../conformance/resource-qualification/README.md) measures the current `effect/4` profile using the compiler and both runtimes. Three runs matched 22 runtime checks, including settled write receipts after late responses. The [Work Record](../../.agent-workflow/tasks/effect4-resource-evidence.md) records scope and measurements.
 
-**Still open:** Define the supported production workload and qualify Java process-wide memory and synchronous evaluation containment. The 1 MiB probe isolates structural and byte rejection. The largest admitted artifact in the measured corpus was 26,157 bytes. Qualify a valid near-ceiling case or derive a tighter reachable bound. The harness does not independently exercise every step and call count boundary or sustained concurrency.
+**Serial workload measured:** The [second slice](../../.agent-workflow/tasks/effect4-embedded-workload.md) verified the 8/9-step and 4/5-call boundaries and measured 3,000 serial calls per runtime on a trusted host with cooperative adapters. It observed JVM working-set peaks and verified the same 30,777-byte artifact in both runtimes. The derived 495,792-byte compiler-output bound covers only the two measured catalogs. The large fixture short-circuits during invocation.
 
-**Next slice:** [Qualify a serial embedded workload](../../.agent-workflow/tasks/effect4-embedded-workload.md) with JVM process-wide memory and a valid artifact-size case. This workload uses a trusted host, cooperative adapters and one active invocation per host. Hard interruption of synchronous evaluation remains a separate guarantee.
+**Still open:** Worst-case admitted CPU and memory behavior, longer-duration retention, capacity beyond the serial workload, general near-ceiling artifact admission, and enforceable limits for synchronous evaluation. The 1 MiB probe remains byte and structural rejection evidence.
 
 **Dependencies:** [bound-cel-execution](../features/bound-cel-execution.md); [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
