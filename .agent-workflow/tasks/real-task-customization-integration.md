@@ -39,7 +39,7 @@ Owning feature: [Real task integration](../../roadmap/features/demo-task-integra
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -177,3 +177,13 @@ The live assistant finished the edit and saved six passing independent examples.
 The live journey confirmed that approval leaves the old version running. Separate activation changed the task created on a matching completion. Checking the saved result added no duplicate, completing the generated task triggered one further legitimate creation, and another project produced no task. Turning the customization off stopped new effects. The second demo person independently authored and passed six examples for a different project and title, then created the expected native task after approval and activation. The collections remained separate. The designer verified the canvas divider with drag and keyboard and completed the narrow-screen review check. The designer renamed a disposable draft and reached its deletion confirmation. The final live click requires action-time confirmation. The draft is retained, and final deletion verification uses the isolated browser regression. Native uncertainty and failure verification use the controlled runtime and process evidence.
 
 Manager accepted the unavailable-read explanation delta after reviewing its evidence conditions and five passing browser checks. The same final candidate will move the existing turn-off action beside the active status, make the existing naming action easier to recognize for untitled items and clarify how the assistant describes checked examples. Preserve the selection and owner guards, explicit naming choice and existing request excerpt. The designer returned the QA slot. Manager verified a new database backup with settled authoring, saved native outcomes and retained accounting. Final focused recheck and normal rollout remain pending.
+
+## Reviewed integration and rollout
+
+Candidate v7 preserves the reviewed v6 frontend assets and updates the assistant's wording for example checks. The final focused verification includes 19 interaction cases, 12 deletion cases and 22 authoring context checks. The designer accepted the saved unavailable-read explanations, request excerpts, desktop and phone naming, and phone turn-off placement and focus. The live deletion walkthrough reached confirmation. The automated deletion cases exercised the final action against disposable fixtures. The prior live journeys and controlled failure evidence remain applicable.
+
+The manager verified all frozen payloads and committed the exact source to [demo main](https://github.com/rore/keir-demo-app/commit/e066c055af9eee7da71d15b8b184d93f65e42581). The backed-up normal demo upgraded from schema 7 to 8 at its existing URL. Every previous table was preserved, with legacy selection rows mapped to their original hook. The task-completion hook started without a selected customization or replayed effects. The database and foreign-key checks passed, the assistant settings matched their prior bytes and the served assets matched the reviewed build.
+
+The [initial hosted run](https://github.com/rore/keir-demo-app/actions/runs/41980694699) reached its job timeout and exposed a stale expected example count. The [verification patch](https://github.com/rore/keir-demo-app/commit/b2476a4c09141d74cb9596bd8363e9a2990550fc) corrects that count and gives the existing suite 15 minutes to finish. The [full hosted rerun](https://github.com/rore/keir-demo-app/actions/runs/41982700292) passed install, build, 341 unit tests with 12 expected skips, and all 168 browser tests, including terminal example recovery and the three Studio viewports.
+
+The manager accepts the delivered integration. Native persistence verifies original ownership, pinned selection, current authority and foreign data rejection. Separate browser cases exercise account switching while a response is held, and two live users confirmed distinct native outcomes. The combined browser-switch and queued-native-redelivery sequence was not exercised in a single browser test. The source and evidence recovery files were verified before releasing the completed task checkout for cleanup.
