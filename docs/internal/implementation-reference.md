@@ -74,9 +74,9 @@ On POSIX, use the same CLI arguments and redirect stdout. Check the compiler exi
 
 ## Pinned companion and runtime package files
 
-The first authoring companion reads [guide v1](../agents/customer-authoring-guide-v1.md) and the other committed inputs at the source revision pinned in its manifest. [Guide v2](../agents/customer-authoring-guide-v2.md) is a separate source for a future archive. Packaging it requires updating the source pin and verifying a reproducible archive with a new digest.
+The first authoring companion reads the [original guide at its pinned revision](https://github.com/rore/keir-core/blob/57a74a57e6c5fec2e74d3561d4b2ad1da2e650c1/docs/agents/customer-authoring-guide-v1.md) and the other committed inputs named in its manifest. The [public v1 page](../agents/customer-authoring-guide-v1.md) is an archival notice. [Guide v2](../agents/customer-authoring-guide-v2.md) is a separate source for a future archive. Packaging it requires updating the source pin and verifying a reproducible archive with a new digest.
 
-The [Node.js runtime package README](../../runtime-node/README.md) ships inside the runtime tarball. Its headings, profile labels, examples and API descriptions describe the pinned release bytes. Changes to that README require repacking and verifying the example host's archive integrity pin. Public examples use the maintained [Node host guide](../../examples/node-host/README.md).
+The [Node.js runtime package README](../../runtime-node/README.md) ships inside the runtime tarball. A README change updates the Core example's archive integrity pin. The [earlier Node APIs](compatibility-reference.md#earlier-node-runtime-apis) document the historical package interfaces.
 
 The [single-write schema index](../../schemas/effect-4/README.md) and [read-only schema index](../../schemas/read-2/README.md) list the literal schema IDs used by validators. Fixture paths, archive names and existing Markdown anchors keep their exact spelling so commands and links continue to resolve.
 
