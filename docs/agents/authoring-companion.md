@@ -23,6 +23,10 @@ python scripts/authoring-companion.py verify keir-authoring-v3.zip --version 3 -
 
 The verifier checks the pin before reading the archive. Load the guide named in `manifest.json` and supply your application's exact model, scoped tools and policy separately. The host owns permissions, approval and activation.
 
+## Semantic references for the guide
+
+Supply the [Keir 1 language reference](https://github.com/rore/keir-core/blob/0cae8d4417e19882e4355960b168f49d092f18e6/docs/specs/language.md) for expression and type rules, and the [Keir 1 model reference](https://github.com/rore/keir-core/blob/0cae8d4417e19882e4355960b168f49d092f18e6/docs/specs/domain-model.md) for hooks, capabilities and protected arguments. These online links are pinned to the matching specification revision. The [schemas in the guide](customer-authoring-guide-v3.md#follow-up-example) check document structure and are available inside the archive.
+
 ## Record release assets
 
 For a release, record the qualified Core revision and each package’s `version` and asset pin. The `assets` object uses the release filename as its key and a `sha256:<hex>` pin as its value. Use `keir-compiler-cli-<version>.zip`, `keir-java-runtime-maven-<version>.zip`, and `keir-runtime-node-<version>.tgz`. The Java Maven ZIP includes its POMs. Commit the record with `status` set to `release`. Build with `--core-assets <directory>` to check all three files. Consumers can pass the same option to `verify` when they also have the Core downloads.

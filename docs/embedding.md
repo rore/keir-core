@@ -38,7 +38,19 @@ Read the rule result and write evidence separately. A result such as `CREATED` i
 - The simulated create receives the title supplied by the extension. It returns a confirmed result for the first completion. For the third completion it reports an unknown commit, so the invocation is `UNCERTAIN` with an `UNKNOWN` receipt.
 - The host supplies `actorId`, event provenance, a deadline, and the original request key. The extension only receives the business task ID and any declared operation results.
 
-Replace the simulated adapters with your application’s implementations. The host selects and verifies approved artifact bytes, checks permissions and key authenticity, and owns native outcomes and reconciliation. Bind real or simulated implementations as a set. Both modes can use the same compiled bytes.
+Bind real or simulated implementations as a set. Both modes can use the same compiled bytes.
+
+## Connect a task service
+
+For a real `tasks.create` adapter, the extension supplies `projectId` and `title`. The host supplies the authenticated `actorId` and passes the original request key, event and deadline in the invocation context. Have the adapter call your task service under that authority. The service checks current project permissions and the authenticity of the key before attempting the write.
+
+| What the task service can establish | What the adapter returns |
+| --- | --- |
+| The actor lacks permission and the service rejected the request before writing. | `{kind: 'BUSINESS_REJECTION', code: 'ACCESS_DENIED', effect: 'NONE'}` |
+| The service committed the new task and returned its ID. | `{kind: 'SUCCESS', value: {id: taskId}, effect: 'CONFIRMED'}` |
+| The connection dropped after dispatch and the service cannot establish whether it committed. | `{kind: 'UNKNOWN_COMMIT', effect: 'UNKNOWN'}` |
+
+Use the original key to reconcile an uncertain attempt through your service. A timeout alone gives the host no evidence that the write was skipped. [Adapter response contract](specs/runtime.md#adapter-responses)
 
 ## Use the same artifact in Java
 
