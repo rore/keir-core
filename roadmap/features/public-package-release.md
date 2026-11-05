@@ -18,6 +18,8 @@ The first public milestone supports at most one mutation per run with the existi
 
 - Choose license, coordinates/version policy, support scope and publication authority; keep experimental versus production claims explicit.
 - Publish Java compiler/runtime and Node runtime packages, checked quickstarts and a supported dependency/profile compatibility matrix.
+- Ship a versioned authoring package with the matching agent guide, schemas and examples. Record compatible compiler and runtime releases, profiles and DCM formats so a host can pin the package alongside its exact published model.
+- When a release changes what an agent can author, update the affected guidance, schemas and examples with the feature. Verify the packaged guide can teach an agent to use that behavior through the published model and host tools.
 - Test clean isolated installs, artifact integrity, compiler-free execution, old-profile migration and release/security provenance.
 
 ## Out of Scope
@@ -28,7 +30,7 @@ Requiring AI or every optional proposal before an experimental release, silently
 
 - [ ] Design/spec: settle license/release authority, supported profiles, compatibility/deprecation policy and user-facing limits.
 - [ ] Implementation: clean Java and Node consumers compile once and run the same artifact through documented package interfaces.
-- [ ] Verification: reproducible install/package checks, upgrade conformance and examples pass; publishing uses a separately authorized release action.
+- [ ] Verification: reproducible install/package checks, upgrade conformance and examples pass. A reference host consumes the compatible pinned authoring package. Publishing uses a separately authorized release action.
 
 ## Notes
 

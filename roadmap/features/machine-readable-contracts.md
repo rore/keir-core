@@ -17,6 +17,7 @@ Make the actual supported language, DCM, artifact, simulation and diagnostics us
 - Publish profile-specific schemas, valid/invalid examples, capability-discovery inputs and stable diagnostics/API references.
 - Reconcile current parsers, semantic checks and schema limits; structural schema validation never substitutes for authority or semantic validation.
 - Publish a compact, versioned customer-authoring guide that a host can supply to its agent. Teach discovery, typed composition from the DCM, compiler diagnostics, independent examples, and review. Keep host-specific vocabulary, tool implementations and policy in host context. Maintain separate host-design guidance.
+- Version and release the guide, schemas and examples together under the [authoring package release contract](public-package-release.md). Keep host model identity separate so hosts can evolve their own catalog within a supported profile.
 
 ## Out of Scope
 
