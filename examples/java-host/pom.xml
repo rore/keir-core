@@ -10,17 +10,11 @@
     <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.12.2</version><scope>test</scope></dependency>
   </dependencies>
   <build>
-    <resources><resource><directory>${project.basedir}/../../conformance/single-effect</directory><targetPath>single-effect</targetPath><includes><include>scenarios.json</include></includes></resource><resource><directory>${project.basedir}/../../conformance/generic-hooks</directory><targetPath>generic-hooks</targetPath></resource></resources>
-    <testResources>
-      <testResource><directory>${project.basedir}/../../conformance/read-and-decide</directory><targetPath>read-and-decide</targetPath></testResource>
-      <testResource><directory>${project.basedir}/../../conformance/single-effect</directory><targetPath>single-effect</targetPath></testResource>
-      <testResource><directory>${project.basedir}/../../conformance/generic-hooks</directory><targetPath>generic-hooks</targetPath></testResource>
-    </testResources>
     <plugins>
     <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.1</version>
       <executions><execution><phase>package</phase><goals><goal>shade</goal></goals><configuration>
         <createDependencyReducedPom>false</createDependencyReducedPom>
-        <transformers><transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"><mainClass>dev.keir.examples.JavaHost</mainClass></transformer></transformers>
+        <transformers><transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"><mainClass>dev.keir.examples.ScenarioHost</mainClass></transformer></transformers>
         <filters><filter><artifact>*:*</artifact><excludes><exclude>META-INF/*.SF</exclude><exclude>META-INF/*.DSA</exclude><exclude>META-INF/*.RSA</exclude></excludes></filter></filters>
       </configuration></execution></executions>
     </plugin>

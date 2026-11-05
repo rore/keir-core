@@ -7,7 +7,7 @@ on:
       - runtime-java/**
       - runtime-node/**
       - schemas/**
-      - scripts/check-read2-contracts.py
+      - scripts/check-keir-contracts.py
       - scripts/requirements-read2-contracts.txt
       - conformance/**
       - examples/**
@@ -23,7 +23,7 @@ on:
       - runtime-java/**
       - runtime-node/**
       - schemas/**
-      - scripts/check-read2-contracts.py
+      - scripts/check-keir-contracts.py
       - scripts/requirements-read2-contracts.txt
       - conformance/**
       - examples/**
@@ -61,8 +61,8 @@ jobs:
           package-manager-cache: false
       - name: Install pinned schema-check dependency
         run: python -m pip install -r scripts/requirements-read2-contracts.txt
-      - name: Check read/2 structural contracts
-        run: python scripts/check-read2-contracts.py
+      - name: Check public Keir contracts
+        run: python scripts/check-keir-contracts.py
       - uses: actions/cache@v6
         with:
           path: |
@@ -71,20 +71,30 @@ jobs:
           key: ${{ runner.os }}-keir-${{ hashFiles('pom.xml', 'compiler-java/pom.xml', 'runtime-java/pom.xml', 'examples/java-host/pom.xml', 'runtime-node/package-lock.json', 'examples/node-host/package-lock.json', '.mvn/wrapper/maven-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-keir-
       - name: Java regression and coverage
+        env:
+          KEIR_SCENARIO_PYTHON: python
         run: ./mvnw -B -ntp -Dmaven.repo.local=.tools/maven/repository -Pcoverage verify
       - name: Install pinned Node dependencies
         run: npm ci --prefix runtime-node --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
       - name: Node regression and coverage
         run: npm run --prefix runtime-node test:coverage
       - name: Pack and test the independent Node host
+        env:
+          KEIR_SCENARIO_PYTHON: python
         run: |
           mkdir -p .tools/packages
           npm pack ./runtime-node --pack-destination .tools/packages --cache .tools/npm-cache --ignore-scripts
           npm ci --prefix examples/node-host --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
-          node --experimental-test-coverage --test-coverage-include=examples/node-host/run.mjs --test examples/node-host/test.mjs
-      - name: Compare artifacts, runtimes and packaged hosts
-        run: node conformance/read-and-decide/verify.mjs
-      - name: Compare packaged read simulation and offline schemas
+          mkdir -p .tools/node-packed
+          tar -xzf .tools/packages/keir-runtime-node-0.0.0.tgz -C .tools/node-packed
+          diff -r .tools/node-packed/package examples/node-host/node_modules/@keir/runtime-node
+          node --test examples/node-host/follow-up.test.mjs examples/node-host/verify-scenarios.test.mjs
+      - name: Compare packaged Java and Node scenario results
         run: |
-          node conformance/read-simulation/verify.mjs
-          python conformance/read-simulation/check_schemas.py
+          java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar examples/node-host/follow-up/source.yaml examples/node-host/follow-up/dcm.json > .tools/teaching-artifact.json
+          cmp conformance/keir-1/artifact.json .tools/teaching-artifact.json
+          for group in main zero after-write-read no-call handler title title-max title-composed; do
+            java -jar examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar "$group" python > .tools/java-scenarios.json
+            node examples/node-host/verify-scenarios.mjs "$group" python > .tools/node-scenarios.json
+            python -c 'import json; from pathlib import Path; assert json.loads(Path(".tools/java-scenarios.json").read_bytes()) == json.loads(Path(".tools/node-scenarios.json").read_bytes())'
+          done
