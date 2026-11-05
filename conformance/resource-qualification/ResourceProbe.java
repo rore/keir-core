@@ -71,7 +71,7 @@ public final class ResourceProbe {
             var row = map(value, "");
             String id = (String) row.get("id"), expected = (String) row.get("expected");
             byte[] source = read((String) row.get("source")), model = read((String) row.get("model"));
-            var result = measure(id, () -> compiler.compile(source, model, KeirCompiler.Environment.effect4()));
+            var result = measure(id, () -> compiler.compile(source, model, KeirCompiler.Environment.supported()));
             if (expected.isEmpty()) {
                 check(result.succeeded(), id + " " + result.diagnostics());
                 Files.write(directory.resolve(id + ".json"), result.artifact());
@@ -148,6 +148,7 @@ public final class ResourceProbe {
             outcome(result, id.equals("value-max") ? "COMPLETED" : "LIMIT_EXCEEDED", List.of());
             facts.put(id, observed(result));
         }
+        check(base.reads.get() == 0 && base.writes.get() == 0, "Unexpected dispatch during static or no-call probes");
 
         var title = new Host(titleDcm);
         var titleBound = measure("bind-title", () -> bind(titleDcm, title));
@@ -185,6 +186,7 @@ public final class ResourceProbe {
             if (prior) base.delayAtRead = priorReads + 2;
             var settled = measure(id, () -> base.invoke(prior ? confirmedFirst : normal, deadline, true).join());
             outcome(settled, prior ? "LIMIT_EXCEEDED" : "UNCERTAIN", List.of(prior ? "CONFIRMED" : "UNKNOWN"));
+            check("BUDGET_EXCEEDED".equals(settled.error().get("code")), id + " must exceed the deadline");
             check(base.writes.get() == priorWrites + 1 && base.reads.get() == priorReads + (prior ? 2 : 1)
                     && !pending.isDone(), id + " must time out after dispatch");
             byte[] snapshot = settled.toJson();
@@ -285,7 +287,9 @@ public final class ResourceProbe {
     }
 
     private static final class Host {
-        final Object key = new Object();
+        private static final Map<String, Object> EVENT = Map.of("id", "event1", "source", "task1");
+        private record RequestKey(Host owner, KeirRuntime.Deadline deadline) {}
+
         final Map<String, KeirRuntime.BoundEffectAdapter> adapters = new TreeMap<>();
         final java.util.concurrent.atomic.AtomicInteger reads = new java.util.concurrent.atomic.AtomicInteger();
         final java.util.concurrent.atomic.AtomicInteger writes = new java.util.concurrent.atomic.AtomicInteger();
@@ -301,7 +305,11 @@ public final class ResourceProbe {
             for (var entry : map(model.get("capabilities"), "").entrySet()) {
                 String id = entry.getKey(), version = (String) map(entry.getValue(), "").get("version");
                 adapters.put(id, new KeirRuntime.BoundEffectAdapter(version, "real", keyType, (args, bindings, remaining, context) -> {
-                    check(context.requestKey() == key && "user1".equals(bindings.get("actorId")) && remaining > 0, "Unexpected host context");
+                    check(context.requestKey() instanceof RequestKey key && key.owner() == this
+                            && "user1".equals(bindings.get("actorId")) && EVENT.equals(context.event())
+                            && context.deadline().clock() == key.deadline().clock()
+                            && context.deadline().expiresAtMs() == key.deadline().expiresAtMs()
+                            && remaining > 0 && remaining <= key.deadline().expiresAtMs(), "Unexpected host context");
                     if (id.equals("tasks.create")) {
                         writes.incrementAndGet();
                         if (expectedTitle != null) check(expectedTitle.equals(args.get("title")), "Unexpected composed title");
@@ -324,8 +332,8 @@ public final class ResourceProbe {
         CompletableFuture<KeirRuntime.Outcome> invoke(KeirRuntime.Prepared handle, long budget, boolean hasCalls, Object input) {
             long start = System.nanoTime();
             Map<String, Object> bindings = hasCalls ? Map.of("actorId", "user1") : Map.of();
-            var invocation = new KeirRuntime.BoundEffectInvocation(bindings,
-                    new KeirRuntime.Deadline(() -> (System.nanoTime() - start) / 1_000_000, budget), key, Map.of("id", "event1", "source", "task1"));
+            var deadline = new KeirRuntime.Deadline(() -> (System.nanoTime() - start) / 1_000_000, budget);
+            var invocation = new KeirRuntime.BoundEffectInvocation(bindings, deadline, new RequestKey(this, deadline), EVENT);
             return KeirRuntime.invokeBoundEffectProgram(handle, input, invocation).toCompletableFuture().orTimeout(4, TimeUnit.SECONDS);
         }
     }
