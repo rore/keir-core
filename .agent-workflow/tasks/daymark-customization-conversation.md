@@ -47,4 +47,6 @@ The final candidate passed build and type checks, 350 fast tests with 13 existin
 
 ## Result review
 
-Independent result review approved the candidate, including the exact historical link and scroll anchor corrections. Manager review checked owner and item scope, current write-target selection, authority and retry fences, and the complete browser suite against the exact candidate. Daymark `main` fast-forwarded to the reviewed commit. Hosted checks and adoption by the existing preview are tracked separately.
+Independent result review approved the candidate, including the exact historical link and scroll anchor corrections. Manager review checked owner and item scope, current write-target selection, authority and retry fences, and the complete browser suite against the exact candidate. Daymark `main` fast-forwarded to the reviewed commit.
+
+The existing preview now serves the verified build. A read-only check matched an earlier customization's saved transcript against storage. The database and settings were byte-identical to the verified pre-update backup. No migration or live provider call was needed.
