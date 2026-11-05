@@ -16,7 +16,7 @@ Make the actual supported language, DCM, artifact, simulation and diagnostics us
 
 - Publish profile-specific schemas, valid/invalid examples, capability-discovery inputs and stable diagnostics/API references.
 - Reconcile current parsers, semantic checks and schema limits; structural schema validation never substitutes for authority or semantic validation.
-- Maintain compact separate host-design and customer-authoring guidance; consider skill packaging only as a delivery format.
+- Publish a compact, versioned customer-authoring guide that a host can supply to its agent. Teach discovery, typed composition from the DCM, compiler diagnostics, independent examples, and review. Keep host-specific vocabulary, tool implementations and policy in host context. Maintain separate host-design guidance.
 
 ## Out of Scope
 
@@ -26,7 +26,7 @@ A second language specification in prompts, an agent framework in core or an aut
 
 - [ ] Design/spec: identify the normative contract for each current profile and the fields a host tool may expose.
 - [ ] Implementation: tools can consume versioned machine-readable definitions and errors; both persona guides use those same contracts.
-- [ ] Verification: examples/schemas match the actual validators, diagnostics are repairable and scoped, and forged/unsupported authority stays rejected.
+- [ ] Verification: examples/schemas match the actual validators, diagnostics are repairable and scoped, and forged/unsupported authority stays rejected. Daymark consumes the pinned shared guide, with host-specific context supplied separately.
 
 ## Notes
 
