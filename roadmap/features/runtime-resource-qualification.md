@@ -30,6 +30,8 @@ Assuming worker limits cover all process memory, adopting an isolation platform 
 
 ## Notes
 
+**First slice:** [Measure the current effect/4 profile](../../.agent-workflow/tasks/effect4-resource-evidence.md) using the compiler and both runtimes. Use the results to choose any additional limits or isolation.
+
 **Dependencies:** [bound-cel-execution](../features/bound-cel-execution.md); [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
 **Design input:** [Resource limits and gates, sections 6 and 10](../../docs/internal/design-baseline/public/keir-architecture.md); [Runner bounds, sections 6-7](../../docs/internal/design-baseline/public/compiler-artifact-and-runners-v0.md).
