@@ -6,6 +6,7 @@ import hmac
 import io
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import zipfile
@@ -29,6 +30,33 @@ SOURCES = {
     f"{EXAMPLE}/dcm.json": f"{FIXTURES}/dcm.json",
     f"{EXAMPLE}/artifact.json": f"{FIXTURES}/artifact.json",
 }
+V3_GUIDE = "docs/agents/customer-authoring-guide-v3.md"
+V3_COMPATIBILITY = "docs/agents/authoring-companion-v3-compatibility.json"
+V3_FIXTURES = "conformance/keir-1"
+V3_MODEL = "examples/node-host/follow-up/dcm.json"
+V3_ARTIFACT = f"{V3_FIXTURES}/artifact.json"
+V3_FORMATS = {
+    "language": "keir/1",
+    "dcm": "keir-dcm/1",
+    "artifact": "keir-artifact/1",
+    "scenario": "keir-scenario/1",
+}
+V3_FILES = (
+    V3_GUIDE,
+    "schemas/source-1/source.schema.json",
+    "schemas/dcm-1/dcm.schema.json",
+    "schemas/artifact-1/artifact.schema.json",
+    "schemas/scenario-1/scenario.schema.json",
+    V3_MODEL,
+    f"{V3_FIXTURES}/source.yaml",
+    V3_ARTIFACT,
+    *(f"{V3_FIXTURES}/scenarios/main/{case}.json" for case in SCENARIO_IDS),
+)
+RELEASE_ASSETS = {
+    "compiler": "keir-compiler-cli-{}.zip",
+    "javaRuntime": "keir-java-runtime-maven-{}.zip",
+    "nodeRuntime": "keir-runtime-node-{}.tgz",
+}
 
 
 def source_paths(version):
@@ -46,7 +74,7 @@ def json_bytes(document):
 
 def read_blob(revision, path):
     return subprocess.check_output(
-        ["git", "cat-file", "blob", f"{revision}:{path}"],
+        ["git", "--no-replace-objects", "cat-file", "blob", f"{revision}:{path}"],
         cwd=Path(__file__).resolve().parents[1],
     )
 
@@ -66,6 +94,10 @@ def make_archive(version, payload):
         },
         "files": {name: {"bytes": len(data), "digest": digest(data)} for name, data in payload.items()},
     }
+    return encode_archive(payload, manifest)
+
+
+def encode_archive(payload, manifest):
     members = {**payload, "manifest.json": json_bytes(manifest)}
     output = io.BytesIO()
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
@@ -77,7 +109,93 @@ def make_archive(version, payload):
     return output.getvalue()
 
 
-def build(version):
+def matches(pattern, value):
+    return isinstance(value, str) and re.fullmatch(pattern, value) is not None
+
+
+def validate_compatibility(record):
+    if (not isinstance(record, dict) or record.keys() != {"status", "coreRevision", "packages"}
+            or not matches(r"[0-9a-f]{40}", record["coreRevision"]) or not isinstance(record["packages"], dict)):
+        raise ValueError("Invalid Core compatibility record.")
+    packages = record["packages"]
+    if record["status"] == "candidate" and not packages:
+        return
+    if record["status"] != "release" or packages.keys() != RELEASE_ASSETS.keys():
+        raise ValueError("Record either a Core source candidate or all three Core release packages.")
+    for role, package in packages.items():
+        if (not isinstance(package, dict) or package.keys() != {"version", "assets"}
+                or not matches(r"[0-9][0-9A-Za-z.+-]{0,63}", package["version"])
+                or not isinstance(package["assets"], dict)):
+            raise ValueError("Every Core release package needs a version and asset pins.")
+        asset = RELEASE_ASSETS[role].format(package["version"])
+        pins = package["assets"]
+        if pins.keys() != {asset} or not matches(r"sha256:[0-9a-f]{64}", pins[asset]):
+            raise ValueError(f"Expected a SHA-256 pin for {asset}.")
+
+
+def check_core_assets(record, directory):
+    if record["status"] != "release":
+        raise ValueError("A source candidate has no Core release assets to check.")
+    for package in record["packages"].values():
+        for name, pin in package["assets"].items():
+            with (directory / name).open("rb") as stream:
+                actual = "sha256:" + hashlib.file_digest(stream, "sha256").hexdigest()
+            if not hmac.compare_digest(actual, pin):
+                raise ValueError(f"Core asset digest does not match: {name}.")
+
+
+def make_v3_archive(revision, compatibility, payload):
+    if not matches(r"[0-9a-f]{40}", revision):
+        raise ValueError("Edition 3 requires a full Git commit.")
+    validate_compatibility(compatibility)
+    artifact = json.loads(payload[V3_ARTIFACT])
+    if (not isinstance(artifact, dict) or artifact.get("format") != V3_FORMATS["artifact"]
+            or not isinstance(artifact.get("compiler"), str) or not isinstance(artifact.get("environment"), dict)):
+        raise ValueError("Invalid edition 3 artifact metadata.")
+    manifest = {
+        "format": "keir-authoring-companion/3",
+        "sourceRevision": revision,
+        "guide": V3_GUIDE,
+        "contracts": V3_FORMATS,
+        "producer": artifact["compiler"],
+        "environment": artifact["environment"],
+        "compatibility": compatibility,
+        "files": {name: {"bytes": len(data), "digest": digest(data)} for name, data in payload.items()},
+    }
+    return encode_archive(payload, manifest)
+
+
+def build_v3(revision, core_assets):
+    if not matches(r"[0-9a-f]{40}", revision):
+        raise ValueError("Edition 3 requires --revision with a full Git commit.")
+    root = Path(__file__).resolve().parents[1]
+    actual = subprocess.check_output(
+        ["git", "--no-replace-objects", "cat-file", "-t", revision], cwd=root, text=True,
+    ).strip()
+    if actual != "commit":
+        raise ValueError("Edition 3 source revision must be a Git commit.")
+    compatibility = json.loads(read_blob(revision, V3_COMPATIBILITY))
+    validate_compatibility(compatibility)
+    core = compatibility["coreRevision"]
+    actual = subprocess.check_output(
+        ["git", "--no-replace-objects", "cat-file", "-t", core], cwd=root, text=True,
+    ).strip()
+    if actual != "commit":
+        raise ValueError("Core compatibility revision must be a Git commit.")
+    comparison = subprocess.run(
+        ["git", "--no-replace-objects", "diff", "--quiet", core, revision, "--", *V3_FILES[1:]], cwd=root,
+    )
+    if comparison.returncode:
+        raise ValueError("Edition 3 schemas or example files differ from the recorded Core revision.")
+    if compatibility["status"] == "release" and core_assets is None:
+        raise ValueError("Building a release row requires --core-assets.")
+    if core_assets is not None:
+        check_core_assets(compatibility, core_assets)
+    payload = {name: read_blob(revision, name) for name in V3_FILES}
+    return make_v3_archive(revision, compatibility, payload)
+
+
+def build_historical(version):
     revision = SOURCE_REVISIONS[version]
     payload = {name: read_blob(revision, path) for name, path in source_paths(version).items()}
     rows = {row["id"]: row for row in json.loads(read_blob(revision, f"{FIXTURES}/scenarios.json"))}
@@ -85,30 +203,44 @@ def build(version):
     if any(row["given"]["program"] != "main" for row in selected):
         raise ValueError("The selected cases must use the bundled example artifact.")
     payload[SCENARIOS] = json_bytes(selected)
-    data = make_archive(version, payload)
+    return make_archive(version, payload)
+
+
+def build(version, revision=None, core_assets=None):
+    data = build_v3(revision, core_assets) if version == 3 else build_historical(version)
     if len(data) > MAX_ARCHIVE_BYTES:
         raise ValueError("Archive exceeds its size limit.")
     return data
 
 
-def verify(version, path, expected_digest):
+def verify(version, path, expected_digest, core_assets=None):
     with path.open("rb") as stream:
         data = stream.read(MAX_ARCHIVE_BYTES + 1)
     if len(data) > MAX_ARCHIVE_BYTES:
         raise ValueError("Archive exceeds its size limit.")
     if not hmac.compare_digest(digest(data), expected_digest):
         raise ValueError("Archive digest does not match the trusted pin.")
+    files = V3_FILES if version == 3 else (*source_paths(version), SCENARIOS)
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         entries = archive.infolist()
-        if [entry.filename for entry in entries] != sorted([*source_paths(version), SCENARIOS, "manifest.json"]):
+        if [entry.filename for entry in entries] != sorted([*files, "manifest.json"]):
             raise ValueError("Unexpected archive inventory.")
         for entry in entries:
             if (entry.compress_type != zipfile.ZIP_STORED or entry.flag_bits & 1
                     or entry.compress_size != entry.file_size or entry.file_size > len(data)):
                 raise ValueError("Unsupported archive entry.")
         payload = {entry.filename: archive.read(entry) for entry in entries if entry.filename != "manifest.json"}
-    if make_archive(version, payload) != data:
+        manifest = json.loads(archive.read("manifest.json")) if version == 3 else None
+    if version == 3:
+        if not isinstance(manifest, dict):
+            raise ValueError("Invalid edition 3 manifest.")
+        canonical = make_v3_archive(manifest.get("sourceRevision"), manifest.get("compatibility"), payload)
+    else:
+        canonical = make_archive(version, payload)
+    if canonical != data:
         raise ValueError("Archive encoding or manifest does not match its payload.")
+    if core_assets is not None:
+        check_core_assets(manifest["compatibility"], core_assets)
 
 
 def main():
@@ -116,27 +248,32 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     create = commands.add_parser("build")
     create.add_argument("archive", type=Path)
+    create.add_argument("--revision", help="Full Git commit containing the edition 3 inputs")
     check = commands.add_parser("verify")
     check.add_argument("archive", type=Path)
     check.add_argument("--sha256", required=True, help="Trusted archive pin in sha256:<hex> form")
     for command in (create, check):
-        command.add_argument("--version", type=int, choices=SOURCE_REVISIONS, default=1,
+        command.add_argument("--version", type=int, choices=(1, 2, 3), default=1,
                              help="Companion version (default: 1)")
+        command.add_argument("--core-assets", type=Path, help="Directory containing the pinned Core release assets")
     args = parser.parse_args()
     try:
+        revision = getattr(args, "revision", None)
+        if args.version != 3 and (revision is not None or args.core_assets is not None):
+            raise ValueError("--revision and --core-assets apply only to edition 3.")
         if args.command == "build":
-            data = build(args.version)
+            data = build(args.version, revision, args.core_assets)
             with args.archive.open("xb") as stream:
                 stream.write(data)
             print(digest(data))
         else:
             if not args.sha256.isascii():
                 raise ValueError("Archive pin must be ASCII.")
-            verify(args.version, args.archive, args.sha256)
+            verify(args.version, args.archive, args.sha256, args.core_assets)
             if args.version == 1:
                 print("Verified effect/4 authoring companion.")
             else:
-                print("Verified Keir authoring companion v2.")
+                print(f"Verified Keir authoring companion v{args.version}.")
     except (OSError, ValueError, KeyError, zipfile.BadZipFile, subprocess.CalledProcessError) as error:
         parser.exit(1, f"{error}\n")
 
