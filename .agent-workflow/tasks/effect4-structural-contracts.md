@@ -38,9 +38,19 @@
 
 **Approvals:** Not required at this risk level.
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Plan review
 
 Clean-context review of `673ca5c9` requested exact format and handler rules, explicit checker compatibility, and minimal missing native proof. The reviewer accepted the revised plan and recommended pinning the compiler literal that both effect/4 loaders already enforce. The manager verified that literal in both loaders. The current base leaves the reviewed product paths unchanged.
+
+## Implementation and verification
+
+Candidate `e287011a5df99337286bba996448742b84504537` adds three offline schemas, explicit effect/4 selection in the checker and a shared compiler-produced guarded handler example. Java and Node prepare and execute the exact same fixture. Three shared mutations pass the structural schema and fail native preparation before dispatch. Phase-specific diagnostic paths are preserved.
+
+The candidate passed 16 Python structural checks, 275 Java coverage tests, 456 Node coverage tests and four installed Node host tests. Packaged parity covered 36 compiler runs and 12 host batches. Read simulation compared 19 reports and two artifacts, and offline simulation schema checks accepted 29 inputs. The default profile selection and existing CI command remain compatible.
+
+## Result review
+
+Independent clean-context result review found no blocking issue. Manager review verified the schema/checker scope, preserved native boundaries and exact candidate paths. The only integration change to candidate files was terminology in the schema README. Hosted CI follows integration. Broader API coverage and the authoring package remain open.

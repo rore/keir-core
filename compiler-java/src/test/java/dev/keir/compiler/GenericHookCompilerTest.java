@@ -189,6 +189,21 @@ class GenericHookCompilerTest {
         assertArrayEquals(bytes("effect4","artifact.json"),stdout.toByteArray()); assertEquals(0,stderr.size());
     }
 
+    @Test void effect4StructuralSourcesCompileToThePinnedArtifacts() throws Exception {
+        Path fixtures=Path.of("..","conformance","effect4-structural");
+        byte[] dcm=bytes("effect4","dcm.json"), source=Files.readAllBytes(fixtures.resolve("source.json"));
+        assertArrayEquals(StrictData.canonical(StrictData.parse(bytes("effect4","source.yaml"),"/source")),
+                StrictData.canonical(StrictData.parse(source,"/source")));
+        var baseline=COMPILER.compile(source,dcm,environment("effect4"));
+        assertTrue(baseline.succeeded(),baseline.diagnostics().toString());
+        assertArrayEquals(bytes("effect4","artifact.json"),baseline.artifact());
+        assertEquals(Files.readString(fixture("effect4","artifact.sha256")).trim(),baseline.artifactDigest());
+        var guarded=COMPILER.compile(Files.readAllBytes(fixtures.resolve("source-handler.json")),dcm,environment("effect4"));
+        assertTrue(guarded.succeeded(),guarded.diagnostics().toString());
+        assertArrayEquals(Files.readAllBytes(fixtures.resolve("artifact-handler.json")),guarded.artifact());
+        assertEquals(Files.readString(fixtures.resolve("artifact-handler.sha256")).trim(),guarded.artifactDigest());
+    }
+
     @Test void authoredConstantsAndGenericCreateArgumentsRemainInTheProgram() throws Exception {
         var main=artifact(compile("effect",source("effect"),model("effect")));
         assertEquals(Map.of("op","BIND","id","eligibleProject","resultType","ProjectId","value",Map.of("literal","project1","type","ProjectId")),steps(main).getFirst());

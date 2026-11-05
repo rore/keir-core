@@ -31,7 +31,7 @@ A second language specification in prompts, an agent framework in core or an aut
 
 ## Notes
 
-**Current discovery:** Identify the smallest structural schema and example set for the supported `effect/4` source, DCM and artifact. Compare it with the actual compiler and Java/Node loaders and identify checks that remain native. Broader cross-profile and API coverage remains queued.
+**Effect/4 schemas delivered:** [Source, DCM and artifact schemas](../../schemas/effect-4/README.md) describe decoded structure. The compiler and runtimes retain semantic and authority checks. The [Work Record](../../.agent-workflow/tasks/effect4-structural-contracts.md) records the shared compiler-produced fixture and native residual checks. The reusable authoring package and broader API coverage remain open.
 
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { fromBinary, fromJson, toBinary } from '@bufbuild/protobuf';
 import { celEnv, CelScalar, plan } from '@bufbuild/cel';
 import { CheckedExprSchema } from '@bufbuild/cel-spec/cel/expr/checked_pb.js';
@@ -96,6 +97,32 @@ test('preparation validates compiler environment model and artifact structure in
   }
   assert.equal(api.prepareProgram(new Uint8Array(1_048_577), bound).diagnostic.code, 'BUDGET_EXCEEDED');
   assert.equal(f.calls.length, 0);
+});
+
+test('effect/4 structural artifact requires native preparation', async () => {
+  const fixtures = new URL('../../conformance/effect4-structural/', import.meta.url);
+  const bytes = readFileSync(new URL('artifact-handler.json', fixtures));
+  assert.equal(digest(bytes), readFileSync(new URL('artifact-handler.sha256', fixtures), 'utf8').trim());
+  const f = boundFixture(api, { mode: 'simulation' });
+  const binding = f.bind();
+  assert.equal(binding.diagnostic, null);
+  for (const row of JSON.parse(readFileSync(new URL('residuals.json', fixtures)))) {
+    const artifact = JSON.parse(bytes);
+    const target = row.path.slice(0, -1).reduce((current, part) => current[part], artifact);
+    target[row.path.at(-1)] = row.value;
+    denied(api.prepareProgram(canonicalBytes(artifact), binding.boundModel), row.nodePath, 'ARTIFACT_INVALID');
+    assert.equal(f.calls.length, 0, row.id);
+  }
+  const result = api.prepareProgram(bytes, binding.boundModel);
+  assert.equal(result.diagnostic, null);
+  assert.equal(f.calls.length, 0);
+  f.state.writeResponse = { kind: 'BUSINESS_REJECTION', code: 'CREATE_REJECTED', effect: 'NONE' };
+  const outcome = await api.invokeProgram(result.prepared, input, f.invocation);
+  assert.equal(outcome.classification, 'BUSINESS_REJECTION');
+  assert.deepEqual(outcome.error, { code: 'CREATE_REJECTED', path: '/steps/3' });
+  assert.deepEqual(outcome.result, { status: 'NO_OP' });
+  assert.deepEqual(f.calls.map(call => call.capability), ['tasks.get', 'tasks.create']);
+  assert.deepEqual(outcome.effects.map(effect => effect.state), ['NONE']);
 });
 
 test('one bound model and prepared program receive fresh actors events opaque keys and absolute deadlines', async () => {
