@@ -46,4 +46,4 @@ Design reference: [Review inside the conversation](../../docs/internal/studio-in
 
 ## Delivery
 
-The user approved moving the reviewed design into the working demo. The prior split preview is still the deployed baseline. The next checkpoint is the developer's concrete plan and independent technical review.
+The user approved moving the reviewed design into the working demo. The Daymark developer accepted implementation ownership and verified the clean base at `36ade85`. Discovery maps the written design to the existing saved-review controller and evidence. The next checkpoint is the concrete implementation plan and its independent technical review. The split preview remains the deployed baseline.
