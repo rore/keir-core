@@ -74,7 +74,7 @@ On POSIX, use the same CLI arguments and redirect stdout. Check the compiler exi
 
 ## Pinned companion and runtime package files
 
-The first authoring companion reads the [original guide at its pinned revision](https://github.com/rore/keir-core/blob/57a74a57e6c5fec2e74d3561d4b2ad1da2e650c1/docs/agents/customer-authoring-guide-v1.md) and the other committed inputs named in its manifest. The [public v1 page](../agents/customer-authoring-guide-v1.md) is an archival notice. [Guide v2](../agents/customer-authoring-guide-v2.md) is a separate source for a future archive. Packaging it requires updating the source pin and verifying a reproducible archive with a new digest.
+The first authoring companion reads the [original guide at its pinned revision](https://github.com/rore/keir-core/blob/57a74a57e6c5fec2e74d3561d4b2ad1da2e650c1/docs/agents/customer-authoring-guide-v1.md) and the other committed inputs named in its manifest. The [public v1 page](../agents/customer-authoring-guide-v1.md) is an archival notice. Version 2 uses the [revised guide](../agents/customer-authoring-guide-v2.md) with the same schemas, examples and runtime compatibility. See [build and verify](../agents/authoring-companion.md) for explicit version selection and trusted digest verification.
 
 The [Node.js runtime package README](../../runtime-node/README.md) ships inside the runtime tarball. A README change updates the Core example's archive integrity pin. The [earlier Node APIs](compatibility-reference.md#earlier-node-runtime-apis) document the historical package interfaces.
 

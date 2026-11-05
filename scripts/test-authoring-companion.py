@@ -12,6 +12,8 @@ import zipfile
 
 
 SCRIPT = Path(__file__).with_name("authoring-companion.py")
+V1_PIN = "sha256:8e365ff0d14fb0c479e43ace36e941562c94577f793a86b720d54e20622547b6"
+V2_GUIDE_PIN = "sha256:22f3aba081b5653f7f5d4fff8861afe606c840ce56d9b26d7464ffc08ee8ab1d"
 
 
 def command(*args):
@@ -41,13 +43,15 @@ class AuthoringCompanionTest(unittest.TestCase):
 
     def test_build_and_verify_exact_bytes(self):
         second = self.path.with_name("second.zip")
-        result = command("build", second)
+        result = command("build", second, "--version", "1")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), self.pin)
         self.assertEqual(second.read_bytes(), self.data)
         self.assertEqual(self.pin, digest(self.data))
+        self.assertEqual(self.pin, V1_PIN)
         result = command("verify", self.path, "--sha256", self.pin)
         self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "Verified effect/4 authoring companion.")
         self.assertNotEqual(command("build", self.path).returncode, 0)
         self.assertEqual(self.path.read_bytes(), self.data)
 
@@ -61,6 +65,47 @@ class AuthoringCompanionTest(unittest.TestCase):
             for name, metadata in manifest["files"].items():
                 data = archive.read(name)
                 self.assertEqual(metadata, {"bytes": len(data), "digest": digest(data)})
+
+    def test_v2_is_explicit_and_reproducible(self):
+        path = self.path.with_name("v2.zip")
+        second = self.path.with_name("v2-second.zip")
+        for output in (path, second):
+            result = command("build", output, "--version", "2")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.strip(), digest(output.read_bytes()))
+        data = path.read_bytes()
+        self.assertEqual(second.read_bytes(), data)
+        pin = digest(data)
+        self.assertNotEqual(pin, V1_PIN)
+        result = command("verify", path, "--version", "2", "--sha256", pin)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        with zipfile.ZipFile(self.path) as v1, zipfile.ZipFile(path) as v2:
+            guide = "customer-authoring-guide-v2.md"
+            self.assertEqual(digest(v2.read(guide)), V2_GUIDE_PIN)
+            manifest = json.loads(v2.read("manifest.json"))
+            self.assertEqual(manifest["format"], "keir-authoring-companion/2")
+            self.assertEqual(manifest["compatibility"], json.loads(v1.read("manifest.json"))["compatibility"])
+            for name in v2.namelist():
+                if name not in (guide, "manifest.json"):
+                    self.assertEqual(v2.read(name), v1.read(name), name)
+
+        for archive, version, expected in ((path, "1", pin), (self.path, "2", V1_PIN)):
+            with self.subTest(version=version):
+                result = command("verify", archive, "--version", version, "--sha256", expected)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("inventory", result.stderr)
+        self.assertNotEqual(command("verify", path, "--sha256", pin).returncode, 0)
+
+        malformed = path.with_name("invalid-v2.zip")
+        malformed.write_bytes(data[:8])
+        result = command("verify", malformed, "--version", "2", "--sha256", pin)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("digest does not match", result.stderr)
+        malformed.write_bytes(data + b"trailing bytes")
+        result = command("verify", malformed, "--version", "2", "--sha256", digest(malformed.read_bytes()))
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("manifest does not match", result.stderr)
 
     def test_requires_an_independent_pin(self):
         self.assertNotEqual(command("verify", self.path).returncode, 0)
