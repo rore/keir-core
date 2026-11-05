@@ -123,8 +123,12 @@ const stubCall = ({ response, ...call }) => call;
 
 function checkSemantics(document, artifact, dcm) {
   const { expect, stubs } = document;
+  const dispatched = dispatches(expect.outcome);
   assert.deepEqual(stubs.map(stubCall), expect.calls, 'Scenario stubs and expected calls');
-  assert.deepEqual(dispatches(expect.outcome).map(target), expect.calls.map(target), 'Scenario expected dispatch order');
+  assert.deepEqual(dispatched.map(target), expect.calls.map(target), 'Scenario expected dispatch order');
+  for (const guard of expect.outcome.trace.filter(event => event.event === 'GUARD_EVALUATED' && !event.taken)) {
+    assert.ok(!dispatched.some(call => call.step === guard.step), 'Scenario expected dispatch with a false guard');
+  }
   const writes = expect.calls.filter(call => dcm.capabilities[call.capability].effect === 'WRITE').map(target);
   const intents = expect.outcome.trace.filter(event => event.event === 'EFFECT_INTENT');
   const receipts = expect.outcome.trace.filter(event => event.event === 'EFFECT_RECORDED');
@@ -132,7 +136,7 @@ function checkSemantics(document, artifact, dcm) {
   assert.deepEqual(receipts.map(target), writes, 'Scenario expected write receipt targets');
   assert.deepEqual(receipts.map(({ step, capability, state }) => ({ step, capability, state })), expect.outcome.effects, 'Scenario expected write receipts');
   for (const intent of intents) {
-    const dispatch = dispatches(expect.outcome).find(event => event.step === intent.step);
+    const dispatch = dispatched.find(event => event.step === intent.step);
     const receipt = receipts.find(event => event.step === intent.step);
     assert.ok(intent.sequence < dispatch?.sequence && dispatch.sequence < receipt?.sequence, 'Scenario write event order');
   }
@@ -268,8 +272,15 @@ forged.expect.outcome.trace.forEach((event, sequence) => { event.sequence = sequ
 forged.expect.outcome.effects = [receipt];
 forged.expect.consumption.effects = [receipt];
 const forgedReadReceipt = { group: 'main', bytes: Buffer.from(JSON.stringify(forged)), label: 'receipt-for-read', expected: 'semantics' };
-structural([...scenarios, ...vectors, forgedReadReceipt], process.argv[2] ?? 'python');
-assert.equal((await run(forgedReadReceipt)).phase, 'semantics');
+const falseGuard = JSON.parse(read('scenarios/main/normal.json'));
+const guard = falseGuard.expect.outcome.trace.find(event => event.event === 'GUARD_EVALUATED' && event.step === 'created');
+assert.equal(guard.taken, true);
+guard.taken = false;
+const dispatchAfterFalseGuard = { group: 'main', bytes: Buffer.from(JSON.stringify(falseGuard)), label: 'dispatch-after-false-guard', expected: 'semantics' };
+structural([...scenarios, ...vectors, forgedReadReceipt, dispatchAfterFalseGuard], process.argv[2] ?? 'python');
+for (const invalid of [forgedReadReceipt, dispatchAfterFalseGuard]) {
+  assert.deepEqual(await run(invalid), { phase: 'semantics', dispatchCount: 0 });
+}
 
 const scenarioReports = [];
 const ids = new Set();
