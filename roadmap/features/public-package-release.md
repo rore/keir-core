@@ -30,11 +30,13 @@ Requiring AI or every optional proposal before an experimental release, silently
 
 - [ ] Design/spec: settle release authority, supported contracts, compatibility and deprecation policy, and user-facing limits.
 - [ ] Implementation: clean Java and Node consumers compile once and run the same artifact through documented package interfaces.
-- [ ] Verification: reproducible install/package checks, upgrade conformance and examples pass. A reference host consumes the compatible pinned authoring package. Publishing uses a separately authorized release action.
+- [ ] Verification: reproducible install/package checks, upgrade conformance and examples pass. A reference host consumes the compatible pinned authoring package. Repository visibility is a separate launch decision.
 
 ## Notes
 
-**GitHub release candidate:** Keir Core uses Apache 2.0. The first release will use GitHub Releases for the compiler CLI, npm tarball, Java Maven bundle, and authoring companion, with checksums and installation guidance. A draft pairs Java development builds and the Node development package with authoring companion version 2. The compiler and runtimes passed their regression suites and shared conformance. Independent package consumers ran the same compiled rule without the compiler installed and matched outcomes and traces. Final package versions, third-party compiler notices, and qualification of the final downloads are still open.
+**Release channel in use:** [GitHub Releases](https://github.com/rore/keir-core/releases) is the distribution channel. The [release checklist](../../docs/releasing.md) defines when to ship and how to verify each package. [Authoring companion v2](https://github.com/rore/keir-core/releases/tag/authoring-v2) is available with its license and checksums. A download from the release passed the verifier against the expected digest. Daymark integration remains open.
+
+**Core release candidate:** Keir Core uses Apache 2.0. The Core draft contains versioned compiler, Node and Java packages, including third-party notices for the compiler bundle. Isolated consumers installed the versioned candidates, ran one compiled rule and matched outcomes and traces. The package version was set in the staging checkout without changing the serialized compiler identity. Before publishing Core, finalize the reproducible build and compatibility policy, and qualify the exact release assets. Public readiness also requires clearance of reachable history and GitHub surfaces.
 
 **Authoring companion available from source:** Build and verify the versioned guide, schemas and examples as a deterministic ZIP. The verifier checks a trusted archive digest before inspecting its contents. The example compiled to the pinned artifact and its three cases match Java and Node conformance. The first reference-host integration is still open. [Authoring companion guide](../../docs/agents/authoring-companion.md)
 
