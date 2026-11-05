@@ -30,7 +30,7 @@ Calendars, notifications, recurring scheduling, shared accounts and Keir-specifi
 
 ## Notes
 
-**First slice:** Design native tags and bounded task search. Define task ownership, query completeness and pagination before implementation. Studio capability exposure is tracked under [richer customizations](rich-task-customizations.md).
+**First slice in implementation:** Native task tags and bounded search within the selected project. The [reviewed plan](../../.agent-workflow/tasks/daymark-native-tags-search.md) defines owner scope, live pagination, migration and recovery checks. Studio capability exposure is tracked under [richer customizations](rich-task-customizations.md).
 
 **Dependencies:** [native-task-app](../features/native-task-app.md).
 
