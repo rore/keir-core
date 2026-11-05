@@ -1,17 +1,18 @@
 <a id="effect4-resource-qualification"></a>
-# Resource qualification for single-write execution
+# Resource qualification for public Keir single-write execution
 
 This engineering reference describes the test workload and measured resource behavior. For runtime requirements, see the [Keir specification](../../docs/specs/runtime.md#limits).
 
-From the repository root with Java 21, Node 24, the Maven wrapper, and the locked Node dependencies:
+Run from the root of an isolated checkout with Java 21, Node 24, the Maven wrapper and seeded task-local caches.
 
 ```sh
-./mvnw -B -ntp package -DskipTests
-npm ci --prefix runtime-node
+mkdir -p build
+MAVEN_USER_HOME="$PWD/.tools/maven" ./mvnw -o -B -ntp -Dmaven.repo.local=.tools/maven/repository -DskipTests package
+npm ci --offline --prefix runtime-node --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
 node conformance/resource-qualification/qualify.mjs > build/resource-qualification.json
 ```
 
-Use `mvnw.cmd` on Windows. Create the ignored `build/` directory before redirecting output. Use an isolated checkout and existing caches or set a process-local Maven cache. The harness uses local fixtures and test-owned processes only. Neither default suite runs it.
+On Windows, create the ignored `build/` directory with `New-Item -ItemType Directory -Force build`. Set `$env:MAVEN_USER_HOME = Join-Path $PWD '.tools/maven'` for the current shell and use `mvnw.cmd` with the same flags. The harness uses local fixtures and test-owned processes and runs separately from the default suites.
 
 ## Workload limits
 
@@ -28,13 +29,13 @@ Use `mvnw.cmd` on Windows. Create the ignored `build/` directory before redirect
 | Child supervision | 1 direct child at a time, 45 s per real child, 1 MiB combined capture |
 | Containment probes | 1 direct child at a time, 1 s timeout, 16 KiB combined capture |
 
-The compiler API produces the artifacts used by both runtimes. The CLI independently checks the admitted source byte boundary and its fixture bytes. Runtime preparation exercises intentionally modified checked expressions at 65 nodes, depth 17 and 513 total nodes. Invocation covers the 256/257-byte title boundary, a 32-leaf concatenation with 8,192 intermediate string bytes, and a Boolean comparison with an oversized intermediate. The shared-model case holds four adapter responses pending before releasing them. Deadline cases release late success only after checking the settled UNKNOWN or earlier CONFIRMED receipt.
+The public compiler API produces the artifacts used by both runtimes. The two-file CLI independently checks the admitted source byte boundary. The harness verifies the [Keir 1 fixtures](../keir-1/README.md) against their adjacent pins and compares the exact compiler output. Runtime preparation exercises intentionally modified checked expressions at 65 nodes, depth 17 and 513 total nodes. Invocation covers the 256/257-byte title boundary, a 32-leaf concatenation with 8,192 intermediate string bytes, and a Boolean comparison with an oversized intermediate. The shared-model case holds four adapter responses pending before releasing them. Deadline cases release late success only after checking the settled UNKNOWN or earlier CONFIRMED receipt.
 
 The qualification prints raw JSON. Wall times include host and engine work. Process CPU includes engine and background threads. Standalone parse timings use the same parsers as the public bind and prepare operations, whose timings also include parsing. Node reports endpoint samples of phase heap and RSS plus process peak RSS. Java reports the sum of phase heap memory-pool peaks, which may occur at different times. Both report post-GC heap before and after the workload and with and after releasing the prepared handles. Forced collection happens outside timed samples. Small phases may be shorter than CPU accounting resolution. Compiler CLI startup and exit are reported separately from in-process compilation.
 
 The source and model byte cases use whitespace padding to isolate their raw input bounds. The exact 1 MiB artifact is canonical JSON with an extra member. It reaches structural rejection, and the 1 MiB + 1 input fails the byte gate. The largest semantically admitted artifact in this run is the aggregate AST case. A future full-size admission claim needs a valid near-ceiling fixture or a derived tighter reachable bound. JVM heap telemetry leaves whole-process RSS open. A platform process sampler is the next step if total resident memory is part of a release claim.
 
-The child watchdog covers test-owned direct children. The compiler CLI creates no descendants. The probe checks timeout, cancellation, capture across both streams, overflow during exit, and process close before temporary cleanup. The adapter deadline measures settlement with a cooperative test host. Hard preemption of synchronous CEL remains unqualified.
+The child watchdog covers test-owned direct children. The compiler CLI creates no descendants. The probe checks timeout, cancellation, capture across both streams, overflow during exit, and process close before temporary cleanup. In serial mode, cleanup waits for any started sampler as well as the workload JVM. The adapter deadline measures settlement with a cooperative test host. Hard preemption of synchronous CEL remains unqualified.
 
 ## Serial embedded workload on Windows
 
@@ -68,6 +69,6 @@ For the exact base and title DCMs, a single-write artifact is bounded by **495,7
 | Lowered binding and field name per slot, including a possible 256-byte literal escaped at up to six bytes per byte | 2,048 B |
 | All fixed envelope and plan framing | 16,384 B |
 
-The fixed allowance covers eight step headers at up to 512 bytes each, up to nine handler wrappers at 256 bytes each, and up to 2,048 bytes for the fixed model reference, compiler pins, return wrapper and surrounding syntax. This gives `19 × (21,848 + 1,208 + 128 + 2,048) + 16,384 = 495,792` bytes. The serial run checks the computed bound against a compiler-produced fixture accepted by both runtimes. The fixture need not approach the bound. The 1 MiB byte cap remains the profile-wide ceiling, with semantic admission at that size still open for other catalogs.
+The fixed allowance covers eight step headers at up to 512 bytes each, up to nine handler wrappers at 256 bytes each, and up to 2,048 bytes for the fixed model reference, compiler pins, return wrapper and surrounding syntax. This gives `19 × (21,848 + 1,208 + 128 + 2,048) + 16,384 = 495,792` bytes. The serial run checks the computed bound against a compiler-produced fixture accepted by both runtimes. The fixture need not approach the bound. The public artifact byte ceiling is 1 MiB. Semantic admission at that size remains open for other catalogs.
 
 The runtime boundary cases already live in `BoundEffectRuntimeTest.fourCallsAndEightStepsPassButTheirNextValuesFailStatically` and the fixed-ceiling test in `runtime-node/test/bound-effect.test.js`. The serial run adds the current single-write compiler checks.

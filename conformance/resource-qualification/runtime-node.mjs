@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as api from '../../runtime-node/src/index.js';
 import { parseCanonical, parseModelJson } from '../../runtime-node/src/canonical.js';
-import { boundFixture } from '../generic-hooks/bound-effect.mjs';
+import { boundFixture } from '../../runtime-node/test/bound-fixture.js';
 
 const [, , directory, manifest] = process.argv;
 const read = name => readFileSync(join(directory, name));
@@ -57,9 +57,15 @@ function invoke(host, handle, budget = 2000, input = { taskId: 'task1' }) {
 function clear(host) {
   for (const list of [host.calls, host.nativeActions, host.contexts, host.budgets]) list.length = 0;
 }
+function checkBudgets(host, deadline) {
+  assert.equal(host.budgets.length, host.calls.length);
+  assert.ok(host.budgets.every(remaining => Number.isSafeInteger(remaining) && remaining > 0 && remaining <= deadline),
+    'Unexpected host callback budget');
+}
 async function warm(id, host, prepared, classification, states, count = repeats, warmupCount = warmups) {
   const one = async () => {
     const result = outcome(await invoke(host, prepared), classification, states);
+    checkBudgets(host, 2000);
     const writes = host.calls.filter(call => call.capability === 'tasks.create');
     assert.equal(writes.length, states.length);
     assert.equal(result.trace.some(event => event.event === 'EFFECT_INTENT'), states.length > 0);
@@ -127,6 +133,7 @@ for (const id of ['value-max', 'value-over']) {
   const result = await measure('invoke-' + id, () => invoke(noCall, wideProgram, 2000, input));
   facts[id] = observed(outcome(result, id === 'value-max' ? 'COMPLETED' : 'LIMIT_EXCEEDED', []));
 }
+assert.equal(base.calls.length + noCall.calls.length, 0, 'Unexpected dispatch during static or no-call probes');
 
 const title = boundFixture(api, { program: 'title' });
 const titleBound = await measure('bind-title', () => bind(title.dcmBytes, title));
@@ -159,6 +166,7 @@ if (!soak) {
     assert.ok(base.calls.every(call => call.capability === 'tasks.get'));
     overlap.resolve();
     for (const result of await Promise.all(active)) outcome(result, 'COMPLETED', ['CONFIRMED']);
+    checkBudgets(base, 2000);
     return active.length;
   });
   prepared.length = 0;
@@ -175,6 +183,8 @@ for (const prior of [false, true]) {
   else base.state.afterWrite = () => pending.promise;
   const result = await measure(id, () => invoke(base, prior ? confirmedFirst : normal, adapterMs));
   outcome(result, prior ? 'LIMIT_EXCEEDED' : 'UNCERTAIN', [prior ? 'CONFIRMED' : 'UNKNOWN']);
+  assert.equal(result.error.code, 'BUDGET_EXCEEDED');
+  checkBudgets(base, adapterMs);
   assert.deepEqual(base.calls.map(call => call.capability),
     prior ? ['tasks.get', 'tasks.create', 'tasks.get'] : ['tasks.get', 'tasks.create']);
   assert.equal(base.nativeActions.length, prior ? 3 : 2);
