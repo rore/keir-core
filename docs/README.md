@@ -2,7 +2,9 @@
 
 Keir lets a host expose hooks and approved capabilities that customers compose into application behavior. The host owns permissions, real adapter guarantees and result consumption. Keir validates and executes constrained extensions; host-integrated agents can assist with integration and authoring.
 
-**Current status:** the experimental Java compiler and Java/Node runtimes execute `/1` and `/2` read and simulation-only single-effect profiles. `/2` adds generic catalog composition, authored nominal constants and reference artifacts bound to a complete host model/invoker catalog. Shared scenarios and independent packaged hosts pass local verification. See [testing evidence](testing.md) for the separate local and CI status; production qualification and release remain open.
+**Start here.** [Run your first Keir extension](quickstart.md) to compile a `keir-effect/4` program and run it in the packaged Node and Java hosts with simulated task services.
+
+The experimental `keir-effect/4` profile supports one potential write per program. The host binds a complete capability catalog and its implementations, then supplies fresh context for every invocation. The `/1`–`/3` profiles retain their documented behavior. See [testing evidence](testing.md) for local verification and CI status. Production qualification and release remain open.
 
 ## Public documentation
 
