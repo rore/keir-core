@@ -1,7 +1,7 @@
 ---
 id: "public-package-release"
 title: "Release installable Java and Node libraries with compatibility guidance"
-status: "queued"
+status: "active"
 priority: "medium"
 commitment: "committed"
 milestone: "Release an embeddable Keir library"
@@ -33,6 +33,8 @@ Requiring AI or every optional proposal before an experimental release, silently
 - [ ] Verification: reproducible install/package checks, upgrade conformance and examples pass. A reference host consumes the compatible pinned authoring package. Publishing uses a separately authorized release action.
 
 ## Notes
+
+**Offline consumer check passed:** Using staged development packages from `98d1901`, isolated Java and Node consumers ran the same `effect/4` artifact after one compilation. Their full outcomes and traces matched for creation and no-op cases. Both passed the original request key to the host implementations. Java consumed the thin runtime JAR with its matching parent POM, and Node installed the tarball with the pinned lock integrity. Both execution environments excluded the compiler. Repeat against the final release packages after release identities and compatibility policy are set.
 
 **Dependencies:** [machine-readable-contracts](../features/machine-readable-contracts.md); [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
