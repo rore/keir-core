@@ -12,6 +12,8 @@ repo: "keir-core"
 
 Let an external developer install and embed a documented, explicitly supported Keir release without this workspace.
 
+The first public milestone supports at most one mutation per run with the existing host-owned key, authorization and outcome contract. Multi-mutation composition follows later. The documentation track begins with a source-checkout binding and runtime guide for Java and Node while release qualification proceeds. Opening the repositories and publishing registry packages are separate release actions.
+
 ## In Scope
 
 - Choose license, coordinates/version policy, support scope and publication authority; keep experimental versus production claims explicit.
