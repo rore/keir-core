@@ -10,7 +10,7 @@ repo: "keir-demo-app"
 
 ## Summary
 
-**Conversation continuity follow-up.** Each customization should open its own conversation and show its existing messages by default. The user continues in the same chat through model, settings and draft changes. Internal authoring runs can renew while keeping the visible history and current approval boundaries. The reviewed [implementation plan](../../.agent-workflow/tasks/daymark-customization-conversation.md) restores this flow using the existing owner-scoped message store.
+**Conversation continuity delivered on Daymark main.** Each customization opens its own conversation with its existing messages and continues in the same chat through model, settings and draft changes. Internal authoring runs can renew while keeping the visible history and current approval boundaries. The reviewed [implementation](https://github.com/rore/keir-demo-app/commit/60d08534d35f5cc559c77a657a0844620d9a367d) uses the existing owner-scoped message store. All 169 browser checks passed on the exact candidate. [Work Record](../../.agent-workflow/tasks/daymark-customization-conversation.md).
 
 **Current assignment:** Real-task authoring continues under the reviewed host-contract correction and verified core package handoff. The demo is running the actual compile/simulate/runtime and authoring browser flow before designer and real-provider business-persona iterations. Preserve source, discussions, operation receipts, provider configuration and accounting. Historical deliveries remain evidence of their own scope; actual new task-customization acceptance and rollout are still pending.
 

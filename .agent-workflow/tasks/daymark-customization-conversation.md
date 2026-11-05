@@ -38,5 +38,13 @@ Provider context → offline checks on both adapters for bounded prior user data
 
 **Approvals:** Not required at this risk level.
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
+
+The Daymark candidate is `60d08534d35f5cc559c77a657a0844620d9a367d`. It renders one owner-scoped transcript across compatible and older conversations, keeps exact historical links available, and renews the authoring context only on an explicit send. The existing message store and schema support the change.
+
+The final candidate passed build and type checks, 350 fast tests with 13 existing skips, and all 169 browser checks on the verified asset build. The checks include reopening and continuing an earlier conversation, paging, scroll recovery, owner isolation and settings changes. Both provider protocols used synthetic responses.
+
+## Result review
+
+Independent result review approved the candidate, including the exact historical link and scroll anchor corrections. Manager review checked owner and item scope, current write-target selection, authority and retry fences, and the complete browser suite against the exact candidate. Daymark `main` fast-forwarded to the reviewed commit. Hosted checks and adoption by the existing preview are tracked separately.
