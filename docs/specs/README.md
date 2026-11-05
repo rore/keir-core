@@ -1,33 +1,39 @@
-# Keir specifications
+# Keir specification
 
-The current host-bound single-write contract is `keir-effect/4`. The `/1`–`/3` profiles retain their legacy behavior. See the [generic hook and capability contract](generic-hook-capability-contract.md) for the current boundary and migration, and the [verification record](../testing.md#effect4-verification) for local and hosted results.
+The specification defines the documents Keir accepts and how a compiled extension runs. For a runnable example, follow the [guided tour](../guided-tour.md) or the [Java and Node quickstart](../quickstart.md).
 
-The [host model binding contract](host-model-binding.md#corrected-host-bound-4-binding) defines `/4` binding, preparation and fresh invocation context. Follow the [guided tour](../guided-tour.md) or run the [quickstart](../quickstart.md) for the current example. The [legacy `/2` worked example](generic-hook-example.md) documents the earlier API.
+## Current profile
 
-The first maintained contract is **`keir-read/1`, an implemented experimental checkpoint** for REQUEST/read/classify/display. The Java compiler and both runtimes pass the same local and CI conformance corpus and packaged-host verification. [Testing evidence](../testing.md) records supported scope and limitations; production qualification and release remain open.
+`keir-effect/4` is the current host-bound profile. It supports bounded reads and at most one potential WRITE capability call in a program, including calls behind guards. The host owns permissions and native commit behavior. Keir validates and executes the program and reports the outcome and write evidence.
 
-The [language/DCM specification feature](../../roadmap/features/specify-language-and-domain-model.md) owns the initial supported contract. Specifications mature with feature implementation and conformance, without a whole-system design freeze.
+| Identifier | Meaning |
+| --- | --- |
+| `keir/v0` | Source language family |
+| `keir-effect/4` | Compiler and runtime profile |
+| `keir-dcm/effect-4` | Domain capability model format |
+| `keir-artifact/effect-4` | Compiled artifact format |
 
-| Contract | What it must define | Current input |
-| --- | --- | --- |
-| [Language and CEL profile](language.md) | Strict source, scalar CEL, nominal/enum overlay and diagnostics | [Language draft](../internal/design-baseline/public/keir-language-v0.md) |
-| [Domain capability model](domain-model.md) | Exact small DCM schema and complete sample | [DCM draft](../internal/design-baseline/public/domain-model-v0.md) |
-| [Compiler and artifact](compiler-artifact.md) | Deterministic descriptor/plan format, digest bytes and external trust anchor | [Compiler/artifact draft](../internal/design-baseline/public/compiler-artifact-and-runners-v0.md) |
-| [Runtime](runtime.md) | Prepare/invoke, protected parameters, outcomes, redacted trace and provisional limits | [Runner draft](../internal/design-baseline/public/compiler-artifact-and-runners-v0.md) |
-| [Host integration](host-integration.md) | Result consumption, two assistant boundaries and acceptance fixtures | [Hook contracts](../internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md), [simulation draft](../internal/design-baseline/public/simulation-and-authoring-v0.md) |
+The compiler takes the profile from trusted configuration, such as the CLI's `--profile=keir-effect/4` option. The artifact records the exact model reference and compiler environment. The runtime checks these against the bound model and supported environment during preparation.
 
-The profile intentionally excludes writes, `when`, `onError`, optional values, collections, numbers and time. `keir/v0` is the source family, not a promise to accept every baseline construct. The sample DCM/artifact have explicit profile-specific formats. Unsupported shapes fail closed; no automatic migration or hidden coercion. [Design rationale and handoff](../internal/read-and-decide-design.md) records pending qualification rather than asserting untested guarantees.
+| Topic | Contract |
+| --- | --- |
+| Hooks, capabilities, and ownership | [Generic hooks and capability composition](generic-hook-capability-contract.md#corrected-host-bound-effect4) |
+| Source and compilation | [Compiler and artifact](compiler-artifact.md#effect4-identity), with the [language rules](language.md) and the [effect/4 reference fixture](../../conformance/generic-hooks/effect4/) |
+| Binding and invocation | [Host model binding](host-model-binding.md#corrected-host-bound-4-binding) and [runtime](runtime.md#corrected-effect4-invocation-boundary) |
+| Native effects and receipts | [Host-bound single-write contract](real-single-effect-admission.md#current-host-bound-contract-effect4) |
+| Verified scope | [Conformance and test evidence](../testing.md#effect4-verification) and [resource qualification](../../roadmap/features/runtime-resource-qualification.md) |
 
-These contracts narrow baseline language/DCM/compiler/simulation drafts for this increment, override Java-later wording under decision 0001 and retain decision 0003's evidence boundary. Developers own executable fixtures under `conformance/`; the [acceptance matrix](host-integration.md#acceptance-fixtures) describes required tests, not passing results. The [read feature](../../roadmap/features/portable-core-first-slice.md) records its accepted checkpoint.
+## Compatibility
+
+| Earlier profile | Reference |
+| --- | --- |
+| `keir-read/1` | [Language](language.md), [DCM](domain-model.md), [artifact](compiler-artifact.md), [runtime](runtime.md), and [host integration](host-integration.md) |
+| `keir-effect/1` | [Single-effect profile](single-effect.md) |
+| `keir-read/2` and `keir-effect/2` | [Generic hook delta](generic-hook-capability-contract.md#versioned-delta), [binding](host-model-binding.md#one-binding-boundary), and [worked example](generic-hook-example.md) |
+| `keir-effect/3` | [Qualification and admission protocol](real-single-effect-admission.md#compatibility-boundary) |
+
+Each profile retains its own input, artifact, and invocation rules. Moving to another profile requires selecting its contract and recompiling against the corresponding model. The [read/2 simulation contract](read-simulation.md) describes the separate scenario and report formats.
 
 ## Maintaining a contract
 
-The [read/2 simulation contract](read-simulation.md) defines bounded data-only scenarios and redacted reports over the same native Java/Node artifact. See the [operator guide](../agents/read-simulation.md) and [shared examples](../../conformance/read-simulation/README.md); simulated success does not establish real adapter or host guarantees.
-
-The separately versioned [single-effect profile](single-effect.md) is an **implemented experimental checkpoint** for [one guarded follow-up](../../roadmap/features/single-effect-followup.md). Local combined verification compares 25 scenarios through Java, Node and both packaged hosts; [effect-host CI](https://github.com/rore/keir-core/actions/runs/41113166355) passes. It adds guards, terminal business handlers, original native host-key forwarding, retained effect receipts and simulation-only admission. It does not widen the read profile or establish real write guarantees. See the [design and acceptance vectors](../internal/single-effect-followup-design.md).
-
-For each affected feature: review the draft, specify the supported behavior, add accepted/rejected conformance examples, implement it, and reconcile discoveries. A maintained contract identifies status, supported scope, unresolved decisions, compatibility consequences, verification evidence and superseded baseline sections.
-
-Keep normative rules here, rationale in [internal decisions](../internal/README.md), and task-oriented explanations in [agent guides](../agents/README.md). Schemas, catalog descriptions and examples must agree with the written rules. Structural validation does not prove semantic safety; shared [conformance fixtures](../../conformance/README.md) supply executable evidence.
-
-Both agent personas use these contracts. Host assistants propose integration definitions for host review; extension assistants use only the host-approved catalog within customer scope. Draft examples, planned tool names and successful simulations do not grant authority or certify adapters.
+Specify feature changes in the affected versioned contracts. Update the applicable schemas, fixtures, and Java and Node conformance evidence together. Keep design rationale in [engineering records](../internal/README.md), future scope in the [roadmap](../../roadmap/scope.md), and usage guidance in the [documentation index](../README.md).

@@ -1,24 +1,18 @@
 # Keir documentation
 
-Keir lets a host expose hooks and approved capabilities that customers compose into application behavior. The host owns permissions, real adapter guarantees and result consumption. Keir validates and executes constrained extensions; host-integrated agents can assist with integration and authoring.
+## Learn and run Keir
 
-**Start here.** [Run your first Keir extension](quickstart.md) to compile a `keir-effect/4` program and run it in the packaged Node and Java hosts with simulated task services.
+- [Quickstart](quickstart.md) compiles one extension and runs the same artifact in Java and Node.
+- [Guided tour](guided-tour.md) follows an extension through host design, customer customization, and runtime.
+- [Embedding examples](../examples/README.md) show runnable hosts. The [manual authoring example](manual-authoring.md) shows how to supply source and independent scenarios directly.
+- [Agent guides](agents/README.md) explain the host integration and customer authoring assistant roles.
 
-The experimental `keir-effect/4` profile supports one potential write per program. The host binds a complete capability catalog and its implementations, then supplies fresh context for every invocation. The `/1`–`/3` profiles retain their documented behavior. See [testing evidence](testing.md) for local verification and CI status. Production qualification and release remain open.
+## Reference
 
-## Public documentation
-
-- [Guided tour: how Keir works](guided-tour.md): follow host design time, customer extension design and runtime, from reusable contracts and customer intent to service calls and outcomes.
-- [Specifications](specs/README.md): maintained language, domain capability model (DCM), artifact, runtime and host contracts, with review and implementation status.
-- [Agent guides](agents/README.md): separate guidance for the host integration assistant and customer extension assistant. Runnable integrations and optional skill packaging come later.
-- [Embedding examples](../examples/README.md): runnable Java and Node hosts for classification and follow-up simulation.
-- [Manual authoring example](manual-authoring.md): supply source and independent scenarios directly, compile them, and inspect the Java/Node simulator and runner integration.
-- [Conformance](../conformance/README.md): shared source, compiled artifacts and independent expectations for both runtimes.
+- [Versioned specifications](specs/README.md) define the source, domain model, compiler artifact, binding, and runtime behavior.
+- [Conformance fixtures](../conformance/README.md) give both runtimes the same inputs and independent expected outcomes.
+- [Verification and testing](testing.md) records tested scope and links to resource qualification.
 
 ## For contributors
 
-Use the [testing guidelines](testing.md) for coverage, fast/slow suites and the initial behavioral-contract protection plan.
-
-The single [Minimap roadmap](../roadmap/board.md) and [milestone guidance](../roadmap/scope.md) live in `roadmap/`. There is no second roadmap under `docs/`.
-
-[Internal records](internal/README.md) contain design inputs, decisions and workflow/bootstrap notes. [Engineering team roles](../roles/README.md) govern our development agents and are distinct from the two product-facing agent personas.
+See [Contributing](../CONTRIBUTING.md) for development checks and the [roadmap](../roadmap/scope.md) for planned work. [Engineering records](internal/README.md) preserve design rationale and earlier proposals.
