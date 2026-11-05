@@ -1,16 +1,12 @@
-# Single-effect simulation
+<a id="single-effect-simulation"></a>
+# Single-write simulation
 
-This is the Java-compiled sample for the accepted [single-effect contract](../../docs/specs/single-effect.md). Source and model match the [design example](../../docs/internal/single-effect-followup-design.md). It conditionally creates one follow-up after reading task status and project; handlers return terminal typed rejection records. The guarded result is absent from every later expression environment.
-
-After building the [compiler](../../compiler-java/README.md), run from the repository root:
-
-```sh
-java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar conformance/single-effect/source.yaml conformance/single-effect/dcm.json --profile=keir-effect/1
-```
+Internal engineering reference for a historical simulation. This is the Java-compiled sample for the accepted [single-write contract](../../docs/specs/single-effect.md). Source and model match the [design example](../../docs/internal/single-effect-followup-design.md). It conditionally creates one follow-up after reading task status and project; handlers return terminal typed rejection records. The guarded result is absent from every later expression environment.
+[Reproduce the original write simulation artifact](../../docs/internal/implementation-reference.md#compile-original-simulation).
 
 Stdout is the canonical artifact; preserve it as bytes. `artifact.sha256` independently pins the 5,439-byte artifact; `dcm.sha256` pins the 1,721-byte canonical model. Two fresh compiler processes reproduced these bytes, and the original two-argument read CLI still reproduced its golden artifact.
 
-The immutable five primary source/model/artifact files are shared by both runtimes. The [scenarios](scenarios.json) are an ordered array of closed `keir-scenario/effect-1` records. Each record is bounded to 65,536 serialized bytes and four stubs. Its `given` contains only business input and a fixed trusted fixture ID. Expected outcomes, full traces, ordered calls and EVENT_REPORT receipts are hand-authored independently of runtime output.
+The immutable five primary source/model/artifact files are shared by both runtimes. The [scenarios](scenarios.json) are an ordered array of closed records in the [original simulated-write scenario format](../../docs/internal/implementation-reference.md#serialized-identifiers-and-compiler-selectors). Each record is bounded to 65,536 serialized bytes and four stubs. Its `given` contains only business input and a fixed trusted fixture ID. Expected outcomes, full traces, ordered calls and EVENT_REPORT receipts are hand-authored independently of runtime output.
 
 Run the default source-runtime simulation without installing the example host:
 

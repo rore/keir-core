@@ -1,53 +1,24 @@
-# Read-and-decide language contract
+<a id="read-and-decide-language-contract"></a>
+<a id="rule-source-and-expressions"></a>
+<a id="keir-ir-source-and-expressions"></a>
+# Keir source and expressions
 
-Select `keir-effect/4` explicitly, with `keir-dcm/effect-4`, `keir-artifact/effect-4` and `keir-scenario/effect-4`. It supports [bounded plain String concatenation](#types-and-cel-bridge) and retains the descriptor recipe, CEL environment, event metadata and result and receipt vocabulary. Earlier profiles keep their existing semantics and bytes.
+For the current rules on source and writes, see [source and data flow](single-effect.md#source-and-definite-availability), the [source schema](../../schemas/effect-4/README.md), and the [compiled example](../../examples/README.md#compile-the-rule). Keir supports [bounded plain String concatenation](#types-and-cel-bridge). Compatibility profiles keep their existing semantics and bytes.
 
-The implemented [generic-hook `/2` contract](generic-hook-capability-contract.md) keeps source `keir/v0`, permits repeated/different published reads without named grants, and adds explicit nominal literals for authored constants. It changes no host payload and adds no configuration channel. The `/1` rules and example below remain compatibility behavior.
+<a id="source-and-example"></a>
+<a id="implementation-reference-earlier-source-rules-and-example"></a>
 
-Status: implemented experimental checkpoint, verified locally in Java and Node. Profile `keir-read/1` is selected by the trusted compiler configuration. It implements a strict subset of source `keir/v0`; unsupported baseline syntax is rejected. See [status](README.md), [DCM](domain-model.md) and [artifact](compiler-artifact.md).
-
-## Source and example
-
-This page defines `keir-read/1`. Implemented `when`/`onError` syntax and definite-availability restrictions belong only to the separately selected [single-effect profile](single-effect.md#source-and-definite-availability); they are not accepted additions to this read grammar.
-
-Accept UTF-8 JSON or YAML containing only the JSON data model. Reject duplicate keys, unknown properties, aliases, anchors, merge keys, tags, multiple documents, malformed Unicode, null and numbers in bindings. No coercion. Mapping order is immaterial; step order matters. Enforce [limits](runtime.md#limits) before and during parsing.
-
-For both source and DCM, YAML uses JSON-compatible scalar resolution, not YAML 1.1 implicit typing. Only lowercase plain `true`, `false`, `null` and the JSON number grammar `-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?` resolve implicitly to non-string values. Other nonempty plain scalars, including `yes`, `on`, `TRUE`, timestamps, `0x10`, `01`, `.inf` and `~`, remain strings. Quoted scalars remain strings. Empty/omitted YAML values are rejected rather than implicitly becoming null. Mapping keys must resolve to strings; reject non-string keys and duplicate decoded keys. Reject every explicit tag, anchor, alias and merge key, including otherwise standard explicit tags. This parsing rule does not admit numeric/null bindings: subsequent schema validation rejects them and accepts numbers only in the bounded integer metadata fields that explicitly require them. No rounding, loss of numeric precision or conversion to fit an expected field type is permitted; for example an unquoted numeric `domain.version` is rejected, not stringified.
-
-Root fields, all required and no others: `language`, `domain`, `entrypoint`, `name`, `steps`, `return`. `language` is `keir/v0`. `domain` contains exactly `id`, `version`, `fingerprint`; these match the trusted DCM and its canonical digest. `name` matches `[a-z][a-z0-9-]{0,63}`. `entrypoint` and capability IDs match `[A-Za-z][A-Za-z0-9.]{0,99}`. Step IDs and record/type/field names match `[A-Za-z][A-Za-z0-9]{0,63}`. Step IDs are unique and cannot be `input`, a type name, or CEL reserved identifier.
-
-Each step is exactly `{id, call, args}` or `{id, let}`. `args` is a map of declared agent-bound parameter names to bindings. A binding is exactly `{literal: boolean|string}` or `{cel: string}`. `return` is exactly `{record: {field: binding, ...}}`, with precisely the entrypoint output fields. `steps` is nonempty. No `when`, `onError`, writes, collections, optional fields, time, general branching, retries or executable source.
-
-Example source for the exact [sample model](domain-model.md#sample-model). Its fingerprint was computed from that model's canonical JSON; it authenticates neither the host nor the model's guarantees.
-
-```yaml
-language: keir/v0
-domain: {id: sample.tasks, version: '1', fingerprint: 'sha256:e43a2657dadad2fdd4826c42b4e5048c7d7f046e61f48043777f5945e9a9a58f'}
-entrypoint: ClassifyTask
-name: classify-completed-task
-steps:
-  - id: source
-    call: tasks.get
-    args:
-      taskId: {cel: input.taskId}
-  - id: completed
-    let: {cel: 'source.status == "COMPLETED"'}
-return:
-  record:
-    classification: {cel: 'completed ? "DONE" : "PENDING"'}
-```
-
-Calls execute in source order. Success binds a required result record; a failure terminates, so later expressions never see a missing call result. `let` binds an immutable scalar. Return runs after all steps succeed. The host displays the classification; it does not treat it as permission for a native write.
+[Original read-only source and example](../internal/compatibility-reference.md#original-read-source).
 
 ## Types and CEL bridge
 
 Supported semantic types: Boolean, bounded String, string-based nominal IDs, string-backed closed enums, and closed records of those scalar types. Records are only input/capability results/root output; no nested records. No Int64, floating point, bytes, null, optional, list, map, unit or temporal types in this profile. Reject unsupported types even if unused in the submitted DCM. This explicit narrowing avoids silently converting numbers through JavaScript `number`.
 
-Generate protobuf record descriptors from the approved DCM as specified in [artifact](compiler-artifact.md). Boolean maps to protobuf `bool`; String, nominal and enum values map to protobuf `string`. Validate required fields, enum membership and bounds **before** protobuf construction, so missing fields cannot become protobuf defaults. A fresh CEL environment for each expression contains only `input` and earlier step IDs, with record message types or inferred scalar types. No host context is declared.
+Generate protobuf record descriptors from the approved DCM as specified in [artifact](compiler-artifact.md). Boolean maps to protobuf `bool`; String, nominal and enum values map to protobuf `string`. Validate required fields, enum membership and bounds **before** protobuf construction, so missing fields cannot become protobuf defaults. Each expression gets a fresh CEL environment with `input` and the earlier bindings permitted by [the source and data-flow rules](single-effect.md#source-and-definite-availability). No host context is declared.
 
-Allowed expression syntax: Boolean/string constants, identifiers, required field selection, scalar `==`/`!=`, `!`, `&&`, `||`, and `?:` with scalar branches. Effect/4 additionally supports `+` on two plain `String` operands. No record equality, indexing, constructors, conversions, macros, comprehensions or other calls. Inspect checked AST and resolved references/overloads, not source spelling alone. A select must resolve to a declared record field; presence-test selects are unsupported. CEL type checking must succeed without `dyn`; only standard implementations of these operations in the pinned environment are available. Exact observed overload identifiers are part of the qualification evidence, not inferred from function spelling.
+Allowed expression syntax: Boolean/string constants, identifiers, required field selection, scalar `==`/`!=`, `!`, `&&`, `||`, and `?:` with scalar branches. The current contract also supports `+` on two plain `String` operands. No record equality, indexing, constructors, conversions, macros, comprehensions or other calls. Inspect checked AST and resolved references/overloads, not source spelling alone. A select must resolve to a declared record field; presence-test selects are unsupported. CEL type checking must succeed without `dyn`; only standard implementations of these operations in the pinned environment are available. Exact observed overload identifiers are part of the qualification evidence, not inferred from function spelling.
 
-For effect/4, the checked pair `_+_`/`add_string` takes exactly two plain `String` operands and returns a plain `String`. Earlier profiles reject this pair. Numeric, list, nominal and enum operands are unsupported. Concatenation uses the pinned CEL evaluator and preserves Unicode exactly. A 64-node expression can concatenate at most 32 bounded string leaves, so a single intermediate string has at most 8,192 UTF-8 bytes. Each expression result is still limited to 256 UTF-8 bytes when it leaves the evaluator. A larger title expression result fails before a create call is dispatched.
+The checked pair `_+_`/`add_string` takes exactly two plain `String` operands and returns a plain `String`. Earlier profiles reject this pair. Numeric, list, nominal and enum operands are unsupported. Concatenation uses the pinned CEL evaluator and preserves Unicode exactly. A 64-node expression can concatenate at most 32 bounded string leaves, so a single intermediate string has at most 8,192 UTF-8 bytes. Each expression result is still limited to 256 UTF-8 bytes when it leaves the evaluator. A larger title expression result fails before a create call is dispatched.
 
 The [scalar qualification](../../conformance/cel-profile/README.md) observed these function/overload pairs: `_==_`/`equals`, `_!=_`/`not_equals`, `!_`/`logical_not`, `_&&_`/`logical_and`, `_||_`/`logical_or`, `_?_:_`/`conditional`, with arities 2, 2, 1, 2, 2, 3 respectively and no receiver target. Reject unknown or missing overload references. The generic equality overload still requires the scalar semantic checks below; its name does not admit CEL's other comparable types. Unary negation chains can simplify during parsing: count the expanded checked AST, not source operator characters. This expression checkpoint does not establish the complete Keir overlay or program compiler.
 

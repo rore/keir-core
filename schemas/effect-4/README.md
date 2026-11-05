@@ -1,6 +1,8 @@
-# Effect/4 structural schemas
+<a id="effect-4-structural-schemas"></a>
+<a id="effect4-structural-schemas"></a>
+# Structural schemas for single-write behavior
 
-These Draft 2020-12 schemas describe decoded JSON values for the host-bound single-write profile.
+Internal engineering reference: these Draft 2020-12 schemas describe decoded JSON values for single-write behavior. Exact profile selectors and wire identifiers are implementation details; see the [implementation reference](../../docs/internal/implementation-reference.md).
 
 | Instance | Schema | ID |
 | --- | --- | --- |
@@ -8,7 +10,7 @@ These Draft 2020-12 schemas describe decoded JSON values for the host-bound sing
 | Domain capability model (DCM) | [dcm.schema.json](dcm.schema.json) | `urn:keir:schema:effect-4:dcm:1` |
 | Reference artifact | [artifact.schema.json](artifact.schema.json) | `urn:keir:schema:effect-4:artifact:1` |
 
-The IDs version the schema documents. Source uses `keir/v0` and trusted compiler configuration selects `keir-effect/4`. Keep schema IDs and the profile out of source. The artifact schema records the compiler and dependency versions currently supported by effect/4 preparation.
+The IDs version the schema documents. Source uses `keir/v0`; trusted compiler configuration selects the profile. Keep schema IDs and profile selectors out of source. The artifact schema records the compiler and dependency versions currently supported for preparation.
 
 | Structural check | Native check |
 | --- | --- |
@@ -19,7 +21,7 @@ The IDs version the schema documents. Source uses `keir/v0` and trusted compiler
 
 The host selects and approves the exact artifact bytes. The runtimes enforce invocation limits and the host verifies current permission, the original request key and native commit behavior. Schema success supplies structural evidence only.
 
-The [shared effect/4 examples](../../conformance/generic-hooks/effect4/) include the standard, no-call and title-composition artifacts. The [structural fixtures](../../conformance/effect4-structural/) add a guarded call with a declared error handler and cases that pass the schema but fail native preparation. Structural errors use `STRUCTURE_INVALID`. Native diagnostics report the rejecting phase and retain their existing code and path. For an undeclared handler, Java reports the error-code field and Node reports the handler map.
+The [shared single-write examples](../../conformance/generic-hooks/effect4/) include the standard, no-call and title-composition artifacts. The [structural fixtures](../../conformance/effect4-structural/) add a guarded call with a declared error handler and cases that pass the schema but fail native preparation. Structural errors use `STRUCTURE_INVALID`. Native diagnostics report the rejecting phase and retain their existing code and path. For an undeclared handler, Java reports the error-code field and Node reports the handler map.
 
 ## Run the offline check
 
@@ -29,10 +31,6 @@ Use the existing [project-local setup](../read-2/README.md#isolated-development-
 python scripts/check-read2-contracts.py
 ```
 
-Select effect/4 explicitly to check one decoded document.
-
-```sh
-python scripts/check-read2-contracts.py --profile keir-effect/4 source conformance/effect4-structural/source.json
-```
+[Validate one single-write document](../../docs/internal/implementation-reference.md#check-one-single-write-document).
 
 The checker also accepts `dcm` and `artifact`. It resolves references locally. Use the native compiler and runtimes for the checks described in the [language](../../docs/specs/language.md), [model](../../docs/specs/domain-model.md), [artifact](../../docs/specs/compiler-artifact.md) and [binding](../../docs/specs/host-model-binding.md) contracts.

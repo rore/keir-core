@@ -1,4 +1,7 @@
-# Effect/4 resource qualification
+<a id="effect4-resource-qualification"></a>
+# Resource qualification for single-write execution
+
+This engineering reference describes the test workload and measured resource behavior. For runtime requirements, see the [Keir specification](../../docs/specs/runtime.md#limits).
 
 From the repository root with Java 21, Node 24, the Maven wrapper, and the locked Node dependencies:
 
@@ -55,7 +58,7 @@ The report includes block CPU and elapsed times, invocation min/median/p95/max, 
 
 ### Artifact bound for the measured catalogs
 
-For the exact base and title DCMs, an effect/4 compiler artifact is bounded by **495,792 bytes**. The report lists the DCM digests. These models have one output field, a read with one agent argument and two possible handlers, and a write with two agent arguments and three possible handlers. At most four calls, one write and eight steps allow up to 19 binding slots. At the maximum those slots comprise four LETs, nine read bindings across three reads, five write bindings and one return binding. Each handler contributes one slot for the single output field.
+For the exact base and title DCMs, a single-write artifact is bounded by **495,792 bytes**. The report lists the DCM digests. These models have one output field, a read with one agent argument and two possible handlers, and a write with two agent arguments and three possible handlers. At most four calls, one write and eight steps allow up to 19 binding slots. At the maximum those slots comprise four LETs, nine read bindings across three reads, five write bindings and one return binding. Each handler contributes one slot for the single output field.
 
 | Component | Conservative allowance |
 | --- | ---: |
@@ -67,4 +70,4 @@ For the exact base and title DCMs, an effect/4 compiler artifact is bounded by *
 
 The fixed allowance covers eight step headers at up to 512 bytes each, up to nine handler wrappers at 256 bytes each, and up to 2,048 bytes for the fixed model reference, compiler pins, return wrapper and surrounding syntax. This gives `19 × (21,848 + 1,208 + 128 + 2,048) + 16,384 = 495,792` bytes. The serial run checks the computed bound against a compiler-produced fixture accepted by both runtimes. The fixture need not approach the bound. The 1 MiB byte cap remains the profile-wide ceiling, with semantic admission at that size still open for other catalogs.
 
-The runtime boundary cases already live in `BoundEffectRuntimeTest.fourCallsAndEightStepsPassButTheirNextValuesFailStatically` and the fixed-ceiling test in `runtime-node/test/bound-effect.test.js`. The serial run adds the exact effect/4 compiler checks.
+The runtime boundary cases already live in `BoundEffectRuntimeTest.fourCallsAndEightStepsPassButTheirNextValuesFailStatically` and the fixed-ceiling test in `runtime-node/test/bound-effect.test.js`. The serial run adds the current single-write compiler checks.

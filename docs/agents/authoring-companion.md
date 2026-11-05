@@ -1,4 +1,5 @@
-# Build and verify the effect/4 authoring companion
+<a id="build-and-verify-the-effect4-authoring-companion"></a>
+# Build and verify the authoring companion
 
 The authoring companion is a versioned ZIP of data files. It contains the customer authoring guide, the source, model and artifact schemas, and one follow-up example. The example includes matching, skipped and lost-response cases drawn from the shared corpus. These are authoring examples. The full conformance runner still uses its own fixture directory.
 
@@ -11,6 +12,8 @@ python scripts/authoring-companion.py build keir-authoring-effect4-v1.zip
 ```
 
 The command prints the archive’s SHA-256 pin. Repeated builds use the same file order, timestamps and permissions. The schema and guide files keep their exact committed bytes.
+
+This archive contains the first guide version. The [current guide source](customer-authoring-guide-v2.md) is tracked separately. See the [implementation reference](../internal/implementation-reference.md#pinned-companion-and-runtime-package-files) for how to update a pinned archive.
 
 ## Verify and load the guide
 

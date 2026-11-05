@@ -1,24 +1,32 @@
 # Java host example
 
-The corrected Java API uses `bindModel(dcmBytes, implementations)`, `prepareProgram(artifactBytes, boundModel)` and `invokeBoundEffectProgram` with fresh `BoundEffectInvocation` context. `BoundEffectContext.deadline()` exposes the same absolute deadline and clock used by the runtime. Host implementations enforce permission and native key authenticity.
+Run a follow-up rule against simulated task services. [Build the example with JDK 21](../README.md#run-both-hosts), then run it from the repository root:
 
-The old `effect3` transport remains a legacy qualification-protocol check. After the ordinary Maven build, run it with the host JAR and runtime test classes:
+```sh
+java -cp examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar dev.keir.examples.GenericHost conformance/generic-hooks/effect4
+```
+
+The host reports 11 scenarios, including a confirmed simulated write, a skipped write, and an uncertain result after a lost response.
+
+Read `boundEffectBatch` and its invocation helper in [GenericSimulation.java](src/main/java/dev/keir/examples/GenericSimulation.java). They call `bindModel` and `prepareProgram`, check `succeeded()` at each step, then call `invokeBoundEffectProgram` with a fresh `BoundEffectInvocation`. The application supplies real permissions, the original key and the deadline when adapting this pattern to its own services. [Integration guide](../../docs/embedding.md) · [Java API reference](../../docs/specs/host-model-binding.md#api-shapes)
+
+<a id="examples-for-earlier-profiles"></a>
+## Implementation reference for earlier examples
+
+The earlier qualified-write transport remains a legacy qualification-protocol check. After the ordinary Maven build, run it with the host JAR and runtime test classes:
 
 ```powershell
 java -cp "examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar;runtime-java/target/test-classes" dev.keir.runtime.RealEffectScenarioDriver
 ```
 
-It compares pinned effect/3 artifacts under separately qualified simulation and real bindings using fixed fake invokers and an original UUID. This is legacy behavior only; no native task is written and no SQLite deployment is qualified.
+It compares pinned qualified-write artifacts under separately qualified simulation and real bindings using fixed fake invokers and an original UUID. This is legacy behavior only; no native task is written and no SQLite deployment is qualified.
 
-Run the corrected `/4` shared host corpus from the repository root after packaging:
+For catalog-bound read and simulated-write examples, run `GenericHost` with the [read or effect fixture directory](../../conformance/generic-hooks/README.md). These cases use their profile's binding and invocation APIs.
 
-```powershell
-java -cp examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar dev.keir.examples.GenericHost conformance/generic-hooks/effect4
-```
+<a id="read1-example"></a>
+### Original read-only example
 
-The `dev.keir.examples.GenericHost` entrypoint also runs legacy `read` and `effect` fixture directories using their historical APIs. It loads fixed program filenames plus independent pins, binds the catalog once, and prepares three programs against that handle. It supplies the legacy invocation context and current authorization, validates dispatch independently of expectations, and enforces finite harness reservations. It uses no compiler, YAML parser, network or real adapters. These legacy fixtures remain separate compatibility checks.
-
-This command-line host prepares the shared Java-compiled artifact once using a digest supplied outside the artifact, then runs four controlled cases through that same prepared handle in one process. The simulation adapter supplies completed, open, missing and deliberately wrong-resource task data. The independent host consumer displays only a COMPLETED outcome with exactly one `classification` field whose value is `DONE` or `PENDING`.
+The original read-only host prepares the shared compiled rule once, then runs four cases through it. The simulation covers completed, open, missing, and wrong-resource task data. The host displays only a completed result with a `DONE` or `PENDING` classification.
 
 From the repository root, build the host and its runtime dependency with JDK 21 in a disposable PowerShell process:
 
@@ -51,7 +59,9 @@ Focused in-process host tests exercise the complete batch, consumer validation, 
 
 Host-correction verification on 2026-10-29: five host tests passed (0.705 seconds focused, 1.105 seconds with coverage). The coherent offline root coverage build passed 89 tests in 16.396 seconds. Host coverage is 64/66 lines (96.97%) and 52/52 branches (100%); the two missed lines are the thin `main`/`System.exit` wrapper. The packaged CLI is also exercised once as a four-case batch outside the coverage agent. Compiler/runtime behavior and the primary golden/shared expectations are unchanged.
 
-## Post-commit effect simulation
+<a id="post-commit-effect-simulation"></a>
+<a id="effect1-post-commit-simulation"></a>
+### Original post-commit write simulation
 
 The additional `dev.keir.examples.EffectHost` entrypoint runs the fixed 25-case [single-effect corpus](../../conformance/single-effect/scenarios.json). The original JAR manifest and two-argument read CLI remain unchanged. After the same package build, run from the repository root:
 

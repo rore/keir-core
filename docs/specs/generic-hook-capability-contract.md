@@ -1,24 +1,16 @@
 # Generic hooks and capability composition
 
 <a id="corrected-host-bound-effect4"></a>
-## Effect/4 contract and version boundaries
+<a id="effect4-contract-and-version-boundaries"></a>
+## Single-write behavior and compatibility boundaries
 
-For `keir-effect/4`, the host defines its catalog in the DCM and supplies every compatible implementation at initialization. [Host model binding](host-model-binding.md#effect4-binding-and-preparation) owns the effect/4 API; [runtime execution](runtime.md#effect4-execution) owns invocation and limits; [single-effect semantics](single-effect.md#effect-evidence-and-outcomes) owns effect receipts. Binding checks completeness, versions, key types and homogeneous mode. Host implementations enforce current permissions, key authenticity and native commit rules. Empty catalogs and no-call programs are valid; runtime context, type and resource validation still applies.
+For single-write behavior, the host defines its catalog in the DCM and supplies every compatible implementation at initialization. [Host model binding](host-model-binding.md#effect4-binding-and-preparation) defines the binding API; [runtime execution](runtime.md#effect4-execution) defines invocation and limits; [single-write semantics](single-effect.md#effect-evidence-and-outcomes) defines write receipts. Binding checks completeness, versions, key types and homogeneous mode. Host implementations enforce current permissions, key authenticity and native commit rules. Empty catalogs and no-call programs are valid; runtime context, type and resource validation still applies.
 
-| Contract | Effect/4 | Earlier versions |
-| --- | --- | --- |
-| Source family | `keir/v0`; explicit nominal literals and effect guards/handlers | `/1` rejects explicit nominal annotations; `/2` and `/3` support them |
-| Model/artifact/scenario | `keir-dcm/effect-4`, `keir-artifact/effect-4`, `keir-scenario/effect-4` | Exact versioned identities remain distinct; never relabel bytes |
-| Assurance | `HOST_BOUND_SINGLE_WRITE` | Effect/1–2: `SIMULATION_ONLY`; effect/3: `HOST_QUALIFIED_SINGLE_WRITE` |
-| Hook restrictions in DCM | Optional `capabilityPolicy` and `effectGrant`; default catalog eligibility and one possible WRITE | `/1` requires grants; `/2` and `/3` use optional restrictions |
-| Host API restrictions | No admission/invocation policy, effectGrant, scope, authorizer or qualification inputs | Legacy `/2` and `/3` retain their narrowing layers and authority callbacks |
-| Expression additions | Plain String concatenation under the [language rules](language.md#types-and-cel-bridge) | Earlier profiles reject concatenation |
-
-The responsibility, service and authored-value rules below apply to effect/4 as well as earlier profiles. Later sections explicitly identify legacy API layers. Implementation evidence belongs in [testing](../testing.md), not in the contract's version selection.
+The DCM can restrict operations with `capabilityPolicy` and limit writes with `effectGrant`. The defaults are the published catalog and at most one possible write. Keir supports explicit nominal literals, guards, handlers, and [bounded String concatenation](language.md#types-and-cel-bridge). [Compatibility details and wire identifiers](../internal/implementation-reference.md#contract-compatibility)
 
 ## Responsibility boundaries
 
-Reference artifacts in `/2`, `/3` and `/4` identify an exact immutable DCM. [Host model binding](host-model-binding.md) binds the complete catalog and implementations into a reusable handle. Program validation and fresh invocation context remain separate. `/1` artifacts retain their embedded model and descriptors.
+Reference artifacts identify an exact immutable DCM. [Host model binding](host-model-binding.md) binds the complete catalog and implementations into a reusable handle. Program validation and fresh invocation context remain separate. The earliest artifacts retain their embedded model and descriptors.
 
 A host publishes a scoped, approved capability catalog. A hook defines its input projection, allowed output and consumer, trigger, lifecycle placement and effect ceiling. A customer extension selects and composes catalog operations; the host need not anticipate its call list. A required map naming the operations of a sample program is not the generic hook contract.
 
@@ -30,8 +22,8 @@ Capabilities expose reusable host-domain operations rather than pre-implementing
 | Hook definition | Host defines typed input/output, consumer semantics and lifecycle/effect constraints. No capability names or counts are required by default. |
 | Authored composition | Source uses static calls to published capabilities and typed dataflow. It cannot publish operations, supply policy, select credentials or override protected bindings. |
 | Compilation and artifact selection | Trusted compiler environment selects the profile and DCM. Compilation checks composition; host independently approves/selects the exact artifact, entrypoint and consumer. |
-| Binding and preparation | Host selects the exact model and artifact. Effect/4 derives compatibility checks internally; legacy admission APIs take external pins and narrowing inputs. Successful preparation is not current user authorization. |
-| Invocation and dispatch | Fresh host context accompanies each invocation. Effect/4 implementations enforce current permission; earlier profiles retain required authorization callbacks. Implementations enforce resource access, invariants and native deadlines. Catalog visibility grants no permission. |
+| Binding and preparation | The host selects the exact model and artifact. The runtime derives compatibility checks from them. The host separately checks current authorization. |
+| Invocation and dispatch | The host supplies fresh context for every invocation. Implementations enforce current permissions, resource access, invariants and native deadlines. |
 | Runtime | Execute the selected artifact against unchanged host payload and fresh protected context; enforce types, policies, bounds and honest outcomes. Do not re-author customer logic, infer customer choices or load implicit configuration. |
 | Host integration assistant | Help the host draft/review hook payload, catalog, native adapters, authorization and consumption. Only host-owner approval publishes these contracts; the assistant cannot certify guarantees or invent authority. |
 | Customer authoring agent | Help the customer author logic, constants and capability composition against the published contract. It may propose source/scenarios and request approval, but cannot change the hook/catalog, protected values, permissions or activation on its own. |
@@ -46,7 +38,7 @@ Treat internal service-to-service operations, including HTTP or RPC calls, as th
 
 The host supplies a compatible client/adapter for each registered capability version. That bridge maps validated arguments to the remote request and maps responses to declared results, rejections and effect evidence. Service routing, credentials, trusted identity propagation, connection management and transport details remain host-owned integration concerns, outside customer source and compiled artifacts. The DCM supplies the logical typed contract; a model reference does not itself locate or authorize a service. This does not require a built-in HTTP client, service discovery system or generated transport bindings in Keir.
 
-Remote calls retain the same current authorization, resource checks and deadline obligations. A local timeout or cancellation does not establish that a remote operation stopped. Losing a response after a possible WRITE must preserve UNKNOWN/UNCERTAIN unless the native contract establishes a definite outcome; do not add automatic retries. Shared model preparation does not cache user credentials or current permissions. Use the [effect/4 API](host-model-binding.md#api-shapes) or the explicitly [legacy dispatch API](host-model-binding.md#invocation-and-remote-dispatch) for the selected profile; both preserve the original native key.
+Remote calls retain the same authorization, resource checks and deadline obligations. A remote operation can finish after a local timeout or cancellation. Losing a response after a possible write preserves UNKNOWN/UNCERTAIN unless the native contract establishes a definite outcome. Keir dispatches an eligible call at most once. Reconcile uncertain outcomes through the host before deciding whether to retry. Keep user credentials and current permissions out of shared preparation. The [current API](host-model-binding.md#api-shapes) and [earlier dispatch API](host-model-binding.md#invocation-and-remote-dispatch) both preserve the original native key.
 
 ## Event facts, extension choices and protected authority
 
@@ -58,15 +50,15 @@ The host defines the hook payload independently of any one extension. Preserve i
 | Authored program constants | The customer selects a particular eligible project and fixed title inside the program. They compile into the artifact. Another source requires explicit program logic, such as an approved capability, not an implicit settings/configuration channel. |
 | Protected authority/context | Authenticated actor/tenant scope, credentials, event provenance and original native key stay host-owned and outside source/CEL. A business ID constant grants none of this authority. |
 
-Under `/1`, a String literal cannot be implicitly assigned to a nominal type. Under `/2`, `/3` and `/4`, an explicit nominal annotation supplies business typing without changing the host payload or granting access.
+An explicit nominal annotation supplies business typing without changing the host payload or granting access. See [compatibility details](../internal/implementation-reference.md#contract-compatibility) for earlier language restrictions.
 
-**Explicit nominal literals (`/2`, `/3`, `/4`):** permit a binding exactly `{literal: string, type: nominalTypeName}` at existing binding positions, including BIND. The type must resolve to a host-published nominal String type. No arbitrary annotation, enum/built-in/record annotation, host-key contract type, null/numeric value, dynamic expression or String-variable cast is admitted. The annotation supplies business typing, never evidence of existence, ownership or access. Keep unannotated literal rules unchanged; in particular, no implicit String-to-nominal coercion. Apply existing Unicode and 256-byte string limits. Invalid shape/unknown fields retain structural diagnostics; unknown/non-nominal type or incompatible nominal assignment uses `NOMINAL_MISMATCH` at the binding/type or literal path as applicable. Host-bound argument overrides still fail preflight regardless of annotation.
+**Explicit nominal literals:** permit a binding exactly `{literal: string, type: nominalTypeName}` at existing binding positions, including BIND. The type must resolve to a host-published nominal String type. No arbitrary annotation, enum/built-in/record annotation, host-key contract type, null/numeric value, dynamic expression or String-variable cast is admitted. The annotation supplies business typing, never evidence of existence, ownership or access. Keep unannotated literal rules unchanged; in particular, no implicit String-to-nominal coercion. Apply existing Unicode and 256-byte string limits. Invalid shape/unknown fields retain structural diagnostics; unknown/non-nominal type or incompatible nominal assignment uses `NOMINAL_MISMATCH` at the binding/type or literal path as applicable. Host-bound argument overrides still fail preflight regardless of annotation.
 
-A nominal literal binds the declared nominal type in the expression environment; same-type comparisons and arguments are allowed, other nominal types remain incompatible. Lower to the existing artifact `{literal,type}` representation; no new opcode, configuration section, compiler input or CEL variable is needed. Both loaders must validate declared nominal literal type/value compatibility under `/2`, `/3` and `/4`, while `/1` retains its rejection behavior. The compiler must preserve nominal provenance through BIND/checked metadata and both runtimes must reject forged type metadata. Literal values are in source/artifacts and must not contain credentials or native keys; trace/error redaction remains unchanged.
+A nominal literal binds the declared nominal type in the expression environment. Same-type comparisons and arguments are allowed. Lower to the artifact's `{literal,type}` representation. Both loaders validate the declared nominal type and value. The compiler preserves nominal provenance through BIND and checked metadata. Both runtimes reject forged type metadata. Keep credentials and native keys out of literals because they appear in source and artifacts.
 
 Resolve the annotation only in the DCM business `types` namespace. An equal host-key metadata label neither grants native-key access nor invalidates a legitimate business nominal type. An unknown/non-nominal annotation fails with `NOMINAL_MISMATCH` at the binding's `/type`; a valid nominal annotation incompatible with its expected nominal type fails at `/literal`.
 
-Example fragment for effect/2, effect/3 or effect/4, assuming the host payload includes `taskId` and the catalog already publishes the shown types/capabilities:
+Example fragment for a single-write rule, assuming the host payload includes `taskId` and the catalog publishes the types and operations shown:
 
 ```yaml
 steps:
@@ -85,30 +77,17 @@ steps:
       title: {literal: 'Follow up'}
 ```
 
-This fragment is valid under effect/2, effect/3 and effect/4, not `/1` syntax or a complete source document. It uses the same host payload for customers choosing different project/title constants. Changing a constant changes canonical source and artifact digests and requires ordinary compilation, review and host selection of that revision. No separate configuration revision, persistence, binding service or invocation override is introduced. An explicitly called capability may supply a value instead, under normal catalog, type, authorization and budget rules.
+This fragment uses the same host payload for customers choosing different project and title constants. Changing a constant changes the canonical source and artifact digests and requires compilation, review and host selection of that revision. An explicitly called operation may supply a value under the usual catalog, type, authorization and budget rules. See the [complete source](../../conformance/generic-hooks/effect4/source.yaml).
 
 Project equality is business logic, not authorization. Authoring tools may help resolve a project name to its ID, but source still contains a customer-authored reference. The host/adapter must enforce current access and native invariants, including nonexistent, wrong-scope or revoked projects. Unknown effect status and prior confirmed effects retain the existing semantics. Explicit nominal literals pass compiler and cross-runtime regression; that typing supplies no authority.
 
-## Versioned delta
+<a id="versioned-delta"></a>
 
-This section records the `/2` delta from `/1`. Effect/3 and effect/4 retain its reference-model and nominal-literal rules; their host API differences are specified above. These identifiers are exact compatibility boundaries:
-
-| Selected profile | DCM format | Artifact format | Existing behavior retained |
-| --- | --- | --- | --- |
-| `keir-read/2` | `keir-dcm/read-2` | `keir-artifact/read-2` | REQUEST, DISPLAY, READ-only calls and three-argument adapters |
-| `keir-effect/2` | `keir-dcm/effect-2` | `keir-artifact/effect-2` | EVENT/AFTER_COMMIT, EVENT_REPORT, guards/terminal handlers, native key channel and simulation-only admission |
-
-Source remains `keir/v0`; trusted compiler configuration must explicitly select the profile. Keep all `/1` type, CEL, canonicalization, descriptor, external pin, outcome and trace rules except the changes stated here, including the explicit nominal-literal addition above. The compiler emits the selected new format/profile pair with its exact supported build identity; both loaders reject mixed pairs and unknown versions. No version inference from optional fields, source constructs or adapter presence.
-
-Both new DCM formats accept READ and WRITE capability definitions in the shared catalog; `read/2` still rejects every WRITE **call**. This permits a read hook to use a catalog that also publishes writes for effect hooks without exposing write authority. All definitions, including unused ones, remain schema/type validated. This does not combine REQUEST and EVENT entrypoint schemas: each format retains its existing lifecycle and consumer restrictions.
-
-Replace required `entrypoint.grants` with optional `entrypoint.capabilityPolicy`. Remove `grants` from the new admission and invocation records; add optional `capabilityPolicy` there too. `grants`, including `{}`, is an unknown field under `/2`, never a synonym. `/1` continues requiring its old maps with omitted IDs meaning zero permission.
-
-For `effect/2`, `effectGrant` becomes optional at entrypoint, admission and invocation. The entrypoint default is one; admission omission inherits the entrypoint ceiling; invocation omission inherits admission. Explicit values are integers 0 or 1 and may only narrow the preceding ceiling. `read/2` has an intrinsic zero-write ceiling and no `effectGrant` field. The [binding contract](host-model-binding.md) moves required effect `keyBinding` to model registration and adds the trusted invocation approval scope; key/event/assurance obligations remain required. Other required API/DCM fields stay required unless that contract explicitly relocates them. Java must represent absence distinctly from zero; Node must distinguish missing properties from null. Null never means omission.
+[Catalog-bound model and artifact changes](../internal/compatibility-reference.md#catalog-delta).
 
 ## Optional restrictive controls
 
-The policy shape and DCM hook restrictions in this section apply to `/2`, `/3` and `/4`. Admission and fresh invocation narrowing apply only to legacy `/2` and `/3` APIs. Effect/4 inherits the DCM restrictions without accepting additional policy or effectGrant inputs.
+The current contract takes these restrictions from the DCM. Earlier catalog-bound and qualified-write APIs also supported narrowing at admission and invocation. See the [compatibility reference](../internal/compatibility-reference.md#catalog-delta).
 
 `capabilityPolicy` is a closed record with optional `allow`, `deny`, `maxCalls`. It is advanced host configuration, not required setup and never source input. Unknown fields, nulls, invalid counts, unknown catalog IDs and duplicate list IDs fail validation. Lists/maps are bounded by the catalog ceiling (eight capabilities); IDs use existing capability identifier rules. No pattern matching, wildcard, inheritance registry or new expression language is added.
 
@@ -123,74 +102,23 @@ The policy shape and DCM hook restrictions in this section apply to `/2`, `/3` a
 | Absent `maxCalls` or `maxCalls: {}` | No additional per-capability quota; earlier quotas still apply. |
 | `maxCalls: {id: n}` | Narrow that capability to `n` potential/static and reached/dynamic calls, integer 0..4. Zero denies calls; omitted IDs do not become denied. |
 
-For legacy `/2` and `/3`, apply constraints in order: profile/catalog, hook, admission, fresh invocation. For effect/4 apply profile/catalog and hook restrictions only. Retain inherited allow/deny constraints and quotas; omission never resets them. An explicit allowlist must be a subset of preceding eligible IDs. An explicit quota must not exceed that ID's preceding ceiling (zero if denied, otherwise inherited quota or profile call ceiling four). Reject attempted widening rather than silently accepting a broader configuration and clipping it. A denylist may repeat an already-denied catalog ID. Within one layer, apply `allow` and `deny` before quotas; a positive quota for a denied ID is invalid. The source cannot supply any layer or substitute its own DCM.
+Start with the catalog, then apply the hook restrictions. In the earlier APIs with admission and invocation policies, apply those layers in that order after the hook. Retain inherited allow/deny constraints and quotas; omission never resets them. An explicit allowlist must be a subset of preceding eligible IDs. An explicit quota must not exceed that ID's preceding ceiling (zero if denied, otherwise inherited quota or profile call ceiling four). Reject attempted widening rather than silently accepting a broader configuration and clipping it. A denylist may repeat an already-denied catalog ID. Within one layer, apply `allow` and `deny` before quotas; a positive quota for a denied ID is invalid. The source cannot supply any layer or substitute its own DCM.
 
 Per-capability quotas are independent of aggregate resource budgets: a quota of four does not permit four calls when the admitted aggregate call limit is two. In legacy APIs the existing `admission.limits` contract remains narrowing-only; omitted fields retain profile ceilings (eight steps, four potential calls, 512 aggregate AST nodes, 64 trace events, and unchanged byte/value limits). No required hook-specific call budget or named quota is introduced. Repeated READs consume the aggregate budget normally; they are not deduplicated, cached or assumed to return the same state.
 
 Compiler and loaders conservatively count all potential calls, including false guards and mutually exclusive branches, against hook policy, aggregate limits and effect ceilings. Legacy preparation also requires the artifact's potential counts to fit admission restrictions. Legacy invocation validates the fresh policy before any adapter call but applies its narrower permissions/counts to reached dispatches: a false guard consumes neither a call nor a quota and performs no per-call authorization. This preserves safe no-op execution under a narrowed invocation, as with a zero fresh effect ceiling.
 
-In legacy `/2` and `/3`, the mandatory invocation authorization request `{entrypoint}` and each reached call request `{entrypoint,capability,version}` remain unchanged. Check resource budgets and effective restrictions before per-call authorization; then validate authority/deadline/trace capacity before dispatch. No positive quota or omitted filter bypasses authorization. False, exception, non-Boolean response and timeout retain the existing denial/failure rules. Protected arguments and key/event context remain separate from source data; reused Prepared handles cache no caller identity or current permission.
+In the earlier APIs with admission and invocation policies, the mandatory invocation authorization request `{entrypoint}` and each reached call request `{entrypoint,capability,version}` remain unchanged. Check resource budgets and effective restrictions before per-call authorization; then validate authority/deadline/trace capacity before dispatch. No positive quota or omitted filter bypasses authorization. False, exception, non-Boolean response and timeout retain the existing denial/failure rules. Protected arguments and key/event context remain separate from source data; reused Prepared handles cache no caller identity or current permission.
 
 ## Effect and lifecycle safety
 
-The default maximum is one possible WRITE in effect/2, effect/3 and effect/4, zero in read/2. One is also the hard ceiling: configuration, idempotency claims, guards or mutually exclusive conditions cannot enable a second WRITE. A zero effect ceiling restricts writes without naming capabilities. Static overflow rejects compilation/preparation; dynamic checks precede dispatch. READ/WRITE classification comes from the pinned host catalog, never source or adapter claims.
+The default maximum is one possible WRITE for a single-write hook and zero for a read-only hook. One is also the hard ceiling: configuration, idempotency claims, guards or mutually exclusive conditions cannot enable a second WRITE. A zero effect ceiling restricts writes without naming capabilities. Static overflow rejects compilation/preparation; dynamic checks precede dispatch. READ/WRITE classification comes from the pinned host catalog, never source or adapter claims.
 
-`effect/2` remains post-commit simulation only. It cannot undo the original event or treat an EVENT_REPORT as a command. Pre-commit interception is still unsupported by these formats; reject `BEFORE_COMMIT` rather than adapting it to AFTER_COMMIT. Any future pre-commit contract must default to read/decide/return with the host performing its native effect after validation; an opaque key does not authorize independent writes before native commit. REQUEST/display continues to provide no permission for a native mutation.
+The catalog-bound simulated-write contract only supports simulation after commit. A single-write rule cannot undo the original event or use its EVENT_REPORT as a command. Pre-commit interception is unsupported; reject `BEFORE_COMMIT` rather than adapting it to AFTER_COMMIT. Any future pre-commit contract must default to read/decide/return with the host performing its native effect after validation; an opaque key does not authorize independent writes before native commit. REQUEST/display continues to provide no permission for a native mutation.
 
 Keep the single-effect receipt and winner rules unchanged: winning CONFIRMED/NONE evidence settles before completion clock/payload checks, UNKNOWN survives lost responses, late responses cannot mutate termination, and failure after CONFIRMED does not imply rollback. Simulation and declarations do not certify real authorization or idempotency.
 
-## Examples and rejection obligations
+<a id="examples-and-rejection-obligations"></a>
+<a id="migration-and-acceptance"></a>
 
-These are read/2 fragments, not complete source documents or `/1` fixtures. The admission/invocation examples and callback diagnostics below describe legacy `/2`, not effect/4. Assume the approved catalog already defines `tasks.get` and `tasks.getSummary` as READ operations accepting agent `taskId` and protected `actorId`, returning a record with `status: TaskStatus`. It also defines the generic `tasks.create` as WRITE. Use existing scalar/nominal types, an input with two TaskId fields, and an output Classification enum.
-
-```yaml
-# entrypoints.ClassifyTasks in keir-dcm/read-2
-input: ClassifyInput
-output: ClassifyResult
-trigger: REQUEST
-consumer: {id: sample.classification, version: '1', kind: DISPLAY}
-# No capabilityPolicy, grants or capability names.
-```
-
-Program A calls `tasks.get(input.taskId)` and classifies its result. Program B uses the **same unchanged hook and DCM** with these steps, substituting only source and its independently selected artifact digest:
-
-```yaml
-steps:
-  - id: first
-    call: tasks.getSummary
-    args: {taskId: {cel: input.taskId}}
-  - id: second
-    call: tasks.getSummary
-    args: {taskId: {cel: input.otherTaskId}}
-return:
-  record:
-    classification: {cel: 'first.status == "COMPLETED" && second.status == "COMPLETED" ? "DONE" : "PENDING"'}
-```
-
-Both compile and run with no advanced filters when authorized and within budgets. They have distinct source/artifact digests; the unchanged DCM digest covers both published operations. Program B does not require a special-purpose host operation combining the reads. The input projection must supply both fields for either program; source cannot broaden input visibility.
-
-An optional hook restriction `capabilityPolicy: {allow: [tasks.get], maxCalls: {tasks.get: 2}}` rejects B but permits two `tasks.get` calls. Admission may narrow that to one; a two-call artifact then fails preparation. Invocation may narrow to zero; the first reached call is denied before its authorization callback/adapter. Removing this restriction is a host-approved DCM revision and recompilation, never a customer source edit. `deny: [tasks.getSummary]` is an alternative opt-in filter, not generated default configuration.
-
-| Case | Required result |
-| --- | --- |
-| Different published READ; repeated READ; all three policies absent | Accepted if typed, authorized and within aggregate bounds; same hook contract, separate compiled programs. |
-| Empty policy/empty quota map vs empty allowlist | First two inherit; empty allowlist rejects every call. Test at hook, admission and invocation boundaries. |
-| Unknown/unpublished capability or source-forged catalog/policy/binding | Fail closed; no unauthorized dispatch. An installed adapter alone cannot publish an operation. |
-| Known capability denied by current authorization | AUTHORITY_DENIED before its adapter; prior confirmed effects remain recorded. |
-| Explicit restrictive policy, quota exhaustion, attempted widening | Preserve upstream restrictions; reject malformed/widened configuration before calls and reached exhausted permission before dispatch. |
-| Two reads vs aggregate bound one; fifth potential call | BUDGET_EXCEEDED; named quotas cannot increase the aggregate bound. |
-| A WRITE in read/2 or zero effect ceiling; second potential WRITE | Reject before execution, including false guards; no inference from idempotency metadata. |
-| PRE_COMMIT placement, real effect admission, changed consumer semantics | Reject under these profiles; no silent lifecycle conversion. |
-| Same artifact through Java/Node and packaged hosts | Match typed results, ordered calls/arguments, trace, effects and consumer receipt, including denial/timeout and unchanged receipt rules. |
-
-Diagnostics retain safe paths/text and existing codes. Unknown calls use `CAPABILITY_UNKNOWN`; invalid DCM policy uses `DCM_INVALID`; source calls denied by hook policy or zero effect ceiling use `ENTRY_GRANT_DENIED` at `/source/steps/<index>/call`, with the corresponding loader code at `/artifact/steps/<index>`. Hard call/write overflow uses `BUDGET_EXCEEDED`. Malformed/widened admission uses `ADMISSION_INVALID` under `/admission/capabilityPolicy` (or `/admission/effectGrant`); a well-formed admission too narrow for the plan uses `AUTHORITY_DENIED` there. Invalid/widened invocation uses `HOST_CONTEXT_INVALID` at the empty pointer; reached permission exhaustion uses `AUTHORITY_DENIED` at the step. New policy preflight follows existing structural/authority-before-expression ordering; for a known call check aggregate call overflow, hard WRITE overflow, effect permission, then capability restrictions. Keep `/1` diagnostic behavior intact.
-
-## Migration and acceptance
-
-Do not delete grants from existing DCMs, patch artifact versions, reinterpret omission or regenerate old goldens. Preserve `/1` compilation, loader rejection behavior, required host APIs and fixtures. `/2` requires explicit profile selection; an unsupported runtime must reject it. A host migrates by approving a new model and explicit compiler selection, recompiling, validating the new artifact in both runtimes, then separately selecting its digest/entrypoint/consumer. Old Prepared handles and active artifacts retain old semantics.
-
-A behavior-preserving migration converts each old grant map into `capabilityPolicy: {allow: <old keys>, maxCalls: <old map>}` at the same hook/admission/invocation layer. An empty old map becomes `allow: []`, not `{}`. Preserve explicit old effect ceilings. Broadening to the corrected generic default is a separate deliberate host decision: remove the migrated restrictions only with host approval and renewed artifact selection. Never let an SDK translate old missing grants into the new default.
-
-New host API entrypoints distinguish the optional-policy context from old required-grant records without breaking existing callers. Node selects semantics from the validated profile, not the presence of `effectGrant`; Java uses new context types and explicit methods. Adapter signatures and consumer wire outcomes need no change: read/2 keeps the read signature, effect/2 keeps the protected original-key/event signature. Revalidate registration version/mode/key compatibility and selected consumer; do not silently reroute old consumers. Scenario formats `keir-scenario/read-2` and `keir-scenario/effect-2` distinguish these defaults from old required-grant fixtures.
-
-Acceptance requires positive/negative fixtures from the table, identical deterministic compiler bytes for both runtimes, all existing `/1` regression, packaged-host examples without default named grants, and matching product assistant guidance. The local [conformance corpus](../../conformance/generic-hooks/README.md) and [testing evidence](../testing.md) record passing checks. This technical regression does not establish real-adapter guarantees or production readiness.
+[Catalog-bound examples, migration and acceptance](../internal/compatibility-reference.md#catalog-examples).

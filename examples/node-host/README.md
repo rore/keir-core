@@ -1,28 +1,36 @@
 # Node host example
 
-Run the corrected `/4` generic corpus and host-bound protocol after installing the packed Node runtime package in the example host:
+Run a follow-up rule against simulated task services. Follow the [quickstart setup](../../docs/quickstart.md#run-the-example) to install the locally packaged runtime, then run this from the repository root:
 
 ```sh
 node examples/node-host/generic.mjs conformance/generic-hooks/effect4
-node conformance/generic-hooks/bound-effect.mjs --installed
 ```
 
-The generic host binds the complete DCM and implementation map, prepares artifacts against that binding, then invokes with fresh context. The older `effect3/` qualification-protocol corpus remains available only as a legacy check:
+Read `runBoundEffectBatch` in [generic-simulation.mjs](generic-simulation.mjs) for the implementation map, the bind and prepare calls, and the fresh context passed to `invokeProgram`. The host reports 11 scenarios, including a confirmed simulated write, a skipped write, and an uncertain result after a lost response. [Integration guide](../../docs/embedding.md) · [Node.js API reference](../../docs/specs/host-model-binding.md#api-shapes)
+
+To exercise the installed runtime against the shared host-bound protocol cases, run `node conformance/generic-hooks/bound-effect.mjs --installed`.
+
+<a id="examples-for-earlier-profiles"></a>
+## Implementation reference for earlier examples
+
+<a id="effect3-qualification"></a>
+### Qualified write example
 
 ```sh
 node examples/node-host/generic.mjs conformance/generic-hooks/effect3
 node conformance/generic-hooks/real-effect.mjs --installed
 ```
 
-For corrected `/4`, bind the DCM and complete implementation map, prepare against that bound model, then invoke with fresh context. There is no qualification object, authorizer or key-validator callback. The `effect3` and `real-effect.mjs` commands exercise legacy behavior; no example command qualifies native service guarantees. See the [effect contract](../../docs/specs/real-single-effect-admission.md).
+See the [earlier write qualification contract](../../docs/specs/real-single-effect-admission.md#legacy-effect3-qualification).
+
+<a id="read1-example"></a>
+### Original read-only example
 
 This command-line host consumes the Java-produced shared artifact through a locally packed Node library. It shows completed/open/missing tasks and a deliberately wrong-resource fake, with separate runtime outcomes and DISPLAYED/NOT_DISPLAYED consumption. All users/tasks are fictional fixture data; no real authorization or persistence is certified.
 
-From the repository root, create the ignored package directory if needed and run:
+Use the same [package setup](../../docs/quickstart.md#run-the-example), then run:
 
 ```powershell
-npm.cmd pack ./runtime-node --pack-destination .tools/packages --ignore-scripts
-npm.cmd ci --prefix examples/node-host --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
 node examples/node-host/run.mjs conformance/read-and-decide/artifact.json sha256:7ba9478b9d8f47ddc1834b1e4a05ad98326f1a0c81f85e5549e12936c1ad4424 sha256:e43a2657dadad2fdd4826c42b4e5048c7d7f046e61f48043777f5945e9a9a58f
 node --test examples/node-host/test.mjs
 ```
@@ -33,7 +41,10 @@ The first two scenarios display DONE and PENDING. Missing task returns declared 
 
 The read host supplies current grants, protected actor binding, authorization and a monotonic deadline. It validates the output before display. Fake READ adapters use explicit simulation registration and cannot be selected through a real-mode admission.
 
-The separate effect command runs the fixed [single-effect corpus](../../conformance/single-effect/README.md) through installed `@keir/runtime-node`, with the same Java-produced artifact and independently held pins:
+<a id="effect1-simulation"></a>
+### Original simulated write
+
+The effect command runs the fixed [single-effect corpus](../../conformance/single-effect/README.md) through installed `@keir/runtime-node`, with the Java-produced artifact and independently held pins:
 
 ```sh
 node examples/node-host/effect.mjs conformance/single-effect/artifact.json sha256:d441413373a59a0a40a509143146fef8fe9c1c2426bee430965efddee591f31c sha256:d97c00f679ed0441817a610a71faeda949069c34fcb2a8d89774838d87a71e77
@@ -44,7 +55,10 @@ It emits deterministic rows containing runtime outcomes, trusted call captures a
 
 The simulator module imports no runtime and receives the selected API from its caller. Default conformance tests inject the source library before host installation; this command injects only the installed package. Its local corpus and trusted fixtures are part of this repository example, with no sibling runtime-source import. Both commands preserve their original native keys and keep them outside public traces. No task application, live activation, real deduplication or persistence guarantee is implemented.
 
-The separate `/2` host binds the complete reviewed catalog once, prepares the fixed Java-produced program variants, and executes each scenario with fresh scope, authorization and native context:
+<a id="read2-and-effect2-examples"></a>
+### Catalog-bound read and simulated write examples
+
+These profiles bind the complete reviewed catalog, prepare the fixed program variants, and execute each scenario with fresh scope, authorization and native context:
 
 ```sh
 node examples/node-host/generic.mjs conformance/generic-hooks/read
@@ -54,6 +68,6 @@ node --test examples/node-host/test.mjs
 
 The directory is trusted operator input for this qualification command. Model/artifact pins are separate reviewed files; program names map only to fixed basenames. Scenario data cannot select paths, callable code, credentials, mode, keys or authority. All 9 read and 19 effect scenarios use the ordinary installed library; default source tests inject the source library into the same simulator before host installation. Both batches emit `{id,outcome,calls,consumption}` rows and compare them with independently authored expectations.
 
-The `/2` input retains the hook's actual task ID. Project and title are compiled customer choices; changing only those source literals does not change the model, input or adapter. The generic creation bridge receives only project/title business arguments plus separate protected actor and original key/event context. Request-local fixture state uses Node's `AsyncLocalStorage`; no process-global current user is used. The authorizer independently checks the entrypoint, published capability and exact version before fixture decisions. Captures are paired with actual dispatch traces by ordinal, and an external mismatch ledger prevents caught adapter exceptions from hiding a failed simulation.
+The catalog-bound input retains the hook's actual task ID. Project and title are compiled customer choices; changing only those source literals does not change the model, input or adapter. The generic creation bridge receives only project/title business arguments plus separate protected actor and original key/event context. Request-local fixture state uses Node's `AsyncLocalStorage`; no process-global current user is used. The authorizer independently checks the entrypoint, published capability and exact version before fixture decisions. Captures are paired with actual dispatch traces by ordinal, and an external mismatch ledger prevents caught adapter exceptions from hiding a failed simulation.
 
 The local harness permits four live model handles, eight Prepared handles, one synchronous bind/prepare operation and two in-flight invocations, with no queue. It rejects raw model bytes above 65,536 and artifact bytes above 1,048,576 before calling the library. Each model slot reserves the full 65,536-byte canonical-model and descriptor ceilings, bounding each aggregate to 262,144 without another descriptor parser. Prepared slots bound retained artifact selection to 8,388,608 bytes; pinned/in-flight users prevent early release. Capacity rejection has the host test reason `CAPACITY_EXCEEDED`, not a fabricated Keir outcome. Bounded file reads and a 1 MiB output ceiling protect the command's fixed batch. These controlled limits do not claim production sizing, decoded-heap isolation or revocation/retirement services.
