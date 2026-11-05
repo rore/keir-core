@@ -41,9 +41,13 @@ Design: [Public contract normalization](../../docs/internal/public-contract-norm
 
 **Approvals:** The user approved the single public contract and clean cutover for Core and Daymark.
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Reviewed implementation plan
 
 The independent review passed for plan SHA-256 `ae9609c61835dc58e54c5487af1980b01e93043fcee63fc7634805647032ff37` against compiler base `1e96300`. The plan matches the accepted compiler and scenario rules in Core `4a7b59c`. It ports current compiler behavior, tests strict scenario bytes at their boundaries, and freezes one compiler-produced corpus for both runtimes. Compiler-only checks can run before integration. The combined release must also port or retire the old callers in the runtime tests, teaching hosts, qualification tools, and CI before it moves to main.
+
+## Compiler result review
+
+Independent result review passed at `5e7ba9c9d146b5cb5d8d462aae6502b42ce9170a`. The offline compiler package passed 59 tests. All eight artifacts matched between the Java API and packaged CLI. Structural checks passed 31 positive and 19 negative cases. The fixture root is `conformance/keir-1`, with adjacent SHA-256 pins, 20 scenario documents and 45 raw phase vectors. The compiler and corpus are frozen for both runtime tasks. Combined runtime, teaching host, qualification, and CI verification remain open.
