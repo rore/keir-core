@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { fromBinary, fromJson, toBinary } from '@bufbuild/protobuf';
 import { celEnv, CelScalar, plan } from '@bufbuild/cel';
 import { CheckedExprSchema } from '@bufbuild/cel-spec/cel/expr/checked_pb.js';
@@ -75,7 +76,7 @@ test('binding inspects descriptors without invoking getters or native implementa
   }
 });
 
-test('binding snapshots model bytes and validates unused catalog data and exact error count', () => {
+test('binding snapshots model bytes and retains exact identity for unused catalog data', () => {
   const f = boundFixture(api, { program: 'no-call' });
   const bytes = Buffer.from(JSON.stringify(f.dcm, null, 2));
   const { boundModel, diagnostic } = api.bindModel(bytes, f.implementations);
@@ -84,16 +85,34 @@ test('binding snapshots model bytes and validates unused catalog data and exact 
   assert.equal(api.prepareProgram(f.bytes, boundModel).diagnostic, null);
   const duplicate = Buffer.concat([Buffer.from('{"format":"keir-dcm/1",'), f.dcmBytes.subarray(1)]);
   denied(api.bindModel(duplicate, f.implementations), '/binding/dcm');
-  for (const count of [16, 17]) {
-    const dcm = structuredClone(f.dcm);
-    dcm.capabilities['tasks.create'].errors = Array.from({ length: count }, (_, i) => `CODE_${i}`);
-    const binding = api.bindModel(canonicalBytes(dcm), f.implementations);
-    if (count === 16) {
-      assert.equal(binding.diagnostic, null);
-      denied(api.prepareProgram(f.bytes, binding.boundModel), '/artifact/modelRef', 'ARTIFACT_INVALID');
-    } else denied(binding, '/binding/dcm');
-  }
+  const dcm = structuredClone(f.dcm);
+  dcm.capabilities['tasks.create'].errors.push('UNUSED_ERROR');
+  const binding = api.bindModel(canonicalBytes(dcm), f.implementations);
+  assert.equal(binding.diagnostic, null);
+  denied(api.prepareProgram(f.bytes, binding.boundModel), '/artifact/modelRef', 'ARTIFACT_INVALID');
   assert.equal(f.calls.length, 0);
+});
+
+test('public model binding matches the shared byte boundary cases without dispatch', () => {
+  const root = new URL('../../conformance/model-binding/', import.meta.url);
+  const read = file => readFileSync(new URL(file, root));
+  const model = JSON.parse(read('valid.json'));
+  let dispatches = 0;
+  const implementations = Object.fromEntries(Object.entries(model.capabilities).map(([id, cap]) => [id, {
+    version: cap.version, mode: 'simulation', keyType: model.hostKey.type,
+    invoke() { dispatches++; },
+  }]));
+  for (const { file, diagnostic } of JSON.parse(read('cases.json'))) {
+    const binding = api.bindModel(read(file), implementations);
+    if (diagnostic === null) {
+      assert.ok(binding.boundModel, file);
+      assert.equal(binding.diagnostic, null, file);
+    } else {
+      assert.equal(binding.boundModel, null, file);
+      assert.deepEqual({ code: binding.diagnostic?.code, path: binding.diagnostic?.path }, diagnostic, file);
+    }
+    assert.equal(dispatches, 0, file);
+  }
 });
 
 test('only the host-bound API is exported and extra admission inputs fail closed', async () => {
