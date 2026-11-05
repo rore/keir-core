@@ -23,6 +23,10 @@ npm.cmd test --prefix runtime-node
 
 See the [testing guide](docs/testing.md) for shared conformance, package verification and opt-in resource checks.
 
+## Release packages
+
+Use [GitHub Releases](https://github.com/rore/keir-core/releases) to distribute Keir packages. Cut a release when a consumer such as Daymark needs a tested version, or when a fix or compatibility change is ready for users. Follow the [release checklist](docs/releasing.md).
+
 ## Prepare a change
 
 - Keep each change focused. Describe what changes for users and include the checks you ran.
