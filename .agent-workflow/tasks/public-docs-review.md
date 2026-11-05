@@ -42,8 +42,11 @@
 
 Rewrote the public opening, explained the example model and version policy, and added a task service mapping and worked authoring flow. The companion setup points to immutable language and model references alongside its archive. Its archived guide and inputs are intact.
 
+Refined the opening to lead with AI-assisted authoring and added a diagram that uses the follow-up example to show the handoff from the compiler to the app's services.
+
 ## Evidence
 
 - Checked 98 repository and pinned links. Confirmed the archive input diff is empty.
 - Installed the pinned Node package in isolation. Node and Java both matched the quickstart output for the pinned example and edited title. Removing the nominal annotation reproduced `NOMINAL_MISMATCH` at the project comparison. Git Bash returned a failure and skipped the Node command when compilation failed.
 - Used the packaged public binding APIs to reproduce the two runtime discrepancies. Node accepts a model with a UTF-8 BOM and Java rejects it with `ADMISSION_INVALID`. Both accept 16 valid declared errors and reject 17. Node reports `ADMISSION_INVALID` and Java reports `BUDGET_EXCEEDED` for the latter, both at `/binding/dcm`. The contract owners received the reproductions and proposed shared boundary tests.
+- Rendered the README SVG at its native size and inspected the flow, labels and contrast. The README image link resolves to a self-contained SVG with descriptive alternative text.

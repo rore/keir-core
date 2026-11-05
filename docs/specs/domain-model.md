@@ -20,6 +20,17 @@ The [source document](language.md#source-document) names the domain ID, version 
 
 The compiler accepts UTF-8 JSON or YAML model bytes. Use UTF-8 JSON without a byte-order mark when binding the model in either runtime. Raw and canonical DCM bytes each have a 65,536-byte ceiling. Nonempty metadata strings such as the domain ID, version and key type have a 256 UTF-8 byte limit. See [canonical bytes and digest rules](compiler-artifact.md#canonical-bytes-and-digest-rules) and [limits](runtime.md#limits).
 
+### Binding diagnostics
+
+These are the required `bindModel` results with matching host registrations and otherwise valid input.
+
+| Model input | Result |
+| --- | --- |
+| Valid UTF-8 JSON | Binds successfully. |
+| The same model prefixed with a UTF-8 byte-order mark | `ADMISSION_INVALID` at `/binding/dcm`. |
+| One capability declares 16 distinct valid error codes | Binds successfully. |
+| One capability declares 17 distinct valid error codes | `BUDGET_EXCEEDED` at `/binding/dcm`. |
+
 ## Types
 
 | Type | Declaration and use |
