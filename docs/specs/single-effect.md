@@ -4,7 +4,7 @@
 
 <a id="effect4-and-legacy-boundaries"></a>
 <a id="single-write-behavior-and-compatibility-boundaries"></a>
-See the [current specification](README.md#current-profile) for the single-write contract. This page keeps the earlier reference links and the shared simulation protocol.
+See the [Keir specification](README.md#current-behavior) for the single-write contract.
 
 <a id="source-and-definite-availability"></a>
 [Source steps, guards and data flow](language.md#steps-and-data-flow)
@@ -30,21 +30,14 @@ See the [current specification](README.md#current-profile) for the single-write 
 
 ## Ordered simulation protocol and acceptance
 
-This section describes repository conformance data. Use the [scenario format for the selected artifact](../internal/implementation-reference.md#serialized-identifiers-and-compiler-selectors). Fixtures provide protected inputs through the host API for that artifact.
+Each [`keir-scenario/1` document](../../schemas/scenario-1/scenario.schema.json) has exactly `{format,id,given,stubs,expect}`. The `given` object has exactly `{input,fixture}`. The trusted host selects the pinned `keir-artifact/1` and its matching `keir-dcm/1` outside the document. The fixture name resolves in the host's trusted fixture table, which supplies protected context, the clock and deterministic behavior. Expected protected arguments describe what the host should dispatch.
 
-Run the exact compiled bytes through the ordinary prepare and invoke path with explicit simulation registrations and the EVENT_REPORT consumer in both runtimes. A row has exactly `{format,id,given,stubs,expect}`.
+Read one strict UTF-8 JSON document of at most 65,536 bytes. Reject a BOM, duplicate keys and unpaired surrogates. Containers may nest up to 16 levels, including the root. Numeric metadata uses nonnegative integer tokens up to 9,007,199,254,740,991, with no leading zero except `0`. Scenario and fixture IDs match the full string `[A-Za-z0-9][A-Za-z0-9_.-]{0,63}`. IDs are case-sensitive and unique within a suite. Each document allows up to four stubs and four expected calls.
 
-| Conformance harness | Exact `given` fields |
-| --- | --- |
-| [Original simulated write](../../conformance/single-effect/README.md) | `{input,fixture}` |
-| [Generic catalog-bound, qualified-write and current single-write batches](../../conformance/generic-hooks/README.md) | `{input,fixture,program}` |
-
-`input` is the business input. `fixture` names a trusted test-host fixture that supplies protected context and deterministic behavior. In the generic harness, `program` selects a fixed, preloaded program. The current batch recognizes `main`, `zero`, `after-write-read`, and `no-call`. These names are test data. Hosts select approved artifacts independently and pass the prepared handle to the runtime API. Scenario data supplies no filesystem paths, executable callbacks, authority, or protected inputs.
-
-The current generic batch accepts one to 128 rows in at most 1 MiB. Row IDs are unique. Each row is limited to 65,536 serialized bytes, four stubs and four expected calls.
+Check lexical and structural validity first. Then check the selected artifact and model, resolve the fixture, and validate inputs and expectations against the DCM and plan before dispatch. The [shared conformance fixtures](../../conformance/keir-1/README.md) exercise this order, including incompatible formats and invalid expectations that must fail before dispatch.
 
 Each stub is `{step,capability,version,args,protectedArgs,response}` in exact dispatch order. `response` is one [valid adapter outcome](runtime.md#adapter-responses); negative protocol tests inject malformed outcomes through the trusted test harness, not a permissive production adapter schema. Before consuming a stub, the test adapter checks actual capability/version and exact agent/protected arguments, and separately checks native key identity and protected origin against the selected fixture. The adapter context has no step label: after execution, reconcile captured calls with the trusted `CALL_DISPATCHED` trace entries by dispatch ordinal, require equal counts and capabilities, and compare each actual trace step with its stub's step. Derive reported `calls.step` from the trace, never from the expected stub or a second plan interpreter. A skipped call consumes no stub. Missing, extra, wrong-order, wrong-step, mismatched, or unconsumed stubs produce a failed simulation assertion outside runtime exception handling, even if execution otherwise returned COMPLETED. Do not turn a stub mismatch into a declared business rejection.
 
-`expect` is exactly `{outcome,calls,consumption}`; outcome includes exact classification/result/error/effects/trace, calls is the ordered array of `{step,capability,version,args,protectedArgs}`, and consumption is the exact consumer receipt. Exclude real wall times. Harness diagnostics identify the mismatching field without leaking protected production values. Test clocks and fixture actions model timeout, denial and lost response without sleeps or live I/O. The original simulated-write corpus includes a simulated duplicate. Native duplicate handling and retention require host evidence.
+`expect` is exactly `{outcome,calls,consumption}`. Compare the full outcome and trace, ordered calls of shape `{step,capability,version,args,protectedArgs}`, and the event report. Trace sequences start at zero and match the entries' positions. Test clocks and fixture actions model deadlines and lost responses. Native permissions, persistence and duplicate handling require separate host evidence.
 
-The [shared conformance corpus](../../conformance/generic-hooks/README.md) and [testing evidence](../testing.md) identify the versioned vectors. Preserve earlier profile regression fixtures and packaged-host behavior. Simulation does not establish real persistence, authority implementation, duplicate suppression, hard deadlines, exactly-once execution or recovery. Host implementations own native guarantees. Earlier qualified-write artifacts retain their [qualification protocol](real-single-effect-admission.md#legacy-effect3-qualification).
+See [testing evidence](../testing.md) for measured behavior and [earlier qualification](real-single-effect-admission.md#legacy-effect3-qualification) for historical fixtures.
