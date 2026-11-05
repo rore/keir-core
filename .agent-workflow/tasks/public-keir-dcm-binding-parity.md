@@ -46,4 +46,4 @@ The extracted Java runtime from the Core 0.1.0 draft passed all four public bind
 
 ## Combined verification
 
-The Java matrix at `656ab97` and the Node fix at `2f0f5ba` share the exact four model byte cases. The focused Java test and all 50 Node tests passed. The seven installed Node teaching tests passed against the rebuilt tarball. The tarball's installed files match its packaged bytes. The versioned release assets and Daymark pins still need to be refreshed and verified.
+The independently reviewed Java matrix at `656ab97` and the Node fix at `2f0f5ba` share the exact four model byte cases. All 70 Java runtime tests and all 50 Node runtime tests passed, including loopback. The seven installed Node teaching tests passed, and the installed files match the rebuilt tarball byte for byte. A separate install of the corrected Node 0.1.0 package passed all four public binding cases with zero dispatch. The frozen conformance fixtures and Java production code were unchanged. [Integration PR](https://github.com/rore/keir-core/pull/5)
