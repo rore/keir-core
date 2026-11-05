@@ -1,20 +1,36 @@
-# Real single-effect admission
+<a id="real-single-effect-admission"></a>
+# Single-write host contract
 
-## Current host-bound contract: effect/4
+<a id="current-host-bound-contract-effect4"></a>
+## Effect/4 contract
 
-The corrected contract uses explicit `keir-effect/4`, `keir-dcm/effect-4`, `keir-artifact/effect-4` and `keir-scenario/effect-4` identities, with DCM assurance `HOST_BOUND_SINGLE_WRITE`. It retains the bounded single-write language and outcome vocabulary while changing where live permission checks occur. Bind the complete DCM and implementation map with `bindModel(dcmBytes, implementations)`, prepare exact artifact bytes with `prepareProgram(artifactBytes, boundModel)`, then invoke with fresh bindings, deadline, original non-null key and typed event. Static model/compiler/environment compatibility is derived internally.
+The effect/4 contract uses explicit `keir-effect/4`, `keir-dcm/effect-4`, `keir-artifact/effect-4` and `keir-scenario/effect-4` identities, with DCM assurance `HOST_BOUND_SINGLE_WRITE`. The [binding API](host-model-binding.md#effect4-binding-and-preparation) defines initialization and preparation. [Runtime execution](runtime.md#effect4-execution) defines fresh invocation context and limits.
 
 There is no `/4` qualification/admission object, expected digest/scope/compiler/consumer/environment input, authorizer, key validator, liveness callback or policy knob. The host selects and approves the exact bytes; preparation cannot authenticate against an expected digest it was not given. Host implementations own current permissions, key authenticity and native commit rules. An implementation denial is an attempted call and is definite NONE only with truthful no-effect evidence. Exceptions, timeout or lost response after dispatch remain UNKNOWN; later denial cannot erase CONFIRMED. A program that reaches no capability may finish without native authorization or key-authentication checks, while runtime input/context/type/deadline/resource validation still applies.
 
 Java uses `BoundEffectAdapter`, `BoundEffectContext.deadline()`, `BoundEffectInvocation` and the distinct `invokeBoundEffectProgram` method. The implementation receives the same absolute expiry and trusted clock. The host checks the deadline before native commit. Implementations may call local or HTTP/RPC services. See the [effect/4 verification record](../testing.md#effect4-verification) for the tested scope and the distinction between runtime conformance and native-provider qualification.
 
-The remainder of this document specifies the preserved legacy `/3` qualification protocol.
+## Effect outcomes and key identity
 
-**Legacy `/3` status:** core protocol implemented and locally exercised; native deployment not qualified. This recorded the first real-task integration proposal for `/3`. It extends the [single-effect semantics](single-effect.md), [generic catalog contract](generic-hook-capability-contract.md) and [host model binding](host-model-binding.md). The [SQLite host handoff](../internal/real-task-effect-handoff.md) is host-specific historical planning/evidence, not a `/4` qualification input. Earlier `/3` fixtures remain compatibility evidence; `/4` verification is linked above and does not grant live execution authority.
+For effect/4 the host supplies one original immutable, non-null native `requestKey`. Its implementations validate key authenticity. For legacy effect/2 and effect/3, the binding additionally supplies the versioned `keyBinding` validator. Pass the exact original value/object to each adapter, separately from business/protected scalar arguments. No stringify/hash/derive/step suffix or source-controlled replacement. Persistent native key serialization and rehydration are the host key contract, not a runtime conversion. Rehydrated values must represent the same original native identity; within each invocation all dispatches receive the same original instance/value.
+
+Use the WRITE envelopes defined in [single-effect semantics](single-effect.md):
+
+| Adapter result | Effect evidence |
+| --- | --- |
+| SUCCESS with valid outer CONFIRMED | Native commit or authoritative matching duplicate receipt |
+| BUSINESS_REJECTION / TRANSIENT_FAILURE with NONE | Definite no effect for this attempted dispatch |
+| UNKNOWN_COMMIT with UNKNOWN | Commit cannot be established |
+
+After dispatch, timeout/exception/malformed outer envelope cannot establish NONE. Winning valid outer evidence settles before value/deadline validation; malformed result after CONFIRMED remains failed-with-CONFIRMED. Timeout winning first remains UNKNOWN; later evidence cannot rewrite the immutable runtime outcome or resume execution. Host read-only reconciliation is a separately dated native observation, not a replacement outcome or replay instruction. EVENT_REPORT never executes an action or infers an effect from a program-authored label.
+
+## Legacy effect/3 qualification
+
+The following sections specify only `keir-effect/3`. They preserve its qualification protocol and extend the [single-effect semantics](single-effect.md) and [legacy host model binding](host-model-binding.md#legacy-read1-effect1-read2-effect2-and-effect3). Effect/4 does not accept this qualification input. Implementation and native-host evidence are recorded in [testing](../testing.md), outside this contract.
 
 ## Compatibility boundary
 
-Introduce exactly `keir-effect/3`, `keir-dcm/effect-3`, `keir-artifact/effect-3` and `keir-scenario/effect-3`. The compiler selects the profile explicitly (`--profile=keir-effect/3`, Java `Environment.effect3()`). No format detection by optional field presence and no automatic upgrade of existing bytes.
+The legacy identities are exactly `keir-effect/3`, `keir-dcm/effect-3`, `keir-artifact/effect-3` and `keir-scenario/effect-3`. The compiler selects the profile explicitly (`--profile=keir-effect/3`, Java `Environment.effect3()`). No format detection by optional field presence and no automatic upgrade of existing bytes.
 
 The DCM retains the effect-2 closed schema except that `format` is `keir-dcm/effect-3` and `assurance` is exactly `HOST_QUALIFIED_SINGLE_WRITE`. That value declares the required admission protocol; it is not evidence of host qualification. Entrypoints remain EVENT/AFTER_COMMIT with EVENT_REPORT consumption. REQUEST, BEFORE_COMMIT, multiple possible writes and unsupported transport guarantees remain rejected. Catalogs expose generic native operations, not customer rules.
 
@@ -58,7 +74,7 @@ In Node, only primitive `true` grants authority. Every other callback return den
 
 The report identified by reportDigest must be reviewed qualification evidence for the deployed native service: original key preservation; atomic matching-key/payload receipts; mismatch rejection; retention without reuse; current owner/resource authorization; truthful commit evidence; crash, timeout and concurrent duplicate tests; hidden retry prohibition. The host deployment approval explicitly selects that report and build. Runtime checks identity and current approval; it cannot prove database atomicity or certify a dishonest host from a JSON claim. An allowlisted host-owned report is required; a customer-supplied digest, DCM assurance or successful simulation is insufficient. No remote report fetching, registry, signature infrastructure or generic transport package is introduced.
 
-For the first qualification, supported real invokers use the local SQLite transaction boundary defined in the handoff. Remote service registrations are not qualified by that evidence, even if their method signatures match. Other hosts need separately reviewed reports and explicit support; no universal production claim.
+Qualification evidence applies only to the native service and deployment it identifies. Matching method signatures do not qualify another host or transport; each requires its own reviewed report and explicit support.
 
 ## Validation and revocation
 
@@ -80,20 +96,6 @@ An effect/3 artifact can be prepared in either simulation or real mode against t
 
 The effect/3 scenario envelope retains effect-2's strict input, trusted fixture selection, ordered stubs and expected outcome/calls/consumer fields, changing only format. Fixtures construct protected event/key values; they cannot supply real invokers or qualification. The simulation adapter records generic create arguments and returns fixtures without touching native task tables. Business expectations are independently chosen before observing results. Approval pins the exact artifact and scenario evidence; enabling the same artifact additionally requires real host qualification and current user authority. No recompile or behavior change between checked and real program bytes.
 
-## Effect outcomes and key identity
-
-Preserve the effect/2 native key channel. The host supplies one original immutable native requestKey with a validating keyBinding. Pass the exact original value/object to each adapter, separately from business/protected scalar arguments. No stringify/hash/derive/step suffix or source-controlled replacement. Persistent native key serialization and rehydration are the host key contract, not a runtime conversion. Rehydrated values must represent the same original native identity; within each invocation all dispatches receive the same original instance/value.
-
-Use existing WRITE envelopes without extension:
-
-| Adapter result | Effect evidence |
-| --- | --- |
-| SUCCESS with valid outer CONFIRMED | Native commit or authoritative matching duplicate receipt |
-| BUSINESS_REJECTION / TRANSIENT_FAILURE with NONE | Definite no effect for this attempted dispatch |
-| UNKNOWN_COMMIT with UNKNOWN | Commit cannot be established |
-
-After dispatch, timeout/exception/malformed outer envelope cannot establish NONE. Winning valid outer evidence settles before value/deadline validation; malformed result after CONFIRMED remains failed-with-CONFIRMED. Timeout winning first remains UNKNOWN; later evidence cannot rewrite the immutable runtime outcome or resume execution. Host read-only reconciliation is a separately dated native observation, not a replacement outcome or replay instruction. EVENT_REPORT never executes an action or infers an effect from a program-authored label.
-
 ## Required shared acceptance
 
 Run the same artifact, model and vector identities through compiler, Java and Node. Extend existing effect scenarios rather than duplicating language semantics.
@@ -105,4 +107,4 @@ Run the same artifact, model and vector identities through compiler, Java and No
 5. Duplicate-confirmed native receipt, definite rejection, transient NONE, timeout/UNKNOWN, malformed outer envelope, malformed value after CONFIRMED and response/deadline winner retain existing semantics and consumer evidence.
 6. Exact byte/model/consumer/compiler/environment mismatch and missing dependencies fail before dispatch; scopes sharing pure caches cannot share invokers or qualification decisions.
 
-Native persistence/race qualification is separately required by the host handoff. Passing these deterministic vectors alone does not qualify SQLite or any deployment.
+Native persistence and race qualification are separate host obligations. Passing deterministic vectors alone does not qualify a deployment.

@@ -1,14 +1,17 @@
-# Binding a host model to capability invokers
+<a id="binding-a-host-model-to-capability-invokers"></a>
+# Host model binding
 
-## Corrected host-bound `/4` binding
+<a id="corrected-host-bound-4-binding"></a>
+## Effect/4 binding and preparation
 
 For `keir-dcm/effect-4` with `HOST_BOUND_SINGLE_WRITE`, initialize with `bindModel(dcmBytes, implementations)`. Validate the complete catalog, including unused capabilities, matching versions and key types, callable implementations, and homogeneous real or simulation mode. An empty capability catalog and empty implementation map are valid and mode-neutral; the DCM still has its required domain and entrypoint definitions. Binding invokes no implementation and performs no live authorization or key authentication.
 
-Prepare with `prepareProgram(artifactBytes, boundModel)`. The runtime derives model identity from the DCM, checks `keir-artifact/effect-4`, exact model compatibility and supported compiler/environment internally, and enforces existing program and resource limits. The host selects approved bytes and owns stored-byte integrity: this API has no expected digest input. Invoke with fresh trusted bindings, deadline, original non-null request key and typed event. Stable host implementations enforce current permission, key authenticity and native commit conditions. No approval, admission, scope, expected digest, compiler, consumer, environment, authorizer, key-validator or qualification input is part of corrected bind/prepare/invoke.
+Prepare with `prepareProgram(artifactBytes, boundModel)`. The runtime derives model identity from the DCM, checks `keir-artifact/effect-4`, exact model compatibility and supported compiler/environment internally, and enforces existing program and resource limits. The host selects approved bytes and owns stored-byte integrity: this API has no expected digest input. Invoke with fresh trusted bindings, deadline, original non-null request key and typed event. Stable host implementations enforce current permission, key authenticity and native commit conditions. No approval, admission, scope, expected digest, compiler, consumer, environment, authorizer, key-validator or qualification input is part of effect/4 bind/prepare/invoke.
 
-Preparation can be reused with distinct fresh invocation contexts. Event data is snapshotted and the original opaque request key is passed unchanged. Node snapshots the deadline's expiry and captures the `nowMs` function with its source receiver in a wrapper; it does not freeze or mutate the source clock object. Java creates a `Deadline` with the same `LongSupplier` and expiry. Neither runtime resets the deadline. Java's corrected adapter and invocation types and `invokeBoundEffectProgram` remain distinct from legacy types and methods.
+Preparation can be reused with distinct fresh invocation contexts. Event data is snapshotted and the original opaque request key is passed unchanged. Node snapshots the deadline's expiry and captures the `nowMs` function with its source receiver in a wrapper; it does not freeze or mutate the source clock object. Java creates a `Deadline` with the same `LongSupplier` and expiry. Neither runtime resets the deadline. Java's effect/4 adapter and invocation types and `invokeBoundEffectProgram` remain distinct from legacy types and methods.
 
-### Exact corrected API shapes
+<a id="exact-corrected-api-shapes"></a>
+### API shapes
 
 Node registration values are `{version, mode, keyType, invoke}` with mode `simulation` or `real`. The invoke function receives `(args, protectedArgs, remainingMs, context)`, where context is `{requestKey, event: {id, source}, deadline: {clock: {nowMs}, expiresAtMs}}`. The only invocation shape is:
 
@@ -18,7 +21,7 @@ prepareProgram(artifactBytes, boundModel) // {prepared, diagnostic}
 invokeProgram(prepared, businessInput, {bindings, deadline, requestKey, event}) // Promise<Outcome>
 ```
 
-Java uses the following corrected nested `KeirRuntime` types and distinct invocation method. Every catalog capability, including READ entries, maps to a `BoundEffectAdapter`:
+Java uses the following nested `KeirRuntime` types and distinct invocation method. Every catalog capability, including READ entries, maps to a `BoundEffectAdapter`:
 
 ```java
 @FunctionalInterface
@@ -39,13 +42,17 @@ public static CompletionStage<Outcome> invokeBoundEffectProgram(Prepared prepare
 
 `Deadline` reuses the existing `(LongSupplier clock, long expiresAtMs)` record. Java snapshots the event map and retains the original opaque key by reference.
 
-The remainder preserves the legacy `/1`–`/3` binding and admission contracts. Their callbacks and qualification requirements do not apply to `/4`.
+The [runtime contract](runtime.md#effect4-execution) defines invocation and limits; [effect evidence](real-single-effect-admission.md#effect-outcomes-and-key-identity) defines write receipts and late responses. A model reference uses the fields and descriptor recipe in [Exact reference artifact](#exact-reference-artifact), with format `keir-dcm/effect-4`. The artifact uses `keir-artifact/effect-4`; it contains the model reference rather than an embedded model. Exact model versions may coexist. A new binding does not redirect existing Prepared handles. Host code owns implementation thread safety, storage, transport and lifecycle.
 
-The `/2` contract described below is legacy behavior, locally verified in Java and Node. It implements the [shared-model direction](../internal/artifact-model-sharing-evaluation.md) and [generic-hook contract](generic-hook-capability-contract.md). See [testing evidence](../testing.md) and the runnable hosts. `/1` APIs and bytes are preserved; real transport/native guarantees and production qualification remain open.
+Binding snapshots model and registration metadata and callable references. Missing or extra implementations, wrong version/key type, non-callable implementations and mixed modes reject the complete binding before any handle is returned. Changing a callable requires a new binding. Binding failures use `ADMISSION_INVALID` under `/binding`; byte-limit failures use `BUDGET_EXCEEDED`. Preparation validates canonical artifact bytes, exact model reference, supported compiler/environment, checked expressions and the complete plan before returning a handle. Neither operation calls a capability implementation.
+
+## Legacy read/1, effect/1, read/2, effect/2 and effect/3
+
+The remaining sections preserve the versioned legacy binding and admission contracts. Their approval, scope, authorization and qualification inputs do not apply to effect/4. The `/2` reference-model API extends `/1`; effect/3 adds real-mode qualification. See [testing](../testing.md) for implementation evidence, separately from these requirements.
 
 ## One binding boundary
 
-The explicit [effect/3 extension](real-single-effect-admission.md) adds an optional final `qualification` argument to `bindModel`. Java adds `bindModel(bytes, approval, invokers, Qualification)` and retains the old three-argument overload; explicit fourth-argument null is invalid. Its `Qualification` contains evidence and a synchronous `Supplier<?>` current callback accepting Boolean true by value. Node treats undefined as omission and rejects null and boxed Boolean results. Qualification is required only for real effect/3, forbidden for simulation and earlier profiles. All existing `/1` and `/2` rules below remain unchanged. Native-host/deployment qualification is a separate obligation.
+The explicit [effect/3 extension](real-single-effect-admission.md#legacy-effect3-qualification) adds an optional final `qualification` argument to `bindModel`. Java adds `bindModel(bytes, approval, invokers, Qualification)` and retains the old three-argument overload; explicit fourth-argument null is invalid. Its `Qualification` contains evidence and a synchronous `Supplier<?>` current callback accepting Boolean true by value. Node treats undefined as omission and rejects null and boxed Boolean results. Qualification is required only for real effect/3, forbidden for simulation and earlier profiles. All existing `/1` and `/2` rules below remain unchanged. Native-host/deployment qualification is a separate obligation.
 
 The host binds a complete approved DCM and its invokers together, then reuses that opaque BoundModel. Preparation accepts no separate invoker map. A callable normally bridges to an internal HTTP/RPC service; it need not implement business logic locally.
 
@@ -59,7 +66,7 @@ Java read: invokeProgram(prepared, businessInput, Invocation2) -> CompletionStag
 Java effect: invokeEffectProgram(prepared, businessInput, EffectInvocation2) -> CompletionStage<Outcome>
 ```
 
-`approval` is a closed host-only record: `{scope, modelRef, profile, environment, mode, keyBinding?}`. Scope is an opaque host-selected nonempty String of at most 256 UTF-8 bytes, compared by exact equality; it is not an artifact field or credential. Effect bindings require the existing native `keyBinding`: its type must match DCM hostKey.type and its validator must be callable; snapshot but do not invoke the validator during binding. Read bindings omit it. Effect mode remains simulation-only. Approval comes from independently trusted configuration, never from customer-supplied self-description.
+`approval` is a closed host-only record: `{scope, modelRef, profile, environment, mode, keyBinding?}`. Scope is an opaque host-selected nonempty String of at most 256 UTF-8 bytes, compared by exact equality; it is not an artifact field or credential. Effect bindings require the existing native `keyBinding`: its type must match DCM hostKey.type and its validator must be callable; snapshot but do not invoke the validator during binding. Read bindings omit it. Effect/2 mode remains simulation-only. Approval comes from independently trusted configuration, never from customer-supplied self-description.
 
 Registration is atomic. Bound raw bytes before parsing; validate canonical DCM size, schema and exact approved identity, derive descriptors, then validate **all** invokers. Require exactly one callable per catalog capability ID, including unused or policy-denied operations. Missing, extra, duplicate, non-callable, wrong-version, wrong-mode or incompatible key-type entries reject the entire binding. READ/WRITE classification comes only from the DCM. Read-profile catalogs containing WRITE definitions still require their bindings but cannot dispatch them. Registration is not a per-extension allowlist; optional policy and fresh authorization restrict dispatch separately.
 
