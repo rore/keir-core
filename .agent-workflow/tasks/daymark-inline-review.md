@@ -41,7 +41,7 @@ Design reference: [Review inside the conversation](../../docs/internal/studio-in
 
 **Approvals:** Approved to integrate the reviewed in-conversation design in Daymark. Existing approval and activation requirements remain in force for each customization.
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Delivery
@@ -53,3 +53,9 @@ The user approved moving the reviewed design into the working demo. The Daymark 
 The independent reviewer checked the client plan at SHA-256 `876bab48fa3fbbaad831901799a94030950280e10f62ac6e8beb8c81a43b8ca8`. It passes with a fresh owner-bound state read after loading the saved evidence and source. That read must be independent of active-version comparison. Scroll and focus intent are separate from decision freshness.
 
 The current host can replace passing approval evidence for the same revision without changing the selection generation. The developer reproduced the race with two passing proofs. The reviewed addendum at SHA-256 `b6a69b61411eb0caff97fc52dd9a60f7f8c291b32289591e7840064e7fdcd111` requires Studio to send its reviewed evidence ID on activation. Daymark compares it to the approved ID inside the existing transaction and rejects a mismatch before selection or history writes. Preserve authorization, revision, draft, suite, generation and uncertain-response recovery. Test an intervening approval, explicit turn-on with the matching proof, and a committed response lost in transit. Deploy matching web and server assets together because older cached clients omit the new required field.
+
+## Result review
+
+Independent technical review passed for Daymark `f3b02f547b0c7ae36aa08fc6576f8b296e122db4`. Review confirmed that the behavior illustration appears before the checks, mismatched projects are distinguishable, and a delayed turn-off respects where the user is reading. The server rejects a changed approval before writing selection or history. The client preserves typed text and checks the saved outcome after an uncertain response.
+
+The production build passed. The qualified Node suite passed 362 tests with 13 skipped. A total of 48 distinct browser checks passed across the reviewed runs and focused reruns. The working application used the actual compiler, simulator and lifecycle with disposable data and scripted provider responses. Designer review of the working app is pending. Live provider, browser zoom and screen-reader verification remain outside this evidence.
