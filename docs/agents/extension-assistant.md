@@ -1,13 +1,13 @@
 <a id="customer-extension-assistant"></a>
 # Build a customer authoring assistant
 
-This guide is for developers adding an assistant to their application. Use the [model-facing guide](customer-authoring-guide-v2.md) as the instructions for that assistant. The [v2 companion](authoring-companion.md) packages those instructions with schemas and a worked example.
+Use the [model-facing guide](customer-authoring-guide-v3.md) as instructions for an assistant in your application. The [authoring companion](authoring-companion.md) packages the guide with schemas and a worked example.
 
 ## Task and inputs
 
 Give the assistant the exact model approved for the customer, including hooks, capabilities, result contracts, types and limits. Give it separate access to the authoring tools you want it to use. For example, the follow-up extension chooses a project and title and calls the app’s existing `tasks.create` operation. The project choice belongs in source. Resource permissions belong to the application.
 
-Use the [current structural schemas](../../schemas/effect-4/README.md) to check decoded documents. Use the [compiler and runtime contracts](../specs/README.md) to check what can compile and run.
+Use the [schemas bundled with the guide](customer-authoring-guide-v3.md#follow-up-example) to check decoded documents. Use the compiler and runtimes to check what can compile and run.
 
 ## Workflow
 

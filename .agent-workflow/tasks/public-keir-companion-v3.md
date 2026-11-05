@@ -44,6 +44,8 @@
 
 Discovery and scope are recorded above. The plan review narrowed links to bundled current inputs and separated asset checks from release qualification.
 
+The command now reads an explicit commit for edition 3 and checks the bundled contract inputs against the compatibility revision. The candidate row, guide, and archive tests are in place. Historical reproduction passed before candidate verification.
+
 ## Edition 3 plan review
 
 Independent review against `94bdbb7` confirmed the committed-input and independent-pin approach. It flagged obsolete spec links and the risk of treating file digests as qualification. The plan now uses archive-local references and assigns qualification to the release owner. Edition 3 is a source candidate in this delivery.
