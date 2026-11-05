@@ -1,12 +1,12 @@
-# Keir Core
+# Keir
 
-Keir is an embeddable framework for AI-assisted application extensions. It provides a constrained language, a compiler, and runtimes for Java and Node.js.
+Keir is an embeddable framework for AI-assisted application extensions. It provides a controlled extension language, a compiler and a runtime, so an agent can turn a business user’s request into behavior the application can safely execute.
 
-In a task app, a business user might ask, “When a task in the launch project is completed, create a follow-up task.” An AI assistant can draft a Keir extension that reads the completed task, checks its project, and requests a follow-up.
+The application defines where extensions can run, what data they can use, and which capabilities they can call. The agent builds an extension from those approved pieces; Keir checks it against the application’s model and runs it through the application’s own operations. The application remains in control of its data, permissions and effects.
 
-Your application defines when extensions run, what data they receive, and which operations they can call. Keir checks the extension against that model and compiles it. You can simulate the compiled extension before approval and run the same version through the app’s own services. The app supplies the authenticated actor and checks permissions.
+For example, a user of a task application might ask: “When a task in the launch project is completed, create a follow-up task.” The agent expresses that request as a Keir extension, using the task data and task-creation capability exposed by the application.
 
-Developers can also write extensions by hand. The runtime executes compiled extensions without an AI service.
+**Let AI extend your app. Keep the app in control.**
 
 ![An AI assistant drafts a Keir extension from a customer request and the app’s model. Keir compiles it. At execution, the app checks permissions and performs the operation.](docs/images/extension-flow.svg)
 

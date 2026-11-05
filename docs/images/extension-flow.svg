@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 320" width="720" height="320" role="img" aria-labelledby="title description">
   <title id="title">From a business request to a running extension</title>
-  <desc id="description">The customer asks for a follow-up task. The app supplies the task completion event and task operations. AI drafts the extension and Keir compiles it against the app model. The app checks permissions and performs each operation when the approved extension runs.</desc>
+  <desc id="description">A business user describes the behavior they want. The app defines the events, data and capabilities available to extensions. AI drafts the extension and Keir compiles it against the app model. The app checks permissions and performs each operation when the approved extension runs.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
       <path d="M1 1L9 5L1 9" fill="none" stroke="#D1FF73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -20,14 +20,14 @@
   </g>
   <g font-family="system-ui, Segoe UI, sans-serif" text-anchor="middle">
     <g fill="#F3F4EE" font-size="22" font-weight="700">
-      <text x="183" y="51">Customer request</text>
+      <text x="183" y="51">Business request</text>
       <text x="537" y="51">Application model</text>
       <text x="360" y="162">AI drafts a Keir extension</text>
       <text x="360" y="257">Keir runs the approved extension</text>
     </g>
     <g fill="#C2D3CD" font-size="17">
-      <text x="183" y="77">Create a follow-up task</text>
-      <text x="537" y="77">Completion event and task operations</text>
+      <text x="183" y="77">Desired behavior in plain language</text>
+      <text x="537" y="77">Approved events, data and capabilities</text>
       <text x="360" y="187">Keir checks and compiles it against the model</text>
       <text x="360" y="282">The app checks permissions and performs the operation</text>
     </g>
