@@ -35,7 +35,7 @@ Design reference: [Review inside the conversation](../../docs/internal/studio-in
 **Verification plan:**
 - Check the real application at desktop and narrow widths. Walk explain, example checks, confusion, reopen, approve, turn on, turn off and later edits. Check focus, scroll, composer, readable coverage and no horizontal overflow.
 - Exercise stale, missing, failed and historical evidence; another active version; interrupted and duplicate actions. Assert that chat and opening evidence do not approve, activate or rerun checks.
-- Preserve earlier results and typed text through reload and later conversation turns. Use independent technical and rendered reviews, revise concrete findings and recheck the working app before normal preview delivery.
+- Preserve earlier results, submitted-request recovery and saved conversation through reload. Preserve unsent text through review navigation, decisions and later conversation turns while Studio remains open. Use independent technical and rendered reviews, revise concrete findings and recheck the working app before normal preview delivery.
 
 **Plan review:** Agent technical review: [Client plan and exact-proof activation review](#client-plan-and-exact-proof-activation-review). Both reviewed plans passed.
 
@@ -58,4 +58,6 @@ The current host can replace passing approval evidence for the same revision wit
 
 Independent technical review passed for Daymark `f3b02f547b0c7ae36aa08fc6576f8b296e122db4`. Review confirmed that the behavior illustration appears before the checks, mismatched projects are distinguishable, and a delayed turn-off respects where the user is reading. The server rejects a changed approval before writing selection or history. The client preserves typed text and checks the saved outcome after an uncertain response.
 
-The production build passed. The qualified Node suite passed 362 tests with 13 skipped. A total of 48 distinct browser checks passed across the reviewed runs and focused reruns. The working application used the actual compiler, simulator and lifecycle with disposable data and scripted provider responses. Designer review of the working app is pending. Live provider, browser zoom and screen-reader verification remain outside this evidence.
+The production build passed. The qualified Node suite passed 362 tests with 13 skipped. A total of 48 distinct browser checks passed across the reviewed runs and focused reruns. The working application used the actual compiler, simulator and lifecycle with disposable data and scripted provider responses. Live provider, browser zoom and screen-reader verification remain outside this evidence.
+
+The designer checked the working app on desktop and two phone widths. The main conversation, disclosure, approval and turn-on flow passed. Delivery awaits a correction to the saved-change card, which can make one checked project look like the scope of the entire rule, and rechecks for failed or unavailable evidence and a newer draft beside an active version. Unsent text survived navigation and decisions but cleared on full reload. The reviewed plan retains submitted-request recovery and limits unsent text preservation to the mounted Studio. The verification text now reflects that boundary.
