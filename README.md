@@ -8,9 +8,9 @@ Keir lets application developers offer customer-written extensions over a host-d
 - [Take the guided tour](docs/guided-tour.md). Follow that rule from host design through customer customization to runtime.
 - [Try Daymark](https://github.com/rore/keir-demo-app). The separate demo app shows how a task application uses Keir for approved customizations that can create real tasks.
 
-## What runs today
+## Supported contract
 
-The experimental `keir-effect/4` profile supports bounded reads and at most one potential write per program. The host binds the complete capability model and its implementations, selects the exact artifact, and supplies fresh context when an event invokes it. Keir checks compatibility, types and execution limits. The registered implementations enforce current permissions and own the write and its receipt. See the [host model binding contract](docs/specs/host-model-binding.md#corrected-host-bound-4-binding).
+The current host-bound profile, `keir-effect/4`, supports bounded reads and at most one WRITE capability call per run. The compiler checks the source against the exact host model and emits an artifact both runtimes can execute. The host binds the complete capability catalog, selects the artifact, and supplies fresh invocation context. Its registered implementations enforce permissions and own native effects. See the [versioned specifications](docs/specs/README.md) and [host model binding contract](docs/specs/host-model-binding.md#corrected-host-bound-4-binding).
 
 Local checks verified matching outcomes for 11 shared `effect/4` scenarios in Java and Node, including packaged hosts. The evidence covers local packages and controlled host integrations. Production CPU, memory and deadline containment are still being qualified. Public package compatibility and registry publication remain pending. See the [test evidence](docs/testing.md), [resource qualification](roadmap/features/runtime-resource-qualification.md) and [public release plan](roadmap/features/public-package-release.md).
 
