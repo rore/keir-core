@@ -8,10 +8,10 @@ Edition 3 packages the [customer authoring guide](customer-authoring-guide-v3.md
 Use Git and Python 3.11 or later. From the repository root, select a commit that contains the edition 3 inputs. The builder reads every input from that commit and prints the archive’s SHA-256 pin.
 
 ```sh
-python scripts/authoring-companion.py build keir-authoring-v3.zip --version 3 --revision "$(git rev-parse HEAD)"
+python scripts/authoring-companion.py build keir-authoring-v3.zip --version 3 --revision "$(git rev-parse HEAD)" --core-assets path/to/core-assets
 ```
 
-The manifest distinguishes the commit that supplied the archive inputs from the Core revision recorded in the [compatibility record](authoring-companion-v3-compatibility.json). A source candidate lists the evaluated Core revision and has an empty package list.
+The manifest distinguishes the commit that supplied the archive inputs from the Core revision recorded in the [compatibility record](authoring-companion-v3-compatibility.json). For a source candidate with an empty package list, omit `--core-assets`.
 
 ## Verify and load the guide
 

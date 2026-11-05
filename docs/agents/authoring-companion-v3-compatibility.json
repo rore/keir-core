@@ -1,5 +1,24 @@
 {
-  "status": "candidate",
-  "coreRevision": "94bdbb70d20d6161c7c0348245cf6fcc006233d0",
-  "packages": {}
+  "status": "release",
+  "coreRevision": "e5e2eb7f4bc4cc6ccd2817511793605eef88a384",
+  "packages": {
+    "compiler": {
+      "version": "0.1.0",
+      "assets": {
+        "keir-compiler-cli-0.1.0.zip": "sha256:1b6f83635c6850a77159c1649cf7922597d326b2d3573f11d7cc178e5de54260"
+      }
+    },
+    "javaRuntime": {
+      "version": "0.1.0",
+      "assets": {
+        "keir-java-runtime-maven-0.1.0.zip": "sha256:b11e3f894da0c44136bb3b62857f6ab22b6064735125658f9732914a51d4e850"
+      }
+    },
+    "nodeRuntime": {
+      "version": "0.1.0",
+      "assets": {
+        "keir-runtime-node-0.1.0.tgz": "sha256:f1d8ede797dd24faacd3de9fd00a5b93a00fb40ccde37b256e8d388c3e792078"
+      }
+    }
+  }
 }
