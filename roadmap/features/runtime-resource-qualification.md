@@ -34,6 +34,8 @@ Assuming worker limits cover all process memory, adopting an isolation platform 
 
 **Still open:** Define the supported production workload and qualify Java process-wide memory and synchronous evaluation containment. The 1 MiB probe isolates structural and byte rejection. The largest admitted artifact in the measured corpus was 26,157 bytes. Qualify a valid near-ceiling case or derive a tighter reachable bound. The harness does not independently exercise every step and call count boundary or sustained concurrency.
 
+**Next slice:** [Qualify a serial embedded workload](../../.agent-workflow/tasks/effect4-embedded-workload.md) with JVM process-wide memory and a valid artifact-size case. This workload uses a trusted host, cooperative adapters and one active invocation per host. Hard interruption of synchronous evaluation remains a separate guarantee.
+
 **Dependencies:** [bound-cel-execution](../features/bound-cel-execution.md); [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
 **Design input:** [Resource limits and gates, sections 6 and 10](../../docs/internal/design-baseline/public/keir-architecture.md); [Runner bounds, sections 6-7](../../docs/internal/design-baseline/public/compiler-artifact-and-runners-v0.md).
