@@ -59,19 +59,10 @@ function descriptorSet(dcm) {
 export function prepareModelTypes(dcm, path = '/binding/dcm/types') {
   const descriptor = descriptorSet(dcm), bytes = Buffer.from(toBinary(FileDescriptorSetSchema, descriptor));
   ok(bytes.length <= 65536, path, 'BUDGET_EXCEEDED');
-  return { registry: createFileRegistry(descriptor), descriptorBytes: bytes };
+  return { registry: createFileRegistry(descriptor) };
 }
 
-export function prepareExpressions(artifact, contexts, model) {
-  const dcm = model ? model.dcm : artifact.dcm;
-  let registry;
-  if (model) registry = model.types.registry;
-  else {
-    const descriptorBytes = base64(artifact.descriptors, 65536, '/artifact/descriptors');
-    const descriptor = decode(FileDescriptorSetSchema, descriptorBytes);
-    ok(Buffer.from(toBinary(FileDescriptorSetSchema, descriptorSet(dcm))).equals(descriptorBytes), '/artifact/descriptors');
-    registry = createFileRegistry(descriptor);
-  }
+export function prepareExpressions(contexts, { dcm, types: { registry } }) {
   const prepared = new Map();
   let totalNodes = 0;
   const scalar = type => type === 'Boolean' || type === 'String' || ['nominal', 'enum'].includes(dcm.types[type]?.kind);
@@ -94,7 +85,7 @@ export function prepareExpressions(artifact, contexts, model) {
     const checkedBytes = base64(context.checked, 16384, p);
     const checked = decode(CheckedExprSchema, checkedBytes);
     ok(checked.expr && checked.exprVersion === '' && checked.sourceInfo && checked.sourceInfo.syntaxVersion === '' && checked.sourceInfo.extensions.length === 0 && Object.keys(checked.sourceInfo.macroCalls).length === 0, p);
-    ok(['<input>', 'keir-read/1'].includes(checked.sourceInfo.location), p);
+    ok(checked.sourceInfo.location === '<input>', p);
     // CEL-Java records the final line boundary one past the source length.
     ok(checked.sourceInfo.lineOffsets.every(n => Number.isSafeInteger(n) && n >= 0 && n <= 513) && Object.values(checked.sourceInfo.positions).every(n => Number.isSafeInteger(n) && n >= 0 && n <= 512), p);
     const ids = new Set(), references = new Set();
@@ -124,7 +115,7 @@ export function prepareExpressions(artifact, contexts, model) {
         ok(record?.kind === 'record' && Object.hasOwn(record.fields, value.field), p);
         inferred = { type: record.fields[value.field] };
       } else if (kind.case === 'callExpr') {
-        const concatenate = artifact.profile === 'keir-effect/4' && value.function === '_+_';
+        const concatenate = value.function === '_+_';
         const pair = concatenate ? stringConcatenation : Object.hasOwn(pairs, value.function) ? pairs[value.function] : undefined;
         ok(pair && !value.target && value.args.length === pair[1], p);
         const ref = checked.referenceMap[node];
