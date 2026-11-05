@@ -17,7 +17,7 @@ function string(value, max = 256, nonempty = false) {
   assert.ok(typeof value === 'string' && value.isWellFormed() && Buffer.byteLength(value) <= max && (!nonempty || value.length > 0), 'Bounded fixture string');
 }
 const quote = value => '"' + value.replace(/["\\\u0000-\u001f]/g, char => char === '"' ? '\\"' : char === '\\' ? '\\\\' : '\\u00' + char.charCodeAt(0).toString(16).padStart(2, '0')) + '"';
-function typed(value, type, dcm) {
+export function typed(value, type, dcm) {
   const definition = dcm.types[type];
   if (definition?.kind === 'record') {
     shape(value, Object.keys(definition.fields));
@@ -34,7 +34,7 @@ function json(value, max = 65536) {
   });
   assert.ok(Buffer.byteLength(text) <= max, 'CAPACITY_EXCEEDED'); return JSON.parse(text);
 }
-function callShape(call, dcm, stub) {
+export function callShape(call, dcm, stub) {
   shape(call, ['step', 'capability', 'version', 'args', 'protectedArgs', ...(stub ? ['response'] : [])]);
   assert.match(call.step, /^[A-Za-z][A-Za-z0-9]{0,63}$/);
   assert.ok(own(dcm.capabilities, call.capability), 'Published fixture capability');
@@ -98,7 +98,7 @@ export function validateGenericScenario(row, dcm) {
 }
 
 const keys = new WeakMap();
-function nativeKey() {
+export function nativeKey() {
   const fail = () => { throw new Error('Opaque key conversion'); };
   const key = Object.freeze(Object.defineProperties({}, { toString: { value: fail }, toJSON: { value: fail },
     [Symbol.toPrimitive]: { value: fail }, privateValue: { enumerable: true, get: fail } }));
