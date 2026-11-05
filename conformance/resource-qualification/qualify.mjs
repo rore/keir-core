@@ -15,12 +15,18 @@ const jdk = name => process.env.JAVA_HOME
 const MB = 1_048_576;
 const DOC = 65_536;
 const start = performance.now();
+const args = process.argv.slice(2);
+assert.ok(args.length === 0 || args.length === 1 && args[0] === '--soak', 'Use --soak for the serial embedded workload');
+const soak = args.includes('--soak') ? {
+  warmups: 100, blocks: 5, perBlock: 200, heapMiB: 256, peakWorkingSetBytes: 512 * MB, sampleIntervalMs: 100,
+} : null;
+if (soak) assert.equal(process.platform, 'win32', 'The serial workload uses the Windows JVM working-set counter');
 const limits = { documentBytes: DOC, artifactBytes: MB, expressionSourceBytes: 512, expressionNodes: 64,
   expressionDepth: 16, aggregateNodes: 512, stringBytes: 256, valueBytes: 8192, steps: 8, calls: 4,
-  warmups: 5, repeats: 30, handles: 4, adapterMs: 500, maxConcurrentChildren: 1, childMs: 45_000, captureBytes: MB,
-  probeMs: 1000, probeBytes: 16_384 };
+  warmups: 5, repeats: 30, handles: 4, adapterMs: 500, maxConcurrentChildren: soak ? 2 : 1, childMs: 45_000, captureBytes: MB,
+  probeMs: 1000, probeBytes: 16_384, ...(soak ? { soak } : {}) };
 
-function child(executable, args, { timeout = limits.childMs, cap = limits.captureBytes, cancelOnReady = false } = {}) {
+function child(executable, args, { timeout = limits.childMs, cap = limits.captureBytes, cancelOnReady = false, started } = {}) {
   return new Promise((done, reject) => {
     const start = performance.now();
     const proc = spawn(executable, args, { cwd: root, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -52,6 +58,7 @@ function child(executable, args, { timeout = limits.childMs, cap = limits.captur
       done({ reason, code, signal, elapsedMs: performance.now() - start, kept,
         stdout: Buffer.concat(stdout), stderr: Buffer.concat(stderr) });
     });
+    if (started && proc.pid) started(proc.pid);
   });
 }
 
@@ -60,14 +67,44 @@ function requireExit(run, code = 0) {
   assert.equal(run.reason, 'exit', JSON.stringify(metrics(run)));
   assert.equal(run.code, code, run.stderr.toString());
 }
+
+async function runJvm(args) {
+  if (!soak) return child(jdk('java'), args);
+  let sampler;
+  const run = await child(jdk('java'), args, { started(pid) {
+    sampler = child('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', [
+      "$ErrorActionPreference = 'Stop'",
+      "$clock = [Diagnostics.Stopwatch]::StartNew()",
+      "$samples = [Collections.Generic.List[object]]::new()",
+      "$proc = Get-Process -Id " + pid,
+      "if ($proc.ProcessName -ne 'java') { throw 'Unexpected sample target' }",
+      "for ($i = 0; $i -lt " + Math.ceil(limits.childMs / soak.sampleIntervalMs) + "; $i++) { $proc.Refresh(); if ($proc.HasExited) { break };",
+      "$samples.Add(@{offsetMs=$clock.ElapsedMilliseconds; workingSetBytes=$proc.WorkingSet64; peakWorkingSetBytes=$proc.PeakWorkingSet64});",
+      "Start-Sleep -Milliseconds " + soak.sampleIntervalMs + " }",
+      "@{samples=$samples} | ConvertTo-Json -Depth 4 -Compress",
+    ].join('\n')]).then(result => ({ result }), error => ({ error }));
+  } });
+  const sampled = await sampler;
+  if (sampled?.error) throw sampled.error;
+  requireExit(run);
+  assert.ok(sampled, 'JVM sampler failed to start');
+  requireExit(sampled.result);
+  const { samples } = JSON.parse(sampled.result.stdout);
+  assert.ok(samples.length >= 2 && samples.every(row => row.workingSetBytes > 0 && row.peakWorkingSetBytes >= row.workingSetBytes),
+    'JVM working-set samples missing or invalid');
+  const peakWorkingSetBytes = Math.max(...samples.map(row => row.peakWorkingSetBytes));
+  assert.ok(peakWorkingSetBytes <= soak.peakWorkingSetBytes, 'Observed JVM working set exceeded the qualification budget');
+  return { ...run, workingSet: { counter: 'Get-Process PeakWorkingSet64', intervalMs: soak.sampleIntervalMs,
+    peakWorkingSetBytes, samples, sampler: metrics(sampled.result) } };
+}
 function padded(bytes, size) {
   assert.ok(bytes.length < size);
   return Buffer.concat([bytes, Buffer.alloc(size - bytes.length, 32)]);
 }
-function tree(leaves) {
-  if (leaves === 1) return 'true';
+function tree(leaves, first = 'true') {
+  if (leaves === 1) return first;
   const half = Math.floor(leaves / 2);
-  return '(' + tree(half) + '&&' + tree(leaves - half) + ')';
+  return '(' + tree(half, first) + '&&' + tree(leaves - half) + ')';
 }
 
 assert.ok(process.versions.node.startsWith('24.'), 'Use Node 24');
@@ -99,7 +136,8 @@ try {
     return id + '.json';
   }
   const dcmName = write('base.dcm', dcm);
-  const titleModel = write('title.dcm', readFileSync(join(fixture, 'dcm-title.json')));
+  const titleDcm = readFileSync(join(fixture, 'dcm-title.json'));
+  const titleModel = write('title.dcm', titleDcm);
   const dcmMax = write('dcm-max.dcm', padded(dcm, DOC));
   const dcmOver = write('dcm-over.dcm', padded(dcm, DOC + 1));
   compile('source-max', padded(source, DOC), dcmName);
@@ -118,6 +156,22 @@ try {
   const aggregateMax = compile('aggregate-max', program(aggregate), dcmName);
   compile('aggregate-over', program(aggregate, expr('"NO_OP"')), dcmName, '/source/steps');
   const donor = compile('aggregate-donor', program([expr(nodes63), ...aggregate.slice(1)], expr('"NO_OP"')), dcmName);
+  if (soak) {
+    const comparison = '("' + 'x'.repeat(200) + '" == "y")';
+    const expression = '!' + tree(31, comparison);
+    assert.ok(Buffer.byteLength(expression) <= limits.expressionSourceBytes);
+    const large = JSON.parse(program(Array.from({ length: 8 }, () => expr(expression))));
+    large.steps.forEach((step, i) => { step.id = 'step' + i + 'x'.repeat(59); });
+    compile('embedded-large', canonicalBytes(large), dcmName);
+    compile('embedded-large-over', canonicalBytes({ ...large, return: { record: { status: expr('"NO_OP"') } } }),
+      dcmName, '/source/steps');
+    compile('steps-over', canonicalBytes({ ...large, steps: [...large.steps, { id: 'ninth', let: { literal: true } }] }),
+      dcmName, '/source/steps');
+    for (const count of [4, 5]) {
+      const callSteps = Array.from({ length: count }, (_, i) => ({ id: 'read' + i, call: 'tasks.get', args: { taskId: expr('input.taskId') } }));
+      compile('calls-' + count, canonicalBytes({ ...large, steps: callSteps }), dcmName, count === 5 ? '/source/steps' : '');
+    }
+  }
   const wide = structuredClone(model), value = { taskId: 'task1', sixth: '' };
   const fields = wide.types.TaskCompletedInput.fields;
   fields.sixth = 'String';
@@ -146,9 +200,9 @@ try {
   requireExit(await child(jdk('javac'), ['-cp', cp, '-d', temporary, probe]));
   const java = (...jars) => ['-Xmx256m', '-cp', [temporary, ...jars].join(delimiter), 'dev.keir.runtime.ResourceProbe'];
   const compilerCases = write('compiler-cases.json', JSON.stringify(cases));
-  const measured = await child(jdk('java'), [...java(compiler, host), 'compiler', temporary, compilerCases]);
+  const measured = await runJvm([...java(compiler, host), 'compiler', temporary, compilerCases]);
   requireExit(measured);
-  output.compiler = { process: metrics(measured), ...JSON.parse(measured.stdout) };
+  output.compiler = { process: metrics(measured), workingSet: measured.workingSet, ...JSON.parse(measured.stdout) };
 
   const cli = await child(jdk('java'), ['-Xmx256m', '-jar', compiler, join(temporary, 'source-max.source'),
     join(temporary, dcmName), '--profile=keir-effect/4']);
@@ -159,6 +213,33 @@ try {
   for (const [id, file] of [['title', 'title'], ['concat', 'title-max'], ['boolean', 'title-composed'], ['main', ''], ['confirmed', 'after-write-read']])
     assert.deepEqual(read(id + '.json'), readFileSync(join(fixture, 'artifact' + (file ? '-' + file : '') + '.json')), id);
   output.compiler.cli = metrics(cli);
+
+  if (soak) {
+    // Slots are LETs, agent arguments, handler fields and return fields for these exact catalogs.
+    const geometry = document => {
+      assert.deepEqual(Object.keys(document.entrypoints), ['TaskCompleted']);
+      assert.ok(canonicalBytes(document.domain).length <= 512);
+      const fields = Object.keys(document.types[document.entrypoints.TaskCompleted.output].fields).length;
+      const capabilities = Object.values(document.capabilities);
+      assert.equal(capabilities.length, 2);
+      const slots = effect => {
+        const cap = capabilities.find(candidate => candidate.effect === effect);
+        assert.equal(cap?.version, '1');
+        return Object.values(cap.parameters).filter(parameter => parameter.binding === 'agent').length + cap.errors.length * fields;
+      };
+      return [fields, slots('READ'), slots('WRITE')];
+    };
+    const [fields, readSlots, writeSlots] = geometry(model);
+    assert.deepEqual([fields, readSlots, writeSlots], [1, 3, 5]);
+    assert.deepEqual(geometry(JSON.parse(titleDcm)), [fields, readSlots, writeSlots]);
+    const bindingSlots = limits.steps - limits.calls + (limits.calls - 1) * readSlots + writeSlots + fields;
+    const expressionBytes = 4 * Math.ceil(16_384 / 3) + 9 * (64 + 64 + 6) + 2 + 128;
+    const artifactBytes = bindingSlots * (expressionBytes + 2048) + 16_384;
+    const accepted = read('embedded-large.json');
+    assert.ok(accepted.length > read(aggregateMax).length && accepted.length <= artifactBytes);
+    output.artifactBound = { catalogs: [digest(dcm), digest(titleDcm)], bindingSlots, artifactBytes,
+      validFixtureBytes: accepted.length, validFixtureDigest: digest(accepted) };
+  }
 
   const largest = JSON.parse(read(aggregateMax)), extra = JSON.parse(read(donor));
   const returnId = extra.return.fields.status.expr;
@@ -177,18 +258,20 @@ try {
 
   const manifest = write('runtime-cases.json', JSON.stringify({
     limits, dcmName, dcmMax, dcmOver, titleModel, wideModel,
-    admissible: ['source-max', 'expression-text-max', 'nodes-max', 'depth-max', 'string-max', 'aggregate-max'],
+    admissible: ['source-max', 'expression-text-max', 'nodes-max', 'depth-max', 'string-max', 'aggregate-max',
+      ...(soak ? ['embedded-large'] : [])],
   }));
   const nodeArgs = ['--expose-gc', '--max-old-space-size=256', join(here, 'runtime-node.mjs'), temporary, manifest];
   for (const [engine, executable, args] of [
     ['java', jdk('java'), [...java(host), 'runtime', temporary, manifest]],
     ['node', process.execPath, nodeArgs],
   ]) {
-    const run = await child(executable, args);
+    const run = await (engine === 'java' ? runJvm(args) : child(executable, args));
     requireExit(run);
-    output.runtimes[engine] = { process: metrics(run), ...JSON.parse(run.stdout) };
+    output.runtimes[engine] = { process: metrics(run), workingSet: run.workingSet, ...JSON.parse(run.stdout) };
   }
   assert.deepEqual(output.runtimes.java.facts, output.runtimes.node.facts);
+  if (soak) assert.ok(output.runtimes.node.peakRssBytes <= soak.peakWorkingSetBytes, 'Observed Node RSS exceeded the qualification budget');
 
   const hold = 'console.log("ready"); setInterval(() => {}, 1000);';
   for (const [id, reason, script] of [

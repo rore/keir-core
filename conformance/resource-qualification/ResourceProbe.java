@@ -18,6 +18,7 @@ import static dev.keir.runtime.RuntimeData.*;
 public final class ResourceProbe {
     private static final Map<String, Object> timings = new LinkedHashMap<>();
     private static final Map<String, Object> facts = new TreeMap<>();
+    private static final Map<String, Object> retainedByBlock = new TreeMap<>();
     private static final Map<String, Object> confirmed = Map.of("kind", "SUCCESS", "effect", "CONFIRMED", "value", Map.of("id", "task2"));
     private static Path directory;
 
@@ -109,6 +110,7 @@ public final class ResourceProbe {
         var limits = map(manifest.get("limits"), "");
         int warmups = ((Number) limits.get("warmups")).intValue(), repeats = ((Number) limits.get("repeats")).intValue();
         int handles = ((Number) limits.get("handles")).intValue();
+        var soak = limits.containsKey("soak") ? map(limits.get("soak"), "") : Map.<String, Object>of();
         long deadline = ((Number) limits.get("adapterMs")).longValue();
         byte[] dcm = read((String) manifest.get("dcmName")), maxDcm = read((String) manifest.get("dcmMax"));
         byte[] overDcm = read((String) manifest.get("dcmOver")), titleDcm = read((String) manifest.get("titleModel"));
@@ -126,6 +128,7 @@ public final class ResourceProbe {
             var prepared = measure("prepare-" + id, () -> prepare(bytes, bound));
             if (id.equals("aggregate-max")) warm(id, warmups, repeats, () -> base.invoke(prepared, 2000, false), "COMPLETED", List.of());
             else outcome(base.invoke(prepared, 2000, false).join(), "COMPLETED", List.of());
+            if (id.equals("embedded-large")) soakCase(id, soak, () -> base.invoke(prepared, 2000, false), "COMPLETED", List.of());
             facts.put(id, "COMPLETED");
         }
         for (String id : List.of("artifact-max", "artifact-over", "aggregate-forged", "nodes-forged", "depth-forged")) {
@@ -160,32 +163,16 @@ public final class ResourceProbe {
             int writesBefore = title.writes.get();
             title.expectedTitle = id.equals("title-256") ? "x".repeat(255) + "!" : "Valid title";
             var result = warm(id, warmups, repeats, () -> title.invoke(prepared, 2000, true), classification, states);
-            check(title.writes.get() - writesBefore == (success ? repeats + warmups : 0), id + " unexpected dispatch count");
+            int soakInvocations = id.equals("concat") || id.equals("boolean-valid")
+                    ? soakCase(id, soak, () -> title.invoke(prepared, 2000, true), classification, states) : 0;
+            check(title.writes.get() - writesBefore == (success ? repeats + warmups + soakInvocations : 0), id + " unexpected dispatch count");
             check(result.trace().stream().anyMatch(event -> "EFFECT_INTENT".equals(event.get("event"))) == success, id + " unexpected effect intent");
             facts.put(id, observed(result));
         }
 
         byte[] main = read("main.json"), afterWrite = read("confirmed.json");
-        var prepared = measure("prepare-handles", () -> {
-            var all = new ArrayList<KeirRuntime.Prepared>();
-            for (int i = 0; i < handles; i++) all.add(prepare(main, bound));
-            return all;
-        });
-        long live = retained();
-        base.pendingRead = new CompletableFuture<>();
-        int before = base.reads.get();
-        var active = measure("invoke-overlap", () -> {
-            var all = prepared.stream().map(handle -> base.invoke(handle, 2000, true)).toList();
-            check(base.reads.get() - before == handles && all.stream().noneMatch(CompletableFuture::isDone), "Expected overlapping calls");
-            base.pendingRead.complete(base.read(Map.of("taskId", "task1")));
-            for (var invocation : all) outcome(invocation.join(), "COMPLETED", List.of("CONFIRMED"));
-            return all.size();
-        });
-        base.pendingRead = null;
-        facts.put("overlap", active);
-        java.lang.ref.Reference.reachabilityFence(prepared);
-        prepared.clear();
-        long released = retained();
+        var report = new LinkedHashMap<String, Object>();
+        if (soak.isEmpty()) report.putAll(overlap(base, bound, main, handles));
 
         var normal = prepare(main, bound);
         var confirmedFirst = prepare(afterWrite, bound);
@@ -207,8 +194,33 @@ public final class ResourceProbe {
             base.pendingRead = null;
             base.pendingWrite = null;
         }
-        report(baseline, Map.of("facts", facts, "heapWithLiveHandlesBytes", live,
-                "heapAfterReleasingHandlesBytes", released, "environment", KeirRuntime.ENVIRONMENT));
+        report.put("facts", facts);
+        report.put("retainedByBlock", retainedByBlock);
+        report.put("environment", KeirRuntime.ENVIRONMENT);
+        report(baseline, report);
+    }
+
+    private static Map<String, Object> overlap(Host base, KeirRuntime.BoundModel bound, byte[] main, int handles) {
+        var prepared = measure("prepare-handles", () -> {
+            var all = new ArrayList<KeirRuntime.Prepared>();
+            for (int i = 0; i < handles; i++) all.add(prepare(main, bound));
+            return all;
+        });
+        long live = retained();
+        base.pendingRead = new CompletableFuture<>();
+        int before = base.reads.get();
+        var active = measure("invoke-overlap", () -> {
+            var all = prepared.stream().map(handle -> base.invoke(handle, 2000, true)).toList();
+            check(base.reads.get() - before == handles && all.stream().noneMatch(CompletableFuture::isDone), "Expected overlapping calls");
+            base.pendingRead.complete(base.read(Map.of("taskId", "task1")));
+            for (var invocation : all) outcome(invocation.join(), "COMPLETED", List.of("CONFIRMED"));
+            return all.size();
+        });
+        base.pendingRead = null;
+        facts.put("overlap", active);
+        java.lang.ref.Reference.reachabilityFence(prepared);
+        prepared.clear();
+        return Map.of("heapWithLiveHandlesBytes", live, "heapAfterReleasingHandlesBytes", retained());
     }
 
     private static void diagnostic(String id, KeirRuntime.Diagnostic actual, String code, String path) {
@@ -234,6 +246,7 @@ public final class ResourceProbe {
     }
     private static KeirRuntime.Outcome outcome(KeirRuntime.Outcome result, String classification, List<String> states) {
         check(result.classification().equals(classification) && observed(result).get("effects").equals(states), observed(result));
+        if (classification.equals("COMPLETED")) check(Map.of("status", states.isEmpty() ? "NO_OP" : "CREATED").equals(result.result()), result.result());
         return result;
     }
     private static KeirRuntime.Outcome warm(String id, int warmups, int repeats,
@@ -248,9 +261,27 @@ public final class ResourceProbe {
                 samples.add((System.nanoTime() - start) / 1000);
             }
             samples.sort(null);
-            timings.put("distribution-" + id, Map.of("minUs", samples.getFirst(), "medianUs", samples.get(repeats / 2), "maxUs", samples.getLast()));
+            timings.put("distribution-" + id, Map.of("minUs", samples.getFirst(), "medianUs", samples.get(repeats / 2),
+                    "p95Us", samples.get((repeats * 95 + 99) / 100 - 1), "maxUs", samples.getLast()));
             return last;
         });
+    }
+
+    private static int soakCase(String id, Map<String, Object> soak,
+            Supplier<CompletableFuture<KeirRuntime.Outcome>> invoke, String classification, List<String> states) {
+        if (soak.isEmpty()) return 0;
+        int warmups = ((Number) soak.get("warmups")).intValue(), blocks = ((Number) soak.get("blocks")).intValue();
+        int perBlock = ((Number) soak.get("perBlock")).intValue();
+        warm(id + "-soak-warmup", 0, warmups, invoke, classification, states);
+        var heap = new ArrayList<Long>();
+        heap.add(retained());
+        for (int block = 1; block <= blocks; block++) {
+            warm(id + "-soak-" + block, 0, perBlock, invoke, classification, states);
+            heap.add(retained());
+        }
+        retainedByBlock.put(id, heap);
+        facts.put("soak-" + id, Map.of("invocations", blocks * perBlock, "classification", classification, "effects", states));
+        return warmups + blocks * perBlock;
     }
 
     private static final class Host {
