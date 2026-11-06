@@ -30,6 +30,8 @@
 
 **Result review checkpoint:** Independent review of `2ea470d` and its test-only follow-up `a3ee02d53632cc0b807ddb5e856c4479366ceb9c` found no blocking contract or migration defect. All 17 focused cases passed. The follow-up tested rollback during selection archival and receipt rebuild, verified unchanged replay of confirmed and no-effect receipts, and exercised tag normalization, request identity and limits. The old Daymark package at `e007019` reopened the v12 backup byte for byte. The separate upgraded v13 copy was retained.
 
+**Studio review checkpoint:** The designer exercised the four inline rules and their simulations on desktop and narrow screens with disposable task data. Approval and activation were distinct, and uncertain writes did not appear confirmed. The review identified four polish items before final verification. Explain no-change results when the evidence establishes a reason, show normalized tags, simplify unavailable and uncertain outcomes and timestamp details, and remove duplicated open-match text. Recheck the rendered successor at desktop and 390 and 320 pixels.
+
 **Approvals:** Isolated implementation and tests are authorized. Contract and durable migration details require independent technical review before final integration.
 
 **State:** Ready to implement
