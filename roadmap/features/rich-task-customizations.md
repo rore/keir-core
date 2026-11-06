@@ -1,7 +1,7 @@
 ---
 id: "rich-task-customizations"
-title: "Run the search, tag and due-date customization in the real app"
-status: "queued"
+title: "Compose real task workflows in Daymark"
+status: "active"
 priority: "medium"
 commitment: "committed"
 milestone: "Extend host behavior safely"
@@ -10,11 +10,15 @@ repo: "keir-demo-app"
 
 ## Summary
 
-Use the newly qualified language features and ordinary task services for the baseline invoice follow-up scenario.
+Let a business user combine task creation and completion triggers, conditions and a single action in the Customization Studio. Daymark owns the task model, native operations, event policy and Studio presentation.
 
 The first increment delivered title copying, exact matching and fixed suffixes in Daymark. A live rule created the expected follow-up title, and upgrade checks verified that prior approvals and pending completions still execute. Search, tags and due dates remain queued. [Implementation record](../../.agent-workflow/tasks/daymark-title-aware-task-customizations.md).
 
 ## In Scope
+
+- Publish Task created and Task completed in the Daymark model and support one active customization per trigger. Preserve owner and event replay boundaries.
+- Compose conditions on project, title, tags, priority, due date and whether a matching open task exists in a project. Use one action to create a task with title, note, tags, priority and due date, or update the triggering task with a tag, priority or due date.
+- Seed discoverable workflows for intake prioritization, cross-project review, follow-up suppression and missing due dates. Show the rule and its simulations inline, preserve explicit approval and activation, and verify the resulting native task state.
 
 - Publish an explicitly revised generic catalog for bounded search and the selected task fields; project/title remain customer-authored.
 - Compose get, search, tag condition and one create with a due date 168 elapsed hours later; no specialized follow-up capability.
