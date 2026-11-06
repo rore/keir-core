@@ -3,6 +3,8 @@
 
 The domain capability model (DCM) is the host's contract for an extension. It describes which entrypoints the host exposes, the data they pass, and the operations an extension may call. The [`keir-dcm/1` schema](../../schemas/dcm-1/dcm.schema.json) checks decoded structure. The compiler and runtimes also check references, UTF-8 byte limits and the relationships between fields.
 
+This page describes the Keir 1 model. See the [Keir 2 workflow expression contract](workflow-expressions.md) for the model additions.
+
 ## Model fields and identity
 
 Every top-level field below is required. Objects are closed, with unique keys and no extra fields. Optional fields described below must be omitted or valid. A null value is invalid.
@@ -92,7 +94,7 @@ All IDs must exist in the catalog. Lists contain unique IDs. Each list or quota 
 
 ## Complete example
 
-Open the [readable task model](../../examples/node-host/follow-up/dcm.json) next to the [extension source](../../examples/node-host/follow-up/source.yaml).
+The follow-up example uses the same task operations in both contracts. Open the [readable model in this checkout](../../examples/node-host/follow-up/dcm.json) to see their declarations. For Keir 1, pair the [pinned model](../../conformance/keir-1/dcm.json) with the [Keir 1 source](../../conformance/keir-1/source.yaml).
 
 | Part of the model | What it does in the example |
 | --- | --- |
@@ -102,7 +104,7 @@ Open the [readable task model](../../examples/node-host/follow-up/dcm.json) next
 | `actorId` on both operations | A protected parameter. The app supplies the authenticated actor and passes the original request key in host context. |
 | `types.FollowupResult` | Reports `CREATED` or `NO_OP` when the extension completes. The runtime reports write evidence separately. |
 
-`TaskId` and `ProjectId` are distinct types, so the extension cannot pass a task ID where a project ID is expected. This model uses the default call and write limits. The [canonical model](../../conformance/keir-1/dcm.json) carries the same data as the readable copy and is pinned for conformance.
+`TaskId` and `ProjectId` are distinct types, so the extension cannot pass a task ID where a project ID is expected. The example uses the default call and write limits. Each contract has its own model pin.
 
 The [structural checker](../../scripts/check-keir-contracts.py) checks the current fixtures against the schemas. The [Java](../../runtime-java/src/test/java/dev/keir/runtime/BoundEffectRuntimeTest.java) and [Node.js](../../runtime-node/test/bound-effect.test.js) tests check exact model binding, catalog registrations, and call and write ceilings.
 

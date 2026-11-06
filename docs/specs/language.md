@@ -5,6 +5,8 @@
 
 Keir source defines how one host entrypoint combines typed data and approved operations. The [`keir/1` source schema](../../schemas/source-1/source.schema.json) checks decoded structure. The compiler also checks the trusted [domain capability model](domain-model.md), expression types, availability, and call limits.
 
+This page describes Keir 1 source. See the [Keir 2 workflow expression contract](workflow-expressions.md) for the language additions.
+
 ## Source document
 
 The compiler accepts bounded UTF-8 JSON or YAML. The document and each nested object have a closed set of fields. Field names are unique. See [compiler and artifact contracts](compiler-artifact.md) for parsing, model selection and canonicalization.
