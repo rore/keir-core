@@ -36,6 +36,8 @@ List size, record-list queries, comprehensions, general sorting, arbitrary maps,
 
 ## Notes
 
+The Keir 2 candidate compiles the three frozen Inventory artifacts byte for byte from the packaged CLI. The packaged Java and Node runtimes agree on 28 scenarios and 51 validation vectors. The authoring companion archive builds deterministically and verifies against the candidate package digests. Whole-artifact resource qualification, hosted verification, and private release publication remain open. [Workflow expression specification](../../docs/specs/workflow-expressions.md) · [Shared conformance corpus](../../conformance/keir-2/README.md).
+
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md); [bound-cel-execution](../features/bound-cel-execution.md).
 
 **Design input:** [Language/dataflow/CEL, sections 3-5 and 10-12](../../docs/internal/design-baseline/public/keir-language-v0.md); [Selected types and query contracts, sections 2-3](../../docs/internal/design-baseline/public/domain-model-v0.md); [Baseline invoice scenario, section 4A](../../docs/internal/design-baseline/public/task-management-poc.md).
