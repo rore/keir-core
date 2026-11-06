@@ -36,6 +36,8 @@ Scheduling, implicit parent relationships, arbitrary search expansion or treatin
 
 ## Notes
 
+The native foundation is integrated in [Daymark 59c819a](https://github.com/rore/keir-demo-app/commit/59c819a1f801a50183d2fc232b433c160da03e31). It adds priority, optional exact due times and a local-time editor. An isolated upgrade from the shipped schema preserved data across all 20 tables. Studio design covers the four workflow scenarios and distinguishes confirmed no change, a check that could not run, and an unconfirmed write. This design still needs validation with the actual host and runtime.
+
 **Dependencies:** [task-organization](../features/task-organization.md); [demo-task-integration](../features/demo-task-integration.md); [enrich-followup-expressions](../features/enrich-followup-expressions.md).
 
 **Design input:** [Task examples and native guarantees, sections 3-4 and 7-8](../../docs/internal/design-baseline/public/task-management-poc.md); [Independent scenario expectations, sections 4-5](../../docs/internal/design-baseline/public/simulation-and-authoring-v0.md).
