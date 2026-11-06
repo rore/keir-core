@@ -28,7 +28,7 @@
 
 **Verification checkpoint:** The build passed. The full Node run passed 373 tests and skipped 13. Twelve opt-in process tests passed separately, and one test requires POSIX. The last focused Node run passed 21 cases after the disposition change. All 181 Chromium cases passed across grouped runs, including a final focused run of 24. Local verification used staged package bytes. Official package provenance, hosted verification on the final commit and an independent Studio review remain open.
 
-**Result review checkpoint:** Independent review of `2ea470d` found no blocking contract or migration code defect. Before integration, prove rollback during selection archive and clearing and during receipt table rebuild. Record the exact old-package restore evidence. These checks supplement the passing failure injection after the version write.
+**Result review checkpoint:** Independent review of `2ea470d` and its test-only follow-up `a3ee02d53632cc0b807ddb5e856c4479366ceb9c` found no blocking contract or migration defect. All 17 focused cases passed. The follow-up tested rollback during selection archival and receipt rebuild, verified unchanged replay of confirmed and no-effect receipts, and exercised tag normalization, request identity and limits. The old Daymark package at `e007019` reopened the v12 backup byte for byte. The separate upgraded v13 copy was retained.
 
 **Approvals:** Isolated implementation and tests are authorized. Contract and durable migration details require independent technical review before final integration.
 
