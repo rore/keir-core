@@ -32,6 +32,8 @@
 
 **Studio review checkpoint:** The designer exercised the four inline rules and their simulations on desktop and narrow screens with disposable task data. Approval and activation were distinct, and uncertain writes did not appear confirmed. Successor `7ccb182bf4fb46606c8055445a07a082fd8c6a90` ties no-change explanations to the exact saved rule and skipped condition, shows normalized tags, simplifies time details, and removes duplicated open-match text. All 30 focused Chromium cases passed, including checks at desktop and 390 and 320 pixels. Independent code review approved the successor. The designer verified the visual changes and identified one remaining copy issue. Follow-up `087ce64f97f52fea2b986d0ab4694fcf00adbd39` closes it with plain-language uncertainty and unavailable outcomes, a separate indication when the example matched, 11 passing focused Chromium cases and visual inspection of both rendered rows.
 
+**Integration candidate:** Daymark `a9b3e20b899d6d3f57535e70f92bfe2025f4b4b4` is based on Stage A `e007019` and has the exact reviewed tree from `087ce64`. Final dependency provenance and hosted checks follow publication of the Core releases.
+
 **Approvals:** Isolated implementation and tests are authorized. Contract and durable migration details require independent technical review before final integration.
 
 **State:** Ready to implement
