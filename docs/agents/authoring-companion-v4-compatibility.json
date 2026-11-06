@@ -1,6 +1,6 @@
 {
   "status": "release",
-  "coreRevision": "ae309725eaa4ae05805f46df98ff6bfcdcc1965d",
+  "coreRevision": "43f28600d8db460db6f22b48c2d4c2c0de9c52b7",
   "packages": {
     "compiler": {
       "version": "0.2.0",
