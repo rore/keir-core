@@ -16,23 +16,23 @@ The first increment delivered bounded string concatenation in the compiler and b
 
 ## In Scope
 
-- For the workflow automation increment, qualify bounded membership, optional values and timestamp arithmetic first. Determine separately whether its host queries require collection-valued results or can use a bounded predicate.
+- Qualify bounded scalar-list membership, optional scalar fields and elapsed timestamp arithmetic with the pinned Java and Node engines.
+- Let hosts express existence checks as Boolean reads. A host defines the query and its completeness. The language does not need to inspect a collection of query results for this increment.
 - Keep the single-write limit and specify validation, execution limits, failures and version alignment across the language, model, compiler, Java and Node runtimes and release packages.
 
-- Mature only the required bounded list, presence/optional, size, one non-nested exists, timestamp and elapsed-duration semantics.
 - Expose the work across language/DCM schemas, parser/type overlay, checked CEL/descriptor and wire-value encodings, compiler and both runtime validators/evaluators.
 - Measure worst-case no-match scans, string/intermediate allocations, aggregate costs, precision/range/overflow and incomplete query results before admitting constructs.
 
 ## Out of Scope
 
-General sorting, nested comprehensions, arbitrary maps, calendar/timezone scheduling, multi-effects and search as atomic duplicate prevention.
+List size, record-list queries, comprehensions, general sorting, arbitrary maps, calendar scheduling, multi-effects and query-based atomic uniqueness.
 
 ## Done When
 
 - [ ] Design/spec: publish exact selected type/value/absence/time rules, diagnostics, bounded CEL operations and accepted/rejected examples; no whole-language freeze.
-- [ ] Implementation: compiler and both runtimes execute identical get -> search -> guarded-create artifact bytes with the source-owned condition and 168-hour arithmetic.
-- [ ] Verification: tags, existing matches, absent values, oversized/incomplete lists, time overflow and adapter failures have shared outcomes; adversarial CEL costs are measured and unsupported forms rejected.
-- [ ] Documentation: schemas and both persona examples match support; all simpler scalar and legacy regressions remain passing.
+- [ ] Implementation: compiler and both runtimes agree on identical artifact bytes and outcomes for neutral examples that use bounded membership, optional values, a Boolean host read and 168-hour arithmetic.
+- [ ] Verification: shared tests cover list bounds, absence, timestamp overflow, adapter failures, worst-case membership work and rejection of unsupported expressions. Keep the existing supported scalar behavior passing.
+- [ ] Documentation and release: ship matching specifications, schemas, examples and agent instructions with the verified compiler and runtimes.
 
 ## Notes
 
