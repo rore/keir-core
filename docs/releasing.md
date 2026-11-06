@@ -8,6 +8,7 @@
 2. Build and smoke-test the package assets using the commands below. Include their licenses, notices and `SHA256SUMS`. Record the supported Keir and DCM formats, prerequisites and install steps in the release notes. Build and verify any companion with its existing command and publish its checksum alongside the archive.
 3. Create a GitHub draft against the selected commit. Download its Core assets to a separate directory and run the verifier with the staged build's checksum file. Publish after the comparison passes. If shipped package bytes need to change, cut a new version.
 4. Consumers pin the release, asset name and SHA-256 digest. Daymark can keep a verified copy for offline setup. Run the consumer's checks when it adopts the release, and verify a reference host before claiming that it supports the release.
+5. When the release is intended for Daymark, update the [running demo](https://github.com/rore/keir-demo-app/blob/main/docs/running.md) after the adopting revision passes its checks. Rehearse any database migration on a copy and keep a verified backup and a rollback path. Confirm that the demo's usual URL serves the checked build with the pinned Keir version before marking the demo rollout complete.
 
 ## Build and verify Core assets
 
