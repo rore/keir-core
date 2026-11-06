@@ -20,7 +20,7 @@ The first increment delivered title copying, exact matching and fixed suffixes i
 - Compose conditions on project, title, tags, priority, due date and whether a matching open task exists in a project. Use one action to create a task with title, note, tags, priority and due date, or update the triggering task with a tag, priority or due date.
 - Seed discoverable workflows for intake prioritization, cross-project review, follow-up suppression and missing due dates. Show the rule and its simulations inline, preserve explicit approval and activation, and verify the resulting native task state.
 
-- Publish an explicitly revised generic catalog for bounded search and the selected task fields; project/title remain customer-authored.
+- Publish a revised Daymark catalog for the bounded Boolean query and task fields. Support exact title matching. The user chooses projects and titles. Store due times as optional instants so elapsed-hour rules have the same result across time zones.
 - Compose get, search, tag condition and one create with a due date 168 elapsed hours later; no specialized follow-up capability.
 - Define actual query completeness and any domain uniqueness separately from operation-key idempotency.
 
@@ -32,7 +32,7 @@ Scheduling, implicit parent relationships, arbitrary search expansion or treatin
 
 - [ ] Design/spec: approve the expanded task model, generic arguments and real query/uniqueness contracts.
 - [ ] Implementation: run the same reviewed program in simulation and against native task data, showing created and no-op outcomes.
-- [ ] Verification: tags, existing matches, absent dates, bounded/incomplete search, overflow, concurrent duplicates and uncertain writes have honest outcomes.
+- [ ] Verification: both triggers, exact title matching, tags, existing matches, absent dates, elapsed time across daylight-saving transitions, incomplete queries, overflow, concurrent duplicates and uncertain writes have honest outcomes.
 
 ## Notes
 
