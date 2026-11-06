@@ -1,7 +1,7 @@
 ---
 id: "enrich-followup-expressions"
 title: "Add bounded collection, absence and elapsed-time expressions"
-status: "active"
+status: "done"
 priority: "medium"
 commitment: "committed"
 milestone: "Extend host behavior safely"
@@ -29,14 +29,14 @@ List size, record-list queries, comprehensions, general sorting, arbitrary maps,
 
 ## Done When
 
-- [ ] Design/spec: publish exact selected type/value/absence/time rules, diagnostics, bounded CEL operations and accepted/rejected examples; no whole-language freeze.
-- [ ] Implementation: compiler and both runtimes agree on identical artifact bytes and outcomes for neutral examples that use bounded membership, optional values, a Boolean host read and 168-hour arithmetic.
-- [ ] Verification: shared tests cover list bounds, absence, timestamp overflow, adapter failures, worst-case membership work and rejection of unsupported expressions. Keep the existing supported scalar behavior passing.
-- [ ] Documentation and release: ship matching specifications, schemas, examples and agent instructions with the verified compiler and runtimes.
+- [x] Publish the selected type, value, absence and time rules, diagnostics, bounded CEL operations, and accepted and rejected examples.
+- [x] Verify the compiler and both runtimes agree on artifact bytes and outcomes for neutral examples that use bounded membership, optional values, a Boolean host read and 168-hour arithmetic.
+- [x] Cover list bounds, absence, timestamp overflow, adapter failures, worst-case membership work, unsupported expressions, and existing scalar behavior.
+- [x] Ship matching specifications, schemas, examples and agent instructions with the verified compiler and runtimes.
 
 ## Notes
 
-The Keir 2 candidate compiles the three frozen Inventory artifacts byte for byte from the packaged CLI. The packaged Java and Node runtimes agree on 28 scenarios and 51 validation vectors. The authoring companion archive builds deterministically and verifies against the candidate package digests. Scoped resource qualification exercised cold bind and prepare, repeated confirmed and maximum-list no-match invocations, and pending host reads. In both runtimes an early read timeout prevented a write and a later read timeout preserved an earlier confirmed receipt. The serial, simulated-host samples do not establish production latency, memory, or preemption guarantees. Hosted verification and private release publication remain open. [Workflow expression specification](../../docs/specs/workflow-expressions.md) · [Shared conformance corpus](../../conformance/keir-2/README.md).
+The packaged CLI reproduced the three frozen Inventory artifacts byte for byte. Java and Node agreed on 28 scenarios and 51 validation vectors. Resource qualification exercised cold bind and prepare, confirmed writes, maximum-list no-match invocations, and pending reads. In both runtimes an early read timeout prevented a write and a later read timeout preserved an earlier confirmed receipt. The measurements used serial invocations and simulated hosts. Hosted checks passed, and the downloaded release assets matched the locally qualified bytes. [Core 0.2.0](https://github.com/rore/keir-core/releases/tag/v0.2.0) · [Authoring companion v4](https://github.com/rore/keir-core/releases/tag/authoring-v4) · [Hosted contract checks](https://github.com/rore/keir-core/actions/runs/42258542838) · [Workflow expression specification](../../docs/specs/workflow-expressions.md) · [Shared conformance corpus](../../conformance/keir-2/README.md)
 
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md); [bound-cel-execution](../features/bound-cel-execution.md).
 
