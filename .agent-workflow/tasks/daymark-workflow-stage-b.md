@@ -24,6 +24,8 @@
 
 **Verification plan:** Verify offline installation and exact format and asset pins. Test tag normalization, duplicate and empty entries, both size limits and atomic rejection. Compile a tagged-create example and use the same artifact in both execution modes. Test owner and trigger isolation, deadline and failure paths, exact revisions, receipt identity and stale selection generation. Inject a pending admission after initial inventory to prove the transaction refuses cutover. Run the four workflows through simulation and native storage. Exercise desktop and narrow browser layouts with saved conversations, focused controls and distinct simulated and confirmed outcomes. Compare old records byte for byte and rehearse rollback, reopening and old-package restore on separate copies of the Stage A database.
 
+**Implementation checkpoint:** The isolated worktree has the Keir 2 host model, both trigger selections, native reads and writes, authoring and Studio changes, and the v13 cutover guard. A focused integration test compiled and simulated both rules, approved and activated them independently, then ran those exact artifacts against native tasks and checked their distinct receipts. The build, authoring checks, 16 scenario checks and two focused Studio browser checks passed. The wider regression suite has failures under investigation. Four-workflow native verification and migration and restore rehearsals remain open.
+
 **Approvals:** Isolated implementation and tests are authorized. Contract and durable migration details require independent technical review before final integration.
 
 **State:** Ready to implement
