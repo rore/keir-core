@@ -27,11 +27,11 @@
 
 **Material assumptions:** The existing per-owner trigger selection key supports a second trigger. The exact shipped schema can be migrated transactionally with all prior rows and execution pins preserved. Verify both assumptions with disposable data.
 
-**Plan:** Start the owner-scoped Boolean lookup and isolated fixtures. Reuse the existing queue and receipt path. After the architect reviews the storage and authority plan, implement exact schema migration, atomic trigger capture and replay boundaries. Keep current completion registrations and external responses through this phase.
+**Plan:** Reuse the queue and receipt path. Rebuild tables and their dependent objects in one transaction from each exact shipped schema, preserving event row order and bytes. Move every renamed-table consumer with the schema. Keep the existing completion route and exact executable /1 bindings. Capture creation events without bindings and exclude them from execution and later backfill. Look up receipts by owner and original key and reject capability, version or payload mismatches before mutation. Run the owner-scoped Boolean lookup with deadline checks before and after the indexed read.
 
-**Verification plan:** Rehearse upgrades from shipped schemas, backup restore and failed migration rollback. Verify exact row preservation, both trigger selections, atomic capture, origin, owner isolation, deadline and query failures, one receipt per key, and current completion regressions.
+**Verification plan:** Rehearse upgrades from shipped schemas, backup restore and rollback at each rebuild boundary. Compare preserved text as bytes, including embedded NUL. Verify both trigger selections, create followed by complete, execution of a pre-upgrade pending /1 event, recovery without re-executing a started event, unchanged old receipt replay, rejection of cross-action key reuse, and explicit busy and expiry failures from the lookup.
 
-**Plan review:** The manager reviewed the scoped lookup and isolated preparation. Independent architecture review is required before editing migration or execution authority. The published Core package gates the separate workflow adapter and Studio phase.
+**Plan review:** The architect accepted the direction after inspecting the shipped schema and consumers. The plan and verification above incorporate the required migration, execution and receipt corrections. The published Core package gates the separate workflow adapter and Studio phase.
 
 **Approvals:** Isolated implementation and verification are authorized. Live startup and migration are outside this record.
 
