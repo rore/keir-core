@@ -13,7 +13,7 @@
 
 **Risk:** Elevated
 
-**Complexity:** High
+**Complexity:** Large
 
 **Plan:** Build from Daymark Stage A. Use optional `tagsText` on `tasks.create@2`. Simulation and native execution share the existing comma-separated parser, normalization and native limits. Omission or whitespace-only input uses empty tags. Empty segments are invalid. The Keir String limit is 256 UTF-8 bytes across the entire input. Reads retain a typed list of up to eight tags.
 
