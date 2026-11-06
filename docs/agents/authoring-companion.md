@@ -37,8 +37,13 @@ The digest check establishes byte identity. The [release checklist](../releasing
 
 Use `--version 1` or `--version 2` with the matching historical pin. Their build and verification commands still use the original committed inputs. See the [edition 2 release](https://github.com/rore/keir-core/releases/tag/authoring-v2) and its [pinned guide](https://github.com/rore/keir-core/blob/74d128f04a5fd76d744e3b7705f6614e64846b38/docs/agents/customer-authoring-guide-v2.md).
 
-## Edition 4 candidate
+## Edition 4 for Keir 2
 
-The [Keir 2 authoring guide](customer-authoring-guide-v4.md) and its [workflow expression reference](../specs/workflow-expressions.md) are candidate inputs for edition 4. The archive requires the matching `/2` schemas, a shared verified example, and pins for the exact Core 0.2.0 packages. Keep using edition 3 with the released Keir 1 packages.
+Edition 4 pairs the [Keir 2 authoring guide](customer-authoring-guide-v4.md), its [workflow expression reference](../specs/workflow-expressions.md), and the Keir 2 schemas with a verified inventory example. The [compatibility record](authoring-companion-v4-compatibility.json) pins the exact Core 0.2.0 packages. Use edition 3 with Keir 1 packages.
 
-Bundle the guide, reference, four linked schemas and the linked inventory example files at their repository-relative paths so the links resolve inside the extracted archive. Use the compiler-owned source, model, artifact and scenarios. Record the archive input revision separately from the Core build revision, and verify the compiler ZIP, Java Maven ZIP and Node tarball against their release digests before pinning the companion archive. [Inventory example](../specs/workflow-expressions.md#inventory-example) · [Shared fixture index](../../conformance/keir-2/README.md)
+Use the full companion source revision from the release notes to reproduce the archive. Supply the three Core package downloads in the same directory. The verifier also accepts `--core-assets` when you want to check those packages alongside the archive.
+
+```sh
+python scripts/authoring-companion.py build keir-authoring-v4.zip --version 4 --revision "$COMPANION_REVISION" --core-assets path/to/core-assets
+python scripts/authoring-companion.py verify keir-authoring-v4.zip --version 4 --sha256 "sha256:<hex>" --core-assets path/to/core-assets
+```
