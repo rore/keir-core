@@ -35,5 +35,11 @@
 
 **Approvals:** Implementation and isolated verification are authorized. Any live database change is outside this record.
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
+
+## Result review
+
+The architect approved the isolated candidate after reviewing the editor, save behavior, tests, and pinned Temporal fallback. Daymark [59c819a](https://github.com/rore/keir-demo-app/commit/59c819a1f801a50183d2fc232b433c160da03e31) integrates the exact reviewed tree. The build passed. The native suite passed 349 tests with 13 platform skips. Chromium passed 22 native browser tests plus a separate year-boundary case. The shipped schema 10 rehearsal preserved prior data across all 20 tables and round-tripped a millisecond due time after reopening. The browser suite covered daylight-saving gaps and repeated hours with native Temporal and the fallback.
+
+This is a repository integration. The running app and its database were not changed. Host workflow integration and hosted verification remain open.
