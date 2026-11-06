@@ -29,9 +29,9 @@
 
 **Plan:** Add native priority and nullable due date with explicit defaults, validation and storage constraints. Implement a transactional upgrade from the exact shipped schema. Extend ordinary task controls. Coordinate event and model semantics with the architect before any Keir-facing implementation.
 
-**Verification plan:** Test fresh schema and isolated upgrades populated with prior tasks and extension state. Verify defaults, read and update round trips, invalid values, owner isolation, unsupported source schema and failed-migration recovery. Run the affected app and browser tests.
+**Verification plan:** Test fresh schema and upgrades using a disposable database created by the shipped Daymark revision `52d81be`. Verify prior values and extension records, defaults, round trips for UTC millisecond due times, invalid times, local display across daylight-saving transitions, owner isolation, failed-migration rollback and reopening. Verify that an unsupported schema is unchanged and an old backup opens under the old app. Run the affected app and browser tests.
 
-**Plan review:** Agent technical review: The manager checked the developer's exact-source migration approach and isolated scope. Review the implemented upgrade and preservation evidence before integrating.
+**Plan review:** Agent technical review: The architect approved isolated implementation after reviewing exact schema admission, transactional schema and version updates, rollback, idempotent reopening and reset refusal. The approved revision uses nullable UTC millisecond due times and requires a fixture created by the shipped app. Review implementation and preservation evidence before integrating.
 
 **Approvals:** Implementation and isolated verification are authorized. Any live database change is outside this record.
 
