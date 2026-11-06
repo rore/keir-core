@@ -37,7 +37,7 @@ class PublicModelBindingTest {
     }
 
     private static byte[] resource(String file) throws IOException {
-        try (var stream = PublicModelBindingTest.class.getResourceAsStream("/model-binding/" + file)) {
+        try (var stream = PublicModelBindingTest.class.getResourceAsStream("/keir-2/model-binding/" + file)) {
             assertNotNull(stream, file);
             return stream.readAllBytes();
         }

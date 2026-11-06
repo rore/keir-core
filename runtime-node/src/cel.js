@@ -1,13 +1,33 @@
 import { create, createFileRegistry, fromBinary, fromJson, toBinary } from '@bufbuild/protobuf';
-import { FileDescriptorSetSchema } from '@bufbuild/protobuf/wkt';
+import { DurationSchema, FileDescriptorSetSchema, TimestampSchema, file_google_protobuf_timestamp } from '@bufbuild/protobuf/wkt';
+import { isReflectMessage } from '@bufbuild/protobuf/reflect';
 import { BinaryReader } from '@bufbuild/protobuf/wire';
 import { CheckedExprSchema } from '@bufbuild/cel-spec/cel/expr/checked_pb.js';
-import { celEnv, objectType, CelScalar, plan, isCelError } from '@bufbuild/cel';
-import { Fault, requireThat as ok, validateValue } from './validation.js';
+import { celEnv, celError, celFunc, objectType, listType, CelScalar, plan, isCelError, isCelList } from '@bufbuild/cel';
+import { Fault, fieldType, requireThat as ok, validateValue } from './validation.js';
 
-const pairs = { '_==_': ['equals', 2], '_!=_': ['not_equals', 2], '!_': ['logical_not', 1], '_&&_': ['logical_and', 2], '_||_': ['logical_or', 2], '_?_:_': ['conditional', 3] };
+const pairs = {
+  '_==_': ['equals', 2], '_!=_': ['not_equals', 2], '!_': ['logical_not', 1],
+  '_&&_': ['logical_and', 2], '_||_': ['logical_or', 2], '_?_:_': ['conditional', 3],
+  '_+_': ['add_string', 2], '@in': ['in_list', 2], '_<_': ['less_timestamp', 2],
+  timestamp: ['string_to_timestamp', 1], duration: ['string_to_duration', 1],
+};
 const p = '/artifact/expressions';
-const stringConcatenation = ['add_string', 2];
+const timestamp = objectType(TimestampSchema);
+const duration = objectType(DurationSchema);
+const minimumSecond = -62135596800n;
+const maximumSecond = 253402300799n;
+const maxDuration = 31_536_000;
+// CEL can merge an escaping Boolean error and drop its original cause. Artifact node IDs are positive.
+const timestampOverflowId = -1n;
+class TimestampOverflow extends Error {}
+const checkedAddition = celFunc('_+_', [timestamp, duration], timestamp, (left, right) => {
+  const { seconds, nanos } = left.message;
+  const elapsed = right.message.seconds;
+  const result = seconds + elapsed;
+  if (result < minimumSecond || result > maximumSecond) throw celError(new TimestampOverflow(), timestampOverflowId);
+  return create(TimestampSchema, { seconds: result, nanos });
+});
 function base64(value, max, path) {
   ok(typeof value === 'string' && value.length > 0 && value.length <= Math.ceil(max / 3) * 4 && /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value), path);
   const bytes = Buffer.from(value, 'base64');
@@ -53,7 +73,38 @@ function decode(schema, bytes) {
 
 function descriptorSet(dcm) {
   const records = Object.keys(dcm.types).filter(k => dcm.types[k].kind === 'record').sort();
-  return create(FileDescriptorSetSchema, { file: [{ name: 'keir_read.proto', package: 'keir.read', syntax: 'proto3', messageType: records.map(name => ({ name, field: Object.keys(dcm.types[name].fields).sort().map((field, i) => ({ name: field, jsonName: field, number: i + 1, label: 1, type: dcm.types[name].fields[field] === 'Boolean' ? 8 : 9 })) })) }] });
+  let usesTimestamp = Object.values(dcm.capabilities ?? {}).some(capability =>
+    Object.values(capability.parameters).some(parameter => parameter.type === 'Timestamp'));
+  const messageType = records.map(name => {
+    const fields = dcm.types[name].fields;
+    const names = Object.keys(fields).sort(), used = new Set(names), oneofDecl = [];
+    const field = names.map((name, index) => {
+      const declaration = fields[name], type = fieldType(declaration);
+      const list = dcm.types[type]?.kind === 'list' ? dcm.types[type] : undefined;
+      const scalar = list ? list.element : type;
+      const proto = { name, jsonName: name, number: index + 1, label: list ? 3 : 1, type: scalar === 'Boolean' ? 8 : 9 };
+      if (type === 'Timestamp') {
+        usesTimestamp = true;
+        proto.type = 11;
+        proto.typeName = '.google.protobuf.Timestamp';
+      } else if (typeof declaration !== 'string') {
+        let oneof = '_' + name;
+        while (used.has(oneof)) oneof = '_' + oneof;
+        used.add(oneof);
+        proto.proto3Optional = true;
+        proto.oneofIndex = oneofDecl.length;
+        oneofDecl.push({ name: oneof });
+      }
+      return proto;
+    });
+    return { name, field, oneofDecl };
+  });
+  const dependency = file_google_protobuf_timestamp.proto;
+  return create(FileDescriptorSetSchema, { file: [
+    ...(usesTimestamp ? [dependency] : []),
+    { name: 'keir_read.proto', package: 'keir.read', syntax: 'proto3', messageType,
+      dependency: usesTimestamp ? [dependency.name] : [] },
+  ] });
 }
 
 export function prepareModelTypes(dcm, path = '/binding/dcm/types') {
@@ -65,7 +116,8 @@ export function prepareModelTypes(dcm, path = '/binding/dcm/types') {
 export function prepareExpressions(contexts, { dcm, types: { registry } }) {
   const prepared = new Map();
   let totalNodes = 0;
-  const scalar = type => type === 'Boolean' || type === 'String' || ['nominal', 'enum'].includes(dcm.types[type]?.kind);
+  const scalar = type => type === 'Boolean' || type === 'String' || type === 'Timestamp' || ['nominal', 'enum'].includes(dcm.types[type]?.kind);
+  const list = type => dcm.types[type]?.kind === 'list';
   const literals = value => ({ type: 'String', literals: [value] });
   const assignable = (value, type) => value.type === type || value.literals && (type === 'String' || dcm.types[type]?.kind === 'enum' && value.literals.every(s => dcm.types[type].values.includes(s)));
   function equality(left, right) {
@@ -81,6 +133,19 @@ export function prepareExpressions(contexts, { dcm, types: { registry } }) {
     if (assignable(right, left.type)) return { type: left.type };
     throw new Fault('ARTIFACT_INVALID', p);
   }
+  function matchesType(checked, type) {
+    const kind = checked?.typeKind;
+    if (type === 'Timestamp' || type === 'Duration') return kind?.case === 'wellKnown' && kind.value === (type === 'Timestamp' ? 2 : 3);
+    if (list(type)) return kind?.case === 'listType' && matchesType(kind.value.elemType, dcm.types[type].element);
+    if (dcm.types[type]?.kind === 'record') return kind?.case === 'messageType' && kind.value === 'keir.read.' + type;
+    return scalar(type) && kind?.case === 'primitive' && kind.value === (type === 'Boolean' ? 1 : 5);
+  }
+  function engineType(type) {
+    if (type === 'Timestamp') return timestamp;
+    if (list(type)) return listType(engineType(dcm.types[type].element));
+    if (dcm.types[type]?.kind === 'record') return objectType(registry.getMessage('keir.read.' + type));
+    return type === 'Boolean' ? CelScalar.BOOL : CelScalar.STRING;
+  }
   for (const [id, context] of contexts) {
     const checkedBytes = base64(context.checked, 16384, p);
     const checked = decode(CheckedExprSchema, checkedBytes);
@@ -89,7 +154,7 @@ export function prepareExpressions(contexts, { dcm, types: { registry } }) {
     // CEL-Java records the final line boundary one past the source length.
     ok(checked.sourceInfo.lineOffsets.every(n => Number.isSafeInteger(n) && n >= 0 && n <= 513) && Object.values(checked.sourceInfo.positions).every(n => Number.isSafeInteger(n) && n >= 0 && n <= 512), p);
     const ids = new Set(), references = new Set();
-    function visit(expr, depth = 1) {
+    function visit(expr, depth = 1, present = new Set()) {
       ok(depth <= 16 && ids.size < 64, p, 'BUDGET_EXCEEDED');
       ok(expr && expr.id > 0n && expr.id <= BigInt(Number.MAX_SAFE_INTEGER) && !ids.has(String(expr.id)), p);
       const node = String(expr.id); ids.add(node);
@@ -109,35 +174,82 @@ export function prepareExpressions(contexts, { dcm, types: { registry } }) {
         ok(ref && ref.name === value.name && ref.overloadId.length === 0 && ref.value === undefined, p); references.add(node);
         inferred = { type: context.variables[value.name] };
       } else if (kind.case === 'selectExpr') {
-        ok(!value.testOnly, p);
-        const operand = visit(value.operand, depth + 1);
+        const operand = visit(value.operand, depth + 1, present);
         const record = dcm.types[operand.type];
         ok(record?.kind === 'record' && Object.hasOwn(record.fields, value.field), p);
-        inferred = { type: record.fields[value.field] };
+        const field = record.fields[value.field];
+        if (value.testOnly || typeof field !== 'string') {
+          const variable = value.operand.exprKind;
+          ok(variable.case === 'identExpr' && typeof field !== 'string', p);
+          const key = variable.value.name + '.' + value.field;
+          if (value.testOnly) inferred = { type: 'Boolean', presence: { key, positive: true } };
+          else {
+            ok(present.has(key), p);
+            inferred = { type: fieldType(field) };
+          }
+        } else inferred = { type: field };
       } else if (kind.case === 'callExpr') {
-        const concatenate = value.function === '_+_';
-        const pair = concatenate ? stringConcatenation : Object.hasOwn(pairs, value.function) ? pairs[value.function] : undefined;
+        const operation = value.function;
+        const pair = Object.hasOwn(pairs, operation) ? pairs[operation] : undefined;
         ok(pair && !value.target && value.args.length === pair[1], p);
+        const first = visit(value.args[0], depth + 1, present);
+        const args = [first, ...value.args.slice(1).map((arg, index) => {
+          const proof = first.presence;
+          const guarded = proof && (operation === '_&&_' && proof.positive ||
+            operation === '_?_:_' && proof.positive === (index === 0));
+          return visit(arg, depth + 1, guarded ? new Set([...present, proof.key]) : present);
+        })];
+        const timeAddition = operation === '_+_' && args[0].type === 'Timestamp' && args[1].type === 'Duration';
+        const overload = timeAddition ? 'add_timestamp_duration' : pair[0];
         const ref = checked.referenceMap[node];
-        ok(ref && ref.name === '' && ref.value === undefined && ref.overloadId.length === 1 && ref.overloadId[0] === pair[0], p); references.add(node);
-        const args = value.args.map(arg => visit(arg, depth + 1));
-        if (concatenate) { ok(args.every(arg => arg.type === 'String'), p); inferred = { type: 'String' }; }
-        else if (['_==_', '_!=_'].includes(value.function)) { equality(args[0], args[1]); inferred = { type: 'Boolean' }; }
-        else if (value.function === '_?_:_') { ok(args[0].type === 'Boolean', p); inferred = joinBranches(args[1], args[2]); }
-        else { ok(args.every(arg => arg.type === 'Boolean'), p); inferred = { type: 'Boolean' }; }
+        ok(ref && ref.name === '' && ref.value === undefined && ref.overloadId.length === 1 && ref.overloadId[0] === overload, p);
+        references.add(node);
+        if (operation === '_+_') {
+          ok(timeAddition || args.every(arg => arg.type === 'String'), p);
+          inferred = { type: timeAddition ? 'Timestamp' : 'String' };
+        } else if (operation === 'timestamp' || operation === 'duration') {
+          const constant = value.args[0].exprKind;
+          ok(constant.case === 'constExpr' && constant.value.constantKind.case === 'stringValue', p);
+          const literal = constant.value.constantKind.value;
+          if (operation === 'timestamp') {
+            validateValue(dcm, 'Timestamp', literal, p, 'ARTIFACT_INVALID');
+            inferred = { type: 'Timestamp' };
+          } else {
+            ok(/^(?:0|[1-9][0-9]{0,7})s$/.test(literal) && Number(literal.slice(0, -1)) <= maxDuration, p);
+            inferred = { type: 'Duration' };
+          }
+        } else if (operation === '@in') {
+          ok(list(args[1].type), p);
+          const { element } = dcm.types[args[1].type];
+          const directLiteral = value.args[0].exprKind.case === 'constExpr';
+          ok(first.type === element || directLiteral && assignable(first, element), p);
+          inferred = { type: 'Boolean' };
+        } else if (operation === '_<_') {
+          ok(args.every(arg => arg.type === 'Timestamp'), p);
+          inferred = { type: 'Boolean' };
+        } else if (operation === '_==_' || operation === '_!=_') {
+          ok(operation === '_==_' || args.every(arg => arg.type !== 'Timestamp'), p);
+          equality(args[0], args[1]);
+          inferred = { type: 'Boolean' };
+        } else if (operation === '_?_:_') {
+          ok(first.type === 'Boolean', p);
+          inferred = joinBranches(args[1], args[2]);
+        } else {
+          ok(args.every(arg => arg.type === 'Boolean'), p);
+          inferred = { type: 'Boolean' };
+          if (operation === '!_' && first.presence?.positive) inferred.presence = { key: first.presence.key, positive: false };
+        }
       } else throw new Fault('ARTIFACT_INVALID', p);
-      const type = checked.typeMap[node]?.typeKind;
-      const record = dcm.types[inferred.type]?.kind === 'record';
-      ok(type && (record ? type.case === 'messageType' && type.value === 'keir.read.' + inferred.type : type.case === 'primitive' && type.value === (inferred.type === 'Boolean' ? 1 : 5)), p);
+      ok(matchesType(checked.typeMap[node], inferred.type), p);
       return inferred;
     }
     const result = visit(checked.expr);
-    ok(scalar(context.resultType) && assignable(result, context.resultType), p);
+    ok((scalar(context.resultType) || list(context.resultType)) && assignable(result, context.resultType), p);
     ok(Object.keys(checked.typeMap).length === ids.size && Object.keys(checked.typeMap).every(k => ids.has(k)), p);
     ok(Object.keys(checked.referenceMap).length === references.size && Object.keys(checked.referenceMap).every(k => references.has(k)), p);
     totalNodes += ids.size; ok(totalNodes <= 512, p, 'BUDGET_EXCEEDED');
-    const variables = Object.fromEntries(Object.entries(context.variables).map(([name, type]) => [name, dcm.types[type]?.kind === 'record' ? objectType(registry.getMessage('keir.read.' + type)) : type === 'Boolean' ? CelScalar.BOOL : CelScalar.STRING]));
-    const evaluate = plan(celEnv({ registry, variables }), checked);
+    const variables = Object.fromEntries(Object.entries(context.variables).map(([name, type]) => [name, engineType(type)]));
+    const evaluate = plan(celEnv({ registry, variables, funcs: [checkedAddition] }), checked);
     prepared.set(id, { evaluate, variables: context.variables, resultType: context.resultType });
   }
   return { expressions: prepared, registry, totalNodes };
@@ -146,10 +258,26 @@ export function prepareExpressions(contexts, { dcm, types: { registry } }) {
 export function evaluateBinding(binding, state, dcm, prepared, path) {
   if (Object.hasOwn(binding, 'literal')) return binding.literal;
   const expression = prepared.expressions.get(binding.expr);
-  const variables = Object.fromEntries(Object.entries(expression.variables).map(([name, type]) => [name, dcm.types[type]?.kind === 'record' ? fromJson(prepared.registry.getMessage('keir.read.' + type), state[name]) : state[name]]));
+  const variables = Object.fromEntries(Object.entries(expression.variables).map(([name, type]) => {
+    const schema = type === 'Timestamp' ? TimestampSchema : dcm.types[type]?.kind === 'record'
+      ? prepared.registry.getMessage('keir.read.' + type) : undefined;
+    return [name, schema ? fromJson(schema, state[name]) : state[name]];
+  }));
   let result;
   try { result = expression.evaluate(variables); }
   catch { throw new Fault('EXPRESSION_FAILED', path); }
-  if (isCelError(result)) throw new Fault('EXPRESSION_FAILED', path);
+  if (isCelError(result)) throw new Fault(result.exprId === timestampOverflowId ? 'BUDGET_EXCEEDED' : 'EXPRESSION_FAILED', path);
+  const type = expression.resultType;
+  if (type === 'Timestamp') {
+    ok(isReflectMessage(result, TimestampSchema), path, 'EXPRESSION_FAILED');
+    const { seconds, nanos } = result.message;
+    ok(seconds >= minimumSecond && seconds <= maximumSecond &&
+      Number.isInteger(nanos) && nanos >= 0 && nanos < 1_000_000_000 && nanos % 1_000_000 === 0, path, 'EXPRESSION_FAILED');
+    result = new Date(Number(seconds * 1000n + BigInt(nanos / 1_000_000))).toISOString();
+  } else if (dcm.types[type]?.kind === 'list') {
+    ok(isCelList(result), path, 'EXPRESSION_FAILED');
+    ok(result.size <= dcm.types[type].maxItems, path, 'BUDGET_EXCEEDED');
+    result = Array.from(result);
+  }
   return validateValue(dcm, expression.resultType, result, path, 'EXPRESSION_FAILED');
 }

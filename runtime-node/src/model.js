@@ -15,7 +15,7 @@ export function bindModel(dcmBytes, implementations) {
     const raw = Buffer.from(dcmBytes), dcm = parseModelJson(raw), canonical = canonicalBytes(dcm);
     const model = validateModel(dcm, path);
     const modelRef = { domainId: dcm.domain.id, domainVersion: dcm.domain.version, format: dcm.format,
-      digest: digest(canonical), descriptorRecipe: 'keir-record-descriptors/1' };
+      digest: digest(canonical), descriptorRecipe: 'keir-record-descriptors/2' };
     path = '/binding/dcm/types';
     const types = prepareModelTypes(dcm, path);
     path = '/binding/implementations';

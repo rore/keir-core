@@ -158,7 +158,7 @@ export async function invokeProgram(prepared, businessInput, trustedInvocation) 
     let totalCalls = 0, totalEffects = 0;
     const evaluate = (binding, path) => {
       clock.remaining(path);
-      // shortcut: scalar CEL is synchronous; qualify interruption before promising hard deadlines.
+      // shortcut: CEL is synchronous; qualify interruption before promising hard deadlines.
       const value = evaluateBinding(binding, state, dcm, plan.cel, path);
       clock.remaining(path);
       return value;
@@ -187,7 +187,7 @@ export async function invokeProgram(prepared, businessInput, trustedInvocation) 
       const agentArgs = Object.create(null), protectedArgs = Object.create(null);
       for (const [name, parameter] of Object.entries(cap.parameters)) {
         if (parameter.binding === 'host') protectedArgs[name] = validateValue(dcm, parameter.type, bindings[name], '/hostBindings', 'HOST_BINDING_INVALID');
-        else agentArgs[name] = validateValue(dcm, parameter.type, evaluate(step.args[name], path), path, 'INPUT_INVALID');
+        else if (Object.hasOwn(step.args, name)) agentArgs[name] = validateValue(dcm, parameter.type, evaluate(step.args[name], path), path, 'INPUT_INVALID');
       }
       clock.remaining(path);
       freeze(agentArgs); freeze(protectedArgs);

@@ -1,13 +1,20 @@
 package dev.keir.runtime;
 
 import java.nio.charset.StandardCharsets;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
+import java.util.regex.Pattern;
 import static dev.keir.runtime.RuntimeData.*;
 
 final class Artifact {
     private static final String MODEL = "/artifact/dcm";
+    private static final Set<String> SCALARS = Set.of("Boolean", "String", "Timestamp");
+    private static final Pattern TIMESTAMP = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z");
     private static final Set<String> RESERVED = Set.of("true", "false", "null", "in", "as", "break", "const", "continue", "else", "for", "function", "if", "import", "let", "loop", "package", "namespace", "return", "var", "void", "while");
-    private static final Set<String> BUILTINS = Set.of("Boolean", "String", "bool", "bytes", "double", "dyn", "int", "list", "map", "null_type", "string", "type", "uint", "input");
+    private static final Set<String> BUILTINS = Set.of("Boolean", "String", "Timestamp", "Duration", "bool", "bytes", "double", "dyn", "int", "list", "map", "null_type", "string", "type", "uint", "input");
 
     private Artifact() {}
 
@@ -39,23 +46,35 @@ final class Artifact {
         return value instanceof Map<?,?> ? map(value, MODEL) : Map.of();
     }
     static boolean scalar(Map<String,Object> dcm, String type) {
-        return "Boolean".equals(type) || "String".equals(type) || ("nominal".equals(definition(dcm, type).get("kind")) || "enum".equals(definition(dcm, type).get("kind")));
+        if (type == null) return false;
+        Object kind = definition(dcm, type).get("kind");
+        return SCALARS.contains(type) || "nominal".equals(kind) || "enum".equals(kind);
     }
     static boolean record(Map<String,Object> dcm, String type) { return "record".equals(definition(dcm, type).get("kind")); }
+    static boolean listType(Map<String,Object> dcm, String type) { return "list".equals(definition(dcm, type).get("kind")); }
+    static String fieldType(Object declaration) {
+        return (String)(declaration instanceof Map<?,?> fields ? fields.get("type") : declaration);
+    }
+    static boolean optionalField(Object declaration) {
+        return declaration instanceof Map<?,?> fields && Boolean.TRUE.equals(fields.get("optional"));
+    }
     private static boolean scalarType(Map<String,Object> dcm, Object type) { return type instanceof String text && scalar(dcm, text); }
     private static boolean recordType(Map<String,Object> dcm, Object type) { return type instanceof String text && record(dcm, text); }
+    private static boolean valueType(Map<String,Object> dcm, Object type, boolean optional) {
+        return type instanceof String text && (scalar(dcm, text) || !optional && listType(dcm, text));
+    }
 
     static Map<String,Object> modelRef(Map<String,Object> dcm) {
         Map<String,Object> domain = map(dcm.get("domain"),MODEL);
         return Map.of("domainId",domain.get("id"),"domainVersion",domain.get("version"),
                 "format",dcm.get("format"),"digest",digest(canonical(dcm)),
-                "descriptorRecipe","keir-record-descriptors/1");
+                "descriptorRecipe","keir-record-descriptors/2");
     }
 
     static void validateModel(Map<String,Object> dcm) {
         String p = MODEL;
         exact(dcm, p, "format", "domain", "types", "capabilities", "entrypoints", "hostKey");
-        require("keir-dcm/1".equals(dcm.get("format")), p);
+        require("keir-dcm/2".equals(dcm.get("format")), p);
         require(canonical(dcm).length <= Profile.DCM_BYTES, p, "BUDGET_EXCEEDED");
         exact(dcm.get("hostKey"),p+"/hostKey","source","type");
         Map<String,Object> key = map(dcm.get("hostKey"),p+"/hostKey");
@@ -78,19 +97,40 @@ final class Artifact {
             } else if ("record".equals(kind)) {
                 exact(type, p, "kind", "fields"); Map<String,Object> fields = bounded(type.get("fields"), p, 16);
                 require(!fields.isEmpty(), p); for (String field : fields.keySet()) named(field, p, false);
+            } else if ("list".equals(kind)) {
+                exact(type, p, "kind", "element", "maxItems");
+                number(type.get("maxItems"), 0, 16, p);
             } else throw new RuntimeFault("DCM_INVALID", p);
         }
-        for (String name : types.keySet()) if (record(dcm, name))
-            for (Object type : map(definition(dcm,name).get("fields"), p).values()) require(scalarType(dcm,type),p);
+        for (String name : types.keySet()) {
+            Map<String,Object> type = definition(dcm, name);
+            if (listType(dcm, name)) {
+                Object element = type.get("element");
+                require(!"Timestamp".equals(element) && scalarType(dcm, element), p);
+            } else if (record(dcm, name)) {
+                for (Object field : map(type.get("fields"), p).values()) {
+                    if (field instanceof Map<?,?> declaration) {
+                        exact(declaration, p, "type", "optional");
+                        require(optionalField(declaration) && scalarType(dcm, declaration.get("type")), p);
+                    } else require(valueType(dcm, field, false), p);
+                }
+            }
+        }
         Map<String,Object> caps = bounded(dcm.get("capabilities"), p + "/capabilities", 8);
         for (var item : new TreeMap<>(caps).entrySet()) {
             named(item.getKey(), p, true); Map<String,Object> cap = map(item.getValue(),p);
             exact(cap,p,"version","parameters","result","effect","errors"); text(cap.get("version"),p,true,256);
             require(("READ".equals(cap.get("effect")) || "WRITE".equals(cap.get("effect"))) && recordType(dcm,cap.get("result")),p);
             for (var parameter : bounded(cap.get("parameters"),p,16).entrySet()) {
-                named(parameter.getKey(),p,false); exact(parameter.getValue(),p,"type","binding");
+                named(parameter.getKey(),p,false);
                 Map<String,Object> param = map(parameter.getValue(),p);
-                require(scalarType(dcm,param.get("type")) && ("agent".equals(param.get("binding")) || "host".equals(param.get("binding"))),p);
+                boolean optional = param.containsKey("optional");
+                if (optional) exact(param,p,"type","binding","optional");
+                else exact(param,p,"type","binding");
+                boolean authored = "agent".equals(param.get("binding"));
+                require(authored || "host".equals(param.get("binding")),p);
+                require(!optional || authored && optionalField(param),p);
+                require(valueType(dcm,param.get("type"),optional),p);
             }
             List<Object> errors = list(cap.get("errors"),p); require(new HashSet<>(errors).size() == errors.size(),p);
             require(errors.size()<=16,p+"/capabilities/"+item.getKey()+"/errors","BUDGET_EXCEEDED");
@@ -128,24 +168,67 @@ final class Artifact {
         catch (RuntimeFault failure) { throw new RuntimeFault("DCM_INVALID",path); }
     }
 
+    static Instant timestamp(String text) {
+        if (text == null || text.length() != 24 || text.startsWith("0000") || !TIMESTAMP.matcher(text).matches())
+            throw new IllegalArgumentException("Invalid Timestamp");
+        try {
+            return LocalDateTime.parse(text.substring(0, 23)).toInstant(ZoneOffset.UTC);
+        } catch (DateTimeException invalid) {
+            throw new IllegalArgumentException("Invalid Timestamp", invalid);
+        }
+    }
+
+    private static void validateMembers(Map<String,Object> values, Map<String,Object> declarations, String path) {
+        require(declarations.keySet().containsAll(values.keySet()), path);
+        for (var field : declarations.entrySet())
+            require(optionalField(field.getValue()) || values.containsKey(field.getKey()), path);
+    }
+
     static Object value(Map<String,Object> dcm, String name, Object value, String path, String code) {
+        Object checked = typedValue(dcm, name, value, path, code);
+        try { canonical(checked, Profile.VALUE_BYTES); }
+        catch (RuntimeFault fault) { throw new RuntimeFault(fault.code,path); }
+        return checked;
+    }
+
+    private static Object typedValue(Map<String,Object> dcm, String name, Object value, String path, String code) {
         try {
             Map<String,Object> type = definition(dcm,name); Object kind = type.get("kind");
             if ("Boolean".equals(name)) require(value instanceof Boolean,path);
+            else if ("Timestamp".equals(name)) {
+                require(value instanceof String, path);
+                timestamp((String)value);
+            }
             else if ("String".equals(name) || "nominal".equals(kind) || "enum".equals(kind)) {
-                require(value instanceof String,path); String text = (String)value; unicode(text);
+                require(value instanceof String,path); String text = (String)value;
+                require(text.length() <= Profile.STRING_BYTES,path,"BUDGET_EXCEEDED");
+                unicode(text);
                 require(text.getBytes(StandardCharsets.UTF_8).length <= Profile.STRING_BYTES,path,"BUDGET_EXCEEDED");
                 if ("enum".equals(kind)) require(list(type.get("values"),path).contains(value),path);
+            } else if ("list".equals(kind)) {
+                List<Object> elements = list(value, path);
+                int count = elements.size();
+                require(count <= ((Number)type.get("maxItems")).intValue(), path, "BUDGET_EXCEEDED");
+                List<Object> copied = new ArrayList<>(count);
+                String elementType = (String)type.get("element");
+                for (int i = 0; i < count; i++)
+                    copied.add(typedValue(dcm,elementType,elements.get(i),pointer(path,Integer.toString(i)),code));
+                value = Collections.unmodifiableList(copied);
             } else if ("record".equals(kind)) {
-                Map<String,Object> fields = map(type.get("fields"),path); shape(value,fields.keySet(),path);
-                for (var field : fields.entrySet()) value(dcm,(String)field.getValue(),map(value,path).get(field.getKey()),pointer(path,field.getKey()),code);
+                Map<String,Object> fields = map(type.get("fields"),path);
+                require(value instanceof Map<?,?> raw && raw.size() <= fields.size(),path);
+                Map<String,Object> supplied = map(value,path);
+                validateMembers(supplied,fields,path);
+                Map<String,Object> copied = new LinkedHashMap<>();
+                for (var field : fields.entrySet()) if (supplied.containsKey(field.getKey()))
+                    copied.put(field.getKey(),typedValue(dcm,fieldType(field.getValue()),supplied.get(field.getKey()),pointer(path,field.getKey()),code));
+                value = Collections.unmodifiableMap(copied);
             } else throw new RuntimeFault(code,path);
-            require(canonical(value).length <= Profile.VALUE_BYTES,path,"BUDGET_EXCEEDED");
-            return immutable(value);
         } catch (RuntimeException error) {
             if (error instanceof RuntimeFault fault && "BUDGET_EXCEEDED".equals(fault.code)) throw fault;
             throw new RuntimeFault(code,path);
         }
+        return value;
     }
 
     static void validateEnvelope(Map<String,Object> artifact, Map<String,Object> dcm) {
@@ -153,8 +236,8 @@ final class Artifact {
         text(artifact.get("compiler"),"/artifact/compiler",true,256);
         require(map(dcm.get("entrypoints"),MODEL).containsKey(artifact.get("entrypoint")),"/artifact/entrypoint");
         require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment","PIN_MISMATCH");
-        require("keir-compiler-java/0.1.0".equals(artifact.get("compiler")),"/artifact/compiler","PIN_MISMATCH");
-        require("keir-artifact/1".equals(artifact.get("format")),"/artifact/format");
+        require("keir-compiler-java/0.2.0".equals(artifact.get("compiler")),"/artifact/compiler","PIN_MISMATCH");
+        require("keir-artifact/2".equals(artifact.get("format")),"/artifact/format");
         require(modelRef(dcm).equals(artifact.get("modelRef")),"/artifact/modelRef");
         require(artifact.get("sourceDigest") instanceof String text && text.matches("sha256:[0-9a-f]{64}"),"/artifact/sourceDigest");
     }
@@ -173,7 +256,7 @@ final class Artifact {
         for (int i=0; i<steps.size(); i++) {
             String p = "/artifact/steps/"+i; Map<String,Object> step = map(steps.get(i),p);
             named(step.get("id"),p,false); String id = (String)step.get("id");
-            require(!Set.of("input","Boolean","String").contains(id) && ids.add(id) && !types(dcm).containsKey(id),p);
+            require(!"input".equals(id) && !SCALARS.contains(id) && !"Duration".equals(id) && ids.add(id) && !types(dcm).containsKey(id),p);
             if ("CALL".equals(step.get("op"))) {
                 Set<String> fields = new HashSet<>(Set.of("op","id","capability","version","args","resultType"));
                 for (String optional : List.of("when","onError")) if (step.containsKey(optional)) fields.add(optional);
@@ -183,9 +266,10 @@ final class Artifact {
                 require(caps.containsKey(step.get("capability")),p,step.get("capability") instanceof String?"CAPABILITY_UNKNOWN":"ARTIFACT_INVALID");
                 Map<String,Object> cap = map(caps.get(step.get("capability")),p);
                 require(Objects.equals(step.get("version"),cap.get("version")) && Objects.equals(step.get("resultType"),cap.get("result")),p);
-                Map<String,Object> params = map(cap.get("parameters"),p); Set<String> agent = new TreeSet<>();
-                params.forEach((key,param)-> { if ("agent".equals(map(param,p).get("binding"))) agent.add(key); });
-                shape(step.get("args"),agent,p+"/args");
+                Map<String,Object> params = map(cap.get("parameters"),p); Map<String,Object> agent = new TreeMap<>();
+                params.forEach((key,param)-> { if ("agent".equals(map(param,p).get("binding"))) agent.put(key,param); });
+                Map<String,Object> args = map(step.get("args"),p+"/args");
+                validateMembers(args,agent,p+"/args");
                 String capability = (String)step.get("capability"); calls.merge(capability,1,Integer::sum); callCount++;
                 require(callCount <= Profile.CALLS,p,"BUDGET_EXCEEDED");
                 if ("WRITE".equals(cap.get("effect"))) {
@@ -193,7 +277,8 @@ final class Artifact {
                     require(writeCount<=effectGrant,p,"ENTRY_GRANT_DENIED");
                 }
                 require(CapabilityPolicy.permits(policy,capability,calls.get(capability)),p,"ENTRY_GRANT_DENIED");
-                for (String arg : agent) binding(dcm,expressions,variables,contexts,map(step.get("args"),p).get(arg),map(params.get(arg),p).get("type"),p+"/args/"+arg);
+                for (String arg : agent.keySet()) if (args.containsKey(arg))
+                    binding(dcm,expressions,variables,contexts,args.get(arg),fieldType(agent.get(arg)),p+"/args/"+arg);
                 if (step.containsKey("onError")) {
                     Map<String,Object> handlers = map(step.get("onError"),p+"/onError");
                     require(!handlers.isEmpty(),p+"/onError");
@@ -221,16 +306,19 @@ final class Artifact {
         Map<String,Object> returned = map(value,path); exact(returned,path,"type","fields");
         require(Objects.equals(returned.get("type"),entry.get("output")),path);
         Map<String,Object> fields = map(definition(dcm,(String)entry.get("output")).get("fields"),MODEL);
-        shape(returned.get("fields"),fields.keySet(),path+"/fields");
-        for (String field : new TreeSet<>(fields.keySet())) binding(dcm,expressions,variables,contexts,map(returned.get("fields"),path).get(field),fields.get(field),pointer(path+"/fields",field));
+        Map<String,Object> supplied = map(returned.get("fields"),path+"/fields");
+        validateMembers(supplied,fields,path+"/fields");
+        for (String field : new TreeSet<>(supplied.keySet()))
+            binding(dcm,expressions,variables,contexts,supplied.get(field),fieldType(fields.get(field)),pointer(path+"/fields",field));
     }
 
     private static void binding(Map<String,Object> dcm, Map<String,Object> expressions, Map<String,Object> variables,
                                 LinkedHashMap<String,Map<String,Object>> contexts, Object value, Object type, String path) {
         Map<String,Object> binding = map(value,path); boolean literal = binding.containsKey("literal");
         exact(binding,path,literal ? "literal" : "expr","type");
-        require(Objects.equals(binding.get("type"),type) && scalarType(dcm,type),path);
+        require(Objects.equals(binding.get("type"),type) && valueType(dcm,type,false),path);
         if (literal) {
+            require(!"Timestamp".equals(type) && !listType(dcm,(String)type),path);
             value(dcm,(String)type,binding.get("literal"),path,"ARTIFACT_INVALID");
         } else {
             String id = "e"+contexts.size(); require(id.equals(binding.get("expr")) && expressions.containsKey(id),path);

@@ -18,8 +18,7 @@
   </dependencies>
   <build>
     <testResources>
-      <testResource><directory>${project.basedir}/../conformance/keir-1</directory><targetPath>keir-1</targetPath></testResource>
-      <testResource><directory>${project.basedir}/../conformance/model-binding</directory><targetPath>model-binding</targetPath></testResource>
+      <testResource><directory>${project.basedir}/../conformance/keir-2</directory><targetPath>keir-2</targetPath></testResource>
     </testResources>
   </build>
 </project>

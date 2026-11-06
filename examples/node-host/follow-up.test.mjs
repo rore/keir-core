@@ -8,9 +8,9 @@ const read = path => readFileSync(new URL(path, root), 'utf8');
 
 test('teaching inputs match the frozen main source and model', () => {
   assert.deepEqual(JSON.parse(read('examples/node-host/follow-up/dcm.json')),
-    JSON.parse(read('conformance/keir-1/dcm.json')));
+    JSON.parse(read('conformance/keir-2/dcm.json')));
   assert.equal(read('examples/node-host/follow-up/source.yaml').replaceAll('\r\n', '\n'),
-    read('conformance/keir-1/source.yaml').replaceAll('\r\n', '\n'));
+    read('conformance/keir-2/source.yaml').replaceAll('\r\n', '\n'));
 });
 
 test('installed runtime runs the direct follow-up host', () => {

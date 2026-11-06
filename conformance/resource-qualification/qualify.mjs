@@ -7,7 +7,7 @@ import { canonicalBytes, digest } from '../../runtime-node/src/canonical.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const here = dirname(fileURLToPath(import.meta.url));
-const fixture = join(root, 'conformance/keir-1');
+const fixture = join(root, 'conformance/keir-2');
 const compiler = join(root, 'compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar');
 const host = join(root, 'examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar');
 const jdk = name => process.env.JAVA_HOME
@@ -125,7 +125,7 @@ try {
   const dcm = pinned('dcm');
   const model = JSON.parse(dcm);
   const program = (steps, returned = { literal: 'NO_OP' }, dcmBytes = dcm) => canonicalBytes({
-    language: 'keir/1', domain: { ...model.domain, fingerprint: digest(dcmBytes) }, name: 'resource-probe',
+    language: 'keir/2', domain: { ...model.domain, fingerprint: digest(dcmBytes) }, name: 'resource-probe',
     entrypoint: 'TaskCompleted', steps: steps.map((binding, index) => ({ id: 'step' + index, let: binding })),
     return: { record: { status: returned } },
   });

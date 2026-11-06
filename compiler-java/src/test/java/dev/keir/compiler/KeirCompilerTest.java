@@ -194,7 +194,7 @@ class KeirCompilerTest {
         assertEquals("/source/steps/1/let/cel",a.diagnostics().getFirst().path());
         s=source(); map(s.get("domain")).put("fingerprint","sha256:forged");
         denied(compiler.compile(StrictData.canonical(s),modelBytes(),ENV),"PIN_MISMATCH");
-        denied(compiler.compile(sourceBytes(),modelBytes(),new KeirCompiler.Environment("keir-compiler-java/0.1.0-SNAPSHOT",ENV.packages())),"PIN_MISMATCH");
+        denied(compiler.compile(sourceBytes(),modelBytes(),new KeirCompiler.Environment("keir-compiler-java/0.2.0-SNAPSHOT",ENV.packages())),"PIN_MISMATCH");
         var packages=new HashMap<>(ENV.packages()); packages.put("celJava","unselected");
         denied(compiler.compile(sourceBytes(),modelBytes(),new KeirCompiler.Environment(ENV.compiler(),packages)),"PIN_MISMATCH");
         denied(compiler.compile(null,modelBytes(),ENV),"SYNTAX_INVALID");
@@ -318,7 +318,7 @@ class KeirCompilerTest {
     private static byte[] modelBytes() { return StrictData.canonical(model()); }
     private static byte[] sourceBytes() {
         return """
-                language: keir/1
+                language: keir/2
                 domain: {id: sample.tasks, version: '1', fingerprint: '%s'}
                 entrypoint: ClassifyTask
                 name: classify-completed-task

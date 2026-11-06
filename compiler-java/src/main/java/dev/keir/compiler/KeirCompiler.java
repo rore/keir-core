@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 /** Compiles the public Keir single-mutation contract. */
 public final class KeirCompiler {
-    public static final String IDENTITY = "keir-compiler-java/0.1.0";
+    public static final String IDENTITY = "keir-compiler-java/0.2.0";
     private static final Map<String, String> PACKAGES = Map.of("celJava", "0.14.0", "celNode", "0.6.1",
             "protobufJava", "4.35.1", "protobufNode", "2.6.2");
     private static final Set<String> RESERVED = Set.of("input", "as", "break", "const", "continue", "else",
@@ -71,7 +71,7 @@ public final class KeirCompiler {
                     var supplied = object(step.get("args"), path + "/args");
                     var args = new TreeMap<String, Object>();
                     for (var parameter : definition.parameters().entrySet()) {
-                        if (!parameter.getValue().binding().equals("agent")) continue;
+                        if (!parameter.getValue().binding().equals("agent") || !supplied.containsKey(parameter.getKey())) continue;
                         String name = parameter.getKey(), argPath = pointer(path + "/args", name);
                         args.put(name, binding(supplied.get(name), parameter.getValue().type(), variables,
                                 dcm, expressions, nodes, argPath));
@@ -105,11 +105,11 @@ public final class KeirCompiler {
             if (nodes[0] > 512) fail("BUDGET_EXCEEDED", "/source/steps");
             if (dcm.descriptors().getSerializedSize() > 65_536) fail("BUDGET_EXCEEDED", "/dcm/types");
             var artifact = new TreeMap<String, Object>();
-            artifact.put("format", "keir-artifact/1");
+            artifact.put("format", "keir-artifact/2");
             artifact.put("compiler", environment.compiler()); artifact.put("environment", environment.packages());
             artifact.put("sourceDigest", StrictData.digest(source)); artifact.put("entrypoint", entryId);
             artifact.put("modelRef", Map.of("domainId", modelDomain.get("id"), "domainVersion", modelDomain.get("version"),
-                    "format", dcm.root().get("format"), "digest", dcmDigest, "descriptorRecipe", "keir-record-descriptors/1"));
+                    "format", dcm.root().get("format"), "digest", dcmDigest, "descriptorRecipe", "keir-record-descriptors/2"));
             artifact.put("expressions", expressions); artifact.put("steps", steps);
             artifact.put("return", Map.of("type", entry.output(), "fields", fields));
             byte[] bytes = StrictData.canonical(artifact);
@@ -141,8 +141,10 @@ public final class KeirCompiler {
     private static Map<String,Object> lowerRecord(Map<String,Object> fields, Map<String,String> types,
             Map<String,String> variables, Dcm dcm, Map<String,Object> expressions, int[] nodes, String path) {
         var lowered = new TreeMap<String,Object>();
-        for (var field : types.entrySet()) lowered.put(field.getKey(), binding(fields.get(field.getKey()),
-                field.getValue(), variables, dcm, expressions, nodes, pointer(path, field.getKey())));
+        for (var field : types.entrySet()) {
+            if (fields.containsKey(field.getKey())) lowered.put(field.getKey(), binding(fields.get(field.getKey()),
+                    field.getValue(), variables, dcm, expressions, nodes, pointer(path, field.getKey())));
+        }
         return lowered;
     }
 
@@ -158,7 +160,7 @@ public final class KeirCompiler {
             var step = object(steps.get(i), path);
             String id = (String) step.get("id");
             if (names.contains(id) || RESERVED.contains(id) || dcm.types().containsKey(id)
-                    || id.equals("Boolean") || id.equals("String")) fail("DATAFLOW_UNAVAILABLE", path + "/id");
+                    || Set.of("Boolean", "String", "Timestamp", "Duration").contains(id)) fail("DATAFLOW_UNAVAILABLE", path + "/id");
             if (step.containsKey("call")) {
                 String capability = (String) step.get("call");
                 var definition = dcm.capabilities().get(capability);
@@ -180,14 +182,17 @@ public final class KeirCompiler {
                 }
                 for (var parameter : definition.parameters().entrySet()) if (parameter.getValue().binding().equals("agent")) {
                     String argPath = pointer(path + "/args", parameter.getKey());
-                    if (!args.containsKey(parameter.getKey())) fail("TYPE_MISMATCH", argPath);
+                    if (!args.containsKey(parameter.getKey())) {
+                        if (parameter.getValue().optional()) continue;
+                        fail("TYPE_MISMATCH", argPath);
+                    }
                     checkLiteral(args.get(parameter.getKey()), parameter.getValue().type(), dcm, argPath);
                 }
                 if (step.containsKey("onError")) for (var handler : object(step.get("onError"), path + "/onError").entrySet()) {
                     String handlerPath = pointer(path + "/onError", handler.getKey());
                     if (!definition.errors().contains(handler.getKey())) fail("FIELD_UNKNOWN", handlerPath);
                     var fields = object(object(handler.getValue(), handlerPath).get("record"), handlerPath + "/record");
-                    preflightRecord(fields, dcm.record(entry.output()).fields(), dcm, handlerPath + "/record");
+                    preflightRecord(fields, dcm.record(entry.output()), dcm, handlerPath + "/record");
                 }
             } else {
                 checkLiteral(step.get("let"), null, dcm, path + "/let");
@@ -196,14 +201,17 @@ public final class KeirCompiler {
             names.add(id);
         }
         var fields = object(object(source.get("return"), "/source/return").get("record"), "/source/return/record");
-        preflightRecord(fields, dcm.record(entry.output()).fields(), dcm, "/source/return/record");
+        preflightRecord(fields, dcm.record(entry.output()), dcm, "/source/return/record");
     }
 
-    private static void preflightRecord(Map<String,Object> fields, Map<String,String> output, Dcm dcm, String path) {
-        for (String key : fields.keySet()) if (!output.containsKey(key)) fail("FIELD_UNKNOWN", pointer(path, key));
-        for (var field : output.entrySet()) {
+    private static void preflightRecord(Map<String,Object> fields, Dcm.Type output, Dcm dcm, String path) {
+        for (String key : fields.keySet()) if (!output.fields().containsKey(key)) fail("FIELD_UNKNOWN", pointer(path, key));
+        for (var field : output.fields().entrySet()) {
             String fieldPath = pointer(path, field.getKey());
-            if (!fields.containsKey(field.getKey())) fail("TYPE_MISMATCH", fieldPath);
+            if (!fields.containsKey(field.getKey())) {
+                if (output.optionalFields().contains(field.getKey())) continue;
+                fail("TYPE_MISMATCH", fieldPath);
+            }
             checkLiteral(fields.get(field.getKey()), field.getValue(), dcm, fieldPath);
         }
     }
@@ -219,7 +227,7 @@ public final class KeirCompiler {
     private static Map<String, Object> sourceShape(Object parsed) {
         var source = object(parsed, "/source");
         shape(source, Set.of("language", "domain", "entrypoint", "name", "steps", "return"), "/source");
-        if (!"keir/1".equals(source.get("language"))) fail("PROFILE_UNSUPPORTED", "/source/language");
+        if (!"keir/2".equals(source.get("language"))) fail("PROFILE_UNSUPPORTED", "/source/language");
         var domain = object(source.get("domain"), "/source/domain");
         shape(domain, Set.of("id", "version", "fingerprint"), "/source/domain");
         domain.forEach((key, value) -> text(value, pointer("/source/domain", key), 256));

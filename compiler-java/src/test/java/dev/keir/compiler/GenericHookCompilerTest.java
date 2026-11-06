@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GenericHookCompilerTest {
     private static final KeirCompiler COMPILER = new KeirCompiler();
     private static final KeirCompiler.Environment ENV = KeirCompiler.Environment.supported();
-    private static Path fixture(String name) { return Path.of("..","conformance","keir-1",name); }
+    private static Path fixture(String name) { return Path.of("..","conformance","keir-2",name); }
     private static byte[] bytes(String name) throws IOException { return Files.readAllBytes(fixture(name)); }
     private static Map<String,Object> map(Object value) { return (Map<String,Object>)value; }
     private static List<Map<String,Object>> steps(Map<String,Object> value) { return (List<Map<String,Object>>)value.get("steps"); }
@@ -91,8 +91,8 @@ class GenericHookCompilerTest {
             assertEquals(Files.readString(fixture("artifact"+suffix+".sha256")).trim(),first.artifactDigest(),suffix);
             assertEquals(Set.of("format","compiler","environment","sourceDigest","modelRef","entrypoint",
                     "expressions","steps","return"),artifact.keySet());
-            assertEquals("keir-artifact/1",artifact.get("format"));
-            assertEquals("keir-compiler-java/0.1.0",artifact.get("compiler"));
+            assertEquals("keir-artifact/2",artifact.get("format"));
+            assertEquals("keir-compiler-java/0.2.0",artifact.get("compiler"));
             assertEquals(StrictData.digest(StrictData.parse(source,"/source")),artifact.get("sourceDigest"));
             assertEquals(Map.of("celJava","0.14.0","celNode","0.6.1","protobufJava","4.35.1",
                     "protobufNode","2.6.2"),artifact.get("environment"));
@@ -101,7 +101,7 @@ class GenericHookCompilerTest {
             var digest=Files.readString(fixture(modelStem+".sha256")).trim();
             assertEquals(digest,StrictData.digest(model));
             assertEquals(Map.of("domainId",domain.get("id"),"domainVersion",domain.get("version"),
-                    "format","keir-dcm/1","digest",digest,"descriptorRecipe","keir-record-descriptors/1"),
+                    "format","keir-dcm/2","digest",digest,"descriptorRecipe","keir-record-descriptors/2"),
                     artifact.get("modelRef"));
             for (Object expression : map(artifact.get("expressions")).values()) {
                 var checked=CheckedExpr.parseFrom(Base64.getDecoder().decode((String)map(expression).get("checked")));
@@ -118,9 +118,9 @@ class GenericHookCompilerTest {
     }
 
     @Test void artifactSchemaPinsMatchTheCompiler() throws Exception {
-        var schema=map(StrictData.parse(Files.readAllBytes(Path.of("..","schemas","artifact-1",
+        var schema=map(StrictData.parse(Files.readAllBytes(Path.of("..","schemas","artifact-2",
                 "artifact.schema.json")),"/schema"));
-        assertEquals("urn:keir:schema:artifact:1",schema.get("$id"));
+        assertEquals("urn:keir:schema:artifact:2",schema.get("$id"));
         var properties=map(schema.get("properties"));
         assertEquals(ENV.compiler(),map(properties.get("compiler")).get("const"));
         var environment=map(map(properties.get("environment")).get("properties"));
@@ -138,7 +138,7 @@ class GenericHookCompilerTest {
         assertArrayEquals(result.artifact(),stdout.toByteArray());
         assertEquals(0,stderr.size());
         stdout.reset();
-        for (String selector : List.of("--profile=keir-effect/4","--profile=keir-read/1","--contract=keir/1")) {
+        for (String selector : List.of("--profile=keir-effect/4","--profile=keir-read/1","--contract=keir/2")) {
             stderr.reset();
             assertEquals(2,CompilerCli.run(new String[]{fixture("source.yaml").toString(),fixture("dcm.json").toString(),selector},out,err));
             assertEquals(0,stdout.size());
@@ -150,10 +150,12 @@ class GenericHookCompilerTest {
         var source=source();
         source.put("language","keir/v0");
         denied(compile(source,model()),"PROFILE_UNSUPPORTED","/source/language");
+        source.put("language","keir/1");
+        denied(compile(source,model()),"PROFILE_UNSUPPORTED","/source/language");
         source=source(); source.put("profile","keir-effect/4");
         denied(compile(source,model()),"FIELD_UNKNOWN","/source/profile");
         for (String format : List.of("keir-dcm/read-1","keir-dcm/read-2","keir-dcm/effect-1",
-                "keir-dcm/effect-2","keir-dcm/effect-3","keir-dcm/effect-4")) {
+                "keir-dcm/effect-2","keir-dcm/effect-3","keir-dcm/effect-4","keir-dcm/1")) {
             var model=model(); model.put("format",format);
             denied(compile(source(),model),"PROFILE_UNSUPPORTED","/dcm/format");
         }

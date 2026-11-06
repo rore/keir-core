@@ -12,16 +12,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /** Runs the compiler-owned frozen corpus through the public host-bound API. */
 public final class PublicScenarioDriver {
-    private static final Map<String,List<String>> GROUPS = Map.of(
-            "main", List.of("lost-response", "normal", "open", "other-project", "read-throws",
-                    "response-expired", "unknown-commit", "write-rejected", "write-transient"),
-            "zero", List.of("zero"),
-            "after-write-read", List.of("after-write-read", "confirmed-then-read-failure"),
-            "no-call", List.of("no-call"),
-            "handler", List.of("handled-rejection"),
-            "title", List.of("title-256", "title-257", "title-unicode"),
-            "title-max", List.of("title-max"),
-            "title-composed", List.of("title-composed-overflow", "title-composed-valid"));
+    private static final Map<String,List<String>> GROUPS = Map.ofEntries(
+            Map.entry("main", List.of("lost-response", "normal", "open", "other-project", "read-throws",
+                    "response-expired", "unknown-commit", "write-rejected", "write-transient")),
+            Map.entry("zero", List.of("zero")),
+            Map.entry("after-write-read", List.of("after-write-read", "confirmed-then-read-failure")),
+            Map.entry("no-call", List.of("no-call")),
+            Map.entry("handler", List.of("handled-rejection")),
+            Map.entry("inventory", List.of("inventory-adjusted", "inventory-optional-false", "inventory-lazy-overflow",
+                    "inventory-selected-overflow", "inventory-handler-omits-due", "inventory-max-no-match")),
+            Map.entry("inventory-algebra", List.of("inventory-confirmed-then-overflow")),
+            Map.entry("inventory-enum", List.of("inventory-enum-literal")),
+            Map.entry("title", List.of("title-256", "title-257", "title-unicode")),
+            Map.entry("title-max", List.of("title-max")),
+            Map.entry("title-composed", List.of("title-composed-overflow", "title-composed-valid")));
     private static final Set<String> FIXTURES = Set.of("normal", "read-throws", "lost-response", "response-expired");
     private static final String ID = "[A-Za-z0-9][A-Za-z0-9_.-]{0,63}";
     private static final String STEP = "[A-Za-z][A-Za-z0-9]{0,63}";
@@ -52,7 +56,7 @@ public final class PublicScenarioDriver {
                 documents.put(label, assertDoesNotThrow(() -> scenario(label), label));
             }
         }
-        assertEquals(20, documents.size(), "Frozen scenario count");
+        assertEquals(28, documents.size(), "Shared scenario count");
         checkUniqueIds(documents.values());
 
         List<Object> scenarios = new ArrayList<>();
@@ -62,7 +66,7 @@ public final class PublicScenarioDriver {
         }
 
         List<Map<String,Object>> manifest = rows(object(parseJson(resource("scenario-vectors.json"), 65_536)).get("vectors"));
-        assertEquals(45, manifest.size(), "Frozen vector count");
+        assertEquals(51, manifest.size(), "Shared vector count");
         checkUniqueIds(manifest);
         List<Object> vectors = new ArrayList<>();
         for (var vector : manifest) {
@@ -102,7 +106,8 @@ public final class PublicScenarioDriver {
     private Run run(String group, byte[] bytes, Map<String,Object> decoded, Map<String,Object> vector, String expected)
             throws Exception {
         String phase = "lexical";
-        var callbacks = new Callbacks();
+        var callbacks = new Callbacks(group != null && group.startsWith("inventory")
+                ? Map.of("id", "event1", "source", "item1") : EVENT);
         try {
             Object document = bytes == null ? decoded : parseScenario(bytes);
             phase = "structural";
@@ -162,8 +167,8 @@ public final class PublicScenarioDriver {
             assertTrue(callbacks.calls.isEmpty(), "Preflight dispatched a stub");
             callbacks.stubs = stubs;
             var context = new KeirRuntime.BoundEffectInvocation(
-                    group.equals("no-call") ? Map.of() : Map.of("actorId", "user1"),
-                    callbacks.deadline, callbacks.key, EVENT);
+                    Set.of("no-call", "inventory-enum").contains(group) ? Map.of() : Map.of("actorId", "user1"),
+                    callbacks.deadline, callbacks.key, callbacks.event);
             var actual = KeirRuntime.invokeBoundEffectProgram(preparation.prepared(), given.get("input"), context)
                     .toCompletableFuture().get(3, TimeUnit.SECONDS);
             assertNull(callbacks.mismatch, () -> "Callback mismatch despite runtime outcome " + actual.error()
@@ -197,9 +202,14 @@ public final class PublicScenarioDriver {
         final AtomicLong now = new AtomicLong();
         final KeirRuntime.Deadline deadline = new KeirRuntime.Deadline(now::get, EXPIRES_AT);
         final List<Map<String,Object>> calls = new ArrayList<>();
+        final Map<String,Object> event;
         List<Map<String,Object>> stubs = List.of();
         String fixture;
         AssertionError mismatch;
+
+        Callbacks(Map<String,Object> event) {
+            this.event = event;
+        }
 
         Map<String,KeirRuntime.BoundEffectAdapter> implementations(Map<String,Object> dcm) {
             String keyType = (String)object(dcm.get("hostKey")).get("type");
@@ -218,7 +228,7 @@ public final class PublicScenarioDriver {
                                 assertTrue(index < stubs.size(), "Unexpected callback");
                                 assertEquals(without(stubs.get(index), "step", "response"), capture, "Stub callback request");
                                 assertSame(key, context.requestKey(), "Trusted native key");
-                                assertEquals(EVENT, context.event(), "Trusted event");
+                                assertEquals(event, context.event(), "Trusted event");
                                 assertEquals(deadline, context.deadline(), "Trusted deadline");
                                 assertEquals(EXPIRES_AT - now.get(), remaining, "Callback budget");
                             } catch (AssertionError failure) {
@@ -257,6 +267,7 @@ public final class PublicScenarioDriver {
         parameters.forEach((name, definition) -> {
             var parameter = object(definition);
             if (binding.equals(parameter.get("binding"))) {
+                if (Boolean.TRUE.equals(parameter.get("optional")) && !args.containsKey(name)) return;
                 names.add(name);
                 type(dcm, parameter.get("type"), args.get(name), "/call/" + binding + "/" + name);
             }
@@ -322,7 +333,7 @@ public final class PublicScenarioDriver {
 
     private static void structure(Map<String,Object> scenario) {
         fields(scenario, "format id given stubs expect");
-        assertEquals("keir-scenario/1", scenario.get("format"), "Scenario format");
+        assertEquals("keir-scenario/2", scenario.get("format"), "Scenario format");
         matches(scenario.get("id"), ID);
         var given = object(scenario.get("given"));
         fields(given, "input fixture");
@@ -459,7 +470,7 @@ public final class PublicScenarioDriver {
     }
 
     private static byte[] resource(String name) throws IOException {
-        try (var stream = PublicScenarioDriver.class.getResourceAsStream("/keir-1/" + name)) {
+        try (var stream = PublicScenarioDriver.class.getResourceAsStream("/keir-2/" + name)) {
             if (stream == null) throw new IOException("Missing public conformance resource " + name);
             return stream.readAllBytes();
         }
@@ -512,7 +523,11 @@ public final class PublicScenarioDriver {
 
     private static String group(String label) { return label.substring(0, label.indexOf('/')); }
     private static String artifactName(String group) { return group.equals("main") ? "artifact" : "artifact-" + group; }
-    private static String modelName(String group) { return group.startsWith("title") ? "dcm-title" : "dcm"; }
+    private static String modelName(String group) {
+        if (group.equals("inventory-enum")) return "dcm-inventory-enum";
+        if (group.startsWith("inventory")) return "dcm-inventory";
+        return group.startsWith("title") ? "dcm-title" : "dcm";
+    }
     private static Map<String,Object> object(Object value) { return map(value, "/scenario"); }
     private static List<Map<String,Object>> rows(Object value) {
         return list(value, "/scenario").stream().map(PublicScenarioDriver::object).toList();

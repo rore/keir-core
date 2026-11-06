@@ -1,0 +1,22 @@
+language: keir/2
+domain: {id: sample.tasks, version: '4-title', fingerprint: 'sha256:74ee42abb4169bfaa03ba99c67d18b415120cb9c3e09f9bef835d8a6e7176534'}
+entrypoint: TaskCompleted
+name: follow-up-in-selected-project
+steps:
+  - id: eligibleProject
+    let: {literal: 'project1', type: ProjectId}
+  - id: source
+    call: tasks.get
+    args:
+      taskId: {cel: input.taskId}
+  - id: eligible
+    let: {cel: 'source.status == "COMPLETED" && source.projectId == eligibleProject'}
+  - id: created
+    call: tasks.create
+    when: eligible
+    args:
+      projectId: {cel: eligibleProject}
+      title: {cel: 'source.title + "!"'}
+return:
+  record:
+    status: {cel: 'eligible ? "CREATED" : "NO_OP"'}

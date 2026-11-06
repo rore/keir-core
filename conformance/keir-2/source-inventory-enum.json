@@ -1,0 +1,49 @@
+{
+  "language": "keir/2",
+  "domain": {
+    "id": "sample.inventory",
+    "version": "1",
+    "fingerprint": "sha256:5b921fff08d9dee8c924216eb716a36b4d2bb111216792945929148fe2883127"
+  },
+  "entrypoint": "InventoryArrived",
+  "name": "report-inventory-priority",
+  "steps": [
+    {
+      "id": "low",
+      "let": {
+        "cel": "\"LOW\" in input.priorities && false in input.flags && (has(input.note) ? input.note == \"\" : false)"
+      }
+    },
+    {
+      "id": "labels",
+      "let": {
+        "cel": "input.labels"
+      }
+    },
+    {
+      "id": "zero",
+      "let": {
+        "cel": "input.occurredAt + duration(\"0s\")"
+      }
+    },
+    {
+      "id": "due",
+      "let": {
+        "cel": "zero + duration(\"31536000s\")"
+      }
+    }
+  ],
+  "return": {
+    "record": {
+      "eligible": {
+        "cel": "low && zero == input.occurredAt"
+      },
+      "labels": {
+        "cel": "labels"
+      },
+      "dueAt": {
+        "cel": "due"
+      }
+    }
+  }
+}

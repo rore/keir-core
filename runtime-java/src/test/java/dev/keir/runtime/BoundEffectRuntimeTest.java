@@ -25,7 +25,7 @@ class BoundEffectRuntimeTest {
     static final String KEY_TYPE="sample.RequestUuid/1";
     static final UUID KEY=UUID.fromString("00000000-0000-4000-8000-000000000001");
     static byte[] file(String file) throws IOException {
-        try(var stream=BoundEffectRuntimeTest.class.getResourceAsStream("/keir-1/"+file)) {
+        try(var stream=BoundEffectRuntimeTest.class.getResourceAsStream("/keir-2/"+file)) {
             assertNotNull(stream,file); return stream.readAllBytes();
         }
     }
@@ -166,14 +166,14 @@ class BoundEffectRuntimeTest {
         @SuppressWarnings({"rawtypes","unchecked"}) Map<String,KeirRuntime.BoundEffectAdapter> unsafe=
                 (Map)Map.of("tasks.create",new Object(),"tasks.get",new Object());
         bindingDenied(KeirRuntime.bindModel(file("dcm.json"),unsafe),"ADMISSION_INVALID","/binding/implementations/tasks.create");
-        for(String format:List.of("keir-dcm/effect-4","keir-dcm/effect-3","keir-dcm/read-2")) {
+        for(String format:List.of("keir-dcm/effect-4","keir-dcm/effect-3","keir-dcm/read-2","keir-dcm/1")) {
             var old=model(); old.put("format",format);
             assertFalse(KeirRuntime.bindModel(canonical(old),implementations("simulation")).succeeded(),format);
         }
         var extra=model(); extra.put("assurance","unsupported");
         assertFalse(KeirRuntime.bindModel(canonical(extra),implementations("simulation")).succeeded());
         var invalid=new String(file("dcm.json"),StandardCharsets.UTF_8)
-                .replace("\"format\":","\"format\":\"keir-dcm/1\",\"format\":").getBytes(StandardCharsets.UTF_8);
+                .replace("\"format\":","\"format\":\"keir-dcm/2\",\"format\":").getBytes(StandardCharsets.UTF_8);
         assertFalse(KeirRuntime.bindModel(invalid,implementations("simulation")).succeeded());
     }
 
@@ -197,7 +197,7 @@ class BoundEffectRuntimeTest {
         var bound=bind(implementations("real"));var bytes=file("artifact.json");
         assertFalse(KeirRuntime.prepareProgram(bytes,null).succeeded());
         assertFalse(KeirRuntime.prepareProgram(null,bound).succeeded());
-        var mutations=Map.<String,Object>of("compiler","keir-compiler-java/0.1.0-SNAPSHOT","environment",Map.of(),
+        var mutations=Map.<String,Object>of("compiler","keir-compiler-java/0.2.0-SNAPSHOT","environment",Map.of(),
                 "modelRef",Map.of(),"format","keir-artifact/effect-4");
         for(var mutation:mutations.entrySet()) {
             var artifact=document(bytes);artifact.put(mutation.getKey(),mutation.getValue());
@@ -215,6 +215,8 @@ class BoundEffectRuntimeTest {
         }
         var forged=document(bytes);forged.put("compiler","keir-compiler-java/1.0.0");
         denied(KeirRuntime.prepareProgram(canonical(forged),bound),"PIN_MISMATCH","/artifact/compiler");
+        var old=document(bytes);old.put("format","keir-artifact/1");
+        denied(KeirRuntime.prepareProgram(canonical(old),bound),"ARTIFACT_INVALID","/artifact/format");
         byte[] padded=Arrays.copyOf(bytes,bytes.length+1);padded[bytes.length]=' ';
         assertFalse(KeirRuntime.prepareProgram(padded,bound).succeeded());
         var prepared=prepare("main",bound);

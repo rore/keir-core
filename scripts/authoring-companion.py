@@ -52,6 +52,37 @@ V3_FILES = (
     V3_ARTIFACT,
     *(f"{V3_FIXTURES}/scenarios/main/{case}.json" for case in SCENARIO_IDS),
 )
+V4_GUIDE = "docs/agents/customer-authoring-guide-v4.md"
+V4_COMPATIBILITY = "docs/agents/authoring-companion-v4-compatibility.json"
+V4_FIXTURES = "conformance/keir-2"
+V4_MODEL = f"{V4_FIXTURES}/dcm-inventory.json"
+V4_ARTIFACT = f"{V4_FIXTURES}/artifact-inventory.json"
+V4_FORMATS = {
+    "language": "keir/2",
+    "dcm": "keir-dcm/2",
+    "artifact": "keir-artifact/2",
+    "scenario": "keir-scenario/2",
+}
+V4_FILES = (
+    V4_GUIDE,
+    "docs/specs/workflow-expressions.md",
+    "schemas/source-2/source.schema.json",
+    "schemas/dcm-2/dcm.schema.json",
+    "schemas/artifact-2/artifact.schema.json",
+    "schemas/scenario-2/scenario.schema.json",
+    V4_MODEL,
+    f"{V4_FIXTURES}/dcm-inventory.sha256",
+    f"{V4_FIXTURES}/source-inventory.json",
+    V4_ARTIFACT,
+    f"{V4_FIXTURES}/artifact-inventory.sha256",
+    *(f"{V4_FIXTURES}/scenarios/inventory/inventory-{case}.json" for case in (
+        "adjusted", "handler-omits-due", "lazy-overflow", "max-no-match", "optional-false", "selected-overflow",
+    )),
+)
+PINNED_EDITIONS = {
+    3: (V3_COMPATIBILITY, V3_GUIDE, V3_ARTIFACT, V3_FORMATS, V3_FILES),
+    4: (V4_COMPATIBILITY, V4_GUIDE, V4_ARTIFACT, V4_FORMATS, V4_FILES),
+}
 RELEASE_ASSETS = {
     "compiler": "keir-compiler-cli-{}.zip",
     "javaRuntime": "keir-java-runtime-maven-{}.zip",
@@ -144,19 +175,32 @@ def check_core_assets(record, directory):
                 raise ValueError(f"Core asset digest does not match: {name}.")
 
 
-def make_v3_archive(revision, compatibility, payload):
+def make_pinned_archive(version, revision, compatibility, payload):
+    _, guide, artifact_path, formats, _ = PINNED_EDITIONS[version]
     if not matches(r"[0-9a-f]{40}", revision):
-        raise ValueError("Edition 3 requires a full Git commit.")
+        raise ValueError("A pinned edition requires a full Git commit.")
     validate_compatibility(compatibility)
-    artifact = json.loads(payload[V3_ARTIFACT])
-    if (not isinstance(artifact, dict) or artifact.get("format") != V3_FORMATS["artifact"]
+    artifact = json.loads(payload[artifact_path])
+    if (not isinstance(artifact, dict) or artifact.get("format") != formats["artifact"]
             or not isinstance(artifact.get("compiler"), str) or not isinstance(artifact.get("environment"), dict)):
-        raise ValueError("Invalid edition 3 artifact metadata.")
+        raise ValueError("Invalid pinned artifact metadata.")
+    if version == 4:
+        model_pin = payload[f"{V4_FIXTURES}/dcm-inventory.sha256"].decode("ascii").strip()
+        artifact_pin = payload[f"{V4_FIXTURES}/artifact-inventory.sha256"].decode("ascii").strip()
+        model_ref = artifact.get("modelRef")
+        if (not isinstance(model_ref, dict) or model_ref.get("format") != formats["dcm"]
+                or model_ref.get("digest") != model_pin or digest(payload[V4_MODEL]) != model_pin
+                or digest(payload[V4_ARTIFACT]) != artifact_pin
+                or artifact["compiler"] != "keir-compiler-java/0.2.0"):
+            raise ValueError("Invalid edition 4 example or compiler pin.")
+        if compatibility["status"] == "release" and any(
+                package["version"] != "0.2.0" for package in compatibility["packages"].values()):
+            raise ValueError("Edition 4 requires Core 0.2.0 packages.")
     manifest = {
-        "format": "keir-authoring-companion/3",
+        "format": f"keir-authoring-companion/{version}",
         "sourceRevision": revision,
-        "guide": V3_GUIDE,
-        "contracts": V3_FORMATS,
+        "guide": guide,
+        "contracts": formats,
         "producer": artifact["compiler"],
         "environment": artifact["environment"],
         "compatibility": compatibility,
@@ -165,16 +209,17 @@ def make_v3_archive(revision, compatibility, payload):
     return encode_archive(payload, manifest)
 
 
-def build_v3(revision, core_assets):
+def build_pinned(version, revision, core_assets):
+    compatibility_path, _, _, _, files = PINNED_EDITIONS[version]
     if not matches(r"[0-9a-f]{40}", revision):
-        raise ValueError("Edition 3 requires --revision with a full Git commit.")
+        raise ValueError("A pinned edition requires --revision with a full Git commit.")
     root = Path(__file__).resolve().parents[1]
     actual = subprocess.check_output(
         ["git", "--no-replace-objects", "cat-file", "-t", revision], cwd=root, text=True,
     ).strip()
     if actual != "commit":
-        raise ValueError("Edition 3 source revision must be a Git commit.")
-    compatibility = json.loads(read_blob(revision, V3_COMPATIBILITY))
+        raise ValueError("Source revision must be a Git commit.")
+    compatibility = json.loads(read_blob(revision, compatibility_path))
     validate_compatibility(compatibility)
     core = compatibility["coreRevision"]
     actual = subprocess.check_output(
@@ -183,16 +228,16 @@ def build_v3(revision, core_assets):
     if actual != "commit":
         raise ValueError("Core compatibility revision must be a Git commit.")
     comparison = subprocess.run(
-        ["git", "--no-replace-objects", "diff", "--quiet", core, revision, "--", *V3_FILES[1:]], cwd=root,
+        ["git", "--no-replace-objects", "diff", "--quiet", core, revision, "--", *files[1:]], cwd=root,
     )
     if comparison.returncode:
-        raise ValueError("Edition 3 schemas or example files differ from the recorded Core revision.")
+        raise ValueError("Companion inputs differ from the recorded Core revision.")
     if compatibility["status"] == "release" and core_assets is None:
         raise ValueError("Building a release row requires --core-assets.")
     if core_assets is not None:
         check_core_assets(compatibility, core_assets)
-    payload = {name: read_blob(revision, name) for name in V3_FILES}
-    return make_v3_archive(revision, compatibility, payload)
+    payload = {name: read_blob(revision, name) for name in files}
+    return make_pinned_archive(version, revision, compatibility, payload)
 
 
 def build_historical(version):
@@ -207,7 +252,7 @@ def build_historical(version):
 
 
 def build(version, revision=None, core_assets=None):
-    data = build_v3(revision, core_assets) if version == 3 else build_historical(version)
+    data = build_pinned(version, revision, core_assets) if version in PINNED_EDITIONS else build_historical(version)
     if len(data) > MAX_ARCHIVE_BYTES:
         raise ValueError("Archive exceeds its size limit.")
     return data
@@ -220,7 +265,8 @@ def verify(version, path, expected_digest, core_assets=None):
         raise ValueError("Archive exceeds its size limit.")
     if not hmac.compare_digest(digest(data), expected_digest):
         raise ValueError("Archive digest does not match the trusted pin.")
-    files = V3_FILES if version == 3 else (*source_paths(version), SCENARIOS)
+    pinned = version in PINNED_EDITIONS
+    files = PINNED_EDITIONS[version][4] if pinned else (*source_paths(version), SCENARIOS)
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         entries = archive.infolist()
         if [entry.filename for entry in entries] != sorted([*files, "manifest.json"]):
@@ -230,11 +276,11 @@ def verify(version, path, expected_digest, core_assets=None):
                     or entry.compress_size != entry.file_size or entry.file_size > len(data)):
                 raise ValueError("Unsupported archive entry.")
         payload = {entry.filename: archive.read(entry) for entry in entries if entry.filename != "manifest.json"}
-        manifest = json.loads(archive.read("manifest.json")) if version == 3 else None
-    if version == 3:
+        manifest = json.loads(archive.read("manifest.json")) if pinned else None
+    if pinned:
         if not isinstance(manifest, dict):
-            raise ValueError("Invalid edition 3 manifest.")
-        canonical = make_v3_archive(manifest.get("sourceRevision"), manifest.get("compatibility"), payload)
+            raise ValueError("Invalid pinned manifest.")
+        canonical = make_pinned_archive(version, manifest.get("sourceRevision"), manifest.get("compatibility"), payload)
     else:
         canonical = make_archive(version, payload)
     if canonical != data:
@@ -248,19 +294,19 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     create = commands.add_parser("build")
     create.add_argument("archive", type=Path)
-    create.add_argument("--revision", help="Full Git commit containing the edition 3 inputs")
+    create.add_argument("--revision", help="Full Git commit containing the pinned edition inputs")
     check = commands.add_parser("verify")
     check.add_argument("archive", type=Path)
     check.add_argument("--sha256", required=True, help="Trusted archive pin in sha256:<hex> form")
     for command in (create, check):
-        command.add_argument("--version", type=int, choices=(1, 2, 3), default=1,
+        command.add_argument("--version", type=int, choices=(1, 2, 3, 4), default=1,
                              help="Companion version (default: 1)")
         command.add_argument("--core-assets", type=Path, help="Directory containing the pinned Core release assets")
     args = parser.parse_args()
     try:
         revision = getattr(args, "revision", None)
-        if args.version != 3 and (revision is not None or args.core_assets is not None):
-            raise ValueError("--revision and --core-assets apply only to edition 3.")
+        if args.version not in PINNED_EDITIONS and (revision is not None or args.core_assets is not None):
+            raise ValueError("--revision and --core-assets apply only to pinned editions.")
         if args.command == "build":
             data = build(args.version, revision, args.core_assets)
             with args.archive.open("xb") as stream:

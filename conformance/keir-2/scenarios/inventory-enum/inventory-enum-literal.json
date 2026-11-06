@@ -1,0 +1,114 @@
+{
+  "format": "keir-scenario/2",
+  "id": "inventory-enum-literal",
+  "given": {
+    "fixture": "normal",
+    "input": {
+      "itemId": "item1",
+      "warehouseId": "warehouse1",
+      "targetLabel": "fragile",
+      "labels": [
+        "fragile",
+        "cold",
+        "fragile"
+      ],
+      "occurredAt": "2026-01-01T00:00:00.000Z",
+      "priorities": [
+        "HIGH",
+        "LOW"
+      ],
+      "priorityText": "LOW",
+      "rank": "LOW",
+      "flags": [
+        true,
+        false
+      ],
+      "note": ""
+    }
+  },
+  "stubs": [],
+  "expect": {
+    "calls": [],
+    "outcome": {
+      "classification": "COMPLETED",
+      "effects": [],
+      "result": {
+        "eligible": true,
+        "labels": [
+          "fragile",
+          "cold",
+          "fragile"
+        ],
+        "dueAt": "2027-01-01T00:00:00.000Z"
+      },
+      "trace": [
+        {
+          "event": "INVOCATION_START",
+          "sequence": 0
+        },
+        {
+          "event": "STEP_START",
+          "step": "low",
+          "sequence": 1
+        },
+        {
+          "event": "VALUE_BOUND",
+          "step": "low",
+          "sequence": 2
+        },
+        {
+          "event": "STEP_START",
+          "step": "labels",
+          "sequence": 3
+        },
+        {
+          "event": "VALUE_BOUND",
+          "step": "labels",
+          "sequence": 4
+        },
+        {
+          "event": "STEP_START",
+          "step": "zero",
+          "sequence": 5
+        },
+        {
+          "event": "VALUE_BOUND",
+          "step": "zero",
+          "sequence": 6
+        },
+        {
+          "event": "STEP_START",
+          "step": "due",
+          "sequence": 7
+        },
+        {
+          "event": "VALUE_BOUND",
+          "step": "due",
+          "sequence": 8
+        },
+        {
+          "event": "RETURNED",
+          "sequence": 9
+        },
+        {
+          "event": "TERMINATED",
+          "sequence": 10
+        }
+      ]
+    },
+    "consumption": {
+      "status": "REPORTED",
+      "classification": "COMPLETED",
+      "effects": [],
+      "result": {
+        "eligible": true,
+        "labels": [
+          "fragile",
+          "cold",
+          "fragile"
+        ],
+        "dueAt": "2027-01-01T00:00:00.000Z"
+      }
+    }
+  }
+}

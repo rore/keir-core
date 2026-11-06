@@ -1,0 +1,95 @@
+{
+  "format": "keir-scenario/2",
+  "id": "read-throws",
+  "given": {
+    "input": {
+      "taskId": "task1"
+    },
+    "fixture": "read-throws"
+  },
+  "stubs": [
+    {
+      "step": "source",
+      "capability": "tasks.get",
+      "version": "1",
+      "args": {
+        "taskId": "task1"
+      },
+      "protectedArgs": {
+        "actorId": "user1"
+      },
+      "response": {
+        "kind": "SUCCESS",
+        "value": {
+          "id": "task1",
+          "projectId": "project1",
+          "status": "COMPLETED"
+        }
+      }
+    }
+  ],
+  "expect": {
+    "outcome": {
+      "classification": "FAILED",
+      "error": {
+        "code": "ADAPTER_EXCEPTION",
+        "path": "/steps/1"
+      },
+      "effects": [],
+      "trace": [
+        {
+          "sequence": 0,
+          "event": "INVOCATION_START"
+        },
+        {
+          "sequence": 1,
+          "event": "STEP_START",
+          "step": "eligibleProject"
+        },
+        {
+          "sequence": 2,
+          "event": "VALUE_BOUND",
+          "step": "eligibleProject"
+        },
+        {
+          "sequence": 3,
+          "event": "STEP_START",
+          "step": "source"
+        },
+        {
+          "sequence": 4,
+          "event": "CALL_DISPATCHED",
+          "step": "source",
+          "capability": "tasks.get"
+        },
+        {
+          "sequence": 5,
+          "event": "TERMINATED",
+          "code": "ADAPTER_EXCEPTION"
+        }
+      ]
+    },
+    "calls": [
+      {
+        "step": "source",
+        "capability": "tasks.get",
+        "version": "1",
+        "args": {
+          "taskId": "task1"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        }
+      }
+    ],
+    "consumption": {
+      "status": "REPORTED",
+      "classification": "FAILED",
+      "error": {
+        "code": "ADAPTER_EXCEPTION",
+        "path": "/steps/1"
+      },
+      "effects": []
+    }
+  }
+}

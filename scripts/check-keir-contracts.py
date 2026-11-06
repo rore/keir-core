@@ -12,21 +12,22 @@ from referencing.exceptions import NoSuchResource
 
 ROOT = Path(__file__).resolve().parents[1]
 NAMES = ("source", "dcm", "artifact", "scenario")
+REVISIONS = (1, 2)
 
 
 def deny_retrieval(uri):
     raise NoSuchResource(ref=uri)
 
 
-def validators():
+def validators(revision):
     if version("jsonschema") != "4.26.0":
         raise RuntimeError("Use the pinned development requirements in an isolated environment.")
     schemas = {
-        name: read_document(ROOT / "schemas" / f"{name}-1" / f"{name}.schema.json")
+        name: read_document(ROOT / "schemas" / f"{name}-{revision}" / f"{name}.schema.json")
         for name in NAMES
     }
     for name, schema in schemas.items():
-        if schema["$id"] != f"urn:keir:schema:{name}:1":
+        if schema["$id"] != f"urn:keir:schema:{name}:{revision}":
             raise ValueError(f"Unexpected {name} schema ID")
         Draft202012Validator.check_schema(schema)
     registry = Registry(retrieve=deny_retrieval).with_resources(
@@ -69,10 +70,10 @@ def check_scenario_rejections(validator, fixtures):
     return len(structural)
 
 
-def check_fixtures(schemas):
-    fixtures = ROOT / "conformance" / "keir-1"
+def check_fixtures(schemas, revision):
+    fixtures = ROOT / "conformance" / f"keir-{revision}"
     patterns = {
-        "source": "source-handler.json",
+        "source": "source-handler.json" if revision == 1 else "source*.json",
         "dcm": "dcm*.json",
         "artifact": "artifact*.json",
         "scenario": "scenarios/*/*.json",
@@ -100,31 +101,66 @@ def check_fixtures(schemas):
         ("artifact", {"compiler": "keir-compiler-java/0.1.0-SNAPSHOT"}),
         ("artifact", {"modelRef": {**samples["artifact"]["modelRef"], "format": "keir-dcm/effect-4"}}),
     ]
+    if revision == 2:
+        mutants.extend(workflow_mutants(samples))
     for name, changes in mutants:
         if schemas[name].is_valid({**samples[name], **changes}):
             raise ValueError(f"{name} accepted invalid fields {', '.join(changes)}")
 
     rejections = len(mutants) + check_scenario_rejections(schemas["scenario"], fixtures)
-    print(f"Validated {count} public fixtures and {rejections} structural rejections. Native checks remain required.")
+    print(f"Validated {count} public /{revision} fixtures and {rejections} structural rejections. Native checks remain required.")
+
+
+def workflow_mutants(samples):
+    model_ref = samples["artifact"]["modelRef"]
+    types = samples["dcm"]["types"]
+    mutants = [
+        ("source", {"language": "keir/1"}),
+        ("dcm", {"format": "keir-dcm/1"}),
+        ("artifact", {"format": "keir-artifact/1"}),
+        ("artifact", {"compiler": "keir-compiler-java/0.1.0"}),
+        ("artifact", {"modelRef": {**model_ref, "format": "keir-dcm/1"}}),
+        ("artifact", {"modelRef": {**model_ref, "descriptorRecipe": "keir-record-descriptors/1"}}),
+        ("scenario", {"format": "keir-scenario/1"}),
+    ]
+    for bound in (-1, 17, 1.5):
+        probe = {"kind": "list", "element": "String", "maxItems": bound}
+        mutants.append(("dcm", {"types": {**types, "ProbeList": probe}}))
+    for field in ({"type": "Boolean"}, {"type": "Boolean", "optional": False},
+                  {"type": "Boolean", "optional": True, "extra": True}):
+        probe = {"kind": "record", "fields": {"flag": field}}
+        mutants.append(("dcm", {"types": {**types, "ProbeRecord": probe}}))
+    capabilities = samples["dcm"]["capabilities"]
+    capability_id, capability = next(iter(capabilities.items()))
+    for binding, optional in (("agent", False), ("host", True)):
+        probe = {"type": "String", "binding": binding, "optional": optional}
+        parameters = {**capability["parameters"], "probe": probe}
+        changed = {**capability, "parameters": parameters}
+        mutants.append(("dcm", {"capabilities": {**capabilities, capability_id: changed}}))
+    return mutants
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--revision", type=int, choices=REVISIONS,
+                        help="Schema revision (default: 1 for a document, both for fixture checks)")
     parser.add_argument("schema", nargs="?", choices=NAMES)
     parser.add_argument("document", nargs="?", type=Path)
     args = parser.parse_args()
     if bool(args.schema) != bool(args.document):
         parser.error("Supply both schema name and JSON document, or neither to run checks.")
-    schemas = validators()
     if not args.schema:
+        revisions = (args.revision,) if args.revision else REVISIONS
         try:
-            check_fixtures(schemas)
+            for revision in revisions:
+                check_fixtures(validators(revision), revision)
         except (OSError, ValueError) as error:
             print(error, file=sys.stderr)
             return 1
         return 0
+    validator = validators(args.revision or 1)[args.schema]
     try:
-        errors = diagnostics(schemas[args.schema], read_document(args.document))
+        errors = diagnostics(validator, read_document(args.document))
     except (OSError, ValueError, RecursionError):
         errors = [{"code": "DOCUMENT_INVALID", "path": "", "message": "Provide one bounded decoded JSON document."}]
     print(json.dumps({"valid": not errors, "diagnostics": errors}))

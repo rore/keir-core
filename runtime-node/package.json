@@ -1,10 +1,13 @@
 {
   "name": "@keir/runtime-node",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.2.0",
   "type": "module",
   "exports": "./src/index.js",
-  "files": ["src", "README.md"],
+  "files": [
+    "src",
+    "README.md"
+  ],
   "scripts": {
     "test": "node --test test/*.test.js",
     "test:coverage": "node --experimental-test-coverage --test-coverage-include=src/*.js --test test/*.test.js",

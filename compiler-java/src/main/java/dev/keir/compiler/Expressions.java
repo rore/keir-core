@@ -6,17 +6,23 @@ import dev.cel.common.CelAbstractSyntaxTree;
 import dev.cel.common.CelProtoAbstractSyntaxTree;
 import dev.cel.common.CelValidationException;
 import dev.cel.common.types.CelType;
+import dev.cel.common.types.ListType;
 import dev.cel.common.types.SimpleType;
 import dev.cel.common.types.StructTypeReference;
 import dev.cel.compiler.CelCompilerFactory;
 import dev.cel.expr.CheckedExpr;
 import dev.cel.expr.Expr;
 import dev.cel.expr.Type;
+import dev.cel.parser.CelStandardMacro;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +31,13 @@ import java.util.TreeMap;
 final class Expressions {
     private static final Map<String, String> OVERLOADS = Map.of(
             "_==_", "equals", "_!=_", "not_equals", "!_", "logical_not",
-            "_&&_", "logical_and", "_||_", "logical_or", "_?_:_", "conditional");
+            "_&&_", "logical_and", "_||_", "logical_or", "_?_:_", "conditional",
+            "@in", "in_list", "_<_", "less_timestamp",
+            "timestamp", "string_to_timestamp", "duration", "string_to_duration");
+    private static final Instant EARLIEST = Instant.parse("0001-01-01T00:00:00.000Z");
+    private static final Instant LATEST = Instant.parse("9999-12-31T23:59:59.999Z");
+    private static final java.time.format.DateTimeFormatter UTC_MILLIS =
+            new DateTimeFormatterBuilder().appendInstant(3).toFormatter();
     private static final CelOptions OPTIONS = CelOptions.current()
             .enableHeterogeneousNumericComparisons(true).comprehensionMaxIterations(0)
             .maxExpressionCodePointSize(512).maxParseRecursionDepth(512)
@@ -40,7 +52,7 @@ final class Expressions {
         if (text.getBytes(StandardCharsets.UTF_8).length > 512) fail("BUDGET_EXCEEDED", path);
         try {
             var parsed = CelCompilerFactory.standardCelCompilerBuilder().setOptions(OPTIONS)
-                    .setStandardMacros(Set.of()).build().parse(text, "<input>").getAst();
+                    .setStandardMacros(Set.of(CelStandardMacro.HAS)).build().parse(text, "<input>").getAst();
             available(CelProtoAbstractSyntaxTree.fromCelAst(parsed).getExpr(), variables, path);
             return parsed;
         } catch (CelValidationException e) { throw new CompileFailure("TYPE_MISMATCH", path); }
@@ -49,15 +61,15 @@ final class Expressions {
     static Compiled compile(CelAbstractSyntaxTree parsed, String expected, Map<String, String> variables,
                             Dcm dcm, String path) {
         var builder = CelCompilerFactory.standardCelCompilerBuilder().setOptions(OPTIONS)
-                .setStandardMacros(Set.of()).addFileTypes(dcm.fileDescriptor());
+                .setStandardMacros(Set.of(CelStandardMacro.HAS)).addFileTypes(dcm.fileDescriptor());
         variables.forEach((name, type) -> builder.addVar(name, celType(type, dcm)));
         var compiler = builder.build();
         try {
             CheckedExpr checked = CelProtoAbstractSyntaxTree.fromCelAst(compiler.check(parsed).getAst())
                     .toCheckedExpr();
             var walker = new Walker(dcm, variables, checked, path);
-            Value value = walker.visit(checked.getExpr(), 1);
-            if (!dcm.type(value.type()).scalar()) fail("CEL_POLICY_DENIED", path);
+            Value value = walker.visit(checked.getExpr(), 1, Set.of());
+            if (dcm.type(value.type()) == null || dcm.record(value.type()) != null) fail("CEL_POLICY_DENIED", path);
             String type = expected == null ? value.type() : assign(value, expected, dcm, path);
             byte[] bytes = deterministic(checked);
             if (bytes.length > 16_384) fail("BUDGET_EXCEEDED", path);
@@ -87,8 +99,15 @@ final class Expressions {
     }
 
     private static CelType celType(String type, Dcm dcm) {
-        if (dcm.type(type).kind().equals("record")) return StructTypeReference.create("keir.read." + type);
-        return type.equals("Boolean") ? SimpleType.BOOL : SimpleType.STRING;
+        return switch (dcm.type(type).kind()) {
+            case "record" -> StructTypeReference.create("keir.read." + type);
+            case "list" -> ListType.create(celType(dcm.type(type).element(), dcm));
+            default -> switch (type) {
+                case "Boolean" -> SimpleType.BOOL;
+                case "Timestamp" -> SimpleType.TIMESTAMP;
+                default -> SimpleType.STRING;
+            };
+        };
     }
 
     private static String assign(Value value, String expected, Dcm dcm, String path) {
@@ -131,6 +150,7 @@ final class Expressions {
     }
 
     private static final class Walker {
+        private record Presence(String variable, String field) {}
         private final Dcm dcm;
         private final Map<String, String> variables;
         private final CheckedExpr checked;
@@ -141,12 +161,14 @@ final class Expressions {
             this.dcm = dcm; this.variables = variables; this.checked = checked; this.path = path;
         }
 
-        Value visit(Expr expr, int depth) {
+        Value visit(Expr expr, int depth, Set<Presence> proofs) {
             if (++nodes > 64 || depth > 16) fail("BUDGET_EXCEEDED", path);
             Type wireType = checked.getTypeMapMap().get(expr.getId());
             if (wireType == null || !(wireType.getPrimitive() == Type.PrimitiveType.BOOL
                     || wireType.getPrimitive() == Type.PrimitiveType.STRING
-                    || wireType.hasMessageType() && wireType.getMessageType().startsWith("keir.read.")))
+                    || wireType.hasMessageType() && wireType.getMessageType().startsWith("keir.read.")
+                    || wireType.hasListType() || wireType.getWellKnown() == Type.WellKnownType.TIMESTAMP
+                    || wireType.getWellKnown() == Type.WellKnownType.DURATION))
                 fail("CEL_POLICY_DENIED", path);
             if (expr.hasConstExpr()) {
                 var constant = expr.getConstExpr();
@@ -168,26 +190,58 @@ final class Expressions {
             }
             if (expr.hasSelectExpr()) {
                 var select = expr.getSelectExpr();
-                Value operand = visit(select.getOperand(), depth + 1);
-                String fieldType = dcm.type(operand.type()).fields().get(select.getField());
-                if (select.getTestOnly() || fieldType == null) fail("CEL_POLICY_DENIED", path);
+                Value operand = visit(select.getOperand(), depth + 1, proofs);
+                var record = dcm.record(operand.type());
+                String fieldType = record == null ? null : record.fields().get(select.getField());
+                if (fieldType == null) fail("CEL_POLICY_DENIED", path);
+                boolean optional = record.optionalFields().contains(select.getField());
+                Presence presence = presence(expr);
+                if (select.getTestOnly()) {
+                    if (!optional || presence == null) fail("CEL_POLICY_DENIED", path);
+                    return new Value("Boolean");
+                }
+                if (optional && (presence == null || !proofs.contains(presence)))
+                    fail("DATAFLOW_UNAVAILABLE", path);
                 return new Value(fieldType);
             }
             if (!expr.hasCallExpr()) throw new CompileFailure("CEL_POLICY_DENIED", path);
             var call = expr.getCallExpr();
             String function = call.getFunction();
-            boolean concatenate = function.equals("_+_");
-            String overload = concatenate ? "add_string" : OVERLOADS.get(function);
-            int arity = function.equals("!_") ? 1 : function.equals("_?_:_") ? 3 : 2;
+            boolean addition = function.equals("_+_");
+            boolean constructor = function.equals("timestamp") || function.equals("duration");
+            int arity = function.equals("!_") || constructor ? 1 : function.equals("_?_:_") ? 3 : 2;
             var reference = checked.getReferenceMapMap().get(expr.getId());
-            if (overload == null || call.hasTarget() || call.getArgsCount() != arity
-                    || reference == null || !reference.getOverloadIdList().equals(List.of(overload)))
+            if ((!addition && !OVERLOADS.containsKey(function)) || call.hasTarget() || call.getArgsCount() != arity
+                    || reference == null)
                 fail("CEL_POLICY_DENIED", path);
             var args = new ArrayList<Value>();
-            for (Expr arg : call.getArgsList()) args.add(visit(arg, depth + 1));
-            if (concatenate) {
-                if (args.stream().anyMatch(arg -> !arg.type().equals("String"))) fail("CEL_POLICY_DENIED", path);
+            for (int i = 0; i < arity; i++) args.add(visit(call.getArgs(i), depth + 1, branchProofs(call, i, proofs)));
+            boolean temporalAdd = addition && pair(args, "Timestamp", "Duration");
+            String overload = addition ? temporalAdd ? "add_timestamp_duration" : "add_string" : OVERLOADS.get(function);
+            if (!reference.getOverloadIdList().equals(List.of(overload))) fail("CEL_POLICY_DENIED", path);
+            if (constructor) {
+                Expr literal = call.getArgs(0);
+                if (!literal.hasConstExpr() || !literal.getConstExpr().hasStringValue()) fail("TYPE_MISMATCH", path);
+                String text = literal.getConstExpr().getStringValue();
+                if (function.equals("timestamp") ? !validTimestamp(text) : !validDuration(text))
+                    fail("TYPE_MISMATCH", path);
+                return new Value(function.equals("timestamp") ? "Timestamp" : "Duration");
+            }
+            if (addition) {
+                if (temporalAdd) return new Value("Timestamp");
+                if (!pair(args, "String", "String")) fail("CEL_POLICY_DENIED", path);
                 return new Value("String");
+            }
+            if (function.equals("@in")) {
+                var collection = dcm.type(args.get(1).type());
+                if (collection == null || !collection.kind().equals("list")
+                        || !membershipNeedle(args.get(0), call.getArgs(0), collection.element()))
+                    fail("TYPE_MISMATCH", path);
+                return new Value("Boolean");
+            }
+            if (function.equals("_<_")) {
+                if (!pair(args, "Timestamp", "Timestamp")) fail("CEL_POLICY_DENIED", path);
+                return new Value("Boolean");
             }
             if (function.equals("_?_:_")) {
                 if (!args.get(0).type().equals("Boolean")) fail("TYPE_MISMATCH", path);
@@ -195,7 +249,8 @@ final class Expressions {
             }
             if (function.equals("_==_") || function.equals("_!=_")) {
                 Value a = args.get(0), b = args.get(1);
-                if (!dcm.type(a.type()).scalar() || !dcm.type(b.type()).scalar())
+                if (!scalar(a) || !scalar(b) || function.equals("_!=_")
+                        && (a.type().equals("Timestamp") || b.type().equals("Timestamp")))
                     fail("CEL_POLICY_DENIED", path);
                 if (dcm.type(a.type()).kind().equals("enum")) assign(b, a.type(), dcm, path);
                 else if (dcm.type(b.type()).kind().equals("enum")) assign(a, b.type(), dcm, path);
@@ -207,7 +262,7 @@ final class Expressions {
         }
 
         private Value branches(Value a, Value b) {
-            if (!dcm.type(a.type()).scalar() || !dcm.type(b.type()).scalar())
+            if (!scalar(a) || !scalar(b))
                 fail("CEL_POLICY_DENIED", path);
             if (a.type().equals(b.type())) {
                 if (a.literals() != null && b.literals() != null) {
@@ -226,6 +281,55 @@ final class Expressions {
             assign(a, b.type(), dcm, path);
             return new Value(a.type());
         }
+
+        private boolean scalar(Value value) {
+            var type = dcm.type(value.type());
+            return type != null && type.scalar();
+        }
+
+        private boolean membershipNeedle(Value needle, Expr source, String element) {
+            if (needle.type().equals(element)) return true;
+            return dcm.type(element).kind().equals("enum") && source.hasConstExpr()
+                    && source.getConstExpr().hasStringValue()
+                    && dcm.type(element).values().contains(source.getConstExpr().getStringValue());
+        }
+
+        private static boolean pair(List<Value> args, String left, String right) {
+            return args.get(0).type().equals(left) && args.get(1).type().equals(right);
+        }
+
+        private static Presence presence(Expr expression) {
+            if (!expression.hasSelectExpr() || !expression.getSelectExpr().getOperand().hasIdentExpr()) return null;
+            var select = expression.getSelectExpr();
+            return new Presence(select.getOperand().getIdentExpr().getName(), select.getField());
+        }
+
+        private static Set<Presence> branchProofs(Expr.Call call, int index, Set<Presence> incoming) {
+            if (index == 0 || !Set.of("_&&_", "_?_:_").contains(call.getFunction())) return incoming;
+            Expr condition = call.getArgs(0);
+            boolean negated = condition.hasCallExpr() && condition.getCallExpr().getFunction().equals("!_")
+                    && condition.getCallExpr().getArgsCount() == 1;
+            if (negated && index == 2) condition = condition.getCallExpr().getArgs(0);
+            else if (negated || index != 1) return incoming;
+            if (!condition.hasSelectExpr() || !condition.getSelectExpr().getTestOnly()) return incoming;
+            Presence proof = presence(condition);
+            if (proof == null || incoming.contains(proof)) return incoming;
+            var extended = new HashSet<>(incoming);
+            extended.add(proof);
+            return extended;
+        }
+    }
+
+    private static boolean validTimestamp(String text) {
+        try {
+            Instant instant = Instant.parse(text);
+            return !instant.isBefore(EARLIEST) && !instant.isAfter(LATEST) && UTC_MILLIS.format(instant).equals(text);
+        } catch (DateTimeParseException invalid) { return false; }
+    }
+
+    private static boolean validDuration(String text) {
+        return text.matches("(?:0|[1-9][0-9]{0,7})s")
+                && Integer.parseInt(text.substring(0, text.length() - 1)) <= 31_536_000;
     }
 
     private static void bounded(String value, String path) {

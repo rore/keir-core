@@ -164,7 +164,7 @@ public final class KeirRuntime {
     private static Map<String,Object> contextFields(Map<String,Object> value,Set<String> fields) {
         require(value!=null && value.size()==fields.size(),"HOST_CONTEXT_INVALID","");
         shape(value,fields,"");
-        // Validated model fields are scalar; typed preflight rejects containers without traversing them.
+        // Typed preflight validates and snapshots the raw values before dispatch.
         Map<String,Object> copied=new LinkedHashMap<>();
         for(String field:fields) copied.put(field,value.get(field));
         return Collections.unmodifiableMap(copied);
@@ -213,8 +213,12 @@ public final class KeirRuntime {
             state.put("input",Artifact.value(prepared.plan.dcm(),(String)prepared.plan.entrypoint().get("input"),input,"/input","INPUT_INVALID"));
             try {
                 shape(invocation.bindings(),prepared.hostFields.keySet(),"/hostBindings");
-                for (var field:prepared.hostFields.entrySet()) for (String type:field.getValue())
-                    bindings.put(field.getKey(),Artifact.value(prepared.plan.dcm(),type,invocation.bindings().get(field.getKey()),"/hostBindings","HOST_BINDING_INVALID"));
+                for (var field:prepared.hostFields.entrySet()) {
+                    Object value=invocation.bindings().get(field.getKey());
+                    for (String type:field.getValue())
+                        value=Artifact.value(prepared.plan.dcm(),type,value,"/hostBindings","HOST_BINDING_INVALID");
+                    bindings.put(field.getKey(),value);
+                }
             } catch (RuntimeException failure) { throw new RuntimeFault(failure instanceof RuntimeFault f && f.code.equals("BUDGET_EXCEEDED")?f.code:"HOST_BINDING_INVALID","/hostBindings"); }
             require(invocation.requestKey()!=null,"HOST_CONTEXT_INVALID","");
             Map<String,Object> eventTypes=map(prepared.plan.entrypoint().get("event"),"");
@@ -259,10 +263,11 @@ public final class KeirRuntime {
             if (write) require(prepared.effectGrant>0,"AUTHORITY_DENIED",path);
             require(count<=prepared.grants.getOrDefault(capability,0L),"AUTHORITY_DENIED",path);
             Map<String,Object> agent=new LinkedHashMap<>(),protectedArgs=new LinkedHashMap<>();
+            Map<String,Object> args=map(step.get("args"),path);
             for (var parameter:map(cap.get("parameters"),"").entrySet()) {
                 String name=parameter.getKey(); Map<String,Object> definition=map(parameter.getValue(),""); String type=(String)definition.get("type");
                 if ("host".equals(definition.get("binding"))) protectedArgs.put(name,Artifact.value(prepared.plan.dcm(),type,bindings.get(name),"/hostBindings","HOST_BINDING_INVALID"));
-                else agent.put(name,Artifact.value(prepared.plan.dcm(),type,evaluate(map(step.get("args"),"").get(name),path),path,"INPUT_INVALID"));
+                else if (args.containsKey(name)) agent.put(name,Artifact.value(prepared.plan.dcm(),type,evaluate(args.get(name),path),path,"INPUT_INVALID"));
             }
             clock.remaining(path);
             // Preserve the adapter-entry check after the pre-dispatch clock read.

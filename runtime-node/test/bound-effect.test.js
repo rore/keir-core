@@ -83,7 +83,7 @@ test('binding snapshots model bytes and retains exact identity for unused catalo
   assert.equal(diagnostic, null);
   bytes.fill(0);
   assert.equal(api.prepareProgram(f.bytes, boundModel).diagnostic, null);
-  const duplicate = Buffer.concat([Buffer.from('{"format":"keir-dcm/1",'), f.dcmBytes.subarray(1)]);
+  const duplicate = Buffer.concat([Buffer.from('{"format":"keir-dcm/2",'), f.dcmBytes.subarray(1)]);
   denied(api.bindModel(duplicate, f.implementations), '/binding/dcm');
   const dcm = structuredClone(f.dcm);
   dcm.capabilities['tasks.create'].errors.push('UNUSED_ERROR');
@@ -94,7 +94,7 @@ test('binding snapshots model bytes and retains exact identity for unused catalo
 });
 
 test('public model binding matches the shared byte boundary cases without dispatch', () => {
-  const root = new URL('../../conformance/model-binding/', import.meta.url);
+  const root = new URL('../../conformance/keir-2/model-binding/', import.meta.url);
   const read = file => readFileSync(new URL(file, root));
   const model = JSON.parse(read('valid.json'));
   let dispatches = 0;
@@ -135,10 +135,10 @@ test('preparation requires the public envelope, compiler and model pins', () => 
   const f = boundFixture(api), bound = f.bind().boundModel;
   for (const [mutate, path, code] of [
     [a => { a.compiler = 'keir-compiler-java/0.1.0-SNAPSHOT'; }, '/artifact/compiler', 'PIN_MISMATCH'],
-    [a => { a.compiler = 'keir-compiler-java/0.2.0'; }, '/artifact/compiler', 'PIN_MISMATCH'],
+    [a => { a.compiler = 'keir-compiler-java/0.1.0'; }, '/artifact/compiler', 'PIN_MISMATCH'],
     [a => { a.environment.celJava = 'unsupported'; }, '/artifact/environment', 'PIN_MISMATCH'],
     [a => { a.modelRef.digest = 'sha256:' + '0'.repeat(64); }, '/artifact/modelRef'],
-    [a => { a.modelRef.descriptorRecipe = 'keir-record-descriptors/2'; }, '/artifact/modelRef'],
+    [a => { a.modelRef.descriptorRecipe = 'keir-record-descriptors/1'; }, '/artifact/modelRef'],
     [a => { a.modelRef.format = 'keir-dcm/effect-4'; }, '/artifact/modelRef'],
     [a => { a.modelRef.domainId = [a.modelRef.domainId]; }, '/artifact/modelRef'],
     [a => { a.modelRef.domainVersion = 'unsupported'; }, '/artifact/modelRef'],
@@ -151,7 +151,7 @@ test('preparation requires the public envelope, compiler and model pins', () => 
     mutate(artifact);
     denied(api.prepareProgram(canonicalBytes(artifact), bound), path, code ?? 'ARTIFACT_INVALID');
   }
-  for (const suffix of ['read-1', 'read-2', 'effect-1', 'effect-2', 'effect-3', 'effect-4']) {
+  for (const suffix of ['1', 'read-1', 'read-2', 'effect-1', 'effect-2', 'effect-3', 'effect-4']) {
     const artifact = { ...JSON.parse(f.bytes), format: `keir-artifact/${suffix}` };
     denied(api.prepareProgram(canonicalBytes(artifact), bound), '/artifact/format', 'ARTIFACT_INVALID');
     denied(api.bindModel(canonicalBytes({ ...f.dcm, format: `keir-dcm/${suffix}` }), f.implementations), '/binding/dcm');
@@ -159,7 +159,7 @@ test('preparation requires the public envelope, compiler and model pins', () => 
   const legacyModel = { ...f.dcm, assurance: 'HOST_BOUND_SINGLE_WRITE' };
   denied(api.bindModel(canonicalBytes(legacyModel), f.implementations), '/binding/dcm');
   for (const bytes of [
-    Buffer.concat([Buffer.from('{"format":"keir-artifact/1",'), f.bytes.subarray(1)]),
+    Buffer.concat([Buffer.from('{"format":"keir-artifact/2",'), f.bytes.subarray(1)]),
     Buffer.concat([f.bytes, Buffer.from('\n')]),
     Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), f.bytes]),
     Buffer.from([0x7b, 0xff, 0x7d]),

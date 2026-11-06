@@ -4,7 +4,7 @@ import { createServer, request } from 'node:http';
 import { once } from 'node:events';
 import { digest } from '../src/canonical.js';
 
-const read = name => readFileSync(new URL(`../../conformance/keir-1/${name}`, import.meta.url));
+const read = name => readFileSync(new URL(`../../conformance/keir-2/${name}`, import.meta.url));
 const programs = new Set(['main', 'zero', 'after-write-read', 'no-call', 'handler', 'title', 'title-max', 'title-composed']);
 
 // Fixed host-owned native checks; these examples do not qualify a deployment.
