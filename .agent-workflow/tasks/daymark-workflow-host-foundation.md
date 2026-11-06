@@ -33,7 +33,13 @@
 
 **Plan review:** The architect accepted the direction after inspecting the shipped schema and consumers. The plan and verification above incorporate the required migration, execution and receipt corrections. The published Core package gates the separate workflow adapter and Studio phase.
 
+**Implementation:** Daymark candidate `e0070190fc417f34717aad424c1bc1647d32d151` adds schema v12, durable capture for native task creation, and the scoped exact-title lookup. It keeps existing completion bindings, row order, event keys and write receipts. Creation events have no binding and stay out of dispatch and backfill. Automation-created tasks stay out of capture.
+
+**Verification:** The production build passed. The Node suite passed 354 tests, the separate process suite passed 12 tests, and all 24 selected Chromium cases passed after retrying two cases with the production assets built. Rehearsals with disposable shipped-schema data verified rollback, backup reopening, record preservation, completion replay, and use of the covering lookup index. The shipped v11 fixture also verified unchanged receipt replay and recovery without rerunning a started event.
+
+**Result review:** Independent review of the exact candidate, tests and logs found no blocking defects. The reviewer did not rerun the suites or independently repeat the v10 rehearsal. Private repository integration is in progress. The adapters, Studio work and live migration are separate.
+
 **Approvals:** Isolated implementation and verification are authorized. Live startup and migration are outside this record.
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
