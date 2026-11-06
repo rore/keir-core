@@ -36,7 +36,7 @@ List size, record-list queries, comprehensions, general sorting, arbitrary maps,
 
 ## Notes
 
-The Keir 2 candidate compiles the three frozen Inventory artifacts byte for byte from the packaged CLI. The packaged Java and Node runtimes agree on 28 scenarios and 51 validation vectors. The authoring companion archive builds deterministically and verifies against the candidate package digests. Whole-artifact resource qualification, hosted verification, and private release publication remain open. [Workflow expression specification](../../docs/specs/workflow-expressions.md) · [Shared conformance corpus](../../conformance/keir-2/README.md).
+The Keir 2 candidate compiles the three frozen Inventory artifacts byte for byte from the packaged CLI. The packaged Java and Node runtimes agree on 28 scenarios and 51 validation vectors. The authoring companion archive builds deterministically and verifies against the candidate package digests. Scoped resource qualification exercised cold bind and prepare, repeated confirmed and maximum-list no-match invocations, and pending host reads. In both runtimes an early read timeout prevented a write and a later read timeout preserved an earlier confirmed receipt. The serial, simulated-host samples do not establish production latency, memory, or preemption guarantees. Hosted verification and private release publication remain open. [Workflow expression specification](../../docs/specs/workflow-expressions.md) · [Shared conformance corpus](../../conformance/keir-2/README.md).
 
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md); [bound-cel-execution](../features/bound-cel-execution.md).
 
