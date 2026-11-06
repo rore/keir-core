@@ -4,11 +4,40 @@
 
 ## Prepare a release
 
-1. Pick an exact commit on main and a new version. Use `v<major>.<minor>.<patch>` for a Core release and `authoring-v<edition>` for an independently shipped [authoring companion](agents/authoring-companion.md). An authoring-only release describes the Core versions it works with.
-2. Build from a clean checkout. Attach the packages in scope, their licenses and required notices, and `SHA256SUMS`. A Core release contains the compiler CLI, Node runtime, Java runtime and Maven metadata, and a link to the matching authoring companion. Record the supported Keir and DCM formats, prerequisites, and installation steps in the release notes.
-3. Install the exact downloads in a separate checkout or consumer project. For Core, compile a rule once and check that both packaged runtimes agree. For the companion, verify the archive against the expected pin and check the example. Verify a reference host before claiming that it supports the release. Record the tested commit and any limits.
-4. Create a draft against that commit. Compare GitHub's asset digests with the verified files before publishing. If shipped package bytes need to change, cut a new version.
-5. Consumers pin the release, asset name and SHA-256 digest. Daymark can keep a verified copy of the exact dependency so its local setup doesn't require a GitHub download. Record where each copy came from.
+1. Pick a commit on main that passed Core CI. Use `v<major>.<minor>.<patch>` for Core. The matching [authoring companion](agents/authoring-companion.md) can ship as an asset on the Core release. Use `authoring-v<edition>` when the companion ships independently.
+2. Build and smoke-test the package assets using the commands below. Include their licenses, notices and `SHA256SUMS`. Record the supported Keir and DCM formats, prerequisites and install steps in the release notes. Build and verify any companion with its existing command and publish its checksum alongside the archive.
+3. Create a GitHub draft against the selected commit. Download its Core assets to a separate directory and run the verifier with the staged build's checksum file. Publish after the comparison passes. If shipped package bytes need to change, cut a new version.
+4. Consumers pin the release, asset name and SHA-256 digest. Daymark can keep a verified copy for offline setup. Run the consumer's checks when it adopts the release, and verify a reference host before claiming that it supports the release.
+
+## Build and verify Core assets
+
+Use Python 3.12 or later, JDK 21, Node.js 24, npm and Git. Set `REVISION` to the full source commit, and `VERSION` to the release version declared by the compiler, Node package and teaching host. Run from the repository root.
+
+```sh
+python -B scripts/release-core.py --revision "$REVISION" --version "$VERSION" \
+  --output ".tools/release-$VERSION" --maven-repo .tools/maven/repository --npm-cache .tools/npm-cache
+
+python -B scripts/verify-core-release.py --version "$VERSION" --assets ".tools/release-$VERSION" \
+  --smoke-revision "$REVISION" --maven-repo .tools/maven/repository --npm-cache .tools/npm-cache
+```
+
+Use a new output directory. The builder reads source from Git, builds in scratch, and checks the Maven packaging inputs and compiler dependencies against the reviewed notice inventory. Review packaging or dependency changes and update that inventory before building. Add `--offline` to either command when the Maven distribution and dependency caches are populated. To reproduce an existing release byte for byte, use the same build tools and compression versions.
+
+The smoke test compiles the follow-up rule with the packaged compiler. It checks the Maven coordinates and runs the packaged Java JAR with the dependencies resolved from the shipped POMs. It installs the released tarball in the Node example and runs the same compiled rule.
+
+For the draft download check, put only the five Core assets in the download directory. Use the original build's checksum file as the trusted input.
+
+```sh
+gh release create "v$VERSION" ".tools/release-$VERSION/"* \
+  --draft --target "$REVISION" --notes-file release-notes.md
+
+gh release download "v$VERSION" --dir .tools/release-download \
+  --pattern 'keir-compiler-cli-*.zip' --pattern 'keir-java-runtime-maven-*.zip' \
+  --pattern 'keir-runtime-node-*.tgz' --pattern LICENSE --pattern SHA256SUMS
+
+python -B scripts/verify-core-release.py --version "$VERSION" --assets .tools/release-download \
+  --checksums ".tools/release-$VERSION/SHA256SUMS"
+```
 
 ## Public readiness
 
