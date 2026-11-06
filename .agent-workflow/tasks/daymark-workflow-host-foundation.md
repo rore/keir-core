@@ -37,7 +37,7 @@
 
 **Verification:** The production build passed. The Node suite passed 354 tests, the separate process suite passed 12 tests, and all 24 selected Chromium cases passed after retrying two cases with the production assets built. Rehearsals with disposable shipped-schema data verified rollback, backup reopening, record preservation, completion replay, and use of the covering lookup index. The shipped v11 fixture also verified unchanged receipt replay and recovery without rerunning a started event.
 
-**Result review:** Independent review of the exact candidate, tests and logs found no blocking defects. The reviewer did not rerun the suites or independently repeat the v10 rehearsal. The [hosted candidate workflow](https://github.com/rore/keir-demo-app/actions/runs/42197695853) passed on `e0070190fc417f34717aad424c1bc1647d32d151`, and Daymark's private `main` advanced to that exact commit. The adapters, Studio work and live migration are separate.
+**Result review:** Independent review of the exact candidate, tests and logs found no blocking defects. The reviewer did not rerun the suites or independently repeat the v10 rehearsal. The [hosted candidate workflow](https://github.com/rore/keir-demo-app/actions/runs/42197695853) passed on `e0070190fc417f34717aad424c1bc1647d32d151`, and Daymark's private `main` advanced to that exact commit. The [main workflow](https://github.com/rore/keir-demo-app/actions/runs/42199268896) passed on its second attempt without source changes after one Studio request wait timed out. The adapters, Studio work and live migration are separate.
 
 **Approvals:** Isolated implementation and verification are authorized. Live startup and migration are outside this record.
 
