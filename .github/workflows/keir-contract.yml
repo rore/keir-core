@@ -86,13 +86,13 @@ jobs:
           npm pack ./runtime-node --pack-destination .tools/packages --cache .tools/npm-cache --ignore-scripts
           npm ci --prefix examples/node-host --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
           mkdir -p .tools/node-packed
-          tar -xzf .tools/packages/keir-runtime-node-0.0.0.tgz -C .tools/node-packed
+          tar -xzf .tools/packages/keir-runtime-node-0.2.0.tgz -C .tools/node-packed
           diff -r .tools/node-packed/package examples/node-host/node_modules/@keir/runtime-node
           node --test examples/node-host/follow-up.test.mjs examples/node-host/verify-scenarios.test.mjs
       - name: Compare packaged Java and Node scenario results
         run: |
           java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar examples/node-host/follow-up/source.yaml examples/node-host/follow-up/dcm.json > .tools/teaching-artifact.json
-          cmp conformance/keir-1/artifact.json .tools/teaching-artifact.json
+          cmp conformance/keir-2/artifact.json .tools/teaching-artifact.json
           for group in main zero after-write-read no-call handler title title-max title-composed; do
             java -jar examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar "$group" python > .tools/java-scenarios.json
             node examples/node-host/verify-scenarios.mjs "$group" python > .tools/node-scenarios.json
