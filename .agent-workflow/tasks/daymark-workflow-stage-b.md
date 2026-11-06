@@ -28,6 +28,8 @@
 
 **Verification checkpoint:** The build passed. The full Node run passed 373 tests and skipped 13. Twelve opt-in process tests passed separately, and one test requires POSIX. The last focused Node run passed 21 cases after the disposition change. All 181 Chromium cases passed across grouped runs, including a final focused run of 24. Local verification used staged package bytes. Official package provenance, hosted verification on the final commit and an independent Studio review remain open.
 
+**Result review checkpoint:** Independent review of `2ea470d` found no blocking contract or migration code defect. Before integration, prove rollback during selection archive and clearing and during receipt table rebuild. Record the exact old-package restore evidence. These checks supplement the passing failure injection after the version write.
+
 **Approvals:** Isolated implementation and tests are authorized. Contract and durable migration details require independent technical review before final integration.
 
 **State:** Ready to implement
