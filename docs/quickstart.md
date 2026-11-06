@@ -4,7 +4,9 @@
 
 Run an extension that creates a follow-up whenever someone completes a task in the launch project. Then change the follow-up title and compile your version.
 
-The app sends the completed task’s ID. The [extension source](../examples/node-host/follow-up/source.yaml) reads that task, checks that it is complete and belongs to `project1`, then requests a follow-up titled `Follow up`. The [model walkthrough](specs/domain-model.md#complete-example) shows what the app exposes and what it keeps under its control.
+The app sends the completed task’s ID. The extension reads that task, checks that it is complete and belongs to `project1`, then requests a follow-up titled `Follow up`. The model defines the event and task operations. The host supplies the authenticated actor separately. [Extension source](../examples/node-host/follow-up/source.yaml) · [Readable model](../examples/node-host/follow-up/dcm.json)
+
+The examples in this checkout use Keir 2. [Keir 2 version matrix](specs/workflow-expressions.md#version-matrix)
 
 Use a local checkout, **Node.js 24 with npm**, and **JDK 21** to compile. The precompiled run only needs Node.js and npm. The first build and install need access to the Maven and npm dependencies unless they are already cached.
 
@@ -100,4 +102,4 @@ The [Java host](../examples/node-host/follow-up/FollowUp.java) prints the same t
 The [shared fixtures](../conformance/keir-2/README.md) record the exact artifacts and independent scenario expectations for conformance.
 
 <a id="embed-the-same-flow"></a>
-[Embed Keir in an application](embedding.md) · [Keir specification](specs/README.md) · [Examples index](../examples/README.md)
+[Embed Keir in an application](embedding.md) · [Keir 2 workflow expressions](specs/workflow-expressions.md) · [Examples index](../examples/README.md)

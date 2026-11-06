@@ -2,12 +2,17 @@
 
 The specification defines the documents Keir accepts and how a compiled extension runs. For a walkthrough, [get started](../quickstart.md) or [embed Keir](../embedding.md).
 
+## Keir 2
+
+The checkout examples use the `/2` source, model, artifact and scenario formats. The Keir 2 reference defines bounded list membership, optional values and elapsed time, and identifies the matching Core 0.2.0 compiler and runtimes. [Keir 2 workflow expressions](workflow-expressions.md) · [Version matrix](workflow-expressions.md#version-matrix)
+
 <a id="current-profile"></a>
-## Current behavior
+<a id="current-behavior"></a>
+## Keir 1 baseline
 
-The current single-write contract runs after a host event commits. An extension can read data and contain at most one possible write, including writes behind guards. Both Java and Node.js can run the same compiled bytes with real or simulated host implementations. The host owns permissions and native commits.
+Keir 1 runs after a host event commits. An extension can read data and contain at most one possible write, including writes behind guards. Both Java and Node.js can run the same compiled bytes with real or simulated host implementations. The host owns permissions and native commits.
 
-The compiler and runtimes use exact, versioned formats. See [document and compiler identities](compiler-artifact.md#source-and-artifact-identity) for the values to use when compiling or validating documents.
+These references describe Core 0.1.0 and its `/1` formats. Use them with the Keir 1 compiler and runtimes. [Keir 1 document and compiler identities](compiler-artifact.md#source-and-artifact-identity)
 
 | Topic | Contract |
 | --- | --- |
@@ -38,10 +43,6 @@ These contracts version independently. For example, a new source syntax can keep
 Package versions identify releases of the compiler and runtimes. Choose a tested combination from the release documentation. The shared `/1` suffix and matching package version numbers alone establish no compatibility. The compiler checks the source's exact model identity. At preparation, the runtime checks the artifact format, producer, dependency environment and model reference against the bound model. The host also supplies the exact capability versions declared in that model. A host-owned domain or capability version describes the host's business contract, independently of the Keir document formats. [Artifact identity](compiler-artifact.md#source-and-artifact-identity) · [Core package record](../agents/authoring-companion-v3-compatibility.json)
 
 Current tooling rejects earlier preview formats. To adopt the current contract, bring the source and model into the supported formats, compile again, and review the new artifact before approval. Keep old artifacts and approvals with their original bytes. [Earlier formats and APIs](../internal/history/README.md)
-
-## Candidate contract
-
-The [Keir 2 workflow expression contract](workflow-expressions.md) records the Core 0.2.0 candidate. It covers bounded lists, optional values and elapsed time. The released Keir 1 contract is described above.
 
 ## Maintaining a contract
 

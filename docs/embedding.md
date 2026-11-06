@@ -2,13 +2,13 @@
 
 An application that embeds Keir is called the **host**. The host decides when rules run, exposes the operations rules may call, and handles permissions and storage. Keir checks rules against the host’s contract and runs them within the executable contract’s limits.
 
-The current Keir specification supports reads and at most one possible write per program. An application can restrict an entrypoint to reads. [Keir specification](specs/README.md#current-profile)
+The checkout examples use Keir 2. An extension can read data and contain at most one possible write. An application can restrict an entrypoint to reads. [Keir 2 execution boundary](specs/workflow-expressions.md#execution-boundary) · [Keir 2 version matrix](specs/workflow-expressions.md#version-matrix)
 
 ## 1. Define what the host exposes
 
 Describe the hook, its input and result, and the available operations in a domain capability model (DCM). For the [follow-up example](../examples/node-host/follow-up/dcm.json), the hook receives a task ID after the app saves the completion. The rule can read that task and request a new task. The host provides the authenticated actor separately from the rule’s arguments.
 
-Implement each operation in host code. An implementation can call an existing local service or an internal API. The host checks current permissions, authenticates the original request key, and reports what happened to a write. [DCM reference](specs/domain-model.md) · [Write evidence](specs/runtime.md#write-evidence)
+Implement each operation in host code. An implementation can call an existing local service or an internal API. The host checks current permissions, authenticates the original request key, and reports what happened to a write. [Keir 2 model changes](specs/workflow-expressions.md) · [Write evidence](specs/runtime.md#write-evidence)
 
 ## 2. Compile and review a rule
 
