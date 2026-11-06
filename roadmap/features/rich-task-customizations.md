@@ -12,7 +12,7 @@ repo: "keir-demo-app"
 
 Let a business user combine task creation and completion triggers, conditions and a single action in the Customization Studio. Daymark owns the task model, native operations, event policy and Studio presentation.
 
-The first increment delivered title copying, exact matching and fixed suffixes in Daymark. A live rule created the expected follow-up title, and upgrade checks verified that prior approvals and pending completions still execute. Search, tags and due dates remain queued. [Implementation record](../../.agent-workflow/tasks/daymark-title-aware-task-customizations.md).
+The first increment delivered title copying, exact matching and fixed suffixes in Daymark. A live rule created the expected follow-up title, and upgrade checks verified that prior approvals and pending completions still execute. [Implementation record](../../.agent-workflow/tasks/daymark-title-aware-task-customizations.md)
 
 ## In Scope
 
@@ -30,13 +30,13 @@ Scheduling, implicit parent relationships, arbitrary search expansion or treatin
 
 ## Done When
 
-- [ ] Design/spec: approve the expanded task model, generic arguments and real query/uniqueness contracts.
-- [ ] Implementation: run the same reviewed program in simulation and against native task data, showing created and no-op outcomes.
+- [x] Review the expanded task model, generic arguments, and the authorized snapshot used by the open-task check.
+- [x] Run the same reviewed program in simulation and against native task data, showing created and no-op outcomes.
 - [ ] Verification: both triggers, exact title matching, tags, existing matches, absent dates, elapsed time across daylight-saving transitions, incomplete queries, overflow, concurrent duplicates and uncertain writes have honest outcomes.
 
 ## Notes
 
-The native foundation is integrated in [Daymark 59c819a](https://github.com/rore/keir-demo-app/commit/59c819a1f801a50183d2fc232b433c160da03e31). It adds priority, optional exact due times and a local-time editor. An isolated upgrade from the shipped schema preserved data across all 20 tables. Studio design covers the four workflow scenarios and distinguishes confirmed no change, a check that could not run, and an unconfirmed write. This design still needs validation with the actual host and runtime.
+The Keir 2 slice is integrated in private Daymark `main` at `7751541`. All four workflows ran the same compiled artifacts in simulation and against native tasks. Studio distinguishes no change, a check that could not run, and an unconfirmed write. The exact integration candidate passed hosted build, Node and Chromium checks. The open-task check describes an authorized snapshot, so concurrent actions can still create matching tasks. Live deployment remains separate. [Daymark integration](https://github.com/rore/keir-demo-app/commit/77515417e74f962dd09a95c68f4a6b7306877e81) · [Hosted verification](https://github.com/rore/keir-demo-app/actions/runs/42261861370) · [Stage B work record](../../.agent-workflow/tasks/daymark-workflow-stage-b.md)
 
 **Dependencies:** [task-organization](../features/task-organization.md); [demo-task-integration](../features/demo-task-integration.md); [enrich-followup-expressions](../features/enrich-followup-expressions.md).
 
