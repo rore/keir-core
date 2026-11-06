@@ -7,7 +7,9 @@
 
 The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-| Field | Current value |
+This table and command are for Core 0.1.0. For Core 0.2.0, use the [Keir 2 version matrix](workflow-expressions.md#version-matrix).
+
+| Field | Keir 1 value |
 | --- | --- |
 | Source `language` | `keir/1` |
 | DCM `format` | `keir-dcm/1` |
@@ -18,7 +20,7 @@ The compiler checks a [Keir source document](language.md) against a trusted [dom
 
 ### Compile source
 
-On JDK 21, use the [compiler CLI JAR](../../compiler-java/README.md#build-and-run). Pass the source path followed by the trusted DCM path.
+From a Keir 1 checkout, use the [compiler CLI JAR](../../compiler-java/README.md#build-and-run) on JDK 21. Pass the source path followed by the trusted DCM path.
 
 ```sh
 java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar source.yaml dcm.json > artifact.json

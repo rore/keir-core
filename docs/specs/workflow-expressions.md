@@ -1,6 +1,6 @@
 # Keir 2 workflow expressions
 
-This is the contract for the Core 0.2.0 candidate. Use the released Keir 1 references for Core 0.1.0. Java and Node.js must pass the same artifact and scenario checks before the candidate is released.
+This specification defines the Keir 2 workflow expressions implemented by Core 0.2.0. Use the Keir 1 references with Core 0.1.0.
 
 Keir 2 adds bounded list membership, optional values and elapsed-time expressions. The host still defines its events, input data and operations. The host binds a model, prepares the compiled artifact and invokes it after the triggering event commits.
 
@@ -55,12 +55,16 @@ CEL Boolean semantics still apply. A pure arithmetic error can be masked by `fal
 
 On an inventory arrival, the extension asks the host whether a matching item is already open. It checks the requested label, the lookup result, and the optional `enabled` flag before requesting one adjustment. The due time is 168 hours after the existing expiry when present, or after the arrival time otherwise. [Model](../../conformance/keir-2/dcm-inventory.json) · [Source](../../conformance/keir-2/source-inventory.json) · [Compiled artifact](../../conformance/keir-2/artifact-inventory.json)
 
+The model and artifact have separate byte pins. [Model digest](../../conformance/keir-2/dcm-inventory.sha256) · [Artifact digest](../../conformance/keir-2/artifact-inventory.sha256)
+
 | Scenario | Expected behavior |
 | --- | --- |
 | [Adjustment](../../conformance/keir-2/scenarios/inventory/inventory-adjusted.json) | The absent `enabled` flag uses the extension's default of `true`. The host confirms the adjustment, and the due time is `2026-03-14T12:34:56.789Z`. |
 | [Present false](../../conformance/keir-2/scenarios/inventory/inventory-optional-false.json) | `enabled: false` skips the adjustment. The result still reports the due time computed from the existing expiry. |
+| [No match at the list limit](../../conformance/keir-2/scenarios/inventory/inventory-max-no-match.json) | None of the 16 labels matches. The extension reports `eligible: false` and the host performs only the lookup. |
 | [Handled denial](../../conformance/keir-2/scenarios/inventory/inventory-handler-omits-due.json) | The host rejects the write with `ACCESS_DENIED` and `NONE` effect evidence. The handler returns `eligible: false` and omits `dueAt`. |
 | [Timestamp overflow](../../conformance/keir-2/scenarios/inventory/inventory-selected-overflow.json) | The lookup runs, then timestamp addition fails with `BUDGET_EXCEEDED`. The extension stops before requesting the adjustment. |
+| [Unselected overflow branch](../../conformance/keir-2/scenarios/inventory/inventory-lazy-overflow.json) | The existing expiry supplies the due time. Adding 168 hours to the arrival time would overflow, but that branch is unselected. The host confirms the adjustment. |
 
 ## Execution boundary
 
@@ -88,7 +92,7 @@ Serialize descriptors deterministically. Validation rejects unknown fields and a
 
 ## Version matrix
 
-| Component | Core 0.2.0 candidate |
+| Component | Core 0.2.0 |
 | --- | --- |
 | Source | [`keir/2`](../../schemas/source-2/source.schema.json) |
 | Domain capability model | [`keir-dcm/2`](../../schemas/dcm-2/dcm.schema.json) |
@@ -96,8 +100,8 @@ Serialize descriptors deterministically. Validation rejects unknown fields and a
 | Verification scenario | [`keir-scenario/2`](../../schemas/scenario-2/scenario.schema.json) |
 | Descriptor recipe | `keir-record-descriptors/2` |
 | Artifact producer | `keir-compiler-java/0.2.0` |
-| Core packages and authoring companion | Core `0.2.0`, companion edition `4`, pending qualification |
+| Core packages and authoring companion | Core `0.2.0`, companion edition `4` |
 
 The artifact environment pins CEL Java `0.14.0`, CEL Node `0.6.1`, protobuf Java `4.35.1` and protobuf Node `2.6.2`. The matching CEL spec packages retain versions `0.14.0` and `0.6.1`. The `/2` scenario keeps the prior outer shape and lexical rules and uses the exact `/2` artifact and model pair. Time values in its business data are strings.
 
-The runtime checks the full model reference, producer, environment and descriptor recipe. Package versions and document suffixes describe separate identities. The candidate compiler and runtimes use the `/2` contracts as a set. Use the matching Keir 1 packages for `/1` artifacts. When moving an extension to Keir 2, compile it against the new model and review the new artifact. Prior artifacts and approvals remain tied to their original bytes.
+The runtime checks the full model reference, producer, environment and descriptor recipe. Package versions and document suffixes describe separate identities. The Core 0.2.0 compiler and runtimes use the `/2` contracts as a set. Use the matching Keir 1 packages for `/1` artifacts. When moving an extension to Keir 2, compile it against the new model and review the new artifact. Prior artifacts and approvals remain tied to their original bytes.

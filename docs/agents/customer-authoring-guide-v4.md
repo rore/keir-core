@@ -1,6 +1,6 @@
 # Keir 2 customer authoring guide
 
-Candidate for authoring companion edition 4. Use a verified Core 0.2.0 package combination and a host that has enabled the Keir 2 contract before using this guide to author extensions.
+Authoring companion edition 4 pairs with Keir Core 0.2.0. Use the verified Core packages and a host that has enabled the Keir 2 contract.
 
 ## Discover the host contract
 
