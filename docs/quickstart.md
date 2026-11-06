@@ -97,7 +97,7 @@ java -cp 'runtime-java/target/keir-runtime-java-0.1.0-SNAPSHOT.jar;runtime-java/
 The [Java host](../examples/node-host/follow-up/FollowUp.java) prints the same three lines as Node. Append `.tools/follow-up/artifact.json` to run the changed extension. Both examples stop on a binding or preparation diagnostic or an unexpected invocation outcome.
 
 <a id="run-the-conformance-cases"></a>
-The [shared fixtures](../conformance/keir-1/README.md) record the exact artifacts and independent scenario expectations for conformance.
+The [shared fixtures](../conformance/keir-2/README.md) record the exact artifacts and independent scenario expectations for conformance.
 
 <a id="embed-the-same-flow"></a>
 [Embed Keir in an application](embedding.md) · [Keir specification](specs/README.md) · [Examples index](../examples/README.md)

@@ -8,7 +8,7 @@ import { bindModel, invokeProgram, prepareProgram } from '../src/index.js';
 import { validateValue } from '../src/validation.js';
 import { lexical } from './scenario-lexical.mjs';
 
-const corpus = new URL('../../conformance/keir-1/', import.meta.url);
+const corpus = new URL('../../conformance/keir-2/', import.meta.url);
 const read = path => readFileSync(new URL(path, corpus));
 const groups = new Map([
   ['main', ['artifact', 'dcm']],
@@ -19,8 +19,12 @@ const groups = new Map([
   ['title', ['artifact-title', 'dcm-title']],
   ['title-max', ['artifact-title-max', 'dcm-title']],
   ['title-composed', ['artifact-title-composed', 'dcm-title']],
+  ['inventory', ['artifact-inventory', 'dcm-inventory']],
+  ['inventory-algebra', ['artifact-inventory-algebra', 'dcm-inventory']],
+  ['inventory-enum', ['artifact-inventory-enum', 'dcm-inventory-enum']],
 ]);
 const fixtures = new Set(['normal', 'read-throws', 'lost-response', 'response-expired']);
+const withoutBindings = new Set(['no-call', 'inventory-enum']);
 
 function vectorBytes(vector) {
   if (Object.hasOwn(vector, 'utf8')) return Buffer.from(vector.utf8);
@@ -85,7 +89,7 @@ function pinned(name) {
 }
 
 const fixtureNames = new Set([...groups.values()].flat());
-assert.equal(fixtureNames.size, 10);
+assert.equal(fixtureNames.size, 15);
 const pinnedBytes = new Map([...fixtureNames].map(name => [name, pinned(name)]));
 
 function withFormat(bytes, format) {
@@ -105,8 +109,13 @@ function checkTypes(document, dcm, entrypoint) {
     assert.equal(row.version, capability.version, 'Scenario capability version');
     for (const [binding, args] of [['agent', row.args], ['host', row.protectedArgs]]) {
       const params = Object.entries(capability.parameters).filter(([, param]) => param.binding === binding);
-      assert.deepEqual(Object.keys(args).sort(), params.map(([name]) => name).sort(), 'Scenario argument names');
-      for (const [name, param] of params) type(param.type, args[name], 'Scenario argument ' + name);
+      for (const name of Object.keys(args)) {
+        assert.ok(Object.hasOwn(capability.parameters, name) && capability.parameters[name].binding === binding, 'Unknown scenario argument ' + name);
+      }
+      for (const [name, param] of params) {
+        if (param.optional && !Object.hasOwn(args, name)) continue;
+        type(param.type, args[name], 'Scenario argument ' + name);
+      }
     }
     if (!row.response) continue;
     const response = row.response;
@@ -120,8 +129,9 @@ function checkTypes(document, dcm, entrypoint) {
 const dispatches = outcome => outcome.trace.filter(event => event.event === 'CALL_DISPATCHED');
 const target = ({ step, capability }) => ({ step, capability });
 const stubCall = ({ response, ...call }) => call;
+const reportInventory = ({ trace, ...outcome }) => ({ status: 'REPORTED', ...outcome });
 
-function checkSemantics(document, artifact, dcm) {
+function checkSemantics(document, artifact, dcm, report) {
   const { expect, stubs } = document;
   const dispatched = dispatches(expect.outcome);
   assert.deepEqual(stubs.map(stubCall), expect.calls, 'Scenario stubs and expected calls');
@@ -144,7 +154,7 @@ function checkSemantics(document, artifact, dcm) {
     const step = artifact.steps.find(step => step.id === call.step);
     assert.ok(step?.op === 'CALL' && step.capability === call.capability, 'Scenario expected artifact step');
   }
-  const consumption = consumeEffect(expect.outcome);
+  const consumption = report(expect.outcome);
   assert.equal(consumption.status, 'REPORTED', 'Invalid scenario expected outcome');
   assert.deepEqual(consumption, expect.consumption, 'Scenario expected consumer report');
 }
@@ -171,7 +181,9 @@ async function run(entry) {
     const dcm = JSON.parse(dcmBytes);
     const artifact = JSON.parse(artifactBytes);
     const requestKey = Object.freeze(Object.create(null));
-    const event = Object.freeze({ id: 'event1', source: 'task1' });
+    const inventory = entry.group.startsWith('inventory');
+    const event = Object.freeze({ id: 'event1', source: inventory ? 'item1' : 'task1' });
+    const report = inventory ? reportInventory : consumeEffect;
     const expiresAtMs = 10_000;
     let now = 0;
     let fixture;
@@ -215,13 +227,13 @@ async function run(entry) {
     phase = 'typing';
     checkTypes(document, dcm, dcm.entrypoints[artifact.entrypoint]);
     phase = 'semantics';
-    checkSemantics(document, artifact, dcm);
+    checkSemantics(document, artifact, dcm, report);
 
     phase = 'execution';
     assert.equal(entry.expected, 'accept', 'Rejection vector passed every preflight phase');
     assert.equal(captures.length, 0, 'Preflight dispatched a native stub');
     const outcome = await invokeProgram(preparation.prepared, document.given.input, {
-      bindings: entry.group === 'no-call' ? {} : { actorId: 'user1' },
+      bindings: withoutBindings.has(entry.group) ? {} : { actorId: 'user1' },
       deadline: { clock: { nowMs: () => now }, expiresAtMs },
       requestKey, event,
     });
@@ -233,7 +245,7 @@ async function run(entry) {
       assert.equal(call.capability, dispatched[index].capability, 'Trace and native dispatch capabilities differ');
       return { step: dispatched[index].step, ...call };
     });
-    const consumption = consumeEffect(outcome);
+    const consumption = report(outcome);
     assert.deepEqual({ outcome, calls, consumption }, document.expect, 'Scenario runtime report');
     return {
       phase: 'accept',
@@ -263,8 +275,8 @@ const vectors = JSON.parse(read('scenario-vectors.json')).vectors.map(vector => 
   if (vector.model) assert.ok(pinnedBytes.has(vector.model), 'Missing vector model pin');
   return { vector, group, bytes: vectorBytes(vector), label: vector.id, expected: vector.expect };
 });
-assert.equal(scenarios.length, 20);
-assert.equal(vectors.length, 45);
+assert.equal(scenarios.length, 28);
+assert.equal(vectors.length, 51);
 const forged = JSON.parse(read('scenarios/main/open.json'));
 const receipt = { ...target(forged.expect.calls[0]), state: 'CONFIRMED' };
 forged.expect.outcome.trace.splice(-1, 0, { event: 'EFFECT_RECORDED', ...receipt });

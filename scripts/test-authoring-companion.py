@@ -1,6 +1,7 @@
 """Offline checks for the authoring companion command line."""
 
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -19,6 +20,7 @@ import zipfile
 SCRIPT = Path(__file__).with_name("authoring-companion.py")
 V1_PIN = "sha256:8e365ff0d14fb0c479e43ace36e941562c94577f793a86b720d54e20622547b6"
 V2_GUIDE_PIN = "sha256:22f3aba081b5653f7f5d4fff8861afe606c840ce56d9b26d7464ffc08ee8ab1d"
+V3_RELEASE_REVISION = "e298e7a4015ea527fca107972aaf2054fd77255b"
 
 
 def command(*args):
@@ -157,7 +159,7 @@ class AuthoringCompanionV3Test(unittest.TestCase):
         directory = tempfile.TemporaryDirectory(dir=build)
         cls.addClassCleanup(directory.cleanup)
         cls.directory = Path(directory.name)
-        cls.revision = git("rev-parse", "HEAD").decode().strip()
+        cls.revision = V3_RELEASE_REVISION
         cls.path = cls.directory / "companion-v3.zip"
         assets = os.environ.get("KEIR_COMPANION_CORE_ASSETS")
         cls.build_flags = ("--version", "3", "--revision", cls.revision, *(("--core-assets", assets) if assets else ()))
@@ -252,12 +254,12 @@ class AuthoringCompanionV3Test(unittest.TestCase):
         def read_blob(_revision, name):
             return json.dumps(release).encode() if name == module["V3_COMPATIBILITY"] else payload[name]
 
-        build = module["build_v3"]
+        build = module["build_pinned"]
         with patch.dict(build.__globals__, read_blob=read_blob):
             with self.assertRaisesRegex(ValueError, "requires --core-assets"):
-                build(self.revision, None)
+                build(3, self.revision, None)
             archive = self.directory / "release-v3.zip"
-            archive.write_bytes(build(self.revision, assets))
+            archive.write_bytes(build(3, self.revision, assets))
         pin = digest(archive.read_bytes())
         for flags in ((), ("--core-assets", assets)):
             result = command("verify", archive, "--version", "3", "--sha256", pin, *flags)
@@ -272,6 +274,27 @@ class AuthoringCompanionV3Test(unittest.TestCase):
         del release["packages"]["nodeRuntime"]
         with self.assertRaisesRegex(ValueError, "all three"):
             module["validate_compatibility"](release)
+
+
+class AuthoringCompanionV4Test(unittest.TestCase):
+    def test_inventory_and_exact_example_pins(self):
+        module = runpy.run_path(str(SCRIPT))
+        root = SCRIPT.resolve().parents[1]
+        payload = {name: (root / name).read_bytes() for name in module["V4_FILES"]}
+        revision = git("rev-parse", "HEAD").decode().strip()
+        compatibility = {"status": "candidate", "coreRevision": revision, "packages": {}}
+        make_archive = module["make_pinned_archive"]
+        data = make_archive(4, revision, compatibility, payload)
+        self.assertEqual(make_archive(4, revision, compatibility, payload), data)
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            manifest = json.loads(archive.read("manifest.json"))
+            self.assertEqual(manifest["format"], "keir-authoring-companion/4")
+            self.assertEqual(manifest["contracts"]["scenario"], "keir-scenario/2")
+            self.assertEqual(manifest["producer"], "keir-compiler-java/0.2.0")
+            self.assertEqual(archive.namelist(), sorted([*payload, "manifest.json"]))
+        payload[module["V4_MODEL"]] += b" "
+        with self.assertRaisesRegex(ValueError, "example or compiler pin"):
+            make_archive(4, revision, compatibility, payload)
 
 
 if __name__ == "__main__":

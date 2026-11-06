@@ -47,7 +47,7 @@ public final class ScenarioHost {
     }
 
     Path corpus() {
-        return root.resolve("conformance/keir-1");
+        return root.resolve("conformance/keir-2");
     }
 
     Selection selection(String group) throws IOException {
@@ -89,7 +89,7 @@ public final class ScenarioHost {
         Selection selected = testSelection == null ? selection(group) : testSelection;
         var model = object(EffectJson.parse(selected.model()));
         var artifact = object(EffectJson.parse(selected.artifact()));
-        check("keir-dcm/1".equals(model.get("format")) && "keir-artifact/1".equals(artifact.get("format")),
+        check("keir-dcm/2".equals(model.get("format")) && "keir-artifact/2".equals(artifact.get("format")),
                 "Incompatible scenario contract");
         try (var simulation = new BoundScenarioSimulation(selected.model(),
                 Map.of(selected.group(), selected.artifact()), model)) {
@@ -119,7 +119,7 @@ public final class ScenarioHost {
             try {
                 Files.write(input, bytes);
                 Process process = new ProcessBuilder(python, root.resolve("scripts/check-keir-contracts.py").toString(),
-                        "scenario", input.toString()).redirectOutput(output.toFile())
+                        "--revision", "2", "scenario", input.toString()).redirectOutput(output.toFile())
                         .redirectError(ProcessBuilder.Redirect.DISCARD).start();
                 try {
                     check(process.waitFor(30, TimeUnit.SECONDS), "Scenario schema checker timed out");

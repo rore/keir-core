@@ -20,4 +20,4 @@ Read the [model](node-host/follow-up/dcm.json) and [extension source](node-host/
 - [Node.js host](node-host/follow-up/run.mjs)
 - [Java host](node-host/follow-up/FollowUp.java)
 
-See [Embed Keir](../docs/embedding.md) to adapt the example to your application. The [shared conformance corpus](../conformance/keir-1/README.md) describes the fixtures that verify the compiler and runtimes.
+See [Embed Keir](../docs/embedding.md) to adapt the example to your application. The [shared conformance corpus](../conformance/keir-2/README.md) describes the fixtures that verify the compiler and runtimes.

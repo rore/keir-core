@@ -1,11 +1,13 @@
-import { canonicalBytes } from './canonical.js';
+import { types as nodeTypes } from 'node:util';
+import { CanonicalLimitError, canonicalBytes } from './canonical.js';
 
 export const ENVIRONMENT = Object.freeze({ celJava: '0.14.0', celNode: '0.6.1', protobufJava: '4.35.1', protobufNode: '2.6.2' });
 export const LIMITS = Object.freeze({ artifactBytes: 1048576, dcmBytes: 65536, steps: 8, calls: 4, expressionNodes: 64, totalAstNodes: 512, traceEvents: 64, valueBytes: 8192, stringBytes: 256 });
 const namePattern = /^[A-Za-z][A-Za-z0-9]{0,63}$/;
 const idPattern = /^[A-Za-z][A-Za-z0-9.]{0,99}$/;
 const reserved = new Set(['true', 'false', 'null', 'in', 'as', 'break', 'const', 'continue', 'else', 'for', 'function', 'if', 'import', 'let', 'loop', 'package', 'namespace', 'return', 'var', 'void', 'while']);
-const builtinTypes = new Set(['Boolean', 'String', 'bool', 'bytes', 'double', 'dyn', 'int', 'list', 'map', 'null_type', 'string', 'type', 'uint', 'input']);
+const builtinTypes = new Set(['Boolean', 'String', 'Timestamp', 'Duration', 'bool', 'bytes', 'double', 'dyn', 'int', 'list', 'map', 'null_type', 'string', 'type', 'uint', 'input']);
+const timestampPattern = /^(?!0000)[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$/;
 
 export class Fault extends Error {
   constructor(code, path) { super(code); this.code = code; this.path = path; }
@@ -22,6 +24,13 @@ export function shape(value, expected, path) {
   const actual = keys(value, path);
   requireThat(actual.length === expected.length && expected.every(k => Object.hasOwn(value, k)), path);
 }
+function shapeWithOptional(value, declared, optional, path) {
+  const actual = keys(value, path, declared.length);
+  requireThat(actual.every(name => declared.includes(name)) &&
+    declared.every(name => Object.hasOwn(value, name) || optional(name)), path);
+  return actual;
+}
+export const fieldType = declaration => typeof declaration === 'string' ? declaration : declaration.type;
 export function text(value, path, nonempty = false, max = 256) {
   requireThat(typeof value === 'string' && value.isWellFormed() && Buffer.byteLength(value) <= max && (!nonempty || value.length > 0), path);
 }
@@ -62,7 +71,7 @@ export function narrowPolicy(dcm, policy, previous, path) {
 
 export function validateModel(dcm, p) {
   shape(dcm, ['format', 'domain', 'types', 'capabilities', 'entrypoints', 'hostKey'], p);
-  requireThat(dcm.format === 'keir-dcm/1', p);
+  requireThat(dcm.format === 'keir-dcm/2', p);
   requireThat(canonicalBytes(dcm).length <= LIMITS.dcmBytes, p, 'BUDGET_EXCEEDED');
   shape(dcm.domain, ['id', 'version'], p + '/domain');
   text(dcm.domain.id, p, true); text(dcm.domain.version, p, true);
@@ -80,21 +89,39 @@ export function validateModel(dcm, p) {
       shape(type, ['kind', 'fields'], p);
       const fields = keys(type.fields, p, 16); requireThat(fields.length > 0, p);
       for (const field of fields) named(field, p);
+    } else if (type?.kind === 'list') {
+      shape(type, ['kind', 'element', 'maxItems'], p);
+      integer(type.maxItems, 16, p, 0);
     } else throw new Fault('DCM_INVALID', p);
   }
-  const scalar = type => typeof type === 'string' && (type === 'Boolean' || type === 'String' || ['nominal', 'enum'].includes(dcm.types[type]?.kind));
+  const listElement = type => typeof type === 'string' && (type === 'Boolean' || type === 'String' || ['nominal', 'enum'].includes(dcm.types[type]?.kind));
+  const scalar = type => type === 'Timestamp' || listElement(type);
+  const valueType = type => scalar(type) || typeof type === 'string' && dcm.types[type]?.kind === 'list';
   const record = type => typeof type === 'string' && dcm.types[type]?.kind === 'record';
   shape(dcm.hostKey, ['source', 'type'], p + '/hostKey');
   requireThat(dcm.hostKey.source === 'requestKey', p + '/hostKey');
   text(dcm.hostKey.type, p + '/hostKey/type', true);
-  for (const type of Object.values(dcm.types)) if (type.kind === 'record') for (const fieldType of Object.values(type.fields)) requireThat(scalar(fieldType), p);
+  for (const type of Object.values(dcm.types)) {
+    if (type.kind === 'list') requireThat(listElement(type.element), p);
+    if (type.kind !== 'record') continue;
+    for (const declaration of Object.values(type.fields)) {
+      if (typeof declaration === 'string') requireThat(valueType(declaration), p);
+      else {
+        shape(declaration, ['type', 'optional'], p);
+        requireThat(declaration.optional === true && scalar(declaration.type), p);
+      }
+    }
+  }
   for (const id of keys(dcm.capabilities, p + '/capabilities', 8)) {
     named(id, p, true);
     const cap = dcm.capabilities[id]; shape(cap, ['version', 'parameters', 'result', 'effect', 'errors'], p);
     text(cap.version, p, true); requireThat(['READ', 'WRITE'].includes(cap.effect) && record(cap.result), p);
     for (const param of keys(cap.parameters, p, 16)) {
-      named(param, p); shape(cap.parameters[param], ['type', 'binding'], p);
-      requireThat(scalar(cap.parameters[param].type) && ['agent', 'host'].includes(cap.parameters[param].binding), p);
+      named(param, p);
+      const parameter = cap.parameters[param], optional = Object.hasOwn(parameter ?? {}, 'optional');
+      shape(parameter, ['type', 'binding', ...(optional ? ['optional'] : [])], p);
+      requireThat(valueType(parameter.type) && ['agent', 'host'].includes(parameter.binding), p);
+      if (optional) requireThat(parameter.optional === true && parameter.binding === 'agent' && scalar(parameter.type), p);
     }
     requireThat(Array.isArray(cap.errors) && new Set(cap.errors).size === cap.errors.length, p);
     requireThat(cap.errors.length <= 16, p, 'BUDGET_EXCEEDED');
@@ -119,25 +146,46 @@ export function validateModel(dcm, p) {
     requireThat(entry.consumer.kind === 'EVENT_REPORT', p);
     policies[id] = narrowPolicy(dcm, entry.capabilityPolicy, Object.fromEntries(Object.keys(dcm.capabilities).map(cap => [cap, LIMITS.calls])), p);
   }
-  return { scalar, policies, effectGrants };
+  return { scalar, valueType, policies, effectGrants };
+}
+
+function checkValue(dcm, typeName, value, path) {
+  const type = dcm.types[typeName];
+  if (typeName === 'Boolean') requireThat(typeof value === 'boolean', path);
+  else if (typeName === 'Timestamp') {
+    requireThat(typeof value === 'string' && timestampPattern.test(value), path);
+    const millis = Date.parse(value);
+    requireThat(Number.isFinite(millis) && new Date(millis).toISOString() === value, path);
+  } else if (typeName === 'String' || type?.kind === 'nominal' || type?.kind === 'enum') {
+    requireThat(typeof value === 'string' && value.isWellFormed(), path);
+    requireThat(Buffer.byteLength(value) <= LIMITS.stringBytes, path, 'BUDGET_EXCEEDED');
+    if (type?.kind === 'enum') requireThat(type.values.includes(value), path);
+  } else if (type?.kind === 'list') {
+    requireThat(Array.isArray(value) && !nodeTypes.isProxy(value) && Object.getPrototypeOf(value) === Array.prototype, path);
+    requireThat(value.length <= type.maxItems, path, 'BUDGET_EXCEEDED');
+    requireThat(Reflect.ownKeys(value).length === value.length + 1, path);
+    for (let i = 0; i < value.length; i++) {
+      const item = Object.getOwnPropertyDescriptor(value, String(i));
+      requireThat(item?.enumerable && Object.hasOwn(item, 'value'), path);
+      checkValue(dcm, type.element, item.value, path + '/' + i);
+    }
+  } else if (type?.kind === 'record') {
+    requireThat(!nodeTypes.isProxy(value), path);
+    shapeWithOptional(value, Object.keys(type.fields), field => typeof type.fields[field] !== 'string', path);
+    for (const [field, declaration] of Object.entries(type.fields)) {
+      if (Object.hasOwn(value, field)) checkValue(dcm, fieldType(declaration), value[field], path + '/' + pointer(field));
+    }
+  } else throw new Fault('ARTIFACT_INVALID', path);
 }
 
 export function validateValue(dcm, typeName, value, path, code) {
   try {
-    const type = dcm.types[typeName];
-    if (typeName === 'Boolean') requireThat(typeof value === 'boolean', path);
-    else if (typeName === 'String' || type?.kind === 'nominal' || type?.kind === 'enum') {
-      requireThat(typeof value === 'string' && value.isWellFormed(), path);
-      requireThat(Buffer.byteLength(value) <= LIMITS.stringBytes, path, 'BUDGET_EXCEEDED');
-      if (type?.kind === 'enum') requireThat(type.values.includes(value), path);
-    } else if (type?.kind === 'record') {
-      shape(value, Object.keys(type.fields), path);
-      for (const [field, scalar] of Object.entries(type.fields)) validateValue(dcm, scalar, value[field], path + '/' + pointer(field), code);
-    } else throw new Fault(code, path);
-    requireThat(canonicalBytes(value).length <= LIMITS.valueBytes, path, 'BUDGET_EXCEEDED');
+    checkValue(dcm, typeName, value, path);
+    canonicalBytes(value, LIMITS.valueBytes);
     return freeze(structuredClone(value));
   } catch (error) {
     if (error instanceof Fault && error.code === 'BUDGET_EXCEEDED') throw error;
+    if (error instanceof CanonicalLimitError) throw new Fault('BUDGET_EXCEEDED', path);
     throw new Fault(code, path);
   }
 }
@@ -147,16 +195,16 @@ export function validateEnvelope(artifact, bound) {
   shape(artifact.environment, Object.keys(ENVIRONMENT), '/artifact/environment');
   shape(artifact.modelRef, ['domainId', 'domainVersion', 'format', 'digest', 'descriptorRecipe'], '/artifact/modelRef');
   text(artifact.compiler, '/artifact/compiler', true);
-  requireThat(artifact.compiler === 'keir-compiler-java/0.1.0', '/artifact/compiler', 'PIN_MISMATCH');
+  requireThat(artifact.compiler === 'keir-compiler-java/0.2.0', '/artifact/compiler', 'PIN_MISMATCH');
   requireThat(typeof artifact.entrypoint === 'string' && Object.hasOwn(bound.dcm.entrypoints, artifact.entrypoint), '/artifact/entrypoint');
   requireThat(Object.keys(ENVIRONMENT).every(k => artifact.environment[k] === ENVIRONMENT[k]), '/artifact/environment', 'PIN_MISMATCH');
-  requireThat(artifact.format === 'keir-artifact/1', '/artifact/format');
+  requireThat(artifact.format === 'keir-artifact/2', '/artifact/format');
   requireThat(canonicalBytes(artifact.modelRef).equals(canonicalBytes(bound.modelRef)), '/artifact/modelRef');
   requireThat(typeof artifact.sourceDigest === 'string' && /^sha256:[0-9a-f]{64}$/.test(artifact.sourceDigest), '/artifact/sourceDigest');
 }
 
 export function validatePlan(artifact, { dcm, model }) {
-  const { scalar } = model;
+  const { scalar, valueType } = model;
   const entrypoint = dcm.entrypoints[artifact.entrypoint];
   const policy = model.policies[artifact.entrypoint];
   const effectGrant = model.effectGrants[artifact.entrypoint];
@@ -166,12 +214,12 @@ export function validatePlan(artifact, { dcm, model }) {
   const contexts = new Map();
   let nextExpression = 0, callCount = 0, writeCount = 0;
   const calls = Object.create(null);
-  const names = new Set(['input', 'Boolean', 'String', ...Object.keys(dcm.types)]);
+  const names = new Set(['input', 'Boolean', 'String', 'Timestamp', 'Duration', ...Object.keys(dcm.types)]);
   const booleanBinds = new Set();
   function binding(value, type, path) {
     const isLiteral = Object.hasOwn(value ?? {}, 'literal');
     shape(value, [isLiteral ? 'literal' : 'expr', 'type'], path);
-    requireThat(value.type === type && scalar(type), path);
+    requireThat(value.type === type && (isLiteral ? scalar(type) && type !== 'Timestamp' : valueType(type)), path);
     if (isLiteral) {
       validateValue(dcm, type, value.literal, path, 'ARTIFACT_INVALID');
     } else {
@@ -185,8 +233,9 @@ export function validatePlan(artifact, { dcm, model }) {
   function returned(value, path) {
     shape(value, ['type', 'fields'], path);
     requireThat(value.type === entrypoint.output, path);
-    const output = dcm.types[entrypoint.output]; shape(value.fields, Object.keys(output.fields), path + '/fields');
-    for (const field of Object.keys(output.fields).sort()) binding(value.fields[field], output.fields[field], path + '/fields/' + field);
+    const { fields } = dcm.types[entrypoint.output];
+    const supplied = shapeWithOptional(value.fields, Object.keys(fields), field => typeof fields[field] !== 'string', path + '/fields');
+    for (const field of supplied.sort()) binding(value.fields[field], fieldType(fields[field]), path + '/fields/' + field);
   }
   function countCall(capability, cap, path) {
     callCount++; calls[capability] = (calls[capability] ?? 0) + 1;
@@ -209,10 +258,10 @@ export function validatePlan(artifact, { dcm, model }) {
       const cap = dcm.capabilities[step.capability];
       requireThat(step.version === cap.version && step.resultType === cap.result, p);
       if (Object.hasOwn(step, 'when')) requireThat(booleanBinds.has(step.when), p + '/when');
-      const agent = Object.keys(cap.parameters).filter(k => cap.parameters[k].binding === 'agent').sort();
-      shape(step.args, agent, p + '/args');
+      const agent = Object.keys(cap.parameters).filter(k => cap.parameters[k].binding === 'agent');
+      const supplied = shapeWithOptional(step.args, agent, name => cap.parameters[name].optional === true, p + '/args');
       countCall(step.capability, cap, p);
-      for (const arg of agent) binding(step.args[arg], cap.parameters[arg].type, p + '/args/' + arg);
+      for (const arg of supplied.sort()) binding(step.args[arg], cap.parameters[arg].type, p + '/args/' + arg);
       if (Object.hasOwn(step, 'onError')) {
         const codes = keys(step.onError, p + '/onError', 16); requireThat(codes.length > 0, p + '/onError');
         for (const code of codes.sort()) {

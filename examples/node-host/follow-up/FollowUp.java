@@ -16,7 +16,7 @@ class FollowUp {
         if (args.length > 1) throw new IllegalArgumentException("Expected at most one artifact path");
 
         var model = Files.readAllBytes(Path.of("examples/node-host/follow-up/dcm.json"));
-        var fixture = Path.of("conformance/keir-1");
+        var fixture = Path.of("conformance/keir-2");
         var artifactPath = args.length == 0 ? fixture.resolve("artifact.json") : Path.of(args[0]);
         var artifact = Files.readAllBytes(artifactPath);
         if (args.length == 0) {

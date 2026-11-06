@@ -1,0 +1,200 @@
+{
+  "format": "keir-scenario/2",
+  "id": "inventory-lazy-overflow",
+  "given": {
+    "input": {
+      "itemId": "item1",
+      "warehouseId": "warehouse1",
+      "targetLabel": "fragile",
+      "labels": [
+        "fragile"
+      ],
+      "occurredAt": "9999-12-31T23:59:59.999Z",
+      "expiresAt": "2026-03-07T12:34:56.789Z"
+    },
+    "fixture": "normal"
+  },
+  "stubs": [
+    {
+      "step": "open",
+      "capability": "inventory.findOpen",
+      "version": "1",
+      "args": {
+        "warehouseId": "warehouse1",
+        "label": "fragile"
+      },
+      "protectedArgs": {
+        "actorId": "user1"
+      },
+      "response": {
+        "kind": "SUCCESS",
+        "value": {
+          "matches": false
+        }
+      }
+    },
+    {
+      "step": "adjusted",
+      "capability": "inventory.adjust",
+      "version": "1",
+      "args": {
+        "itemId": "item1",
+        "dueAt": "2026-03-14T12:34:56.789Z"
+      },
+      "protectedArgs": {
+        "actorId": "user1"
+      },
+      "response": {
+        "kind": "SUCCESS",
+        "value": {
+          "itemId": "item1"
+        },
+        "effect": "CONFIRMED"
+      }
+    }
+  ],
+  "expect": {
+    "outcome": {
+      "classification": "COMPLETED",
+      "effects": [
+        {
+          "step": "adjusted",
+          "capability": "inventory.adjust",
+          "state": "CONFIRMED"
+        }
+      ],
+      "result": {
+        "eligible": true,
+        "dueAt": "2026-03-14T12:34:56.789Z"
+      },
+      "trace": [
+        {
+          "sequence": 0,
+          "event": "INVOCATION_START"
+        },
+        {
+          "sequence": 1,
+          "event": "STEP_START",
+          "step": "open"
+        },
+        {
+          "sequence": 2,
+          "event": "CALL_DISPATCHED",
+          "step": "open",
+          "capability": "inventory.findOpen"
+        },
+        {
+          "sequence": 3,
+          "event": "CALL_SUCCEEDED",
+          "step": "open",
+          "capability": "inventory.findOpen"
+        },
+        {
+          "sequence": 4,
+          "event": "STEP_START",
+          "step": "eligible"
+        },
+        {
+          "sequence": 5,
+          "event": "VALUE_BOUND",
+          "step": "eligible"
+        },
+        {
+          "sequence": 6,
+          "event": "STEP_START",
+          "step": "due"
+        },
+        {
+          "sequence": 7,
+          "event": "VALUE_BOUND",
+          "step": "due"
+        },
+        {
+          "sequence": 8,
+          "event": "STEP_START",
+          "step": "adjusted"
+        },
+        {
+          "sequence": 9,
+          "event": "GUARD_EVALUATED",
+          "step": "adjusted",
+          "taken": true
+        },
+        {
+          "sequence": 10,
+          "event": "EFFECT_INTENT",
+          "step": "adjusted",
+          "capability": "inventory.adjust"
+        },
+        {
+          "sequence": 11,
+          "event": "CALL_DISPATCHED",
+          "step": "adjusted",
+          "capability": "inventory.adjust"
+        },
+        {
+          "sequence": 12,
+          "event": "EFFECT_RECORDED",
+          "step": "adjusted",
+          "capability": "inventory.adjust",
+          "state": "CONFIRMED"
+        },
+        {
+          "sequence": 13,
+          "event": "CALL_SUCCEEDED",
+          "step": "adjusted",
+          "capability": "inventory.adjust"
+        },
+        {
+          "sequence": 14,
+          "event": "RETURNED"
+        },
+        {
+          "sequence": 15,
+          "event": "TERMINATED"
+        }
+      ]
+    },
+    "calls": [
+      {
+        "step": "open",
+        "capability": "inventory.findOpen",
+        "version": "1",
+        "args": {
+          "warehouseId": "warehouse1",
+          "label": "fragile"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        }
+      },
+      {
+        "step": "adjusted",
+        "capability": "inventory.adjust",
+        "version": "1",
+        "args": {
+          "itemId": "item1",
+          "dueAt": "2026-03-14T12:34:56.789Z"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        }
+      }
+    ],
+    "consumption": {
+      "status": "REPORTED",
+      "classification": "COMPLETED",
+      "effects": [
+        {
+          "step": "adjusted",
+          "capability": "inventory.adjust",
+          "state": "CONFIRMED"
+        }
+      ],
+      "result": {
+        "eligible": true,
+        "dueAt": "2026-03-14T12:34:56.789Z"
+      }
+    }
+  }
+}

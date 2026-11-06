@@ -29,8 +29,8 @@ class CheckedCelTest {
         }
     }
     private static Artifact.Plan sample() throws IOException {
-        var model=fixture("/keir-1/dcm.json");
-        return Artifact.validateProgram(fixture("/keir-1/artifact.json"),model,CapabilityPolicy.catalog(model),1);
+        var model=fixture("/keir-2/dcm.json");
+        return Artifact.validateProgram(fixture("/keir-2/artifact.json"),model,CapabilityPolicy.catalog(model),1);
     }
     private static CheckedCel.Bundle prepare(Artifact.Plan plan) {
         return CheckedCel.prepare(plan,CheckedCel.bindModel(plan.dcm()));
@@ -73,7 +73,7 @@ class CheckedCelTest {
 
     @Test void projectionPreservesFalseEmptyUnicodeControlsAndReservedFieldNames() throws Exception {
         var base=sample();
-        var model=fixture("/keir-1/dcm.json");
+        var model=fixture("/keir-2/dcm.json");
         var message=Type.newBuilder().setMessageType("keir.read.TaskCompletedInput").build();
         Map<String,Object> values=Map.of("constructor",false,"input","","toJSON","é😀","toString","\0\t\n\u001f",
                 "valueOf","é".repeat(128),"text","e\u0301");
@@ -190,7 +190,7 @@ class CheckedCelTest {
 
     @Test void derivedModelMustMatchThePlanModel() throws Exception {
         var plan=sample();
-        var other=fixture("/keir-1/dcm-title.json");
+        var other=fixture("/keir-2/dcm-title.json");
         var fault=assertThrows(RuntimeFault.class,()->CheckedCel.prepare(plan,CheckedCel.bindModel(other)));
         assertEquals("/artifact/modelRef",fault.path);
     }

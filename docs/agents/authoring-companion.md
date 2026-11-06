@@ -36,3 +36,9 @@ The digest check establishes byte identity. The [release checklist](../releasing
 ## Earlier editions
 
 Use `--version 1` or `--version 2` with the matching historical pin. Their build and verification commands still use the original committed inputs. See the [edition 2 release](https://github.com/rore/keir-core/releases/tag/authoring-v2) and its [pinned guide](https://github.com/rore/keir-core/blob/74d128f04a5fd76d744e3b7705f6614e64846b38/docs/agents/customer-authoring-guide-v2.md).
+
+## Edition 4 candidate
+
+The [Keir 2 authoring guide](customer-authoring-guide-v4.md) and its [workflow expression reference](../specs/workflow-expressions.md) are candidate inputs for edition 4. The archive requires the matching `/2` schemas, a shared verified example, and pins for the exact Core 0.2.0 packages. Keep using edition 3 with the released Keir 1 packages.
+
+Bundle the guide, reference, four linked schemas and the linked inventory example files at their repository-relative paths so the links resolve inside the extracted archive. Use the compiler-owned source, model, artifact and scenarios. Record the archive input revision separately from the Core build revision, and verify the compiler ZIP, Java Maven ZIP and Node tarball against their release digests before pinning the companion archive. [Inventory example](../specs/workflow-expressions.md#inventory-example) · [Shared fixture index](../../conformance/keir-2/README.md)

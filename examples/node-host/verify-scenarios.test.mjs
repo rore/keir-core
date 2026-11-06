@@ -4,12 +4,12 @@ import test from 'node:test';
 import { decodeScenario, prepareScenario, verifyBatch, verifyGroup } from './verify-scenarios.mjs';
 
 const python = process.env.KEIR_SCENARIO_PYTHON ?? 'python';
-const corpus = new URL('../../conformance/keir-1/', import.meta.url);
+const corpus = new URL('../../conformance/keir-2/', import.meta.url);
 const fixture = path => readFileSync(new URL(path, corpus));
 const read = path => fixture('scenarios/' + path);
+const groups = ['main', 'zero', 'after-write-read', 'no-call', 'handler', 'title', 'title-max', 'title-composed'];
 
 test('installed package verifies the eight frozen scenario groups', async () => {
-  const groups = ['main', 'zero', 'after-write-read', 'no-call', 'handler', 'title', 'title-max', 'title-composed'];
   let count = 0;
   for (const group of groups) count += (await verifyGroup(group, python)).length;
   assert.equal(count, 20);
@@ -70,8 +70,9 @@ function vectorBytes(vector) {
   return bytes;
 }
 
-test('the example enforces the first failure for all frozen raw vectors', async () => {
-  const { vectors } = JSON.parse(fixture('scenario-vectors.json'));
+test('the example enforces the first failure for the teaching vectors', async () => {
+  const { vectors: sharedVectors } = JSON.parse(fixture('scenario-vectors.json'));
+  const vectors = sharedVectors.filter(({ scenario }) => !scenario || groups.includes(scenario.split('/')[0]));
   assert.equal(vectors.length, 45);
   const errors = {
     lexical: /Scenario byte limit|scenario UTF-8|Scenario BOM|scenario token|scenario object key|scenario surrogate|scenario integer|scenario value|scenario JSON|Scenario nesting limit/,
@@ -94,8 +95,8 @@ test('the example enforces the first failure for all frozen raw vectors', async 
       if (vector.expect === 'compatibility') {
         const artifact = fixture('artifact-no-call.json').toString('utf8');
         const model = fixture((vector.model ?? 'dcm') + '.json').toString('utf8');
-        testPair = [Buffer.from(artifact.replace('keir-artifact/1', vector.artifactFormat ?? 'keir-artifact/1')),
-          Buffer.from(model.replace('keir-dcm/1', vector.modelFormat ?? 'keir-dcm/1'))];
+        testPair = [Buffer.from(artifact.replace('keir-artifact/2', vector.artifactFormat ?? 'keir-artifact/2')),
+          Buffer.from(model.replace('keir-dcm/2', vector.modelFormat ?? 'keir-dcm/2'))];
       }
       assert.throws(() => prepareScenario(group, bytes, python, testPair), errors[vector.expect], vector.id);
     }

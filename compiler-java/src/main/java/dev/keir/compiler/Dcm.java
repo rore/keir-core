@@ -3,17 +3,24 @@ package dev.keir.compiler;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Timestamp;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-/** Validates the selected closed model and builds its scalar protobuf bridge. */
+/** Validates the selected closed model and builds its protobuf bridge. */
 final class Dcm {
-    record Type(String kind, String base, List<String> values, Map<String,String> fields) {
-        boolean scalar() { return !kind.equals("record"); }
+    record Type(String kind, String base, List<String> values, Map<String,String> fields,
+                Set<String> optionalFields, String element, int maxItems) {
+        Type(String kind, String base, List<String> values) {
+            this(kind,base,values,Map.of(),Set.of(),null,0);
+        }
+        boolean record() { return kind.equals("record"); }
+        boolean list() { return kind.equals("list"); }
+        boolean scalar() { return !record() && !list(); }
     }
-    record Parameter(String type, String binding) {}
+    record Parameter(String type, String binding, boolean optional) {}
     record Capability(String version, Map<String,Parameter> parameters, String result,
                       String effect, List<String> errors) {}
     record Entrypoint(String input, String output, String trigger, Map<String,Object> consumer,
@@ -21,7 +28,8 @@ final class Dcm {
     private static final Set<String> RESERVED = Set.of("as", "break", "const", "continue", "else",
             "false", "for", "function", "if", "import", "in", "let", "loop", "namespace",
             "null", "package", "return", "true", "var", "void", "while");
-    private static final Set<String> BUILTIN_NAMES = Set.of("Boolean", "String", "bool", "bytes",
+    private static final Set<String> BUILTIN_TYPES = Set.of("Boolean", "String", "Timestamp");
+    private static final Set<String> BUILTIN_NAMES = Set.of("Boolean", "String", "Timestamp", "Duration", "bool", "bytes",
             "double", "dyn", "int", "list", "map", "null_type", "string", "type", "uint", "input");
     private final Map<String,Object> root;
     private final Map<String,Type> types;
@@ -38,25 +46,54 @@ final class Dcm {
         this.entrypoints = immutable(entrypoints);
         var file = DescriptorProtos.FileDescriptorProto.newBuilder().setName("keir_read.proto")
                 .setPackage("keir.read").setSyntax("proto3");
+        var set = DescriptorProtos.FileDescriptorSet.newBuilder();
+        boolean usesTimestamp = types.values().stream().anyMatch(type -> type.fields.containsValue("Timestamp"))
+                || capabilities.values().stream().flatMap(cap -> cap.parameters.values().stream())
+                        .anyMatch(param -> param.type.equals("Timestamp"));
+        var dependencies = new Descriptors.FileDescriptor[usesTimestamp ? 1 : 0];
+        if (usesTimestamp) {
+            var timestamp = Timestamp.getDescriptor().getFile();
+            dependencies[0] = timestamp;
+            set.addFile(timestamp.toProto());
+            file.addDependency(timestamp.getName());
+        }
         this.types.forEach((name, type) -> {
-            if (!type.scalar()) {
+            if (type.record()) {
                 var message = DescriptorProtos.DescriptorProto.newBuilder().setName(name);
+                var usedNames = new HashSet<>(type.fields.keySet());
                 int number = 1;
                 for (var field : type.fields.entrySet()) {
-                    message.addField(DescriptorProtos.FieldDescriptorProto.newBuilder()
-                            .setName(field.getKey()).setJsonName(field.getKey()).setNumber(number++)
-                            .setLabel(DescriptorProtos.FieldDescriptorProto.Label.LABEL_OPTIONAL)
-                            .setType(field.getValue().equals("Boolean")
+                    String fieldName = field.getKey();
+                    String fieldType = field.getValue();
+                    var definition = type(fieldType);
+                    var descriptor = DescriptorProtos.FieldDescriptorProto.newBuilder()
+                            .setName(fieldName).setJsonName(fieldName).setNumber(number++)
+                            .setLabel(definition.list() ? DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED
+                                    : DescriptorProtos.FieldDescriptorProto.Label.LABEL_OPTIONAL);
+                    if (fieldType.equals("Timestamp")) {
+                        descriptor.setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE)
+                                .setTypeName(".google.protobuf.Timestamp");
+                    } else {
+                        String scalarType = definition.list() ? definition.element : fieldType;
+                        descriptor.setType(scalarType.equals("Boolean")
                                     ? DescriptorProtos.FieldDescriptorProto.Type.TYPE_BOOL
-                                    : DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING));
+                                    : DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING);
+                        if (type.optionalFields.contains(fieldName)) {
+                            String oneof = "_" + fieldName;
+                            while (!usedNames.add(oneof)) oneof = "_" + oneof;
+                            descriptor.setProto3Optional(true).setOneofIndex(message.getOneofDeclCount());
+                            message.addOneofDecl(DescriptorProtos.OneofDescriptorProto.newBuilder().setName(oneof));
+                        }
+                    }
+                    message.addField(descriptor);
                 }
                 file.addMessageType(message);
             }
         });
         var proto = file.build();
-        descriptors = DescriptorProtos.FileDescriptorSet.newBuilder().addFile(proto).build();
+        descriptors = set.addFile(proto).build();
         try {
-            fileDescriptor = Descriptors.FileDescriptor.buildFrom(proto, new Descriptors.FileDescriptor[0]);
+            fileDescriptor = Descriptors.FileDescriptor.buildFrom(proto, dependencies);
         } catch (Descriptors.DescriptorValidationException e) {
             throw invalid("/dcm/types");
         }
@@ -64,7 +101,7 @@ final class Dcm {
 
     static Dcm parse(Object value) {
         var root = shape(value,"/dcm","format","domain","types","capabilities","entrypoints","hostKey");
-        supported(root.get("format"),"keir-dcm/1","/dcm/format");
+        supported(root.get("format"),"keir-dcm/2","/dcm/format");
         var key = shape(root.get("hostKey"),"/dcm/hostKey","source","type");
         if (!"requestKey".equals(key.get("source"))) throw invalid("/dcm/hostKey/source");
         metadataText(key.get("type"),"/dcm/hostKey/type");
@@ -83,31 +120,56 @@ final class Dcm {
                 case "nominal" -> {
                     shape(def,path,"kind","base");
                     if (!"String".equals(def.get("base"))) throw invalid(child(path,"base"));
-                    type = new Type(kind,"String",List.of(),Map.of());
+                    type = new Type(kind,"String",List.of());
                 }
                 case "enum" -> {
                     shape(def,path,"kind","values");
-                    type = new Type(kind,"String",strings(def.get("values"),child(path,"values"),16,true,false),Map.of());
+                    type = new Type(kind,"String",strings(def.get("values"),child(path,"values"),16,true,false));
+                }
+                case "list" -> {
+                    shape(def,path,"kind","element","maxItems");
+                    String element = reference(def.get("element"),child(path,"element"));
+                    String countPath = child(path,"maxItems");
+                    Object raw = def.get("maxItems");
+                    if (!(raw instanceof Byte || raw instanceof Short || raw instanceof Integer
+                            || raw instanceof Long || raw instanceof BigInteger)) throw invalid(countPath);
+                    var count = new BigInteger(raw.toString());
+                    if (count.signum() < 0 || count.compareTo(BigInteger.valueOf(16)) > 0) throw invalid(countPath);
+                    type = new Type(kind,null,List.of(),Map.of(),Set.of(),element,count.intValue());
                 }
                 case "record" -> {
                     shape(def,path,"kind","fields");
                     var fields = boundedMap(def.get("fields"),child(path,"fields"),16);
                     if (fields.isEmpty()) throw invalid(child(path,"fields"));
                     var result = new TreeMap<String,String>();
+                    var optional = new HashSet<String>();
                     fields.forEach((name,ref) -> {
                         String fp = child(child(path,"fields"),name);
                         identifier(name,fp,false);
-                        result.put(name,reference(ref,fp));
+                        if (ref instanceof Map<?,?>) {
+                            var field = shape(ref,fp,"type","optional");
+                            if (!Boolean.TRUE.equals(field.get("optional"))) throw invalid(child(fp,"optional"));
+                            result.put(name,reference(field.get("type"),child(fp,"type")));
+                            optional.add(name);
+                        } else result.put(name,reference(ref,fp));
                     });
-                    type = new Type(kind,null,List.of(),immutable(result));
+                    type = new Type(kind,null,List.of(),immutable(result),Set.copyOf(optional),null,0);
                 }
                 default -> throw unsupported(child(path,"kind"));
             }
             types.put(entry.getKey(),type);
         }
         for (var entry : types.entrySet()) {
-            for (var field : entry.getValue().fields.entrySet()) {
-                requireType(types,field.getValue(),child(child(child("/dcm/types",entry.getKey()),"fields"),field.getKey()),false);
+            String path = child("/dcm/types",entry.getKey());
+            var definition = entry.getValue();
+            if (definition.list()) {
+                String element = definition.element;
+                if (element.equals("Timestamp") || !scalarType(types,element)) throw invalid(child(path,"element"));
+            }
+            for (var field : definition.fields.entrySet()) {
+                String fp = child(child(path,"fields"),field.getKey());
+                boolean optional = definition.optionalFields.contains(field.getKey());
+                requireValueType(types,field.getValue(),optional ? child(fp,"type") : fp,optional);
             }
         }
         var capabilities = new TreeMap<String,Capability>();
@@ -119,17 +181,22 @@ final class Dcm {
             String effect = text(cap.get("effect"),child(path,"effect"));
             if (!effect.equals("READ") && !effect.equals("WRITE")) throw unsupported(child(path,"effect"));
             String result = reference(cap.get("result"),child(path,"result"));
-            requireType(types,result,child(path,"result"),true);
+            requireRecord(types,result,child(path,"result"));
             var parameters = new TreeMap<String,Parameter>();
             for (var param : boundedMap(cap.get("parameters"),child(path,"parameters"),16).entrySet()) {
                 String pp = child(child(path,"parameters"),param.getKey());
                 identifier(param.getKey(),pp,false);
-                var p = shape(param.getValue(),pp,"type","binding");
+                var p = object(param.getValue(),pp);
+                boolean optional = p.containsKey("optional");
+                if (optional) shape(p,pp,"type","binding","optional");
+                else shape(p,pp,"type","binding");
                 String type = reference(p.get("type"),child(pp,"type"));
-                requireType(types,type,child(pp,"type"),false);
+                requireValueType(types,type,child(pp,"type"),optional);
                 String binding = text(p.get("binding"),child(pp,"binding"));
                 if (!binding.equals("agent") && !binding.equals("host")) throw invalid(child(pp,"binding"));
-                parameters.put(param.getKey(),new Parameter(type,binding));
+                if (optional && (!Boolean.TRUE.equals(p.get("optional")) || binding.equals("host")))
+                    throw invalid(child(pp,"optional"));
+                parameters.put(param.getKey(),new Parameter(type,binding,optional));
             }
             var errors = strings(cap.get("errors"),child(path,"errors"),16,false,true);
             capabilities.put(entry.getKey(),new Capability(version,immutable(parameters),result,effect,errors));
@@ -141,8 +208,8 @@ final class Dcm {
             var ep = entryShape(entry.getValue(),path);
             String input = reference(ep.get("input"),child(path,"input"));
             String output = reference(ep.get("output"),child(path,"output"));
-            requireType(types,input,child(path,"input"),true);
-            requireType(types,output,child(path,"output"),true);
+            requireRecord(types,input,child(path,"input"));
+            requireRecord(types,output,child(path,"output"));
             if (!"EVENT".equals(ep.get("trigger"))) throw invalid(child(path,"trigger"));
             if (!"AFTER_COMMIT".equals(ep.get("placement"))) throw invalid(child(path,"placement"));
             var consumer = shape(ep.get("consumer"),child(path,"consumer"),"id","version","kind");
@@ -172,19 +239,19 @@ final class Dcm {
     Map<String,Capability> capabilities() { return capabilities; }
     Map<String,Entrypoint> entrypoints() { return entrypoints; }
     Type type(String name) {
-        return name.equals("Boolean") || name.equals("String")
-                ? new Type("builtin",name,List.of(),Map.of()) : types.get(name);
+        return BUILTIN_TYPES.contains(name) ? new Type("builtin",name,List.of()) : types.get(name);
     }
-    Type record(String name) { Type t = types.get(name); return t != null && !t.scalar() ? t : null; }
+    Type record(String name) { Type t = types.get(name); return t != null && t.record() ? t : null; }
     DescriptorProtos.FileDescriptorSet descriptors() { return descriptors; }
     Descriptors.FileDescriptor fileDescriptor() { return fileDescriptor; }
     byte[] descriptorBytes() {
-        byte[] bytes = new byte[descriptors.getSerializedSize()];
+        int size = descriptors.getSerializedSize();
+        if (size > 65536) throw budget("/dcm/types");
+        byte[] bytes = new byte[size];
         var out = CodedOutputStream.newInstance(bytes);
         out.useDeterministicSerialization();
         try { descriptors.writeTo(out); out.checkNoSpaceLeft(); }
         catch (IOException e) { throw invalid("/dcm/types"); }
-        if (bytes.length > 65536) throw budget("/dcm/types");
         return bytes;
     }
 
@@ -225,10 +292,17 @@ final class Dcm {
         return result;
     }
 
-    private static void requireType(Map<String,Type> types,String name,String path,boolean record) {
+    private static void requireRecord(Map<String,Type> types,String name,String path) {
         Type t = types.get(name);
-        boolean builtin = name.equals("Boolean") || name.equals("String");
-        if (record ? t == null || t.scalar() : !builtin && (t == null || !t.scalar())) throw invalid(path);
+        if (t == null || !t.record()) throw invalid(path);
+    }
+    private static boolean scalarType(Map<String,Type> types,String name) {
+        Type t = types.get(name);
+        return BUILTIN_TYPES.contains(name) || t != null && t.scalar();
+    }
+    private static void requireValueType(Map<String,Type> types,String name,String path,boolean optional) {
+        Type t = types.get(name);
+        if (!scalarType(types,name) && (optional || t == null || !t.list())) throw invalid(path);
     }
     private static String reference(Object value,String path) {
         String ref = text(value,path);

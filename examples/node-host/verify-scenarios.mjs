@@ -12,7 +12,7 @@ import { reconcileCalls } from './effect-simulation.mjs';
 import { readBoundedFixture } from './generic-capacity.mjs';
 import { callShape, nativeKey, typed } from './generic-simulation.mjs';
 
-const corpus = new URL('../../conformance/keir-1/', import.meta.url);
+const corpus = new URL('../../conformance/keir-2/', import.meta.url);
 const checker = fileURLToPath(new URL('../../scripts/check-keir-contracts.py', import.meta.url));
 const groups = new Map([
   ['main', ['artifact', 'dcm']],
@@ -39,7 +39,7 @@ function checkSchema(bytes, python) {
   const file = join(directory, 'scenario.json');
   try {
     writeFileSync(file, bytes, { flag: 'wx', mode: 0o600 });
-    const result = spawnSync(python, ['-B', checker, 'scenario', file], { encoding: 'utf8', timeout: 30_000 });
+    const result = spawnSync(python, ['-B', checker, '--revision', '2', 'scenario', file], { encoding: 'utf8', timeout: 30_000 });
     if (result.error) throw result.error;
     assert.ok(result.status === 0 || result.status === 1, result.stderr);
     const check = JSON.parse(result.stdout);

@@ -39,6 +39,10 @@ Package versions identify releases of the compiler and runtimes. Choose a tested
 
 Current tooling rejects earlier preview formats. To adopt the current contract, bring the source and model into the supported formats, compile again, and review the new artifact before approval. Keep old artifacts and approvals with their original bytes. [Earlier formats and APIs](../internal/history/README.md)
 
+## Candidate contract
+
+The [Keir 2 workflow expression contract](workflow-expressions.md) records the Core 0.2.0 candidate. It covers bounded lists, optional values and elapsed time. The released Keir 1 contract is described above.
+
 ## Maintaining a contract
 
 Specify feature changes in the affected versioned contracts. Update the applicable schemas, fixtures, and Java and Node conformance evidence together. Keep design rationale in [engineering records](../internal/README.md), future scope in the [roadmap](../../roadmap/scope.md), and usage guidance in the [documentation index](../README.md).

@@ -22,9 +22,12 @@ class ScenarioHostTest {
         assertEquals(20, count);
     }
 
-    @Test void rawVectorsReachTheirFirstFailureWithNoDispatch() throws Exception {
+    @Test void teachingVectorsReachTheirFirstFailureWithNoDispatch() throws Exception {
         var manifest = object(EffectJson.parse(Files.readAllBytes(host.corpus().resolve("scenario-vectors.json"))));
-        var vectors = array(manifest.get("vectors"));
+        var vectors = array(manifest.get("vectors")).stream().filter(item -> {
+            var scenario = (String) object(item).get("scenario");
+            return scenario == null || ScenarioHost.GROUPS.contains(scenario.split("/", 2)[0]);
+        }).toList();
         assertEquals(45, vectors.size());
         for (Object item : vectors) {
             var vector = object(item);
@@ -140,8 +143,8 @@ class ScenarioHostTest {
             assertEquals("dcm-title", name);
             model = host.selection("title").model();
         }
-        if (vector.get("modelFormat") instanceof String format) model = replace(model, "keir-dcm/1", format);
-        if (vector.get("artifactFormat") instanceof String format) artifact = replace(artifact, "keir-artifact/1", format);
+        if (vector.get("modelFormat") instanceof String format) model = replace(model, "keir-dcm/2", format);
+        if (vector.get("artifactFormat") instanceof String format) artifact = replace(artifact, "keir-artifact/2", format);
         return new ScenarioHost.Selection(group, model, artifact);
     }
 

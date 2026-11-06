@@ -1,0 +1,471 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:keir:schema:dcm:2",
+  "title": "Keir decoded DCM structure",
+  "description": "Native validation checks references, UTF-8 bounds, policy composition and host binding.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "domain",
+    "types",
+    "capabilities",
+    "entrypoints",
+    "hostKey"
+  ],
+  "properties": {
+    "format": {
+      "const": "keir-dcm/2"
+    },
+    "domain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/text"
+        },
+        "version": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "types": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 16,
+      "propertyNames": {
+        "$ref": "#/$defs/typeName"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/type"
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "maxProperties": 8,
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/capability"
+      }
+    },
+    "entrypoints": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 4,
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/entrypoint"
+      }
+    },
+    "hostKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "type"
+      ],
+      "properties": {
+        "source": {
+          "const": "requestKey"
+        },
+        "type": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9]{0,63}(?![\\s\\S])",
+      "not": {
+        "enum": [
+          "true",
+          "false",
+          "null",
+          "in",
+          "as",
+          "break",
+          "const",
+          "continue",
+          "else",
+          "for",
+          "function",
+          "if",
+          "import",
+          "let",
+          "loop",
+          "package",
+          "namespace",
+          "return",
+          "var",
+          "void",
+          "while"
+        ]
+      }
+    },
+    "typeName": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/name"
+        },
+        {
+          "not": {
+            "enum": [
+              "Boolean",
+              "String",
+              "Timestamp",
+              "Duration",
+              "bool",
+              "bytes",
+              "double",
+              "dyn",
+              "int",
+              "list",
+              "map",
+              "null_type",
+              "string",
+              "type",
+              "uint",
+              "input"
+            ]
+          }
+        }
+      ]
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9]{0,63}(?![\\s\\S])"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9.]{0,99}(?![\\s\\S])",
+      "not": {
+        "enum": [
+          "true",
+          "false",
+          "null",
+          "in",
+          "as",
+          "break",
+          "const",
+          "continue",
+          "else",
+          "for",
+          "function",
+          "if",
+          "import",
+          "let",
+          "loop",
+          "package",
+          "namespace",
+          "return",
+          "var",
+          "void",
+          "while"
+        ]
+      }
+    },
+    "type": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "base"
+          ],
+          "properties": {
+            "kind": {
+              "const": "nominal"
+            },
+            "base": {
+              "const": "String"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "values"
+          ],
+          "properties": {
+            "kind": {
+              "const": "enum"
+            },
+            "values": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 16,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/text"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "element",
+            "maxItems"
+          ],
+          "properties": {
+            "kind": {
+              "const": "list"
+            },
+            "element": {
+              "$ref": "#/$defs/reference"
+            },
+            "maxItems": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 16
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "fields"
+          ],
+          "properties": {
+            "kind": {
+              "const": "record"
+            },
+            "fields": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 16,
+              "propertyNames": {
+                "$ref": "#/$defs/name"
+              },
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/reference"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "type",
+                      "optional"
+                    ],
+                    "properties": {
+                      "type": {
+                        "$ref": "#/$defs/reference"
+                      },
+                      "optional": {
+                        "const": true
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "binding"
+      ],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/reference"
+        },
+        "binding": {
+          "enum": [
+            "agent",
+            "host"
+          ]
+        },
+        "optional": {
+          "const": true
+        }
+      },
+      "dependentSchemas": {
+        "optional": {
+          "properties": {
+            "binding": {
+              "const": "agent"
+            }
+          }
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "parameters",
+        "result",
+        "effect",
+        "errors"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/text"
+        },
+        "result": {
+          "$ref": "#/$defs/reference"
+        },
+        "effect": {
+          "enum": [
+            "READ",
+            "WRITE"
+          ]
+        },
+        "parameters": {
+          "type": "object",
+          "maxProperties": 16,
+          "propertyNames": {
+            "$ref": "#/$defs/name"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/parameter"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]{0,63}(?![\\s\\S])"
+          }
+        }
+      }
+    },
+    "consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "version": {
+          "$ref": "#/$defs/text"
+        },
+        "kind": {
+          "const": "EVENT_REPORT"
+        }
+      }
+    },
+    "ids": {
+      "type": "array",
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/id"
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "$ref": "#/$defs/ids"
+        },
+        "deny": {
+          "$ref": "#/$defs/ids"
+        },
+        "maxCalls": {
+          "type": "object",
+          "maxProperties": 8,
+          "propertyNames": {
+            "$ref": "#/$defs/id"
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4
+          }
+        }
+      }
+    },
+    "entrypoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "output",
+        "trigger",
+        "consumer",
+        "placement",
+        "event"
+      ],
+      "properties": {
+        "input": {
+          "$ref": "#/$defs/reference"
+        },
+        "output": {
+          "$ref": "#/$defs/reference"
+        },
+        "trigger": {
+          "const": "EVENT"
+        },
+        "consumer": {
+          "$ref": "#/$defs/consumer"
+        },
+        "capabilityPolicy": {
+          "$ref": "#/$defs/policy"
+        },
+        "placement": {
+          "const": "AFTER_COMMIT"
+        },
+        "event": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "idType",
+            "sourceType"
+          ],
+          "properties": {
+            "idType": {
+              "$ref": "#/$defs/reference"
+            },
+            "sourceType": {
+              "$ref": "#/$defs/reference"
+            }
+          }
+        },
+        "effectGrant": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}

@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class PublicScenarioTest {
     @Test void matchesFrozenScenariosAndNativeVectorPhases() throws Exception {
         var report = new PublicScenarioDriver().runCorpus();
-        assertEquals(20, list(report.get("scenarios"), "").size());
-        assertEquals(45, list(report.get("vectors"), "").size());
+        assertEquals(28, list(report.get("scenarios"), "").size());
+        assertEquals(51, list(report.get("vectors"), "").size());
     }
 
     @Test void callbackMismatchStillFailsHarnessAfterRuntimeConvertsItToAnOutcome() throws Exception {
