@@ -1,7 +1,7 @@
 ---
 id: "rich-task-customizations"
 title: "Compose real task workflows in Daymark"
-status: "active"
+status: "done"
 priority: "medium"
 commitment: "committed"
 milestone: "Extend host behavior safely"
@@ -32,11 +32,13 @@ Scheduling, implicit parent relationships, arbitrary search expansion or treatin
 
 - [x] Review the expanded task model, generic arguments, and the authorized snapshot used by the open-task check.
 - [x] Run the same reviewed program in simulation and against native task data, showing created and no-op outcomes.
-- [ ] Verification: both triggers, exact title matching, tags, existing matches, absent dates, elapsed time across daylight-saving transitions, incomplete queries, overflow, concurrent duplicates and uncertain writes have honest outcomes.
+- [x] Verification: both triggers, exact title matching, tags, existing matches, absent dates, elapsed time across daylight-saving transitions, incomplete queries, overflow, concurrent duplicates and uncertain writes have honest outcomes.
 
 ## Notes
 
-The Keir 2 slice is integrated in private Daymark `main` and running in the demo at `7751541` with Keir `0.2.0`. All four workflows ran the same compiled artifacts in simulation and against native tasks. Studio distinguishes no change, a check that could not run, and an unconfirmed write. The exact integration candidate passed hosted build, Node and Chromium checks. The open-task check describes an authorized snapshot, so concurrent actions can still create matching tasks. [Daymark integration](https://github.com/rore/keir-demo-app/commit/77515417e74f962dd09a95c68f4a6b7306877e81) · [Hosted verification](https://github.com/rore/keir-demo-app/actions/runs/42261861370) · [Stage B work record](../../.agent-workflow/tasks/daymark-workflow-stage-b.md)
+The Keir 2 slice is integrated in private Daymark `main` and running in the demo at `16c7f5c` with Keir `0.2.0`. All four workflows ran the same compiled artifacts in simulation and against native tasks. Studio distinguishes no change, a check that could not run, and an unconfirmed write. The final candidate passed hosted build, Node and Chromium checks. The open-task check describes an authorized snapshot, so concurrent actions can still create matching tasks. The native concurrency regression verifies that boundary and stable replay of the original event. [Daymark integration](https://github.com/rore/keir-demo-app/commit/16c7f5c54548058da6f509f20ed00835b46720e1) · [Hosted verification](https://github.com/rore/keir-demo-app/actions/runs/42468891600) · [Stage B work record](../../.agent-workflow/tasks/daymark-workflow-stage-b.md)
+
+Closure verification included a live provider journey. The observed YAML-authored follow-up passed its four independent simulations and native execution in two disposable projects. The running demo includes the verified-artifact title-suffix summary and compact inline review for short screens. The exact unread-notification layout regression fails with the old CSS and passes with the correction. Saved conversations and evidence survived the demo restart. The temporary qualification customization was deleted through the UI, preserving the owner's other items and selections.
 
 **Dependencies:** [task-organization](../features/task-organization.md); [demo-task-integration](../features/demo-task-integration.md); [enrich-followup-expressions](../features/enrich-followup-expressions.md).
 
