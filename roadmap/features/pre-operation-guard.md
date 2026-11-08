@@ -1,7 +1,7 @@
 ---
 id: "pre-operation-guard"
 title: "Compile and run an authoritative pre-operation decision"
-status: "queued"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -29,6 +29,8 @@ Patch consumers, policy-chain composition, native persistence or guarantees Keir
 - [ ] Verification: shared cases cover invalid results, denied reads, timeout, missing binding, effect prohibition and native-consumption receipts.
 
 ## Notes
+
+The authorized slice starts with independent technical design of the typed decision consumer and shared Java/Node acceptance cases. Core owns document formats, compiler/runtime behavior, read-only enforcement and bounded outcomes. Host-specific task fields, persistence, permissions, rule activation and save UX belong to Daymark. Implementation follows review of the smallest supported contract and its public interfaces.
 
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 

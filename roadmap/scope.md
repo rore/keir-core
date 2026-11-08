@@ -5,7 +5,7 @@ This is the single roadmap for `keir-core` and `keir-demo-app`: delivered featur
 The next release target is a production-ready public Keir Core with **at most one mutation per run**. The three tracks can proceed in parallel.
 
 - **Core.** Set the supported compiler and runtime surface, prove Java and Node parity, qualify resource and failure behavior, and verify clean consumption. The existing host-owned key and authority rules apply to the single mutation. Multi-mutation composition and its idempotency protocol follow this release.
-- **Daymark.** Show what the library enables through real tasks and understandable authoring. Daymark has one visible conversation per customization. The current work checks live authoring and review for rules that create a follow-up in the completed task’s project.
+- **Daymark.** Show what the library enables through real tasks and understandable authoring. Daymark has one visible conversation per customization. The delivered slice supports two task triggers and composable single-action workflows. The next slice adds rules checked before task creation, with clear allowed, blocked and unavailable outcomes.
 - **Documentation.** Start with a human-readable binding and runtime quickstart using the current Java and Node interfaces and runnable examples. Continue with compatibility guidance, host responsibilities and public-readiness review for both repositories.
 
 The [public release card](features/public-package-release.md) owns the release checklist. Repository visibility and registry publication require separate authorization after the supported scope, license and publication prerequisites are reviewed.
@@ -41,7 +41,7 @@ The demo must visibly support different extensions at the same hook for differen
 
 The complete demo includes [AI-driven extension creation](features/conversational-authoring.md), with operator-supplied provider/model/credentials and at least two qualified provider configurations. Native task management and execution of existing extensions do not require AI calls; that fallback is not the complete authoring demonstration. Host design-time uses the coding-agent skill and its existing authentication, independently of the demo server's provider setup. Ship no private keys.
 
-The **Extension Studio is the demo's centerpiece**: primary agent chat with a supporting, agent-directed canvas for relevant visual and interactive UI. Canvas actions feed user input back into the conversation; there is no forced workflow wizard. Its [dedicated design/prototype feature](features/extension-studio-design.md) owns detailed UX, interactions, visual design and a user-reviewed end-to-end walkthrough before Studio UI implementation. Design can begin before backend completion; native CRUD stays a small foundation. Authoring/lifecycle features own the later executable behavior, not a competing experience design.
+The **Customization Studio is the demo's centerpiece**. The primary conversation contains the rule summary, simulations and explicit approval and activation controls. Supporting inspection is secondary and opens on request. Its [dedicated design/prototype feature](features/extension-studio-design.md) owns UX, interaction and visual quality. Each new capability needs a business-person walkthrough and rendered verification alongside its executable acceptance tests.
 
 ## Decomposition of earlier broad cards
 
