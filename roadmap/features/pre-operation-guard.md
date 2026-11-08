@@ -32,6 +32,8 @@ Patch consumers, policy-chain composition, native persistence or guarantees Keir
 
 The authorized slice starts with independent technical design of the typed decision consumer and shared Java/Node acceptance cases. Core owns document formats, compiler/runtime behavior, read-only enforcement and bounded outcomes. Host-specific task fields, persistence, permissions, rule activation and save UX belong to Daymark. Implementation follows review of the smallest supported contract and its public interfaces.
 
+Initial independent review confirmed that existing typed records, enum expressions, binding/invocation APIs and static zero-write enforcement can be reused. The remaining design revisions are explicit producer/model compatibility, separating runtime shape checks from host key authentication, and permitting ordinary host-defined result fields alongside the decision for useful explanations. Semantic implementation follows closure of those findings. The architect owns the contract, Core developers own the compiler and both runtimes, and the documentation owner aligns the packaged agent guide with the verified release.
+
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
 **Design input:** [Synchronous lifecycle and guard pattern, sections 3-6 and 13A](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md); [Hooks and consumers, section 2](../../docs/internal/design-baseline/public/hooks-and-tenant-capabilities.md).

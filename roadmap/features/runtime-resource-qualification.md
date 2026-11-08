@@ -36,6 +36,10 @@ Assuming worker limits cover all process memory, adopting an isolation platform 
 
 **Still open:** Worst-case admitted CPU and memory behavior, longer-duration retention, capacity beyond the serial workload, general near-ceiling artifact admission, and enforceable limits for synchronous evaluation. The 1 MiB probe remains byte and structural rejection evidence.
 
+**Current Keir 2 baseline:** [The delivered expression slice](enrich-followup-expressions.md) adds packaged Java/Node parity and serial whole-artifact measurements, including deadline expiry before a write and retained confirmed evidence after a later read expires. These qualify the stated serial workloads, not general concurrency or CPU preemption.
+
+**Next bounded measurement assigned:** Exercise one compiler-produced Keir 2 artifact that fully evaluates eight bindings and a verified maximum-list membership workload, using identical bytes in Java and Node. Each runtime receives 100 warmups and 5,000 measured serial invocations under the existing isolated supervisor, a 45-second worker watchdog, 256 MiB engine heap and 512 MiB observed process budget. Record CPU, latency and post-GC retention; the last three retained-heap samples must span no more than the larger of 8 MiB or 10% of warmed heap. This is a screening threshold, not proof of leak freedom. Stop on a resource breach rather than widening limits. Sustained concurrency and hard containment remain separate, unqualified work.
+
 **Dependencies:** [bound-cel-execution](../features/bound-cel-execution.md); [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
 **Design input:** [Resource limits and gates, sections 6 and 10](../../docs/internal/design-baseline/public/keir-architecture.md); [Runner bounds, sections 6-7](../../docs/internal/design-baseline/public/compiler-artifact-and-runners-v0.md).

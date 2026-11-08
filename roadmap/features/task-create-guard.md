@@ -36,6 +36,8 @@ Design and host-entry-point discovery are active. The host design must cover int
 
 Completion includes independent design and result review, real compiler/simulator/native tests, cross-owner and stale-selection cases, desktop and narrow/short-screen walkthroughs, matching agent guidance and release pins, and updating the running demo after verification.
 
+The entry-point audit found two live insertion paths: native task creation and the `tasks.create` adapter used by post-event rules. Both must reach the same guard coordinator before their existing short write transaction. Existing receipt replay and automation event suppression remain intact. Quick-add currently accepts only a title, so the designer is adding a pre-save details and correction flow using the existing native fields. The first design review requires retaining all three scoped examples rather than narrowing the feature to one project/priority condition. The demo developer owns native integration and UI implementation; the designer reviews actual rendered behavior and the architect reviews the consistency boundary.
+
 **Dependencies:** [native-task-app](../features/native-task-app.md); [pre-operation-guard](../features/pre-operation-guard.md).
 
 **Design input:** [Guard lifecycle and conformance, sections 6, 12 and 13A](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md); [Pre-create task example, section 4D](../../docs/internal/design-baseline/public/task-management-poc.md).
