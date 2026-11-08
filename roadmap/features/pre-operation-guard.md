@@ -34,6 +34,8 @@ The authorized slice starts with independent technical design of the typed decis
 
 Initial independent review confirmed that existing typed records, enum expressions, binding/invocation APIs and static zero-write enforcement can be reused. The remaining design revisions are explicit producer/model compatibility, separating runtime shape checks from host key authentication, and permitting ordinary host-defined result fields alongside the decision for useful explanations. Semantic implementation follows closure of those findings. The architect owns the contract, Core developers own the compiler and both runtimes, and the documentation owner aligns the packaged agent guide with the verified release.
 
+The revised contract passed independent review at design revision `9d2e593`; all initial Core findings are closed. Implementation is authorized with existing invocation APIs, ordinary bounded output fields, exact old/new execution pairs, and a single current authoring compiler. Compiler/Java and Node contributions have separate task records; combined acceptance still requires identical compiled artifact bytes, complete outcome/consumer parity, retained event behavior and packaged verification. Interactive save recovery remains a host-specific design dependency and does not block generic Core implementation.
+
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 
 **Design input:** [Synchronous lifecycle and guard pattern, sections 3-6 and 13A](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md); [Hooks and consumers, section 2](../../docs/internal/design-baseline/public/hooks-and-tenant-capabilities.md).
