@@ -72,3 +72,48 @@ For the exact base and title DCMs, a single-write artifact is bounded by **495,7
 The fixed allowance covers eight step headers at up to 512 bytes each, up to nine handler wrappers at 256 bytes each, and up to 2,048 bytes for the fixed model reference, compiler pins, return wrapper and surrounding syntax. This gives `19 × (21,848 + 1,208 + 128 + 2,048) + 16,384 = 495,792` bytes. The serial run checks the computed bound against a compiler-produced fixture accepted by both runtimes. The fixture need not approach the bound. The public artifact byte ceiling is 1 MiB. Semantic admission at that size remains open for other catalogs.
 
 The runtime boundary cases already live in `BoundEffectRuntimeTest.fourCallsAndEightStepsPassButTheirNextValuesFailStatically` and the fixed-ceiling test in `runtime-node/test/bound-effect.test.js`. The serial run adds the current single-write compiler checks.
+
+## Fully evaluated Keir 2 membership workload
+
+After the same offline package preparation, run the opt-in dense phase on Windows.
+
+```powershell
+node conformance/resource-qualification/qualify.mjs --dense > build/resource-dense.json
+```
+
+This phase generates one test source against the unchanged, pinned Inventory DCM. Eight BIND steps each evaluate a balanced OR of ten membership tests. The input is the shared maximum no-match Inventory input with sixteen 256-byte labels and a 256-byte needle. Every operand is false, so every OR branch and membership test is reached. The compiler probe verifies the exact select and call shapes, 59 nodes per BIND, 473 nodes including the return, depth 7 and 404 expression-source bytes. The pinned engines scan these lists linearly. The resulting 80 scans imply 1,280 element comparisons per invocation. These counts follow from the checked AST, the no-match input and the pinned list implementations. No instrumented operator counter is installed.
+
+The public runtime APIs prepare the same compiler-produced artifact bytes once in each worker. Each worker registers the complete host catalog with callbacks that fail on any dispatch, then checks every invocation against an independently constructed full outcome and 19-event trace. The expected result is `{eligible:false}`, with no effects and zero adapter calls.
+
+| Dense workload guard | Value |
+| --- | --- |
+| Serial invocations per runtime | 100 warmups, then 5 blocks of 1,000 |
+| Engine heap | 256 MiB |
+| Observed process-memory budget | 512 MiB |
+| Direct child watchdog and capture | 45 seconds and 1 MiB combined output |
+| Total execution budget | 135 seconds including probe compilation |
+| Concurrency | One workload process, plus one Windows JVM sampler |
+| Retention screen | Final three post-GC samples span at most the larger of 8 MiB and 10% of warmed heap |
+
+Probe compilation and artifact production share the first 45-second phase. Each runtime has at most 45 seconds, further restricted by the remaining total budget. The existing supervisor closes each direct child before proceeding. The JVM sampler stops its worker on an observed process-memory breach. Node checks peak RSS after each block. A failed guard ends qualification. The report and generated evidence remain under ignored `build/`; the report names its evidence directory. Per-block progress files preserve the last fully checked counts if a watchdog terminates a worker. Invocations within an unfinished block remain uncounted.
+
+### Recorded bounded sample
+
+The sample used Core source baseline `a79ceba`, Java 21.0.12 and Node 24.14.1 on Windows x64, with CEL-Java 0.14.0, CEL-ES 0.6.1, protobuf-Java 4.35.1 and protobuf-ES 2.6.2. Both runtimes completed all 5,100 invocations and matched the expected artifact and outcome digests. The complete phase finished in 14.064 seconds.
+
+| Measurement | Java | Node |
+| --- | ---: | ---: |
+| Measured invocations | 5,000 | 5,000 |
+| Invocation median | 1,002 microseconds | 543.5 microseconds |
+| Invocation p95 | 1,564 microseconds | 1,251.2 microseconds |
+| Invocation maximum | 3,852 microseconds | 4,405 microseconds |
+| Observed process peak | 312,188,928 bytes | 94,392,320 bytes |
+| Final three retained-heap sample span | 56,912 bytes | 3,968 bytes |
+
+The DCM SHA-256 is `77c67ad6a82149d461181d5c4ea661763a84b7055c6589bcce8049710362d959`. The generated 32,675-byte artifact SHA-256 is `79f5f443b1ffead00e1a89b3ac250d561ca0994f467b6afad88a142329aac3fe`. The complete expected outcome SHA-256 is `ac36df3179b7953cd347710d5b13734104d7ff9322dfb9e54f5b302eafefa4dd`. The raw qualification report SHA-256 is `1fb7f80a8bd6a3c15cc82bd6ece5d323e1f3696d4f3263cb310dcf05ab74c425`.
+
+Per-invocation wall samples include public invocation and outcome construction. Assertions, canonical outcome comparison and explicit collection occur outside those wall samples. Block CPU includes assertions and observation overhead before collection. Retained heap includes the probe's sample arrays. Java process peaks come from the existing 100 ms Windows sampler and may miss a later peak before exit; Node reports its process peak RSS. Allocation rate and compiler process RSS are unmeasured.
+
+This is a bounded serial screening result. It establishes neither leak freedom nor a latency SLA. It does not cover concurrent invocations, every admitted catalog, maximum possible allocation intermediates or synchronous CPU preemption. The existing runtime deadline checks still surround synchronous CEL execution.
+
+Focused failure checks changed the expected result in private test manifests. Both workers rejected the first warmup and reported zero successfully checked invocations. A Node manifest with a one-byte observed-memory ceiling stopped after one measured invocation and saved that count before reporting failure.

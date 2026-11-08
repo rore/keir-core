@@ -21,12 +21,22 @@ public final class ResourceProbe {
     private static final Map<String, Object> retainedByBlock = new TreeMap<>();
     private static final Map<String, Object> confirmed = Map.of("kind", "SUCCESS", "effect", "CONFIRMED", "value", Map.of("id", "task2"));
     private static Path directory;
+    private static int denseWarmups, denseInvocations;
 
     public static void main(String[] args) throws Exception {
         check(Runtime.version().feature() == 21, "Use Java 21");
         directory = Path.of(args[1]);
         var manifest = parseJson(read(args[2]), 65_536);
-        if (args[0].equals("compiler")) {
+        if (args[0].startsWith("dense-")) {
+            try {
+                if (args[0].equals("dense-compiler")) denseCompiler(map(manifest, ""));
+                else denseRuntime(map(manifest, ""));
+            } catch (Throwable failure) {
+                System.out.writeBytes(canonical(Map.of("status", "failed", "completedWarmups", denseWarmups,
+                        "completedInvocations", denseInvocations, "error", String.valueOf(failure).substring(0, Math.min(1000, String.valueOf(failure).length())))));
+                System.exit(1);
+            }
+        } else if (args[0].equals("compiler")) {
             compile(list(manifest, ""));
         } else {
             runtime(map(manifest, ""));
@@ -34,6 +44,133 @@ public final class ResourceProbe {
     }
 
     private static byte[] read(String name) throws Exception { return Files.readAllBytes(directory.resolve(name)); }
+
+    private static void denseCompiler(Map<String,Object> manifest) throws Exception {
+        byte[] source = read((String)manifest.get("source")), model = read((String)manifest.get("model"));
+        var compiled = new KeirCompiler().compile(source, model, KeirCompiler.Environment.supported());
+        check(compiled.succeeded(), compiled.diagnostics());
+        byte[] artifact = compiled.artifact();
+        var plan = map(parseCanonical(artifact), "");
+        var steps = list(plan.get("steps"), "");
+        check(steps.size() == 8, "Expected eight reached BINDs");
+        var expressions = map(plan.get("expressions"), "");
+        check(expressions.size() == 9, "Expected eight BIND expressions and one return expression");
+        var counts = new ArrayList<Integer>();
+        int total = 0, scans = 0, depth = 0;
+        for (int index = 0; index < 8; index++) {
+            var step = map(steps.get(index), "");
+            check("BIND".equals(step.get("op")) && ("scan" + index).equals(step.get("id")), "Unexpected dense step");
+            String id = (String)map(step.get("value"), "").get("expr");
+            var checked = CheckedExpr.parseFrom(Base64.getDecoder().decode((String)map(expressions.get(id), "").get("checked")));
+            int[] shape = denseShape(checked.getExpr());
+            check(shape[0] == checked.getTypeMapCount() && shape[2] == 10, "Dense AST count mismatch");
+            counts.add(shape[0]); total += shape[0]; scans += shape[2]; depth = Math.max(depth, shape[1]);
+        }
+        String returned = (String)map(map(map(plan.get("return"), "").get("fields"), "").get("eligible"), "").get("expr");
+        var checked = CheckedExpr.parseFrom(Base64.getDecoder().decode((String)map(expressions.get(returned), "").get("checked")));
+        check(checked.getExpr().hasIdentExpr() && checked.getExpr().getIdentExpr().getName().equals("scan7")
+                && checked.getTypeMapCount() == 1, "Unexpected dense return");
+        total++;
+        Files.write(directory.resolve((String)manifest.get("artifact")), artifact);
+        System.out.writeBytes(canonical(Map.of("artifactDigest", digest(artifact), "artifactBytes", artifact.length,
+                "nodesPerStep", counts, "totalNodes", total, "depth", depth,
+                "membershipScans", scans, "elementVisits", scans * 16, "calls", 0)));
+    }
+
+    // Every OR operand is false on the no-match input, so every membership leaf is reached.
+    private static int[] denseShape(Expr expression) {
+        check(expression.hasCallExpr(), "Expected a dense call expression");
+        var call = expression.getCallExpr();
+        check(!call.hasTarget() && call.getArgsCount() == 2, "Unexpected dense call form");
+        if (call.getFunction().equals("@in")) {
+            for (int index = 0; index < 2; index++) {
+                var select = call.getArgs(index).getSelectExpr();
+                check(call.getArgs(index).hasSelectExpr() && !select.getTestOnly()
+                        && select.getField().equals(index == 0 ? "targetLabel" : "labels")
+                        && select.getOperand().hasIdentExpr() && select.getOperand().getIdentExpr().getName().equals("input"),
+                        "Unexpected membership operand");
+            }
+            return new int[]{5, 3, 1};
+        }
+        check(call.getFunction().equals("_||_"), "Expected only OR and membership");
+        int[] left = denseShape(call.getArgs(0)), right = denseShape(call.getArgs(1));
+        return new int[]{left[0] + right[0] + 1, Math.max(left[1], right[1]) + 1, left[2] + right[2]};
+    }
+
+    private static void denseRuntime(Map<String,Object> manifest) throws Exception {
+        var limits = map(manifest.get("limits"), "");
+        int warmups = ((Number)limits.get("warmups")).intValue(), blocks = ((Number)limits.get("blocks")).intValue();
+        int perBlock = ((Number)limits.get("perBlock")).intValue();
+        long invocationMs = ((Number)limits.get("invocationMs")).longValue();
+        byte[] modelBytes = read((String)manifest.get("model")), artifact = read((String)manifest.get("artifact"));
+        Object input = parseCanonical(read((String)manifest.get("input")));
+        byte[] expected = canonical(manifest.get("expected"));
+        var model = map(parseJson(modelBytes, 65_536), "");
+        var adapters = new TreeMap<String,KeirRuntime.BoundEffectAdapter>();
+        var dispatches = new java.util.concurrent.atomic.AtomicInteger();
+        String keyType = (String)map(model.get("hostKey"), "").get("type");
+        for (var entry : map(model.get("capabilities"), "").entrySet()) {
+            String version = (String)map(entry.getValue(), "").get("version");
+            adapters.put(entry.getKey(), new KeirRuntime.BoundEffectAdapter(version, "simulation", keyType,
+                    (args, bindings, remaining, context) -> { dispatches.incrementAndGet(); throw new AssertionError("Unexpected dispatch"); }));
+        }
+        var binding = KeirRuntime.bindModel(modelBytes, adapters);
+        check(binding.succeeded(), binding.diagnostic());
+        long prepareStart = System.nanoTime();
+        var preparation = KeirRuntime.prepareProgram(artifact, binding.boundModel());
+        long prepareUs = (System.nanoTime() - prepareStart) / 1000;
+        check(preparation.succeeded(), preparation.diagnostic());
+        Supplier<KeirRuntime.Outcome> invoke = () -> {
+            var deadline = new KeirRuntime.Deadline(() -> System.nanoTime() / 1_000_000,
+                    System.nanoTime() / 1_000_000 + invocationMs);
+            var invocation = new KeirRuntime.BoundEffectInvocation(Map.of(), deadline, new Object(),
+                    Map.of("id", "event1", "source", "item1"));
+            return KeirRuntime.invokeBoundEffectProgram(preparation.prepared(), input, invocation).toCompletableFuture().join();
+        };
+        for (int index = 0; index < warmups; index++) {
+            check(Arrays.equals(expected, invoke.get().toJson()) && dispatches.get() == 0, "Unexpected warmup outcome");
+            denseWarmups++;
+        }
+        long baseline = retained();
+        var samples = new ArrayList<Long>();
+        var blockResults = new ArrayList<Map<String,Object>>();
+        denseProgress(baseline, blockResults);
+        for (int block = 1; block <= blocks; block++) {
+            long blockCpu = cpuUs();
+            for (int index = 0; index < perBlock; index++) {
+                long start = System.nanoTime();
+                var outcome = invoke.get();
+                samples.add((System.nanoTime() - start) / 1000);
+                check(Arrays.equals(expected, outcome.toJson()) && dispatches.get() == 0, "Unexpected measured outcome");
+                denseInvocations++;
+            }
+            long usedCpu = cpuUs() - blockCpu;
+            blockResults.add(Map.of("block", block, "invocations", perBlock, "cpuUs", usedCpu, "postGcHeapBytes", retained()));
+            denseProgress(baseline, blockResults);
+        }
+        var finalHeaps = blockResults.subList(blockResults.size() - 3, blockResults.size()).stream()
+                .mapToLong(row -> ((Number)row.get("postGcHeapBytes")).longValue()).summaryStatistics();
+        long span = finalHeaps.getMax() - finalHeaps.getMin(), threshold = Math.max(8 * 1_048_576L, baseline / 10);
+        check(span <= threshold, "Final post-GC heap span exceeds screening threshold");
+        samples.sort(null);
+        System.out.writeBytes(canonical(Map.ofEntries(
+                Map.entry("status", "passed"), Map.entry("completedWarmups", denseWarmups),
+                Map.entry("completedInvocations", denseInvocations), Map.entry("dispatchCount", dispatches.get()),
+                Map.entry("artifactDigest", digest(artifact)), Map.entry("outcomeDigest", digest(expected)),
+                Map.entry("environment", Map.of("runtime", "java", "version", System.getProperty("java.version"),
+                        "os", System.getProperty("os.name"), "arch", System.getProperty("os.arch"), "pins", KeirRuntime.ENVIRONMENT)),
+                Map.entry("prepare", Map.of("wallUs", prepareUs)),
+                Map.entry("wall", Map.of("minUs", samples.getFirst(), "medianUs", samples.get(samples.size() / 2),
+                        "p95Us", samples.get((samples.size() * 95 + 99) / 100 - 1), "maxUs", samples.getLast())),
+                Map.entry("baselineHeapBytes", baseline), Map.entry("finalHeapSpanBytes", span),
+                Map.entry("heapSpanLimitBytes", threshold), Map.entry("blocks", blockResults))));
+    }
+
+    private static void denseProgress(long baseline, List<Map<String,Object>> blocks) throws Exception {
+        Files.write(directory.resolve("dense-java-progress.json"), canonical(Map.of("completedWarmups", denseWarmups,
+                "completedInvocations", denseInvocations, "completedBlocks", blocks.size(),
+                "baselineHeapBytes", baseline, "blocks", blocks)));
+    }
 
     private static void check(boolean ok, Object message) {
         if (!ok) throw new AssertionError(message);

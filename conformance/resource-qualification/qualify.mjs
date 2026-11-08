@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
-import { delimiter, dirname, join } from 'node:path';
+import { delimiter, dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { canonicalBytes, digest } from '../../runtime-node/src/canonical.js';
 
@@ -16,9 +16,10 @@ const MB = 1_048_576;
 const DOC = 65_536;
 const start = performance.now();
 const args = process.argv.slice(2);
-assert.ok(args.length === 0 || args.length === 1 && args[0] === '--soak', 'Use --soak for the serial embedded workload');
-const soak = args.includes('--soak') ? {
-  warmups: 100, blocks: 5, perBlock: 200, heapMiB: 256, peakWorkingSetBytes: 512 * MB, sampleIntervalMs: 100,
+assert.ok(args.length === 0 || args.length === 1 && ['--soak', '--dense'].includes(args[0]), 'Use --soak or --dense for a serial workload');
+const dense = args.includes('--dense');
+const soak = args.length ? {
+  warmups: 100, blocks: 5, perBlock: dense ? 1000 : 200, heapMiB: 256, peakWorkingSetBytes: 512 * MB, sampleIntervalMs: 100,
 } : null;
 if (soak) assert.equal(process.platform, 'win32', 'The serial workload uses the Windows JVM working-set counter');
 const limits = { documentBytes: DOC, artifactBytes: MB, expressionSourceBytes: 512, expressionNodes: 64,
@@ -68,18 +69,19 @@ function requireExit(run, code = 0) {
   assert.equal(run.code, code, run.stderr.toString());
 }
 
-async function runJvm(args) {
-  if (!soak) return child(jdk('java'), args);
+async function runJvm(args, { timeout = limits.childMs } = {}) {
+  if (!soak) return child(jdk('java'), args, { timeout });
   let sampler, sampled;
-  const run = await child(jdk('java'), args, { started(pid) {
+  const run = await child(jdk('java'), args, { timeout, started(pid) {
     sampler = child('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', [
       "$ErrorActionPreference = 'Stop'",
       "$clock = [Diagnostics.Stopwatch]::StartNew()",
       "$samples = [Collections.Generic.List[object]]::new()",
       "$proc = Get-Process -Id " + pid,
       "if ($proc.ProcessName -ne 'java') { throw 'Unexpected sample target' }",
-      "for ($i = 0; $i -lt " + Math.ceil(limits.childMs / soak.sampleIntervalMs) + "; $i++) { $proc.Refresh(); if ($proc.HasExited) { break };",
+      "for ($i = 0; $i -lt " + Math.ceil(timeout / soak.sampleIntervalMs) + "; $i++) { $proc.Refresh(); if ($proc.HasExited) { break };",
       "$samples.Add(@{offsetMs=$clock.ElapsedMilliseconds; workingSetBytes=$proc.WorkingSet64; peakWorkingSetBytes=$proc.PeakWorkingSet64});",
+      ...(dense ? ["if ($proc.PeakWorkingSet64 -gt " + soak.peakWorkingSetBytes + ") { $proc.Kill(); throw 'Observed JVM process memory exceeded the dense budget' }"] : []),
       "Start-Sleep -Milliseconds " + soak.sampleIntervalMs + " }",
       "@{samples=$samples} | ConvertTo-Json -Depth 4 -Compress",
     ].join('\n')]).then(result => ({ result }), error => ({ error }));
@@ -115,6 +117,12 @@ assert.equal(resolvedBuild, join(realpathSync(root), 'build'), 'Use an in-checko
 const temporary = mkdtempSync(join(resolvedBuild, 'resource-'));
 const output = { limits, platform: process.platform, arch: process.arch, compiler: {}, runtimes: {}, children: {} };
 try {
+  if (dense) {
+    const { runDenseQualification } = await import('./dense.mjs');
+    output.dense = {};
+    await runDenseQualification({ here, fixture, compiler, host, jdk, temporary, limits,
+      child, runJvm, requireExit, metrics, output: output.dense });
+  } else {
   const write = (name, bytes) => { writeFileSync(join(temporary, name), bytes); return name; };
   const pinned = name => {
     const bytes = readFileSync(join(fixture, name + '.json'));
@@ -292,10 +300,23 @@ try {
     else assert.equal(run.stdout.toString(), 'ready\n');
     output.children[id] = metrics(run);
   }
+  }
+} catch (error) {
+  if (!dense) throw error;
+  output.status = 'failed';
+  output.error = String(error.message).slice(0, 2000);
+  output.lastCheckpoints = Object.fromEntries(['java', 'node'].map(engine => {
+    const path = join(temporary, 'dense-' + engine + '-progress.json');
+    return [engine, existsSync(path) ? JSON.parse(readFileSync(path)) : null];
+  }));
+  process.exitCode = 1;
 } finally {
   assert.equal(dirname(realpathSync(temporary)), resolvedBuild);
-  rmSync(temporary, { recursive: true });
-  assert.ok(!existsSync(temporary));
+  if (!dense) {
+    rmSync(temporary, { recursive: true });
+    assert.ok(!existsSync(temporary));
+  }
 }
 console.log(JSON.stringify({ ...output, elapsedMs: performance.now() - start,
-  cleanup: { directChildrenClosed: true, temporaryDirectoryRemoved: true } }, null, 2));
+  cleanup: { directChildrenClosed: true, temporaryDirectoryRemoved: !dense },
+  ...(dense ? { evidenceDirectory: relative(root, temporary).replaceAll('\\', '/') } : {}) }, null, 2));
