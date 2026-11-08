@@ -46,13 +46,13 @@ Use the independently reviewed Core and host contract. Implement one guarded cre
 No persistence or bypass -> real service/API/adapter tests asserting task/event/receipt rows. Races and replay -> paused evaluation, separate DB connection, selection/permission/read changes and concurrent same-attempt calls. Three rules -> actual compiled artifact simulations and native allow/deny. UX -> denied-corrected-saved walkthrough at desktop/320px/683x384 with setup/unread/composer, retained newer input and owner changes. Delivery -> qualified release pins, backup/migration rehearsal and served asset/native checks.
 
 **Plan review:**
-Core final review and host native operation identity/recovery decision remain pending.
+Agent technical review: independent Core/host-seam review passed design 9d2e593dc2215181593d467873e92cd0117bf402; manager inspected and accepted the designer's retained-form and inline simulation direction. The host native identity/readback contract remains a bounded dependency: implement approved UI, projection and coordinator structure independently, but do not enable unknown-save retry or claim recovery until the architect's focused design and review close it.
 
 **Approvals:**
 User authorized this slice, generic framework separation, proper QA and completion. No new environment changes or public visibility change are authorized.
 
 **State:**
-Blocked
+Ready to implement
 <!-- agent-workflow:end -->
 
 ## Implementation
