@@ -8,6 +8,8 @@ The host binds its DCM and implementations, prepares an approved program, and in
 
 Reuse the current [binding and invocation APIs](host-model-binding.md#api-shapes), [Keir 2 expressions](workflow-expressions.md), adapter responses, limits and outcome envelope. No new source instruction, runtime method, registration layer, policy engine, database, patch or multiple-binding composition is needed. Historical REQUEST/DISPLAY is advisory and must not be silently relabeled as a guard. Existing EVENT/AFTER_COMMIT behavior remains unchanged.
 
+At the inspected baseline, existing custom enums/records can already express ALLOW/DENY and additional bounded output fields; `effectGrant:0` can already prohibit writes; Outcome validation can distinguish completion from failure. What they cannot express is a supported pre-operation lifecycle: `compiler-java/.../Dcm.java`, Java `Artifact.java` and Node `validation.js` explicitly require EVENT/AFTER_COMMIT/EVENT_REPORT. Invoking that declared event before commit would contradict its contract. The change is this lifecycle/consumer alternative plus its validation, not a new execution mechanism. The artifact schema also fixes `modelRef.format` to `keir-dcm/2`; a new DCM contract therefore changes the artifact's accepted model-reference structure. The scenario schema only admits event-report consumption. These concrete constraints justify the version changes below; status labels alone would not.
+
 ## DCM delta
 
 A new entrypoint alternative uses the existing fields:
@@ -17,13 +19,13 @@ A new entrypoint alternative uses the existing fields:
 | `trigger` | `REQUEST`: synchronous interception of an operation attempt, not an already committed event. |
 | `placement` | `BEFORE_COMMIT`: output must be consumed before the native effect. Existing AFTER_COMMIT cannot prevent it. |
 | `consumer.kind` | `DECISION`: distinguishes authoritative permission to continue from reporting/display. Keep existing host-owned consumer `id` and `version`. |
-| `output` | Host-named closed record with exactly one required field, `decision`, whose named enum has exactly `ALLOW` and `DENY` in that order. Existing enum/record machinery suffices; no built-in business type. |
+| `output` | Host-named closed record with required `decision`, whose named enum has exactly `ALLOW` and `DENY` in that order. Other host-declared bounded scalar fields, required or optional under existing rules, are permitted; for example `message:String`. Existing enum/record machinery suffices; no built-in business type. |
 | `effectGrant` | Omitted means **0** for DECISION; explicit 0 is valid, 1 is invalid. The lifecycle itself forbids extension writes. Event defaults stay unchanged. |
 | `event` | Retain existing `{idType,sourceType}` nominal declarations and invocation `{id,source}` transport. For REQUEST this identifies the host operation attempt and its host-defined scope; it does not assert a committed event or an existing output entity. |
 
 Only the exact REQUEST/BEFORE_COMMIT/DECISION combination is added. Mixed combinations fail DCM validation. The compiler and both binders validate the output shape and effect ceiling. Preparation independently rejects every potential WRITE, even behind a false guard, with `ENTRY_GRANT_DENIED`; runtime dispatch retains its zero-write check. A catalog may still publish WRITE operations for other entrypoints. No special capability allow-list is required; existing optional policy controls still apply.
 
-The result is intentionally just a decision. A free-form reason, patch, next action or host-verification object is unnecessary for this increment. A host can explain DENY with its own safe interface text.
+An ordinary bounded message field can explain a customer-authored denial. It is data, never markup, native authority or executable recovery instructions. No Core reason-code registry, patch, next action or host-verification object is added. Only `decision` controls continuation; other fields cannot override it. The host validates the complete declared output, renders messages as plain text and uses its own text for infrastructure/native errors.
 
 ## Domain-neutral example
 
@@ -57,15 +59,15 @@ The host establishes selection state independently of the runtime result. Exactl
 | --- | --- |
 | Authoritatively no active binding | Continue ordinary native validation/operation. This hook is an optional customization. |
 | Binding exists but artifact, package, approval or implementation is unavailable/incompatible | Block; never reinterpret as no binding. |
-| Valid `COMPLETED`, exact `{decision:"ALLOW"}`, empty `effects` | Eligible to continue, subject to fresh host checks and deadline. |
-| Valid `COMPLETED`, exact `{decision:"DENY"}`, empty `effects` | Deny; do not attempt the native mutation. |
+| Valid `COMPLETED`, fully typed result with `decision:"ALLOW"`, empty `effects` | Eligible to continue, subject to fresh host checks and deadline. |
+| Valid `COMPLETED`, fully typed result with `decision:"DENY"`, empty `effects` | Deny; do not attempt the native mutation. |
 | `BUSINESS_REJECTION`, including a handler returning ALLOW | Block. A handled capability rejection is not a successfully completed guard. |
 | FAILED, LIMIT_EXCEEDED, UNCERTAIN, malformed result/outcome, nonempty effects, exception | Block. Preserve the actual failure for diagnostics. |
 | Cancellation, expired deadline, changed selection or stale read facts | Block; discard the permission to continue. No automatic reevaluation loop. |
 
 A mandatory guard with no-binding-denies semantics is outside this optional-customization slice; it must not be implied by the default above.
 
-The sample consumer is a pure host helper, `consumeDecision(outcome)`, with the same behavior in Java and Node examples. It returns exactly `{status:"ALLOWED"}`, `{status:"DENIED"}` or `{status:"BLOCKED"}`. It validates the closed outcome/result, empty effects, classification and consistent trace using the existing consumer validation pattern. A failed validation returns BLOCKED rather than throwing through to a native fallback. No per-call DCM, digest, entrypoint, consumer identity or compiler argument is added to this helper. Selection/preparation already established those facts.
+The sample consumer is a pure host helper, `consumeDecision(outcome)`, with the same behavior in Java and Node examples. It returns `{status:"ALLOWED",result}`, `{status:"DENIED",result}` or exactly `{status:"BLOCKED"}`. The result is the complete validated host record, including any declared message. The example's helper checks its known model output; a host with a different output uses its already selected model's validator, captured at binding/setup rather than passed anew by the caller. It validates the closed outcome/result, empty effects, classification and consistent trace using the existing consumer validation pattern. A failed validation returns BLOCKED rather than throwing through to a native fallback. No per-call DCM, digest, entrypoint, consumer identity or compiler argument is added to this helper. This is example host code, not a new runtime export.
 
 ALLOWED is permission to proceed, **not evidence that the native operation committed**. Keep consumer output, runtime outcome and native result separate. The host must never consume an outcome supplied by the customer as if it came from its invocation. Do not introduce a signed permission token or new Core receipt service to join these steps: the host's local control flow suffices.
 
@@ -79,7 +81,7 @@ ALLOWED is permission to proceed, **not evidence that the native operation commi
 
 Keir does not offer a universal snapshot guarantee. A host may revalidate locally read values/predicates inside its native atomic transition. For remote facts it needs an actual host protocol that establishes the required consistency; otherwise that authoritative use is unsupported. A prior successful read or a hash of its result does not establish commit-time truth. The host must specify its consistency boundary and test races against it.
 
-The same original key passes through READ adapters unchanged. Keir does not append step or guard identifiers. The host may allocate an operation-attempt identity before any output entity exists. It must not forge a committed event or accept provenance selected by the extension.
+The same original key passes through READ adapters unchanged. Keir checks only that the key is non-null, not its authenticity or native shape. Protected bindings contain only the names required by actual planned calls; a no-call ALLOW requires no actor binding in Core. The host must still authenticate actor, key and provenance before native continuation, including for a no-call plan. Keir does not append step or guard identifiers. The host may allocate an operation-attempt identity before any output entity exists. It must not forge a committed event or accept provenance selected by the extension.
 
 ## Time, cancellation and nesting
 
@@ -91,7 +93,7 @@ A post-commit extension may call one native WRITE whose host operation has a gua
 
 ## Compatibility and release proposal
 
-Identities version independently. Proposed next release allocation, subject to manager confirmation before implementation:
+Identities version independently. The manager has reserved Core 0.3.0 and companion edition 5 for this design; these are not published assets. The minimum proposed contract pairs are:
 
 | Contract | Proposed value | Reason |
 | --- | --- | --- |
@@ -100,10 +102,12 @@ Identities version independently. Proposed next release allocation, subject to m
 | Artifact | `keir-artifact/3` | Newly admitted entrypoint execution meaning; retain envelope/step representation. |
 | Descriptor recipe | Keep `keir-record-descriptors/2` | No value or protobuf representation change. |
 | Scenario | `keir-scenario/3` | New decision-consumption variants; retain outcome/call envelope. |
-| Compiler/packages | Propose Core `0.3.0`, producer `keir-compiler-java/0.3.0` | Exact release pair must advertise and test the new contract. These are reserved proposals, not published assets. |
-| Authoring companion | Propose edition `5` | Teach pre-operation decisions and failure boundaries; publish only with verified packages. |
+| Compiler/packages | Core `0.3.0`, producer `keir-compiler-java/0.3.0` | Exact release pair must advertise and test the new contract. Reserved, not published. |
+| Authoring companion | Edition `5` | Teach pre-operation decisions and failure boundaries; publish only with verified packages. |
 
-Keep dependency pins unchanged unless implementation evidence requires a separate change. New packages continue supporting the existing exact `/2` event artifact/model/producer pair so already-active post-commit rules need no migration merely to add a guard. Implement only the explicit old/new supported identity pairs; reject mixed tuples. New guard models use `/3`. Do not rewrite old artifacts, approvals, stored receipts or fixtures. If retaining `/2` cannot be achieved without a wider compatibility layer, stop for a concrete migration decision rather than silently disabling live event rules.
+Keep dependency pins unchanged unless implementation evidence requires a separate change. Compiler 0.3.0 accepts source `keir/2` with DCM `/3` only, producing artifact `/3` with its truthful 0.3.0 identity. It rejects DCM `/2`; it never stamps a 0.2.0 producer. Compiler 0.2.0 remains the matching tool for authoring against an existing `/2` catalog. Runtime 0.3.0 admits exactly (artifact `/2`, DCM `/2`, producer 0.2.0, descriptors `/2`) and (artifact `/3`, DCM `/3`, producer 0.3.0, descriptors `/2`), with the existing exact environment pins in both. Reject mixed tuples and guard semantics in `/2`. This needs two explicit supported cases, not a compatibility framework.
+
+Existing approved post-commit artifacts/model snapshots stay on their old exact pair when the runtime package is upgraded. Do not rewrite approvals or receipts. Hosts can retain that snapshot and its compiler for existing event authoring while adding a separate `/3` guard model binding, reusing the existing ability to bind different models; this is not multiple selected programs at one hook. Any later event-catalog migration to `/3` requires recompilation and normal approval, not an automatic semantic upgrade. Package/provenance validation must explicitly recognize the new runtime's support for the old pair rather than fabricate old package integrity.
 
 Update domain-model, host-model-binding, runtime, compiler-artifact, spec index, schemas, example consumers and release compatibility matrix together during implementation. Update `docs/agents/host-integration-assistant.md`, `extension-assistant.md`, the new customer guide and companion compatibility record: discover the exact hook, compose READs, return a decision, test DENY/failure and native consumption, and never infer native commit from ALLOW. This proposal changes none of those files or package pins yet.
 
@@ -118,9 +122,11 @@ Each runtime case uses one compiler-produced artifact/model pair in both runtime
 | Wrong lifecycle tuple, wrong enum/output fields, effectGrant 1 | DCM/compiler/binding rejection. |
 | WRITE, including false guarded WRITE, forged prepared plan | Reject before any adapter dispatch. |
 | Denied/transient/malformed READ; handled rejection with ALLOW | BLOCKED; zero native mutation attempts. |
-| Missing/extra/mistyped result, unknown decision, forged trace or effects | Consumer BLOCKED. |
+| Missing/extra/mistyped result, unknown decision, undeclared message, forged trace or effects | Consumer BLOCKED. Declared message round-trips safely as data in both runtimes. |
 | Expiry before start/during READ/after result; regressing clock; cancellation and late ALLOW | No native continuation; late settlement cannot change terminal outcome. |
-| Missing/mistyped input, actor, original key or provenance | Existing validation errors; zero native mutation attempts. |
+| Missing/mistyped input, required protected binding or event shape; null original key | Core validation error before dispatch. No-call plans legitimately have no actor binding. |
+| Forged/non-null native key, wrong owner or unauthenticated provenance, including pure ALLOW | Host authentication/commit gate blocks native continuation; do not expect Core to authenticate them. |
+| Compiler 0.3 with DCM `/2`; mixed artifact/model/producer pair; `/2` guard | Reject. Existing compiler 0.2 `/2` artifacts and new compiler 0.3 `/3` artifacts both run on runtime 0.3 with their exact models. |
 | Explicit no binding versus selected-but-unavailable | Native path only for verified absence; unavailable blocks. |
 | Changed input, approval, selection, native permission or read fact before commit | Host blocks; race tests prove no native commit. |
 | Native failure after ALLOWED | ALLOWED retained only as decision consumption; native failure reported separately. |
@@ -130,4 +136,4 @@ The generic host harness supplies an independently observed native-operation cou
 
 Compiler/Java owner: DCM validation, compiler identity selection, shared fixtures/schema updates, Java binding/preparation/runtime checks and Java consumer/harness. Node owner: same exact model/artifact pairs, validation and runtime checks, Node consumer/harness, parity and packaged execution. Host owner: activation/absence semantics, creation paths, consistent READ adapters, deadline reserve, replay/nesting, real persistence and UI/API tests. Manager owns independent review, package allocation and combined release acceptance.
 
-Open gates: approve the proposed identity allocation and explicit `/2` coexistence; independently review the host's read-consistency mechanism and measured reserve; qualify cancellation and packaged Java/Node/native evidence. Do not begin semantic implementation on the strength of this author's review alone.
+Open gates: independent review of the revised output and exact two-pair compatibility contract; independently review the host's read-consistency mechanism and measured reserve; qualify cancellation and packaged Java/Node/native evidence. Do not begin semantic implementation on the strength of this author's review alone.
