@@ -38,7 +38,7 @@ Owning feature [CPU, memory and deadline qualification](../../roadmap/features/r
 - Failure reporting → run focused wrong-outcome checks in both workers and a tiny observed-memory ceiling in Node.
 - Scope and privacy → inspect the complete diff and keep raw operational evidence ignored.
 
-**Plan review:** The task manager accepted the exact A/B workload, guards and screening threshold before execution. Independent technical review remains assigned to the integration owner and developer reviewer.
+**Plan review:** Agent technical review: the non-implementing task manager accepted the exact A/B workload, watchdogs, output/memory limits and retention screening threshold before execution. Integration review checked the actual producer, Java and Node workers and retained report against that plan; see Result review.
 
 **Approvals:** Bounded implementation and execution were assigned by the task manager.
 
@@ -61,4 +61,8 @@ Java observed peak working set was 312,188,928 bytes and its final retained-heap
 
 ## Result review
 
-Independent technical review is pending with the integration owner and developer reviewer. Source syntax and whitespace checks passed. The final elapsed-budget assertion was checked against the retained completed report. Concurrency, allocation rate, compiler process RSS, hard synchronous interruption and production latency remain outside this qualification.
+Agent technical review: independent integration review inspected the producer's checked AST validation, both public-runtime workers, existing supervisor/sampler changes, failure checkpoints and the report with the recorded SHA-256. The report's artifact/outcome identities, 100 warmups, 5,000 measured invocations, zero dispatch, retention screens and elapsed budget were independently asserted without repeating the benchmark.
+
+Reviewed revision: `f56e0d2166cb55be20e838eb6de178ac3e6dd717`.
+
+Verification adequacy: adequate for the explicitly bounded Keir 2 serial screen. No product runtime semantics changed. Concurrency, allocation rate, compiler process RSS, hard synchronous interruption and production latency remain unqualified. The next compiler's intentional DCM version change requires deliberate qualification-fixture adaptation; this recorded result must not be relabeled as a measurement of that later package.
