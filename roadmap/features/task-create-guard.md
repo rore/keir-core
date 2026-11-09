@@ -1,7 +1,7 @@
 ---
 id: "task-create-guard"
 title: "Make a denied task-create decision prevent persistence"
-status: "active"
+status: "done"
 priority: "medium"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -28,9 +28,21 @@ Independent extension writes before commit, patches and new customer-specific ho
 
 - [x] Design/spec: settle hook placement, failure policy, native revalidation and bypass/re-entry behavior.
 - [x] Implementation: a denial leaves no task persisted; an allowance continues the normal authorized create path.
-- [ ] Verification: real persistence tests cover denial, invalid result, unavailable decision, concurrent/stale facts, bypass attempts and unchanged native checks.
+- [x] Verification: real persistence tests cover denial, invalid result, unavailable decision, concurrent/stale facts, bypass attempts and unchanged native checks.
+
+## Delivery
+
+Delivered in Daymark source `7ad6d36` with the [published Core 0.3.0 packages and guide edition 5](https://github.com/rore/keir-core/releases/tag/v0.3.0). All three rules use ordinary programs against the published model; the framework contains no task-specific capability or policy.
+
+[Hosted demo verification](https://github.com/rore/keir-demo-app/actions/runs/42579777651) passed 515 Node tests with 12 explicit opt-in skips, and all 229 browser cases in one run. Earlier explicit process/crash checks passed all 12 cases. Focused official-package checks passed distribution/compiler verification, 183 native and binding tests, 69 authoring tests and nine real guard browser journeys. The seven-example repair regression also passes with extra user wording after removing duplicated navigation coaching; the context limit and requested examples are unchanged.
+
+All three actual provider-authored rules compiled, passed their simulations and reached eligible review offers. A final live journey repeated this on the official packages and guide. No real tasks, approvals or selections were changed by qualification.
+
+The running demo now serves the exact reviewed build. The schema-13 to schema-14 rollout preserved all 21 original tables' data and the provider settings byte for byte. Verified backups and the previous app remain available; restoration was rehearsed. Existing approved event selections remain unchanged and new before-save checks start off. Independent post-rollout review passed at desktop, narrow and short-screen sizes, using a disposable browser context without native writes or provider requests.
 
 ## Notes
+
+The checkpoints below record development and earlier dependencies; the delivery above is the final accepted state.
 
 Design and host-entry-point discovery are active. The host design must cover interactive, API and internal task creation, including task creation requested by existing post-event extensions. No active guard preserves ordinary native task behavior. An active guard that cannot establish an allowed result prevents persistence with an understandable recovery path. Existing native validation, current permissions, receipt identity and commit-time checks remain authoritative.
 
