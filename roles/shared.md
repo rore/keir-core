@@ -15,7 +15,7 @@ Load only your selected role and this guide at role entry. For assignments, read
 - Normative contracts: `docs/specs/`; product assistant guides: `docs/agents/`; rationale: `docs/internal/`. New supplied drafts go in `docs/internal/design-baseline/public/` with index updates; never a separate draft-design folder. Current decisions/feature scope govern historical drafts.
 - Core stays domain-independent; host adapters/AI belong to the host/demo. CEL is internal to Keir. Java and Node share one artifact. Product value is accepted; no frozen-catalog/competitor gate. Proposals, mocks and partial tests do not certify real guarantees.
 - Design hook defaults for composition over the host-approved catalog, subject to authorization; never bake a sample program's capability list into the required hook contract. The host defines hook data; customer-specific constants belong in authored programs. Capability filters are advanced opt-in restrictions. Keep effect safety and aggregate resource budgets separate from capability selection.
-- Follow [testing guidance](../docs/testing.md): add regression coverage, keep default tests fast, investigate slowdowns and select slow suites explicitly. Preserve protected behavioral obligations.
+- Follow [testing guidance](../docs/testing.md): add regression coverage, keep default tests fast, investigate slowdowns and select slow suites explicitly. When qualification expands, compare measured end-to-end CI time with the job ceiling before delivery. Preserve protected behavioral obligations and per-test limits.
 
 ## Coordination
 
