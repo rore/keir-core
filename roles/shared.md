@@ -20,6 +20,7 @@ Load only your selected role and this guide at role entry. For assignments, read
 ## Coordination
 
 - Manager alone writes the canonical core roadmap for both repos. Public features own scope/status/evidence; private checkout/routing details stay in ignored local notes. Specify repo, checkout, file ownership and acceptance. Isolate concurrent edits; reserve shared writes and preserve others' work.
+- When development or review exposes a substantive problem, check whether the process contributed: missing inputs, unclear ownership, an ineffective handoff or inadequate verification. If it did, address the cause alongside the product fix with the smallest useful change to existing guidance, tests or working practice. Verify that improvement; do not automatically add another document, approval or review stage.
 - Keep the existing local demo current after verified changes. Reuse its URL and data, back up migrations and verify served assets and preserved state. Routine demo updates/restarts are authorized; obtain approval for changes outside that scope.
 - Use collection-coordination for assignments/handoffs and optional participation. Obtain acceptance, not just delivery. Use exact verified work references; tool gaps do not block ordinary work.
 - After accepted integration, recoverably archive completed task worktrees. Retain only active work or a concrete upcoming assignment; record the reason and revisit point in ignored coordination notes. Preserve required uncommitted/ignored artifacts. Manager verifies cleanup or justified retention before closing work.
