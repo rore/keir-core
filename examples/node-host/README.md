@@ -2,6 +2,8 @@
 
 [Run the follow-up extension in Node.js](../../docs/quickstart.md#run-the-precompiled-example). The [host](follow-up/run.mjs) binds simulated task services, prepares the compiled extension, and runs it for three task completions.
 
+[Run the pre-operation decision](../../docs/quickstart.md#try-a-pre-operation-decision). Its [host](pre-operation/run.mjs) uses the same binding and invocation APIs, then consumes ALLOW, DENY or failed evaluation before counting simulated native continuation. The [source](pre-operation/source.yaml) uses the capabilities declared by its [model](pre-operation/dcm.json).
+
 [Embed Keir in your application](../../docs/embedding.md) · [Node.js API](../../docs/specs/host-model-binding.md#api-shapes)
 
 <a id="examples-for-earlier-profiles"></a>

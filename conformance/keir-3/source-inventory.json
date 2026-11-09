@@ -1,0 +1,68 @@
+{
+  "domain": {
+    "fingerprint": "sha256:db5d85f83c21584d1e094b8fa6d41ad242cf84b5621c383d4fe128e055bf2e65",
+    "id": "sample.inventory",
+    "version": "1"
+  },
+  "entrypoint": "InventoryArrived",
+  "language": "keir/2",
+  "name": "adjust-unmatched-labelled-inventory",
+  "return": {
+    "record": {
+      "dueAt": {
+        "cel": "due"
+      },
+      "eligible": {
+        "cel": "eligible"
+      }
+    }
+  },
+  "steps": [
+    {
+      "args": {
+        "label": {
+          "cel": "input.targetLabel"
+        },
+        "warehouseId": {
+          "cel": "input.warehouseId"
+        }
+      },
+      "call": "inventory.findOpen",
+      "id": "open"
+    },
+    {
+      "id": "eligible",
+      "let": {
+        "cel": "input.targetLabel in input.labels && !open.matches && (has(input.enabled) ? input.enabled : true)"
+      }
+    },
+    {
+      "id": "due",
+      "let": {
+        "cel": "has(input.expiresAt) ? input.expiresAt + duration(\"604800s\") : input.occurredAt + duration(\"604800s\")"
+      }
+    },
+    {
+      "args": {
+        "dueAt": {
+          "cel": "due"
+        },
+        "itemId": {
+          "cel": "input.itemId"
+        }
+      },
+      "call": "inventory.adjust",
+      "id": "adjusted",
+      "onError": {
+        "ACCESS_DENIED": {
+          "record": {
+            "eligible": {
+              "literal": false
+            }
+          }
+        }
+      },
+      "when": "eligible"
+    }
+  ]
+}

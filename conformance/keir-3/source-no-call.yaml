@@ -1,0 +1,10 @@
+language: keir/2
+domain: {id: sample.tasks, version: '4', fingerprint: 'sha256:a8d4195bb72f78a1140f88f5a74ad29294beddacb9a96a18e837bd8bada757d6'}
+entrypoint: TaskCompleted
+name: no-call
+steps:
+  - id: eligible
+    let: {literal: false}
+return:
+  record:
+    status: {cel: 'eligible ? "CREATED" : "NO_OP"'}

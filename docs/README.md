@@ -9,11 +9,12 @@
 
 - [Embed Keir](embedding.md) covers the model, compiler, runtime calls and application responsibilities.
 - [AI assistants](agents/README.md) covers developer integration, customer authoring, and the packaged guide.
+- [Pre-operation decisions](decision-walkthrough.md) explains how an extension can allow or deny a native operation.
 
 ## Reference
 
 - [Keir specification](specs/README.md) defines the language, the DCM, compiler output, binding, and runtime behavior.
-- The [source](../schemas/source-1/source.schema.json), [model](../schemas/dcm-1/dcm.schema.json), [artifact](../schemas/artifact-1/artifact.schema.json) and [scenario](../schemas/scenario-1/scenario.schema.json) schemas validate document structure.
+- The [contract matrix](specs/compiler-artifact.md#source-and-artifact-identity) identifies the matching source, model, artifact and scenario schemas. Use the semantic references to understand what a structurally valid document means.
 - [Java compiler](../compiler-java/README.md), [Java runtime](../runtime-java/README.md) and [Node.js integration](../examples/node-host/README.md) cover component-specific interfaces.
 - [Conformance fixtures](../conformance/README.md) give both runtimes the same inputs and independent expected outcomes. [Run the Java and Node.js conformance examples](../examples/README.md).
 - [Verification and testing](testing.md) records tested scope and links to resource qualification.

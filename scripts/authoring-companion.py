@@ -79,9 +79,40 @@ V4_FILES = (
         "adjusted", "handler-omits-due", "lazy-overflow", "max-no-match", "optional-false", "selected-overflow",
     )),
 )
+V5_GUIDE = "docs/agents/customer-authoring-guide-v5.md"
+V5_COMPATIBILITY = "docs/agents/authoring-companion-v5-compatibility.json"
+V5_FIXTURES = "conformance/keir-3"
+V5_MODEL = f"{V5_FIXTURES}/dcm-guard.json"
+V5_ARTIFACT = f"{V5_FIXTURES}/artifact-guard.json"
+V5_FORMATS = {
+    "language": "keir/2",
+    "dcm": "keir-dcm/3",
+    "artifact": "keir-artifact/3",
+    "scenario": "keir-scenario/3",
+}
+V5_PROGRAMS = ("guard-input", "guard", "guard-handler")
+V5_SCENARIOS = (
+    *(f"{V5_FIXTURES}/scenarios/{case}/{case}-{decision}.json"
+      for case in ("guard-input", "guard") for decision in ("allow", "deny")),
+    f"{V5_FIXTURES}/scenarios/guard-handler/guard-handler-allow.json",
+)
+V5_FILES = (
+    V5_GUIDE,
+    "schemas/source-2/source.schema.json",
+    "schemas/dcm-3/dcm.schema.json",
+    "schemas/artifact-3/artifact.schema.json",
+    "schemas/scenario-3/scenario.schema.json",
+    V5_MODEL,
+    f"{V5_FIXTURES}/dcm-guard.sha256",
+    *(f"{V5_FIXTURES}/{kind}-{case}.{extension}" for case in V5_PROGRAMS for kind, extension in (
+        ("source", "json"), ("artifact", "json"), ("artifact", "sha256"),
+    )),
+    *V5_SCENARIOS,
+)
 PINNED_EDITIONS = {
     3: (V3_COMPATIBILITY, V3_GUIDE, V3_ARTIFACT, V3_FORMATS, V3_FILES),
     4: (V4_COMPATIBILITY, V4_GUIDE, V4_ARTIFACT, V4_FORMATS, V4_FILES),
+    5: (V5_COMPATIBILITY, V5_GUIDE, V5_ARTIFACT, V5_FORMATS, V5_FILES),
 }
 RELEASE_ASSETS = {
     "compiler": "keir-compiler-cli-{}.zip",
@@ -196,6 +227,38 @@ def make_pinned_archive(version, revision, compatibility, payload):
         if compatibility["status"] == "release" and any(
                 package["version"] != "0.2.0" for package in compatibility["packages"].values()):
             raise ValueError("Edition 4 requires Core 0.2.0 packages.")
+    if version == 5:
+        model = json.loads(payload[V5_MODEL])
+        model_pin = payload[f"{V5_FIXTURES}/dcm-guard.sha256"].decode("ascii").strip()
+        environment = {"celJava": "0.14.0", "celNode": "0.6.1", "protobufJava": "4.35.1", "protobufNode": "2.6.2"}
+        if (not isinstance(model, dict) or model.get("format") != formats["dcm"]
+                or not isinstance(model.get("domain"), dict) or digest(payload[V5_MODEL]) != model_pin):
+            raise ValueError("Invalid edition 5 model pin.")
+        for case in V5_PROGRAMS:
+            source_bytes = payload[f"{V5_FIXTURES}/source-{case}.json"]
+            source = json.loads(source_bytes)
+            artifact_bytes = payload[f"{V5_FIXTURES}/artifact-{case}.json"]
+            example = json.loads(artifact_bytes)
+            artifact_pin = payload[f"{V5_FIXTURES}/artifact-{case}.sha256"].decode("ascii").strip()
+            model_ref = {
+                "domainId": model["domain"].get("id"), "domainVersion": model["domain"].get("version"),
+                "format": formats["dcm"], "digest": model_pin, "descriptorRecipe": "keir-record-descriptors/2",
+            }
+            if (not isinstance(example, dict) or example.get("format") != formats["artifact"]
+                    or example.get("compiler") != "keir-compiler-java/0.3.0" or example.get("environment") != environment
+                    or example.get("modelRef") != model_ref or digest(artifact_bytes) != artifact_pin
+                    or example.get("sourceDigest") != digest(source_bytes)
+                    or not isinstance(source, dict) or source.get("language") != formats["language"]
+                    or source.get("domain") != {**model["domain"], "fingerprint": model_pin}
+                    or source.get("entrypoint") != example.get("entrypoint")):
+                raise ValueError("Invalid edition 5 example or producer tuple.")
+        for name in V5_SCENARIOS:
+            scenario = json.loads(payload[name])
+            if not isinstance(scenario, dict) or scenario.get("format") != formats["scenario"]:
+                raise ValueError("Invalid edition 5 scenario format.")
+        if compatibility["status"] == "release" and any(
+                package["version"] != "0.3.0" for package in compatibility["packages"].values()):
+            raise ValueError("Edition 5 requires Core 0.3.0 packages.")
     manifest = {
         "format": f"keir-authoring-companion/{version}",
         "sourceRevision": revision,
@@ -299,7 +362,7 @@ def main():
     check.add_argument("archive", type=Path)
     check.add_argument("--sha256", required=True, help="Trusted archive pin in sha256:<hex> form")
     for command in (create, check):
-        command.add_argument("--version", type=int, choices=(1, 2, 3, 4), default=1,
+        command.add_argument("--version", type=int, choices=(1, 2, 3, 4, 5), default=1,
                              help="Companion version (default: 1)")
         command.add_argument("--core-assets", type=Path, help="Directory containing the pinned Core release assets")
     args = parser.parse_args()

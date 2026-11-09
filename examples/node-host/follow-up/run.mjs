@@ -5,7 +5,7 @@ import { bindModel, prepareProgram, invokeProgram } from '@keir/runtime-node';
 if (process.argv.length > 3) throw new Error('Usage: node examples/node-host/follow-up/run.mjs [artifact.json]');
 
 const dcm = readFileSync(new URL('./dcm.json', import.meta.url));
-const fixture = new URL('../../../conformance/keir-2/', import.meta.url);
+const fixture = new URL('../../../conformance/keir-3/', import.meta.url);
 const artifact = readFileSync(process.argv[2] ?? new URL('artifact.json', fixture));
 if (process.argv[2] === undefined) {
   const expected = readFileSync(new URL('artifact.sha256', fixture), 'utf8').trim();

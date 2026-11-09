@@ -1,6 +1,8 @@
 package dev.keir.runtime;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +28,7 @@ public final class PublicScenarioDriver {
             Map.entry("title", List.of("title-256", "title-257", "title-unicode")),
             Map.entry("title-max", List.of("title-max")),
             Map.entry("title-composed", List.of("title-composed-overflow", "title-composed-valid")));
-    private static final Set<String> FIXTURES = Set.of("normal", "read-throws", "lost-response", "response-expired");
+    private static final Set<String> FIXTURES = Set.of("normal", "read-throws", "lost-response", "response-expired", "read-expired", "read-malformed");
     private static final String ID = "[A-Za-z0-9][A-Za-z0-9_.-]{0,63}";
     private static final String STEP = "[A-Za-z][A-Za-z0-9]{0,63}";
     private static final String CODE = "[A-Z][A-Z0-9_]{0,63}";
@@ -34,29 +36,50 @@ public final class PublicScenarioDriver {
     private static final long EXPIRES_AT = 10_000;
     private static final Map<String,Object> EVENT = Map.of("id", "event1", "source", "task1");
     private final Map<String,byte[]> pins = new HashMap<>();
+    private final Map<String,List<String>> groups = new LinkedHashMap<>(GROUPS);
+    private final Path corpus;
+    private final String scenarioFormat;
 
     PublicScenarioDriver() throws IOException {
-        for (String group : GROUPS.keySet()) {
+        this(null);
+    }
+
+    PublicScenarioDriver(Path corpus) throws IOException {
+        this.corpus = corpus;
+        if (corpus != null) {
+            for (String group : List.of("guard", "guard-input", "guard-handler", "guard-reversed")) {
+                try (var entries = Files.list(corpus.resolve("scenarios").resolve(group))) {
+                    groups.put(group, entries.filter(file -> file.getFileName().toString().endsWith(".json"))
+                            .sorted().map(file -> file.getFileName().toString().replaceFirst("\\.json$", "")).toList());
+                }
+            }
+        }
+        for (String group : groups.keySet()) {
             verifyPin(artifactName(group));
             verifyPin(modelName(group));
         }
+        scenarioFormat = switch ((String)object(parseCanonical(pins.get("dcm"))).get("format")) {
+            case "keir-dcm/2" -> "keir-scenario/2";
+            case "keir-dcm/3" -> "keir-scenario/3";
+            default -> throw new AssertionError("Incompatible scenario contract");
+        };
     }
 
     public static void main(String[] args) throws Exception {
-        assertEquals(0, args.length, "Public scenario driver takes no arguments");
-        System.out.writeBytes(canonical(new PublicScenarioDriver().runCorpus()));
+        assertTrue(args.length <= 1, "Public scenario driver takes an optional corpus directory");
+        System.out.writeBytes(canonical(new PublicScenarioDriver(args.length == 0 ? null : Path.of(args[0])).runCorpus()));
         System.out.println();
     }
 
     Map<String,Object> runCorpus() throws Exception {
         Map<String,Map<String,Object>> documents = new LinkedHashMap<>();
-        for (String group : new TreeSet<>(GROUPS.keySet())) {
-            for (String name : GROUPS.get(group)) {
+        for (String group : new TreeSet<>(groups.keySet())) {
+            for (String name : groups.get(group)) {
                 String label = group + "/" + name;
-                documents.put(label, assertDoesNotThrow(() -> scenario(label), label));
+                documents.put(label, assertDoesNotThrow(() -> object(parseScenario(readResource("scenarios/" + label + ".json"))), label));
             }
         }
-        assertEquals(28, documents.size(), "Shared scenario count");
+        assertEquals(groups.values().stream().mapToInt(List::size).sum(), documents.size(), "Shared scenario count");
         checkUniqueIds(documents.values());
 
         List<Object> scenarios = new ArrayList<>();
@@ -65,7 +88,7 @@ public final class PublicScenarioDriver {
             scenarios.add(assertDoesNotThrow(() -> runScenario(group(label), entry.getValue()), label));
         }
 
-        List<Map<String,Object>> manifest = rows(object(parseJson(resource("scenario-vectors.json"), 65_536)).get("vectors"));
+        List<Map<String,Object>> manifest = rows(object(parseJson(readResource("scenario-vectors.json"), 65_536)).get("vectors"));
         assertEquals(51, manifest.size(), "Shared vector count");
         checkUniqueIds(manifest);
         List<Object> vectors = new ArrayList<>();
@@ -107,7 +130,8 @@ public final class PublicScenarioDriver {
             throws Exception {
         String phase = "lexical";
         var callbacks = new Callbacks(group != null && group.startsWith("inventory")
-                ? Map.of("id", "event1", "source", "item1") : EVENT);
+                ? Map.of("id", "event1", "source", "item1") : group != null && group.startsWith("guard")
+                ? Map.of("id", "attempt1", "source", "scope1") : EVENT);
         try {
             Object document = bytes == null ? decoded : parseScenario(bytes);
             phase = "structural";
@@ -119,7 +143,7 @@ public final class PublicScenarioDriver {
 
             // Pin verification and harness setup failures cannot count as compatibility evidence.
             phase = "setup";
-            assertTrue(GROUPS.containsKey(group), "Missing trusted artifact selection");
+            assertTrue(groups.containsKey(group), "Missing trusted artifact selection");
             byte[] dcmBytes = withFormat(pins.get(vector.getOrDefault("model", modelName(group))), vector.get("modelFormat"));
             byte[] artifactBytes = withFormat(pins.get(artifactName(group)), vector.get("artifactFormat"));
             var dcm = object(parseCanonical(dcmBytes));
@@ -167,7 +191,7 @@ public final class PublicScenarioDriver {
             assertTrue(callbacks.calls.isEmpty(), "Preflight dispatched a stub");
             callbacks.stubs = stubs;
             var context = new KeirRuntime.BoundEffectInvocation(
-                    Set.of("no-call", "inventory-enum").contains(group) ? Map.of() : Map.of("actorId", "user1"),
+                    Set.of("no-call", "inventory-enum", "guard-input").contains(group) ? Map.of() : Map.of("actorId", "user1"),
                     callbacks.deadline, callbacks.key, callbacks.event);
             var actual = KeirRuntime.invokeBoundEffectProgram(preparation.prepared(), given.get("input"), context)
                     .toCompletableFuture().get(3, TimeUnit.SECONDS);
@@ -239,7 +263,9 @@ public final class PublicScenarioDriver {
                                 throw new IllegalStateException("Fixture READ failure");
                             if ("lost-response".equals(fixture) && write)
                                 throw new IllegalStateException("Fixture lost WRITE response");
-                            if ("response-expired".equals(fixture) && write) now.set(EXPIRES_AT);
+                            if ("response-expired".equals(fixture) && write || "read-expired".equals(fixture) && !write) now.set(EXPIRES_AT);
+                            if ("read-malformed".equals(fixture) && !write)
+                                return CompletableFuture.completedFuture(Map.of("kind", "SUCCESS", "value", Map.of("restricted", "false")));
                             return CompletableFuture.completedFuture(stubs.get(index).get("response"));
                         }));
             });
@@ -325,15 +351,21 @@ public final class PublicScenarioDriver {
     }
 
     private static Map<String,Object> report(Map<String,Object> entry, Map<String,Object> outcome) {
+        if ("DECISION".equals(object(entry.get("consumer")).get("kind"))) {
+            if (!"COMPLETED".equals(outcome.get("classification")) || outcome.containsKey("error") ||
+                    !list(outcome.get("effects"), "").isEmpty()) return Map.of("status", "BLOCKED");
+            var result = object(outcome.get("result"));
+            return Map.of("status", result.get("decision").equals("ALLOW") ? "ALLOWED" : "DENIED", "result", result);
+        }
         assertEquals("EVENT_REPORT", object(entry.get("consumer")).get("kind"), "Selected consumer");
         var result = without(outcome, "trace");
         result.put("status", "REPORTED");
         return result;
     }
 
-    private static void structure(Map<String,Object> scenario) {
+    private void structure(Map<String,Object> scenario) {
         fields(scenario, "format id given stubs expect");
-        assertEquals("keir-scenario/2", scenario.get("format"), "Scenario format");
+        assertEquals(scenarioFormat, scenario.get("format"), "Scenario format");
         matches(scenario.get("id"), ID);
         var given = object(scenario.get("given"));
         fields(given, "input fixture");
@@ -352,6 +384,16 @@ public final class PublicScenarioDriver {
             case "NOT_REPORTED" -> {
                 fields(consumption, "status code");
                 matches(consumption.get("code"), CODE);
+            }
+            case "ALLOWED", "DENIED" -> {
+                assertEquals("keir-scenario/3", scenario.get("format"), "Decision scenario format");
+                fields(consumption, "status result");
+                var result = object(consumption.get("result"));
+                assertEquals(consumption.get("status").equals("ALLOWED") ? "ALLOW" : "DENY", result.get("decision"));
+            }
+            case "BLOCKED" -> {
+                assertEquals("keir-scenario/3", scenario.get("format"), "Decision scenario format");
+                fields(consumption, "status");
             }
             default -> fail("Unknown consumption status");
         }
@@ -464,8 +506,8 @@ public final class PublicScenarioDriver {
 
     private void verifyPin(String name) throws IOException {
         if (pins.containsKey(name)) return;
-        byte[] bytes = resource(name + ".json");
-        assertEquals(new String(resource(name + ".sha256"), UTF_8).strip(), digest(bytes), name + " pin");
+        byte[] bytes = readResource(name + ".json");
+        assertEquals(new String(readResource(name + ".sha256"), UTF_8).strip(), digest(bytes), name + " pin");
         pins.put(name, bytes);
     }
 
@@ -476,10 +518,14 @@ public final class PublicScenarioDriver {
         }
     }
 
-    private static byte[] vectorBytes(Map<String,Object> vector) throws IOException {
+    private byte[] readResource(String name) throws IOException {
+        return corpus == null ? resource(name) : Files.readAllBytes(corpus.resolve(name));
+    }
+
+    private byte[] vectorBytes(Map<String,Object> vector) throws IOException {
         if (vector.containsKey("utf8")) return string(vector.get("utf8")).getBytes(UTF_8);
         if (vector.containsKey("base64")) return Base64.getDecoder().decode(string(vector.get("base64")));
-        byte[] bytes = resource("scenarios/" + vector.get("scenario") + ".json");
+        byte[] bytes = readResource("scenarios/" + vector.get("scenario") + ".json");
         if (vector.containsKey("replace")) {
             var replacement = list(vector.get("replace"), "/vector/replace");
             String search = string(replacement.getFirst());
@@ -524,6 +570,8 @@ public final class PublicScenarioDriver {
     private static String group(String label) { return label.substring(0, label.indexOf('/')); }
     private static String artifactName(String group) { return group.equals("main") ? "artifact" : "artifact-" + group; }
     private static String modelName(String group) {
+        if (group.equals("guard-reversed")) return "dcm-guard-reversed";
+        if (group.startsWith("guard")) return "dcm-guard";
         if (group.equals("inventory-enum")) return "dcm-inventory-enum";
         if (group.startsWith("inventory")) return "dcm-inventory";
         return group.startsWith("title") ? "dcm-title" : "dcm";

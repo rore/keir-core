@@ -2,19 +2,19 @@
 
 An application that embeds Keir is called the **host**. The host decides when rules run, exposes the operations rules may call, and handles permissions and storage. Keir checks rules against the host’s contract and runs them within the executable contract’s limits.
 
-The checkout examples use Keir 2. An extension can read data and contain at most one possible write. An application can restrict an entrypoint to reads. [Keir 2 execution boundary](specs/workflow-expressions.md#execution-boundary) · [Keir 2 version matrix](specs/workflow-expressions.md#version-matrix)
+Choose the lifecycle the application needs. An event extension runs after a native operation commits and can contain at most one possible write. A pre-operation decision can only read and returns `ALLOW` or `DENY` before the native operation. The [current format matrix](specs/compiler-artifact.md#source-and-artifact-identity) distinguishes the Core 0.3.0 candidate from released Core 0.2.0.
 
 ## 1. Define what the host exposes
 
 Describe the hook, its input and result, and the available operations in a domain capability model (DCM). For the [follow-up example](../examples/node-host/follow-up/dcm.json), the hook receives a task ID after the app saves the completion. The rule can read that task and request a new task. The host provides the authenticated actor separately from the rule’s arguments.
 
-Implement each operation in host code. An implementation can call an existing local service or an internal API. The host checks current permissions, authenticates the original request key, and reports what happened to a write. [Keir 2 model changes](specs/workflow-expressions.md) · [Write evidence](specs/runtime.md#write-evidence)
+Implement each operation in host code. An implementation can call an existing local service or an internal API. The host checks current permissions, authenticates the original request key, and reports what happened to a write. [Model rules](specs/domain-model.md) · [Write evidence](specs/runtime.md#write-evidence)
 
 ## 2. Compile and review a rule
 
 Write the rule in Keir, then compile it against the exact DCM. The compiler produces an **artifact**, the compiled rule the runtime executes. The artifact references the model it was checked against. [Compile and run the example](../examples/README.md#compile-the-rule)
 
-Run the same artifact with simulated implementations before enabling it. Write down the expected outcome for each case before running the simulation. For the follow-up rule, check a matching completion, a completion in another project, and a lost response after a write request. The host records approval and activation as separate decisions for the exact reviewed artifact. [Run the sample cases](../examples/README.md#run-both-hosts)
+Run the same artifact with simulated implementations before enabling it. Write down the expected outcome for each case before running the simulation. For the follow-up rule, check a matching completion, a completion in another project, and a lost response after a write request. For a decision, check ALLOW, DENY and failed evaluation, including a handled rejection returning ALLOW. The host records approval and activation as separate decisions for the exact reviewed artifact. [Run the sample cases](../examples/README.md#run-both-hosts) · [Decision walkthrough](decision-walkthrough.md)
 
 ## 3. Bind, prepare and run
 
@@ -22,13 +22,21 @@ Run the same artifact with simulated implementations before enabling it. Write d
 | --- | --- | --- |
 | Bind | Supply the model bytes and one compatible implementation for every operation. All registrations use the same mode. | `bindModel(dcmBytes, implementations)` |
 | Prepare | Verify the selected artifact’s integrity in host code, for example with a trusted digest. Check diagnostics after binding and preparation. | `prepareProgram(artifactBytes, boundModel)` |
-| Run | Pass the event input and fresh host context, including protected bindings, an absolute deadline, the original request key, and the event ID and source. | Node.js `invokeProgram`, Java `invokeBoundEffectProgram` |
+| Run | Pass business input and fresh host context, including protected bindings, an absolute deadline, the original request key, and the event or operation-attempt ID and scope. | Node.js `invokeProgram`, Java `invokeBoundEffectProgram` |
 
 The host can reuse a prepared rule across invocations. When it changes the model, verify compatibility and compile and review any rule that adopts the new model.
 
 Read the rule result and write evidence separately. A result such as `CREATED` is a value returned by the rule. The write receipt records what the implementation reported. When the receipt is `UNKNOWN`, the write may already have happened. Reconcile it through the host’s services before deciding what to do next.
 
 [Exact Java and Node.js API shapes](specs/host-model-binding.md#api-shapes) · [Example implementations](../examples/README.md#read-the-host-code)
+
+## Before a native operation
+
+A decision uses the same binding, preparation and invocation methods. The host selects a REQUEST/BEFORE_COMMIT/DECISION entrypoint and an approved artifact for it. The extension uses the model's declared input and approved READ capabilities. Its zero write allowance also prohibits false-guarded writes.
+
+Consume the complete runtime outcome. Only valid COMPLETED ALLOW with an empty effects array permits continuation. DENY stops the native operation. A handled rejection, failure, malformed outcome, timeout or unavailable selected artifact blocks it. Authoritatively no active binding takes the ordinary native path; do not confuse absence with an unavailable selection.
+
+Keep the proposed input fixed and reserve time for native validation and commit. After ALLOW, recheck selection, approval, authorization and mutable facts at the native commit boundary. Cancellation or expiry closes the attempt. The decision supplies no commit evidence; report the native result separately. [Full walkthrough](decision-walkthrough.md) · [Consistency and deadlines](specs/pre-operation-decisions.md#host-invocation-and-consistency-obligations)
 
 ## Example Node host
 

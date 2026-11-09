@@ -74,7 +74,7 @@ final class Artifact {
     static void validateModel(Map<String,Object> dcm) {
         String p = MODEL;
         exact(dcm, p, "format", "domain", "types", "capabilities", "entrypoints", "hostKey");
-        require("keir-dcm/2".equals(dcm.get("format")), p);
+        require(Set.of("keir-dcm/2","keir-dcm/3").contains(dcm.get("format")), p);
         require(canonical(dcm).length <= Profile.DCM_BYTES, p, "BUDGET_EXCEEDED");
         exact(dcm.get("hostKey"),p+"/hostKey","source","type");
         Map<String,Object> key = map(dcm.get("hostKey"),p+"/hostKey");
@@ -145,19 +145,29 @@ final class Artifact {
             shape(entry,fields,p);
             require(recordType(dcm,entry.get("input")) && recordType(dcm,entry.get("output")),p);
             String path = p+"/entrypoints/"+item.getKey();
-            require("EVENT".equals(entry.get("trigger")),path+"/trigger","DCM_INVALID");
-            require("AFTER_COMMIT".equals(entry.get("placement")),path+"/placement","DCM_INVALID");
+            exact(entry.get("consumer"),p,"id","version","kind"); Map<String,Object> consumer = map(entry.get("consumer"),p);
+            named(consumer.get("id"),p,true); text(consumer.get("version"),p,true,256);
+            boolean decision="DECISION".equals(consumer.get("kind"));
+            require(decision ? "keir-dcm/3".equals(dcm.get("format")) : "EVENT_REPORT".equals(consumer.get("kind")),path+"/consumer/kind","DCM_INVALID");
+            require((decision?"REQUEST":"EVENT").equals(entry.get("trigger")),path+"/trigger","DCM_INVALID");
+            require((decision?"BEFORE_COMMIT":"AFTER_COMMIT").equals(entry.get("placement")),path+"/placement","DCM_INVALID");
             try { if (entry.containsKey("effectGrant")) number(entry.get("effectGrant"),0,1,path+"/effectGrant"); }
             catch (RuntimeFault failure) { throw new RuntimeFault("DCM_INVALID",path+"/effectGrant"); }
+            if (decision) {
+                require(!entry.containsKey("effectGrant") || number(entry.get("effectGrant"),0,1,path+"/effectGrant")==0,path+"/effectGrant","DCM_INVALID");
+                Map<String,Object> output=map(definition(dcm,(String)entry.get("output")).get("fields"),path+"/output");
+                Object declaration=output.get("decision");
+                require(declaration instanceof String && "enum".equals(definition(dcm,(String)declaration).get("kind")),path+"/output","DCM_INVALID");
+                List<Object> values=list(definition(dcm,(String)declaration).get("values"),path+"/output");
+                require(values.size()==2 && new HashSet<>(values).equals(Set.of("ALLOW","DENY")),path+"/output","DCM_INVALID");
+                for(Object field:output.values()) require(scalar(dcm,fieldType(field)),path+"/output","DCM_INVALID");
+            }
             exact(entry.get("event"),path+"/event","idType","sourceType");
             Map<String,Object> event = map(entry.get("event"),path+"/event");
             for (String field : List.of("idType","sourceType")) {
                 String type = metadataText(event.get(field),path+"/event/"+field);
                 require("nominal".equals(definition(dcm,type).get("kind")),path+"/event/"+field,"DCM_INVALID");
             }
-            exact(entry.get("consumer"),p,"id","version","kind"); Map<String,Object> consumer = map(entry.get("consumer"),p);
-            named(consumer.get("id"),p,true); text(consumer.get("version"),p,true,256);
-            require("EVENT_REPORT".equals(consumer.get("kind")),path+"/consumer/kind","DCM_INVALID");
             if (entry.containsKey("capabilityPolicy")) CapabilityPolicy.narrow(CapabilityPolicy.catalog(dcm),entry.get("capabilityPolicy"),
                     pointer(p+"/entrypoints",item.getKey())+"/capabilityPolicy","DCM_INVALID");
         }
@@ -236,8 +246,10 @@ final class Artifact {
         text(artifact.get("compiler"),"/artifact/compiler",true,256);
         require(map(dcm.get("entrypoints"),MODEL).containsKey(artifact.get("entrypoint")),"/artifact/entrypoint");
         require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment","PIN_MISMATCH");
-        require("keir-compiler-java/0.2.0".equals(artifact.get("compiler")),"/artifact/compiler","PIN_MISMATCH");
-        require("keir-artifact/2".equals(artifact.get("format")),"/artifact/format");
+        require(Set.of("keir-artifact/2","keir-artifact/3").contains(artifact.get("format")),"/artifact/format");
+        boolean current="keir-artifact/3".equals(artifact.get("format"));
+        require((current?"keir-compiler-java/0.3.0":"keir-compiler-java/0.2.0").equals(artifact.get("compiler")),"/artifact/compiler","PIN_MISMATCH");
+        require((current?"keir-dcm/3":"keir-dcm/2").equals(dcm.get("format")),"/artifact/modelRef","PIN_MISMATCH");
         require(modelRef(dcm).equals(artifact.get("modelRef")),"/artifact/modelRef");
         require(artifact.get("sourceDigest") instanceof String text && text.matches("sha256:[0-9a-f]{64}"),"/artifact/sourceDigest");
     }

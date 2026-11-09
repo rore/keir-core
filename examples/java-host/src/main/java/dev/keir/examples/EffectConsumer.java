@@ -84,7 +84,7 @@ final class EffectConsumer {
         return text(error.get("code"),256,true) && text(error.get("path"),1024,false) &&
             (!error.containsKey("cause") || error(error.get("cause"),false));
     }
-    private static boolean trace(Object value) {
+    static boolean trace(Object value) {
         if(!(value instanceof List<?> trace) || trace.size()<2 || trace.size()>64)return false;
         for(int i=0;i<trace.size();i++) {
             if(!(trace.get(i) instanceof Map<?,?> event) || !(event.get("event") instanceof String name) || !TRACE_FIELDS.containsKey(name))return false;

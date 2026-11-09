@@ -2,6 +2,8 @@
 
 [Run the follow-up extension in Java](../../docs/quickstart.md#run-in-java). The [host](../node-host/follow-up/FollowUp.java) uses the same model, compiled extension and simulated task services as the Node.js example.
 
+[Run the pre-operation decision](../../docs/quickstart.md#try-a-pre-operation-decision). The standalone [Java host](../node-host/pre-operation/BeforeOperation.java) uses the same model and artifact as Node and reports decision consumption separately from simulated native attempts. Both standalone examples need the runtime JAR and its runtime dependencies; they do not need the teaching-host JAR.
+
 [Embed Keir in your application](../../docs/embedding.md) · [Java API](../../docs/specs/host-model-binding.md#api-shapes)
 
 <a id="examples-for-earlier-profiles"></a>

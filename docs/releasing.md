@@ -24,7 +24,9 @@ python -B scripts/verify-core-release.py --version "$VERSION" --assets ".tools/r
 
 Use a new output directory. The builder reads source from Git, builds in scratch, and checks the Maven packaging inputs and compiler dependencies against the reviewed notice inventory. Review packaging or dependency changes and update that inventory before building. Add `--offline` to either command when the Maven distribution and dependency caches are populated. To reproduce an existing release byte for byte, use the same build tools and compression versions.
 
-The smoke test compiles the follow-up rule with the packaged compiler. It checks the Maven coordinates and runs the packaged Java JAR with the dependencies resolved from the shipped POMs. It installs the released tarball in the Node example and runs the same compiled rule.
+The smoke test compiles the [follow-up extension](../examples/node-host/follow-up/source.yaml) with the packaged compiler. When the selected example model is `keir-dcm/3`, it also compiles the [pre-operation decision](../examples/node-host/pre-operation/source.yaml). It checks Maven coordinates, resolves dependencies from the shipped POMs, and runs each artifact in the packaged Java runtime and the installed Node tarball. Both hosts must produce the exact expected output for each example.
+
+The follow-up cases cover a confirmed write, a skipped write and an uncertain write. The decision cases cover ALLOWED, DENIED and BLOCKED, with the simulated native-attempt count observed separately. These counters do not prove durable native persistence. A `/2` model retains the original follow-up-only smoke path, so historical releases use their matching examples. A release requires the actual integrated package smoke to pass; verifier unit tests alone do not qualify its packages.
 
 For the draft download check, put only the five Core assets in the download directory. Use the original build's checksum file as the trusted input.
 

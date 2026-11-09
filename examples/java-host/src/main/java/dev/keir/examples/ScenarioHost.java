@@ -13,17 +13,24 @@ import static dev.keir.examples.ScenarioData.*;
 public final class ScenarioHost {
     static final Set<String> GROUPS = Set.of("main", "zero", "after-write-read", "no-call",
             "handler", "title", "title-max", "title-composed");
-    private static final Set<String> FIXTURES = Set.of("normal", "read-throws", "lost-response", "response-expired");
+    static final Set<String> GUARD_GROUPS = Set.of("guard", "guard-input", "guard-handler", "guard-reversed");
+    private static final Set<String> FIXTURES = Set.of("normal", "read-throws", "lost-response", "response-expired", "read-expired", "read-malformed");
 
     record Selection(String group, byte[] model, byte[] artifact) {}
 
     private final Path root;
     private final String python;
+    private final Path corpus;
     int dispatchCount;
 
     ScenarioHost(Path root, String python) {
+        this(root, python, root.resolve("conformance/keir-2"));
+    }
+
+    ScenarioHost(Path root, String python, Path corpus) {
         this.root = root;
         this.python = python;
+        this.corpus = corpus;
     }
 
     public static void main(String[] args) {
@@ -31,12 +38,13 @@ public final class ScenarioHost {
     }
 
     static int run(String[] args, PrintStream out, PrintStream err) {
-        if (args.length != 2 || !GROUPS.contains(args[0])) {
-            err.println("Usage: ScenarioHost <fixed-scenario-group> <python-executable>");
+        if ((args.length != 2 && args.length != 3) || !(GROUPS.contains(args[0]) || GUARD_GROUPS.contains(args[0]))) {
+            err.println("Usage: ScenarioHost <fixed-scenario-group> <python-executable> [corpus-directory]");
             return 2;
         }
         try {
-            var host = new ScenarioHost(Path.of("").toAbsolutePath(), args[1]);
+            Path root = Path.of("").toAbsolutePath();
+            var host = args.length == 3 ? new ScenarioHost(root, args[1], root.resolve(args[2])) : new ScenarioHost(root, args[1]);
             out.writeBytes(EffectJson.encode(host.verifyGroup(args[0])));
             out.println();
             return 0;
@@ -47,18 +55,18 @@ public final class ScenarioHost {
     }
 
     Path corpus() {
-        return root.resolve("conformance/keir-2");
+        return corpus;
     }
 
     Selection selection(String group) throws IOException {
-        check(GROUPS.contains(group), "Unknown trusted scenario group");
-        String model = group.startsWith("title") ? "dcm-title" : "dcm";
+        check(GROUPS.contains(group) || GUARD_GROUPS.contains(group), "Unknown trusted scenario group");
+        String model = group.equals("guard-reversed") ? "dcm-guard-reversed" : GUARD_GROUPS.contains(group) ? "dcm-guard" : group.startsWith("title") ? "dcm-title" : "dcm";
         String artifact = group.equals("main") ? "artifact" : "artifact-" + group;
         return new Selection(group, pinned(model, 65_536), pinned(artifact, 1_048_576));
     }
 
     List<Map<String, Object>> verifyGroup(String group) throws Exception {
-        check(GROUPS.contains(group), "Unknown trusted scenario group");
+        check(GROUPS.contains(group) || GUARD_GROUPS.contains(group), "Unknown trusted scenario group");
         List<Path> files;
         try (var entries = Files.list(corpus().resolve("scenarios").resolve(group))) {
             files = entries.filter(path -> path.getFileName().toString().endsWith(".json"))
@@ -89,7 +97,13 @@ public final class ScenarioHost {
         Selection selected = testSelection == null ? selection(group) : testSelection;
         var model = object(EffectJson.parse(selected.model()));
         var artifact = object(EffectJson.parse(selected.artifact()));
-        check("keir-dcm/2".equals(model.get("format")) && "keir-artifact/2".equals(artifact.get("format")),
+        boolean old = "keir-dcm/2".equals(model.get("format")) && "keir-artifact/2".equals(artifact.get("format")) &&
+                "keir-compiler-java/0.2.0".equals(artifact.get("compiler"));
+        boolean current = "keir-dcm/3".equals(model.get("format")) && "keir-artifact/3".equals(artifact.get("format")) &&
+                "keir-compiler-java/0.3.0".equals(artifact.get("compiler"));
+        check(old || current,
+                "Incompatible scenario contract");
+        check(rows.stream().allMatch(row -> (old ? "keir-scenario/2" : "keir-scenario/3").equals(row.get("format"))),
                 "Incompatible scenario contract");
         try (var simulation = new BoundScenarioSimulation(selected.model(),
                 Map.of(selected.group(), selected.artifact()), model)) {
@@ -106,20 +120,25 @@ public final class ScenarioHost {
 
     Map<String, Object> decode(byte[] bytes) throws Exception {
         Object decoded = EffectJson.parseScenario(bytes);
-        checkSchema(bytes);
+        String revision = switch ((String)object(EffectJson.parse(pinned("dcm", 65_536))).get("format")) {
+            case "keir-dcm/2" -> "2";
+            case "keir-dcm/3" -> "3";
+            default -> throw new IllegalArgumentException("Incompatible scenario contract");
+        };
+        checkSchema(bytes, revision);
         var row = object(decoded);
         byteFields(row);
         return row;
     }
 
-    private void checkSchema(byte[] bytes) throws Exception {
+    private void checkSchema(byte[] bytes, String revision) throws Exception {
         Path input = Files.createTempFile("keir-scenario-", ".json");
         try {
             Path output = Files.createTempFile("keir-schema-", ".json");
             try {
                 Files.write(input, bytes);
                 Process process = new ProcessBuilder(python, root.resolve("scripts/check-keir-contracts.py").toString(),
-                        "--revision", "2", "scenario", input.toString()).redirectOutput(output.toFile())
+                        "--revision", revision, "scenario", input.toString()).redirectOutput(output.toFile())
                         .redirectError(ProcessBuilder.Redirect.DISCARD).start();
                 try {
                     check(process.waitFor(30, TimeUnit.SECONDS), "Scenario schema checker timed out");
@@ -188,9 +207,13 @@ public final class ScenarioHost {
             check(i < calls.size() && call.equals(calls.get(i)), "Stub and expected call mismatch");
         }
         check(stubs.size() == calls.size(), "Stub and expected call count mismatch");
-        check("EVENT_REPORT".equals(object(entry.get("consumer")).get("kind"))
-                && "REPORTED".equals(consumption.get("status")), "Expected EVENT_REPORT");
-        same(EffectConsumer.consume(outcome), consumption, "Invalid expected outcome or EVENT_REPORT");
+        String consumer = (String)object(entry.get("consumer")).get("kind");
+        if (consumer.equals("DECISION")) {
+            same(DecisionConsumer.consumeDecision(outcome), consumption, "Invalid expected outcome or DECISION");
+        } else {
+            check("EVENT_REPORT".equals(consumer) && "REPORTED".equals(consumption.get("status")), "Expected EVENT_REPORT");
+            same(EffectConsumer.consume(outcome), consumption, "Invalid expected outcome or EVENT_REPORT");
+        }
         validateTrace(catalog, artifact, calls, outcome);
     }
 
@@ -234,8 +257,15 @@ public final class ScenarioHost {
                 case "record" -> {
                     var record = object(value);
                     var fields = object(type.get("fields"));
-                    check(fields.keySet().equals(record.keySet()), "Wrong DCM record fields");
-                    fields.forEach((field, fieldType) -> typedValue(types, fieldType, record.get(field)));
+                    check(fields.keySet().containsAll(record.keySet()), "Wrong DCM record fields");
+                    fields.forEach((field, fieldType) -> {
+                        if (fieldType instanceof String) typedValue(types, fieldType, record.get(field));
+                        else {
+                            var definition = object(fieldType);
+                            if (!record.containsKey(field) && Boolean.TRUE.equals(definition.get("optional"))) return;
+                            typedValue(types, definition.get("type"), record.get(field));
+                        }
+                    });
                 }
                 default -> throw new IllegalArgumentException("Unsupported scenario DCM type");
             }

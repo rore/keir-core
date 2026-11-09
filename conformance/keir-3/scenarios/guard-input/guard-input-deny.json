@@ -1,0 +1,53 @@
+{
+  "format": "keir-scenario/3",
+  "id": "guard-input-deny",
+  "given": {
+    "input": {
+      "restricted": true
+    },
+    "fixture": "normal"
+  },
+  "stubs": [],
+  "expect": {
+    "outcome": {
+      "classification": "COMPLETED",
+      "result": {
+        "decision": "DENY",
+        "message": "Operation restricted."
+      },
+      "effects": [],
+      "trace": [
+        {
+          "sequence": 0,
+          "event": "INVOCATION_START"
+        },
+        {
+          "sequence": 1,
+          "event": "STEP_START",
+          "step": "restricted"
+        },
+        {
+          "sequence": 2,
+          "event": "VALUE_BOUND",
+          "step": "restricted"
+        },
+        {
+          "sequence": 3,
+          "event": "RETURNED"
+        },
+        {
+          "sequence": 4,
+          "event": "TERMINATED"
+        }
+      ]
+    },
+    "calls": [],
+    "consumption": {
+      "status": "DENIED",
+      "result": {
+        "decision": "DENY",
+        "message": "Operation restricted."
+      }
+    }
+  }
+}

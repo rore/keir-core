@@ -1,49 +1,52 @@
 <a id="build-and-verify-the-effect4-authoring-companion"></a>
 # Build and verify the authoring companion
 
-Edition 3 packages the [customer authoring guide](customer-authoring-guide-v3.md), the Keir 1 schemas, and a follow-up example with three simulated outcomes. The guide’s links work inside the extracted archive.
+The companion gives an authoring assistant a versioned guide, structural schemas and compiler-produced examples. The host supplies its own exact model, scoped tools and policy separately. Keir does not define your application's discovery, review or activation tools.
 
-## Build the archive
+## Choose an edition
 
-Use Git and Python 3.11 or later. From the repository root, select a commit that contains the edition 3 inputs. The builder reads every input from that commit and prints the archive’s SHA-256 pin.
+| Host contract | Companion | Status |
+| --- | --- | --- |
+| Core 0.3.0; source `/2`, model/artifact/scenario `/3` | [Edition 5 guide](customer-authoring-guide-v5.md) | Candidate. Publish only after package and fixture qualification and verified asset pins. |
+| Core 0.2.0; source/model/artifact/scenario `/2` | [Edition 4 guide](customer-authoring-guide-v4.md) | Released. [Exact package record](authoring-companion-v4-compatibility.json). |
+| Core 0.1.0; `/1` documents | [Edition 3 guide](customer-authoring-guide-v3.md) | Historical. [Exact package record](authoring-companion-v3-compatibility.json). |
+
+Editions 1 and 2 use earlier preview contracts. Their original archives remain reproducible with the matching version and trusted pin. Do not use a historical guide for current authoring.
+
+## Build from committed inputs
+
+Use Git and Python 3.11 or later. Pass the full companion source commit from the trusted release record, not an arbitrary checkout revision. The builder reads the guide, schemas, examples and compatibility record from that commit and prints the archive's SHA-256 pin.
+
+For released edition 4, supply the three Core 0.2.0 package downloads from its compatibility record.
 
 ```sh
-python scripts/authoring-companion.py build keir-authoring-v3.zip --version 3 --revision "$(git rev-parse HEAD)" --core-assets path/to/core-assets
+python scripts/authoring-companion.py build keir-authoring-v4.zip --version 4 --revision c6a6d171982514569c29c06de7a429d301d25b2a --core-assets path/to/core-assets
 ```
 
-The manifest distinguishes the commit that supplied the archive inputs from the Core revision recorded in the [compatibility record](authoring-companion-v3-compatibility.json). For a source candidate with an empty package list, omit `--core-assets`.
+The manifest distinguishes the companion input commit from the compatible Core source commit. Nonguide inputs must match that Core revision exactly. A source candidate has `status: candidate` and an empty package map; omit `--core-assets` for that row. Candidate bytes do not establish released-package compatibility.
 
-## Verify and load the guide
+The builder creates a new file and refuses to overwrite an existing archive. Exact historical revisions reproduce the original archive bytes even when current documentation changes.
 
-Get the archive pin from the trusted handoff or the release checksums. Substitute that value for `sha256:<hex>`.
+Edition 5's bundled example sources are canonical JSON. The builder checks each source file's exact byte digest against its artifact's `sourceDigest`, as well as the model and artifact pins. An edited source must be recompiled before packaging.
+
+## Verify before loading
+
+Obtain the archive pin independently from trusted release checksums or the authorized handoff. Verify it before extracting or loading the guide. Edition 4's published pin is shown here.
 
 ```sh
-python scripts/authoring-companion.py verify keir-authoring-v3.zip --version 3 --sha256 "sha256:<hex>"
+python scripts/authoring-companion.py verify keir-authoring-v4.zip --version 4 --sha256 sha256:4a9f4f30212ff1d722cf6c993902d0802bee7e7ffebc00304102a5964b5bec63
 ```
 
-The verifier checks the pin before reading the archive. Load the guide named in `manifest.json` and supply your application's exact model, scoped tools and policy separately. The host owns permissions, approval and activation.
+Verification checks the trusted digest before reading ZIP members, then checks the exact inventory, deterministic encoding, manifest and payload hashes. It works offline without Git. Add `--core-assets path/to/core-assets` to check the three package files too.
 
-## Semantic references for the guide
+Load only the guide named by `manifest.json`. Match its contracts and producer to the host's supported tuple. Supply the published model and authorized tools separately; the companion does not grant permissions, approval or activation authority.
 
-Supply the [Keir 1 language reference](https://github.com/rore/keir-core/blob/0cae8d4417e19882e4355960b168f49d092f18e6/docs/specs/language.md) for expression and type rules, and the [Keir 1 model reference](https://github.com/rore/keir-core/blob/0cae8d4417e19882e4355960b168f49d092f18e6/docs/specs/domain-model.md) for hooks, capabilities and protected arguments. These online links are pinned to the matching specification revision. The [schemas in the guide](customer-authoring-guide-v3.md#follow-up-example) check document structure and are available inside the archive.
+## Semantic references
+
+Schemas validate structure. The language and model references explain types, expressions, data flow, lifecycle and effect limits. Edition 4 bundles the matching workflow expression specification. Edition 5 must use matching bundled references or immutable online specification links and actual producer schemas/examples. The [current specification index](../specs/README.md) distinguishes the candidate contract from released snapshots.
 
 ## Record release assets
 
-For a release, record the qualified Core revision and each package’s `version` and asset pin. The `assets` object uses the release filename as its key and a `sha256:<hex>` pin as its value. Use `keir-compiler-cli-<version>.zip`, `keir-java-runtime-maven-<version>.zip`, and `keir-runtime-node-<version>.tgz`. The Java Maven ZIP includes its POMs. Commit the record with `status` set to `release`. Build with `--core-assets <directory>` to check all three files. Consumers can pass the same option to `verify` when they also have the Core downloads.
+A release compatibility record contains the qualified Core revision and all three package versions and asset pins. Use `keir-compiler-cli-<version>.zip`, `keir-java-runtime-maven-<version>.zip` and `keir-runtime-node-<version>.tgz`, each with its independently verified `sha256:<hex>` digest. The Java Maven ZIP includes its POMs.
 
-The digest check establishes byte identity. The [release checklist](../releasing.md) covers asset provenance and installation checks.
-
-## Earlier editions
-
-Use `--version 1` or `--version 2` with the matching historical pin. Their build and verification commands still use the original committed inputs. See the [edition 2 release](https://github.com/rore/keir-core/releases/tag/authoring-v2) and its [pinned guide](https://github.com/rore/keir-core/blob/74d128f04a5fd76d744e3b7705f6614e64846b38/docs/agents/customer-authoring-guide-v2.md).
-
-## Edition 4 for Keir 2
-
-Edition 4 pairs the [Keir 2 authoring guide](customer-authoring-guide-v4.md), its [workflow expression reference](../specs/workflow-expressions.md), and the Keir 2 schemas with a verified inventory example. The [compatibility record](authoring-companion-v4-compatibility.json) pins the exact Core 0.2.0 packages. Use edition 3 with Keir 1 packages.
-
-Use the full companion source revision from the release notes to reproduce the archive. Supply the three Core package downloads in the same directory. The verifier also accepts `--core-assets` when you want to check those packages alongside the archive.
-
-```sh
-python scripts/authoring-companion.py build keir-authoring-v4.zip --version 4 --revision "$COMPANION_REVISION" --core-assets path/to/core-assets
-python scripts/authoring-companion.py verify keir-authoring-v4.zip --version 4 --sha256 "sha256:<hex>" --core-assets path/to/core-assets
-```
+Set `status: release` only after that evidence exists. Build with `--core-assets` to verify every named file. Byte identity alone does not establish provenance or successful installation; the [release checklist](../releasing.md) covers those checks. Preserve earlier editions and their exact bytes.

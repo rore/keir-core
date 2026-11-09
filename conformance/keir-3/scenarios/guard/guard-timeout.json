@@ -1,0 +1,73 @@
+{
+  "format": "keir-scenario/3",
+  "id": "guard-timeout",
+  "given": {
+    "input": {
+      "restricted": false
+    },
+    "fixture": "read-expired"
+  },
+  "stubs": [
+    {
+      "step": "policy",
+      "capability": "policy.get",
+      "version": "1",
+      "args": {},
+      "protectedArgs": {
+        "actorId": "user1"
+      },
+      "response": {
+        "kind": "SUCCESS",
+        "value": {
+          "restricted": false
+        }
+      }
+    }
+  ],
+  "expect": {
+    "outcome": {
+      "classification": "LIMIT_EXCEEDED",
+      "error": {
+        "code": "BUDGET_EXCEEDED",
+        "path": "/steps/0"
+      },
+      "effects": [],
+      "trace": [
+        {
+          "sequence": 0,
+          "event": "INVOCATION_START"
+        },
+        {
+          "sequence": 1,
+          "event": "STEP_START",
+          "step": "policy"
+        },
+        {
+          "sequence": 2,
+          "event": "CALL_DISPATCHED",
+          "step": "policy",
+          "capability": "policy.get"
+        },
+        {
+          "sequence": 3,
+          "event": "TERMINATED",
+          "code": "BUDGET_EXCEEDED"
+        }
+      ]
+    },
+    "calls": [
+      {
+        "step": "policy",
+        "capability": "policy.get",
+        "version": "1",
+        "args": {},
+        "protectedArgs": {
+          "actorId": "user1"
+        }
+      }
+    ],
+    "consumption": {
+      "status": "BLOCKED"
+    }
+  }
+}

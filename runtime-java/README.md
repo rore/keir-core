@@ -3,13 +3,15 @@
 <a id="current-host-bound-profile"></a>
 ## Bind and run a rule
 
-Use these `KeirRuntime` entrypoints for the current single-write contract:
+Event extensions and pre-operation decisions use the same `KeirRuntime` entrypoints:
 
 1. Call `bindModel(dcmBytes, implementations)` with the exact host-selected model and one `BoundEffectAdapter` per capability. All registrations use the same mode and match the catalog's capability versions and native key type.
 2. Verify the selected artifact against a trusted digest in host code, then call `prepareProgram(artifactBytes, boundModel)`. Check `succeeded()` on both binding and preparation before using their handles.
 3. Call `invokeBoundEffectProgram(prepared, businessInput, new BoundEffectInvocation(bindings, deadline, requestKey, event))` to get a `CompletionStage<Outcome>`. Supply fresh context for every invocation. The host implementations check current permissions and authenticate the original key.
 
 See [Embed Keir](../docs/embedding.md), the [runnable Java example](../examples/java-host/README.md), and the [exact adapter and deadline types](../docs/specs/host-model-binding.md#api-shapes).
+
+An EVENT/AFTER_COMMIT extension may contain at most one possible write. A REQUEST/BEFORE_COMMIT decision permits only reads. Consume its complete outcome before the native operation: only valid COMPLETED ALLOW with empty effects permits fresh host checks; DENY and failed evaluation stop continuation. ALLOW is not a commit receipt. The host retains authorization, read consistency, selection, cancellation and native commit responsibilities. [Decision walkthrough](../docs/decision-walkthrough.md) · [Supported version pairs](../docs/specs/compiler-artifact.md#source-and-artifact-identity)
 
 <a id="legacy-2-apis"></a>
 <a id="implementation-reference-for-earlier-apis"></a>
@@ -34,6 +36,6 @@ $env:MAVEN_USER_HOME = "$PWD/.tools/maven"
 
 The opt-in coverage profile uses [JaCoCo 0.8.16](https://www.jacoco.org/jacoco/index.html). It reports actual component coverage in each module's `target/site/jacoco/` directory; it adds no coverage threshold or CI gate. Tests use local fixtures and simulated callbacks, with no live services. The runtime tests include checked-wire/AST mutations, fresh authority, exact traces, Unicode/false/empty values, and native timeout behavior. Shared scenario execution uses the same externally pinned golden bytes as Node; the batch test driver lives only in test sources.
 
-[Current verification results](../docs/testing.md#current-single-write-behavior-verification) cover the packaged Java and Node hosts, shared scenarios and raw validation cases. See the [shared corpus](../conformance/keir-1/README.md) for the exact inputs and independent expectations.
+[Verification results](../docs/testing.md#current-single-write-behavior-verification) identify the tested package versions, scenarios and raw validation cases. See the [conformance index](../conformance/README.md) for the versioned inputs and independent expectations.
 
 See the [compiler build notes](../compiler-java/README.md) for pinned tooling and POSIX cache isolation.

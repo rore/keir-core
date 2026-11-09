@@ -3,13 +3,16 @@
 
 The compiler and both runtimes use shared fixtures to verify that the same rule produces the same observable behavior. The suites use checked-in source, host models, compiled artifacts and independently written expectations. The checks compare results, calls, traces and any write evidence.
 
-- [Run the current example](../examples/README.md) to compile and execute one rule in both runtimes.
-- [Keir 1 fixtures](keir-1/README.md) cover single-write behavior, verification scenarios and raw rejection vectors.
+- [Run the current examples](../examples/README.md) to compile and execute event extensions and decisions in both runtimes.
+- [Current `/3` fixtures](keir-3/) cover post-commit events and pre-operation decisions, with shared source, models, artifacts and scenario expectations. Core 0.3.0 remains a candidate until integrated package qualification.
+- [Keir 2 fixtures](keir-2/README.md) preserve the exact `/2` execution pair supported by runtime 0.3.0. Current compiler 0.3.0 authors against `/3` models only.
 - [Contract workflow](../.github/workflows/keir-contract.yml) runs the structural checker, compiler and runtime tests, and the packaged host comparison.
 - [Testing evidence](../docs/testing.md#current-single-write-behavior-verification) records the results and their scope.
 
 <a id="earlier-profiles"></a>
 ## Compatibility and historical fixtures
+
+The [Keir 1 fixtures](keir-1/README.md) belong to the Core 0.1.0 contract, including single-write behavior, scenarios and raw rejection vectors. They require their matching historical tooling.
 
 The [read-and-decide fixtures](read-and-decide/README.md) preserve a prior compiler and runtime corpus, including grant exhaustion and prepared reuse. The [CEL qualification](cel-profile/README.md) records the earlier expression bridge.
 

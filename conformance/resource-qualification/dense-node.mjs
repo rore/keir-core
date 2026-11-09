@@ -12,7 +12,7 @@ try {
   const { model, artifact, input: inputFile, limits, expected } = JSON.parse(read(manifest));
   const { warmups, blocks, perBlock, invocationMs, peakWorkingSetBytes } = limits;
   const modelBytes = read(model), dcm = parseModelJson(modelBytes);
-  const inventory = readFileSync(new URL('../keir-2/dcm-inventory.json', import.meta.url));
+  const inventory = readFileSync(new URL('../keir-3/dcm-inventory.json', import.meta.url));
   assert.ok(canonicalBytes(dcm).equals(canonicalBytes(parseModelJson(inventory))), 'Expected unchanged Inventory model');
   const artifactBytes = read(artifact), plan = parseCanonical(artifactBytes), input = parseCanonical(read(inputFile));
   assert.equal(plan.steps.length, 8);

@@ -26,6 +26,11 @@ OUTCOMES = [
     "task2 NO_OP -",
     "task3 UNCERTAIN UNKNOWN",
 ]
+DECISION_OUTCOMES = [
+    "allow ALLOWED | native attempts=1",
+    "deny DENIED | native attempts=0 | Operation restricted.",
+    "unavailable BLOCKED | native attempts=0",
+]
 
 
 def verify_assets(version, assets, checksums):
@@ -119,11 +124,15 @@ def smoke(version, assets, revision, maven_repo, npm_cache, offline):
                 raise ValueError("Compiler ZIP license differs from the release license")
             compiler.write_bytes(archive.read(compiler_name))
         example = source / "examples" / "node-host"
-        followup = example / "follow-up"
-        artifact = work / "artifact.json"
-        with artifact.open("wb") as output:
-            run(["java", "-jar", str(compiler), str(followup / "source.yaml"), str(followup / "dcm.json")],
-                cwd=source, stdout=output)
+        programs = [("follow-up", "FollowUp.java", OUTCOMES)]
+        if json.loads((example / "follow-up/dcm.json").read_bytes())["format"] == "keir-dcm/3":
+            programs.append(("pre-operation", "BeforeOperation.java", DECISION_OUTCOMES))
+        artifacts = {}
+        for name, _, _ in programs:
+            artifacts[name] = work / f"{name}-artifact.json"
+            with artifacts[name].open("wb") as output:
+                run(["java", "-jar", str(compiler), str(example / name / "source.yaml"),
+                     str(example / name / "dcm.json")], cwd=source, stdout=output)
 
         runtime_name = f"keir-runtime-java-{version}.jar"
         runtime = work / runtime_name
@@ -145,9 +154,11 @@ def smoke(version, assets, revision, maven_repo, npm_cache, offline):
         maven, maven_env = maven_command(source, maven_repo, offline)
         run([*maven, "-f", str(runtime_pom), "dependency:build-classpath", "-DincludeScope=runtime",
              f"-Dmdep.outputFile={classpath}"], cwd=source, env=maven_env)
-        java_result = run(["java", "-cp", os.pathsep.join([str(runtime), classpath.read_text().strip()]),
-                           str(followup / "FollowUp.java"), str(artifact)],
-                          cwd=source, capture_output=True, text=True)
+        java_results = {}
+        for name, launcher, _ in programs:
+            java_results[name] = run(["java", "-cp", os.pathsep.join([str(runtime), classpath.read_text().strip()]),
+                                      str(example / name / launcher), str(artifacts[name])],
+                                     cwd=source, capture_output=True, text=True)
 
         package_name = f"keir-runtime-node-{version}.tgz"
         package = assets / package_name
@@ -165,11 +176,12 @@ def smoke(version, assets, revision, maven_repo, npm_cache, offline):
         npm = "npm.cmd" if os.name == "nt" else "npm"
         run([npm, "ci", *(["--offline"] if offline else []), "--cache", str(npm_cache),
              "--ignore-scripts", "--no-audit", "--no-fund"], cwd=example)
-        node_result = run(["node", str(followup / "run.mjs"), str(artifact)],
-                          cwd=source, capture_output=True, text=True)
-        for label, result in (("Java", java_result), ("Node", node_result)):
-            if result.stdout.splitlines() != OUTCOMES:
-                raise ValueError(f"{label} package produced unexpected quickstart outcomes: {result.stdout!r}")
+        for name, _, expected in programs:
+            node_result = run(["node", str(example / name / "run.mjs"), str(artifacts[name])],
+                              cwd=source, capture_output=True, text=True)
+            for label, result in (("Java", java_results[name]), ("Node", node_result)):
+                if result.stdout.splitlines() != expected:
+                    raise ValueError(f"{label} package produced unexpected {name} outcomes: {result.stdout!r}")
 
 
 def main():
@@ -177,7 +189,7 @@ def main():
     parser.add_argument("--version", required=True)
     parser.add_argument("--assets", required=True, type=Path)
     parser.add_argument("--checksums", type=Path, help="Trusted SHA256SUMS from the staged build")
-    parser.add_argument("--smoke-revision", help="Full source commit for the packaged follow-up example")
+    parser.add_argument("--smoke-revision", help="Full source commit for the packaged host examples")
     parser.add_argument("--maven-repo", type=Path)
     parser.add_argument("--npm-cache", type=Path)
     parser.add_argument("--offline", action="store_true")
@@ -193,7 +205,7 @@ def main():
         if args.smoke_revision:
             smoke(args.version, assets, args.smoke_revision,
                   args.maven_repo.resolve(), args.npm_cache.resolve(), args.offline)
-            print("Packaged compiler, Java and Node passed the follow-up smoke test.")
+            print("Packaged compiler, Java and Node passed the host example smoke tests.")
     except subprocess.CalledProcessError as error:
         if error.stderr:
             print(error.stderr, file=sys.stderr)

@@ -101,7 +101,7 @@ final class Dcm {
 
     static Dcm parse(Object value) {
         var root = shape(value,"/dcm","format","domain","types","capabilities","entrypoints","hostKey");
-        supported(root.get("format"),"keir-dcm/2","/dcm/format");
+        supported(root.get("format"),"keir-dcm/3","/dcm/format");
         var key = shape(root.get("hostKey"),"/dcm/hostKey","source","type");
         if (!"requestKey".equals(key.get("source"))) throw invalid("/dcm/hostKey/source");
         metadataText(key.get("type"),"/dcm/hostKey/type");
@@ -210,25 +210,38 @@ final class Dcm {
             String output = reference(ep.get("output"),child(path,"output"));
             requireRecord(types,input,child(path,"input"));
             requireRecord(types,output,child(path,"output"));
-            if (!"EVENT".equals(ep.get("trigger"))) throw invalid(child(path,"trigger"));
-            if (!"AFTER_COMMIT".equals(ep.get("placement"))) throw invalid(child(path,"placement"));
             var consumer = shape(ep.get("consumer"),child(path,"consumer"),"id","version","kind");
             String consumerIdPath = child(child(path,"consumer"),"id");
             identifier(text(consumer.get("id"),consumerIdPath),consumerIdPath,true);
             text(consumer.get("version"),child(child(path,"consumer"),"version"));
-            if (!"EVENT_REPORT".equals(consumer.get("kind"))) throw invalid(child(child(path,"consumer"),"kind"));
+            boolean decision = "REQUEST".equals(ep.get("trigger"))
+                    && "BEFORE_COMMIT".equals(ep.get("placement")) && "DECISION".equals(consumer.get("kind"));
+            if (decision) {
+                var result = types.get(output);
+                String decisionName = result.fields.get("decision");
+                var decisionType = decisionName == null ? null : types.get(decisionName);
+                if (result.optionalFields.contains("decision") || decisionType == null
+                        || !decisionType.kind.equals("enum") || decisionType.values.size() != 2
+                        || !decisionType.values.containsAll(List.of("ALLOW","DENY"))) throw invalid(child(path,"output"));
+                if (result.fields.values().stream().anyMatch(type -> !scalarType(types,type)))
+                    throw invalid(child(path,"output"));
+            } else {
+                if (!"EVENT".equals(ep.get("trigger"))) throw invalid(child(path,"trigger"));
+                if (!"AFTER_COMMIT".equals(ep.get("placement"))) throw invalid(child(path,"placement"));
+                if (!"EVENT_REPORT".equals(consumer.get("kind"))) throw invalid(child(child(path,"consumer"),"kind"));
+            }
             String gp = child(path,"effectGrant");
-            Object n = ep.getOrDefault("effectGrant", 1L);
+            Object n = ep.getOrDefault("effectGrant", decision ? 0L : 1L);
             if (!(n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long || n instanceof BigInteger)) throw invalid(gp);
             var count = new BigInteger(n.toString());
-            if (count.signum() < 0 || count.compareTo(BigInteger.ONE) > 0) throw invalid(gp);
+            if (count.signum() < 0 || count.compareTo(decision ? BigInteger.ZERO : BigInteger.ONE) > 0) throw invalid(gp);
             var event = shape(ep.get("event"),child(path,"event"),"idType","sourceType");
             for (String field : List.of("idType","sourceType")) {
                 String type = metadataText(event.get(field),child(child(path,"event"),field));
                 if (!types.containsKey(type) || !types.get(type).kind.equals("nominal")) throw invalid(child(child(path,"event"),field));
             }
             var grants = policy(ep, capabilities, path);
-            entries.put(entry.getKey(),new Entrypoint(input,output,"EVENT",freezeMap(consumer),immutable(grants),count.intValue()));
+            entries.put(entry.getKey(),new Entrypoint(input,output,(String)ep.get("trigger"),freezeMap(consumer),immutable(grants),count.intValue()));
         }
         if (entries.isEmpty()) throw invalid("/dcm/entrypoints");
         return new Dcm(root,types,capabilities,entries);

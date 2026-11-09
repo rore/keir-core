@@ -6,7 +6,7 @@ Run an extension that creates a follow-up whenever someone completes a task in t
 
 The app sends the completed task’s ID. The extension reads that task, checks that it is complete and belongs to `project1`, then requests a follow-up titled `Follow up`. The model defines the event and task operations. The host supplies the authenticated actor separately. [Extension source](../examples/node-host/follow-up/source.yaml) · [Readable model](../examples/node-host/follow-up/dcm.json)
 
-The examples in this checkout use Keir 2. [Keir 2 version matrix](specs/workflow-expressions.md#version-matrix)
+The examples in this checkout target the Core 0.3.0 candidate: source `keir/2` with model and artifact `/3`. Use the [format matrix](specs/compiler-artifact.md#source-and-artifact-identity) to select matching packages.
 
 Use a local checkout, **Node.js 24 with npm**, and **JDK 21** to compile. The precompiled run only needs Node.js and npm. The first build and install need access to the Maven and npm dependencies unless they are already cached.
 
@@ -99,7 +99,35 @@ java -cp 'runtime-java/target/keir-runtime-java-0.1.0-SNAPSHOT.jar;runtime-java/
 The [Java host](../examples/node-host/follow-up/FollowUp.java) prints the same three lines as Node. Append `.tools/follow-up/artifact.json` to run the changed extension. Both examples stop on a binding or preparation diagnostic or an unexpected invocation outcome.
 
 <a id="run-the-conformance-cases"></a>
-The [shared fixtures](../conformance/keir-2/README.md) record the exact artifacts and independent scenario expectations for conformance.
+The [current shared fixtures](../conformance/keir-3/) record exact artifacts and independent scenario expectations for conformance.
+
+## Try a pre-operation decision
+
+The second example decides whether the application may continue an operation. It reads the host's policy and returns ALLOW or DENY. A failed read blocks continuation. Open the [source](../examples/node-host/pre-operation/source.yaml), [model](../examples/node-host/pre-operation/dcm.json), [Node host](../examples/node-host/pre-operation/run.mjs) or [Java host](../examples/node-host/pre-operation/BeforeOperation.java).
+
+After the Node setup above, run:
+
+```sh
+node examples/node-host/pre-operation/run.mjs
+```
+
+Or use the Java runtime and dependencies built above:
+
+```sh
+java -cp 'runtime-java/target/keir-runtime-java-0.1.0-SNAPSHOT.jar:runtime-java/target/dependency/*' examples/node-host/pre-operation/BeforeOperation.java
+```
+
+In PowerShell, use `;` between the JAR and dependency directory in that classpath.
+
+Both hosts print:
+
+```text
+allow ALLOWED | native attempts=1
+deny DENIED | native attempts=0 | Operation restricted.
+unavailable BLOCKED | native attempts=0
+```
+
+This simulation counts native continuation separately from the decision. A real application rechecks permissions and consistency before using its own commit path. To edit and compile this extension, use its `source.yaml` and `dcm.json` in the compiler command above, then pass the resulting artifact path to either host. [Decision walkthrough](decision-walkthrough.md)
 
 <a id="embed-the-same-flow"></a>
 [Embed Keir in an application](embedding.md) · [Keir 2 workflow expressions](specs/workflow-expressions.md) · [Examples index](../examples/README.md)

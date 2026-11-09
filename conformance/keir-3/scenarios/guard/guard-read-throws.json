@@ -1,0 +1,73 @@
+{
+  "format": "keir-scenario/3",
+  "id": "guard-read-throws",
+  "given": {
+    "input": {
+      "restricted": false
+    },
+    "fixture": "read-throws"
+  },
+  "stubs": [
+    {
+      "step": "policy",
+      "capability": "policy.get",
+      "version": "1",
+      "args": {},
+      "protectedArgs": {
+        "actorId": "user1"
+      },
+      "response": {
+        "kind": "SUCCESS",
+        "value": {
+          "restricted": false
+        }
+      }
+    }
+  ],
+  "expect": {
+    "outcome": {
+      "classification": "FAILED",
+      "error": {
+        "code": "ADAPTER_EXCEPTION",
+        "path": "/steps/0"
+      },
+      "effects": [],
+      "trace": [
+        {
+          "sequence": 0,
+          "event": "INVOCATION_START"
+        },
+        {
+          "sequence": 1,
+          "event": "STEP_START",
+          "step": "policy"
+        },
+        {
+          "sequence": 2,
+          "event": "CALL_DISPATCHED",
+          "step": "policy",
+          "capability": "policy.get"
+        },
+        {
+          "sequence": 3,
+          "event": "TERMINATED",
+          "code": "ADAPTER_EXCEPTION"
+        }
+      ]
+    },
+    "calls": [
+      {
+        "step": "policy",
+        "capability": "policy.get",
+        "version": "1",
+        "args": {},
+        "protectedArgs": {
+          "actorId": "user1"
+        }
+      }
+    ],
+    "consumption": {
+      "status": "BLOCKED"
+    }
+  }
+}

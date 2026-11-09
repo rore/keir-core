@@ -65,7 +65,7 @@
       "trigger": "EVENT"
     }
   },
-  "format": "keir-dcm/2",
+  "format": "keir-dcm/3",
   "hostKey": {
     "source": "requestKey",
     "type": "sample.RequestUuid/1"

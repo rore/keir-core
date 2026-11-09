@@ -1,8 +1,8 @@
 # Keir 2 workflow expressions
 
-This specification defines the Keir 2 workflow expressions implemented by Core 0.2.0. Use the Keir 1 references with Core 0.1.0.
+This reference defines the Keir 2 workflow expressions introduced in Core 0.2.0 and retained by the Core 0.3.0 candidate. Source remains `keir/2`; the [current version matrix](compiler-artifact.md#source-and-artifact-identity) identifies the model, artifact and package pair.
 
-Keir 2 adds bounded list membership, optional values and elapsed-time expressions. The host still defines its events, input data and operations. The host binds a model, prepares the compiled artifact and invokes it after the triggering event commits.
+Keir 2 adds bounded list membership, optional values and elapsed-time expressions. The host defines input data, operations and lifecycle. It binds a model and prepares the compiled artifact. Event extensions run after commit; read-only [decisions](pre-operation-decisions.md) run before a native operation under the `/3` model contract.
 
 ## Bounded scalar lists
 
@@ -53,22 +53,22 @@ CEL Boolean semantics still apply. A pure arithmetic error can be masked by `fal
 
 ## Inventory example
 
-On an inventory arrival, the extension asks the host whether a matching item is already open. It checks the requested label, the lookup result, and the optional `enabled` flag before requesting one adjustment. The due time is 168 hours after the existing expiry when present, or after the arrival time otherwise. [Model](../../conformance/keir-2/dcm-inventory.json) · [Source](../../conformance/keir-2/source-inventory.json) · [Compiled artifact](../../conformance/keir-2/artifact-inventory.json)
+On an inventory arrival, the extension asks the host whether a matching item is already open. It checks the requested label, the lookup result, and the optional `enabled` flag before requesting one adjustment. The due time is 168 hours after the existing expiry when present, or after the arrival time otherwise. [Model](../../conformance/keir-3/dcm-inventory.json) · [Source](../../conformance/keir-3/source-inventory.json) · [Compiled artifact](../../conformance/keir-3/artifact-inventory.json)
 
-The model and artifact have separate byte pins. [Model digest](../../conformance/keir-2/dcm-inventory.sha256) · [Artifact digest](../../conformance/keir-2/artifact-inventory.sha256)
+The model and artifact have separate byte pins. [Model digest](../../conformance/keir-3/dcm-inventory.sha256) · [Artifact digest](../../conformance/keir-3/artifact-inventory.sha256)
 
 | Scenario | Expected behavior |
 | --- | --- |
-| [Adjustment](../../conformance/keir-2/scenarios/inventory/inventory-adjusted.json) | The absent `enabled` flag uses the extension's default of `true`. The host confirms the adjustment, and the due time is `2026-03-14T12:34:56.789Z`. |
-| [Present false](../../conformance/keir-2/scenarios/inventory/inventory-optional-false.json) | `enabled: false` skips the adjustment. The result still reports the due time computed from the existing expiry. |
-| [No match at the list limit](../../conformance/keir-2/scenarios/inventory/inventory-max-no-match.json) | None of the 16 labels matches. The extension reports `eligible: false` and the host performs only the lookup. |
-| [Handled denial](../../conformance/keir-2/scenarios/inventory/inventory-handler-omits-due.json) | The host rejects the write with `ACCESS_DENIED` and `NONE` effect evidence. The handler returns `eligible: false` and omits `dueAt`. |
-| [Timestamp overflow](../../conformance/keir-2/scenarios/inventory/inventory-selected-overflow.json) | The lookup runs, then timestamp addition fails with `BUDGET_EXCEEDED`. The extension stops before requesting the adjustment. |
-| [Unselected overflow branch](../../conformance/keir-2/scenarios/inventory/inventory-lazy-overflow.json) | The existing expiry supplies the due time. Adding 168 hours to the arrival time would overflow, but that branch is unselected. The host confirms the adjustment. |
+| [Adjustment](../../conformance/keir-3/scenarios/inventory/inventory-adjusted.json) | The absent `enabled` flag uses the extension's default of `true`. The host confirms the adjustment, and the due time is `2026-03-14T12:34:56.789Z`. |
+| [Present false](../../conformance/keir-3/scenarios/inventory/inventory-optional-false.json) | `enabled: false` skips the adjustment. The result still reports the due time computed from the existing expiry. |
+| [No match at the list limit](../../conformance/keir-3/scenarios/inventory/inventory-max-no-match.json) | None of the 16 labels matches. The extension reports `eligible: false` and the host performs only the lookup. |
+| [Handled denial](../../conformance/keir-3/scenarios/inventory/inventory-handler-omits-due.json) | The host rejects the write with `ACCESS_DENIED` and `NONE` effect evidence. The handler returns `eligible: false` and omits `dueAt`. |
+| [Timestamp overflow](../../conformance/keir-3/scenarios/inventory/inventory-selected-overflow.json) | The lookup runs, then timestamp addition fails with `BUDGET_EXCEEDED`. The extension stops before requesting the adjustment. |
+| [Unselected overflow branch](../../conformance/keir-3/scenarios/inventory/inventory-lazy-overflow.json) | The existing expiry supplies the due time. Adding 168 hours to the arrival time would overflow, but that branch is unselected. The host confirms the adjustment. |
 
 ## Execution boundary
 
-An extension has at most eight steps, four possible calls and one possible write. Every possible write counts, including writes in mutually exclusive branches. A host may expose separate create and update operations, and each extension chooses at most one. Permissions, keys, the native mutation and its evidence remain the host's responsibility.
+An extension has at most eight steps, four possible calls and one possible write. A pre-operation decision permits zero possible writes. Every possible write counts, including writes in mutually exclusive branches. A host may expose separate create and update operations for event hooks, and each extension chooses at most one. Permissions, keys, the native mutation and its evidence remain the host's responsibility.
 
 Each expression has at most 64 AST nodes, depth 16 and 512 source bytes. The artifact has at most 512 expression nodes in total. The ceiling is 16,384 bytes per checked expression, 65,536 bytes each for descriptors and the model, and 64 events per trace. A membership test checks at most 16 bounded scalar elements. These limits bound admitted work. Native callbacks and elapsed deadlines retain the existing host and runtime obligations.
 
@@ -91,6 +91,8 @@ Include the standard `google/protobuf/timestamp.proto` descriptor only for model
 Serialize descriptors deterministically. Validation rejects unknown fields and any additional imports, options, extensions or source information.
 
 ## Version matrix
+
+This table preserves the exact released Core 0.2.0 pair. New authoring uses the [Core 0.3.0 candidate matrix](compiler-artifact.md#source-and-artifact-identity). Its source and descriptor recipe retain `/2`; model, artifact and scenario use `/3`.
 
 | Component | Core 0.2.0 |
 | --- | --- |

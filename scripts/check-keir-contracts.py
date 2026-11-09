@@ -2,6 +2,7 @@
 """Check decoded public Keir structure. Native validation remains required."""
 import argparse
 from importlib.metadata import version
+from itertools import product
 import json
 from pathlib import Path
 import sys
@@ -12,7 +13,7 @@ from referencing.exceptions import NoSuchResource
 
 ROOT = Path(__file__).resolve().parents[1]
 NAMES = ("source", "dcm", "artifact", "scenario")
-REVISIONS = (1, 2)
+REVISIONS = (1, 2, 3)
 
 
 def deny_retrieval(uri):
@@ -22,12 +23,13 @@ def deny_retrieval(uri):
 def validators(revision):
     if version("jsonschema") != "4.26.0":
         raise RuntimeError("Use the pinned development requirements in an isolated environment.")
+    schema_revisions = {name: 2 if name == "source" and revision == 3 else revision for name in NAMES}
     schemas = {
-        name: read_document(ROOT / "schemas" / f"{name}-{revision}" / f"{name}.schema.json")
+        name: read_document(ROOT / "schemas" / f"{name}-{schema_revisions[name]}" / f"{name}.schema.json")
         for name in NAMES
     }
     for name, schema in schemas.items():
-        if schema["$id"] != f"urn:keir:schema:{name}:{revision}":
+        if schema["$id"] != f"urn:keir:schema:{name}:{schema_revisions[name]}":
             raise ValueError(f"Unexpected {name} schema ID")
         Draft202012Validator.check_schema(schema)
     registry = Registry(retrieve=deny_retrieval).with_resources(
@@ -72,6 +74,10 @@ def check_scenario_rejections(validator, fixtures):
 
 def check_fixtures(schemas, revision):
     fixtures = ROOT / "conformance" / f"keir-{revision}"
+    if revision == 3:
+        for group in ("guard", "guard-input", "guard-handler", "guard-reversed"):
+            if not any((fixtures / "scenarios" / group).glob("*.json")):
+                raise ValueError(f"No decision scenarios matched {group}")
     patterns = {
         "source": "source-handler.json" if revision == 1 else "source*.json",
         "dcm": "dcm*.json",
@@ -101,8 +107,10 @@ def check_fixtures(schemas, revision):
         ("artifact", {"compiler": "keir-compiler-java/0.1.0-SNAPSHOT"}),
         ("artifact", {"modelRef": {**samples["artifact"]["modelRef"], "format": "keir-dcm/effect-4"}}),
     ]
-    if revision == 2:
+    if revision >= 2:
         mutants.extend(workflow_mutants(samples))
+    if revision == 3:
+        mutants.extend(decision_mutants(samples, fixtures))
     for name, changes in mutants:
         if schemas[name].is_valid({**samples[name], **changes}):
             raise ValueError(f"{name} accepted invalid fields {', '.join(changes)}")
@@ -140,10 +148,54 @@ def workflow_mutants(samples):
     return mutants
 
 
+def decision_mutants(samples, fixtures):
+    model_ref = samples["artifact"]["modelRef"]
+    mutants = [
+        ("source", {"language": "keir/3"}),
+        ("dcm", {"format": "keir-dcm/2"}),
+        ("artifact", {"format": "keir-artifact/2"}),
+        ("artifact", {"compiler": "keir-compiler-java/0.2.0"}),
+        ("artifact", {"modelRef": {**model_ref, "format": "keir-dcm/2"}}),
+        ("artifact", {"modelRef": {**model_ref, "descriptorRecipe": "keir-record-descriptors/3"}}),
+        ("scenario", {"format": "keir-scenario/2"}),
+    ]
+    for pin in samples["artifact"]["environment"]:
+        mutants.append(("artifact", {"environment": {**samples["artifact"]["environment"], pin: "0.0.0"}}))
+    guard = read_document(fixtures / "dcm-guard.json")
+    entry_id, entry = next(iter(guard["entrypoints"].items()))
+    for trigger, placement, kind, grant in product(
+            ("EVENT", "REQUEST"), ("AFTER_COMMIT", "BEFORE_COMMIT"), ("EVENT_REPORT", "DECISION"), (None, 0, 1, 2)):
+        if ((trigger, placement, kind) == ("EVENT", "AFTER_COMMIT", "EVENT_REPORT") and grant in (None, 0, 1)
+                or (trigger, placement, kind) == ("REQUEST", "BEFORE_COMMIT", "DECISION") and grant in (None, 0)):
+            continue
+        changed = {**entry, "trigger": trigger, "placement": placement, "consumer": {**entry["consumer"], "kind": kind}}
+        changed.pop("effectGrant", None)
+        if grant is not None:
+            changed["effectGrant"] = grant
+        mutants.append(("dcm", {**guard, "entrypoints": {entry_id: changed}}))
+    invalid_consumption = [
+        {"status": "ALLOWED"},
+        {"status": "DENIED"},
+        {"status": "ALLOWED", "result": {"decision": "DENY"}},
+        {"status": "DENIED", "result": {"decision": "ALLOW"}},
+        {"status": "ALLOWED", "result": {}},
+        {"status": "ALLOWED", "result": {"decision": "UNKNOWN"}},
+        {"status": "ALLOWED", "result": {"decision": "ALLOW", "message": []}},
+        {"status": "ALLOWED", "result": {"decision": "ALLOW", "message": 1}},
+        {"status": "ALLOWED", "result": {"decision": "ALLOW", "message": "x" * 257}},
+        {"status": "ALLOWED", "result": {"decision": "ALLOW"}, "code": "EXTRA"},
+        {"status": "BLOCKED", "result": {"decision": "ALLOW"}},
+        {"status": "BLOCKED", "code": "FAILED"},
+    ]
+    for consumption in invalid_consumption:
+        mutants.append(("scenario", {"expect": {**samples["scenario"]["expect"], "consumption": consumption}}))
+    return mutants
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--revision", type=int, choices=REVISIONS,
-                        help="Schema revision (default: 1 for a document, both for fixture checks)")
+                        help="Schema revision (default: 1 for a document, all for fixture checks)")
     parser.add_argument("schema", nargs="?", choices=NAMES)
     parser.add_argument("document", nargs="?", type=Path)
     args = parser.parse_args()

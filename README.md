@@ -20,7 +20,9 @@ For example, a user of a task application might ask: “When a task in the launc
 <a id="supported-contract"></a>
 ## Current scope
 
-An extension can read data and contain at most one possible write, including guarded calls. Java and Node.js run the same compiled format. See the [Keir specification](docs/specs/README.md) for supported behavior, [verification](docs/testing.md) for measured results and their limits, and the [release plan](roadmap/features/public-package-release.md) for package availability.
+An extension can read data and contain at most one possible write, including guarded calls. The pre-operation decision contract allows only reads and returns `ALLOW` or `DENY` before the application performs its own operation. The application still checks permissions and business constraints before committing.
+
+Java and Node.js run the same compiled format. The [specification](docs/specs/README.md) distinguishes the Core 0.3.0 candidate contract from released Core 0.2.0. See [verification](docs/testing.md) for tested scope and the [release plan](roadmap/features/public-package-release.md) for package availability.
 
 ## Documentation
 

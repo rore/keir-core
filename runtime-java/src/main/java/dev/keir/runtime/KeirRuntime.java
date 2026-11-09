@@ -131,7 +131,8 @@ public final class KeirRuntime {
             Map<String,Object> entry=map(map(boundModel.dcm.get("entrypoints"),"").get(artifact.get("entrypoint")),"");
             CapabilityPolicy.State policy=CapabilityPolicy.narrow(CapabilityPolicy.catalog(boundModel.dcm),
                     entry.getOrDefault("capabilityPolicy",Map.of()),"/artifact/entrypoint/capabilityPolicy","ARTIFACT_INVALID");
-            long effectGrant=number(entry.getOrDefault("effectGrant",1L),0,1,"/artifact/entrypoint/effectGrant");
+            boolean decision="DECISION".equals(map(entry.get("consumer"),"").get("kind"));
+            long effectGrant=number(entry.getOrDefault("effectGrant",decision?0L:1L),0,1,"/artifact/entrypoint/effectGrant");
             Artifact.Plan plan=Artifact.validateProgram(artifact,boundModel.dcm,policy,effectGrant);
             CheckedCel.Bundle cel=CheckedCel.prepare(plan,boundModel.types);
             Map<String,List<String>> hostFields=new LinkedHashMap<>();

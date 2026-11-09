@@ -2,7 +2,7 @@
   "maven": {
     "pom.xml": "5581bcf238e26bb5242945daf4e7b0bde6e961f8ca58509a2f602d1b0efb9cd0",
     "compiler-java/pom.xml": "207d3fb633bda2a0a5c5414335747b3b8293489f70e4fc07e17af90327c0c721",
-    "runtime-java/pom.xml": "9e0aaf7ce3612cf0f4e624d17fc4587ecb23eb5451f3b907436685e66c339c55",
+    "runtime-java/pom.xml": "cb22bf47e6511d6130140fb89b68f217bda41815dee0b7470336fc5fc7d6f61e",
     "examples/java-host/pom.xml": "c17eef0fbc14c057f168d5047da361cebbdfaa7dc52301409c276e0018a01ba5",
     ".mvn/wrapper/maven-wrapper.properties": "03e1f35df3e20ff2341e05980c8258a4ce94923884822fc2bab922060989862c",
     "mvnw": "cae96cef89ebea3531221f4ae17c23cf8edf67d00eae8306d4186ae1bbed4d02",

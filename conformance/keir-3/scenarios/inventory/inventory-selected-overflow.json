@@ -1,0 +1,112 @@
+{
+  "format": "keir-scenario/3",
+  "id": "inventory-selected-overflow",
+  "given": {
+    "input": {
+      "itemId": "item1",
+      "warehouseId": "warehouse1",
+      "targetLabel": "fragile",
+      "labels": [
+        "fragile"
+      ],
+      "occurredAt": "9999-12-31T23:59:59.999Z"
+    },
+    "fixture": "normal"
+  },
+  "stubs": [
+    {
+      "step": "open",
+      "capability": "inventory.findOpen",
+      "version": "1",
+      "args": {
+        "warehouseId": "warehouse1",
+        "label": "fragile"
+      },
+      "protectedArgs": {
+        "actorId": "user1"
+      },
+      "response": {
+        "kind": "SUCCESS",
+        "value": {
+          "matches": false
+        }
+      }
+    }
+  ],
+  "expect": {
+    "outcome": {
+      "classification": "LIMIT_EXCEEDED",
+      "effects": [],
+      "error": {
+        "code": "BUDGET_EXCEEDED",
+        "path": "/steps/2"
+      },
+      "trace": [
+        {
+          "sequence": 0,
+          "event": "INVOCATION_START"
+        },
+        {
+          "sequence": 1,
+          "event": "STEP_START",
+          "step": "open"
+        },
+        {
+          "sequence": 2,
+          "event": "CALL_DISPATCHED",
+          "step": "open",
+          "capability": "inventory.findOpen"
+        },
+        {
+          "sequence": 3,
+          "event": "CALL_SUCCEEDED",
+          "step": "open",
+          "capability": "inventory.findOpen"
+        },
+        {
+          "sequence": 4,
+          "event": "STEP_START",
+          "step": "eligible"
+        },
+        {
+          "sequence": 5,
+          "event": "VALUE_BOUND",
+          "step": "eligible"
+        },
+        {
+          "sequence": 6,
+          "event": "STEP_START",
+          "step": "due"
+        },
+        {
+          "sequence": 7,
+          "event": "TERMINATED",
+          "code": "BUDGET_EXCEEDED"
+        }
+      ]
+    },
+    "calls": [
+      {
+        "step": "open",
+        "capability": "inventory.findOpen",
+        "version": "1",
+        "args": {
+          "warehouseId": "warehouse1",
+          "label": "fragile"
+        },
+        "protectedArgs": {
+          "actorId": "user1"
+        }
+      }
+    ],
+    "consumption": {
+      "status": "REPORTED",
+      "classification": "LIMIT_EXCEEDED",
+      "effects": [],
+      "error": {
+        "code": "BUDGET_EXCEEDED",
+        "path": "/steps/2"
+      }
+    }
+  }
+}

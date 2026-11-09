@@ -7,7 +7,8 @@ Implementation evidence belongs in [testing](../testing.md); pending resource qu
 
 <a id="corrected-effect4-invocation-boundary"></a>
 <a id="effect4-execution"></a>
-## Single-write execution
+<a id="single-write-execution"></a>
+## Program execution
 
 1. Validate the [fresh invocation context](host-model-binding.md#invocation-inputs-and-adapter-context), including deadline, input, protected bindings, event and presence of the original key. Start with only the validated business record in the source environment as `input`.
 2. Visit steps in source order. A BIND evaluates and saves its value. A CALL with a false guard skips argument evaluation and dispatch, binds no result and consumes no dynamic call or write budget. It still counts as a reached step. Static validation counts every possible call and write regardless of its guard.
@@ -40,7 +41,7 @@ If a timeout wins first, the runtime stops waiting and retains UNKNOWN. A later 
 
 ## Outcome
 
-For a prepared single-write program the outcome is `{classification,result?,error?,effects,trace}`. `effects` is a zero-or-one array of closed `{step,capability,state}` records. A skipped or undispatched write has no record. The receipt captures runtime evidence in memory. Durable storage and native guarantees belong to the host.
+For a prepared program the outcome is `{classification,result?,error?,effects,trace}`. `effects` is a zero-or-one array of closed `{step,capability,state}` records. A skipped or undispatched write has no record. A decision program has no possible writes and always has empty effects. The receipt captures runtime evidence in memory. Durable storage and native guarantees belong to the host.
 
 | Classification | Result and error | Effect evidence |
 | --- | --- | --- |
@@ -70,6 +71,16 @@ Before dispatch reserve room for dispatch, possible success and termination. A W
 
 The host's `EVENT_REPORT` consumer validates the outcome before reporting it. The [shared example consumer](../../examples/node-host/effect-consumer.mjs) returns `{status:REPORTED,classification,result?,error?,effects}` for a valid outcome or `{status:NOT_REPORTED,code:OUTCOME_INVALID}` for an invalid one. Report a handled rejection as a rejection and preserve a confirmed receipt beside a later failure. A result such as `CREATED` is a business value, separate from the receipt. Reporting does not execute an action or undo the original event.
 
+## Decision consumption
+
+For a REQUEST/BEFORE_COMMIT/DECISION entrypoint, the same execution and outcome rules apply with a write ceiling of zero. The compiler and preparation reject every potential WRITE, including a false-guarded call, with `ENTRY_GRANT_DENIED`. Dispatch enforces the ceiling independently.
+
+The host validates the full outcome, its declared closed result type, classification, consistent trace and empty effects before consuming a decision. The example host helper `consumeDecision(outcome)` returns `{status:ALLOWED,result}` for valid COMPLETED ALLOW, `{status:DENIED,result}` for valid COMPLETED DENY, or exactly `{status:BLOCKED}` otherwise. It retains any additional declared result fields as data. This helper is example host code, not a runtime export.
+
+A handled BUSINESS_REJECTION with a result containing ALLOW still blocks. Failures, resource limits, uncertain outcomes, malformed results and nonempty effects also block. A selected extension that cannot be invoked is not equivalent to an absent selection. The host never treats a customer-supplied outcome as its invocation result.
+
+ALLOWED permits fresh native checks; it supplies no evidence of a native commit. Selection, approval, authorization, proposed input, read consistency, cancellation and the native deadline remain host obligations. The host records the native result separately. See [pre-operation decisions](pre-operation-decisions.md#consumption-and-failure-policy) and the [integration walkthrough](../decision-walkthrough.md).
+
 ## Limits
 
 The compiler and runtime enforce these ceilings at the applicable boundaries. The current binding and invocation APIs use fixed runtime limits. The DCM can [restrict capability use](domain-model.md#call-and-write-policy). Measured performance belongs in the [verification record](../testing.md).
@@ -84,7 +95,7 @@ The compiler and runtime enforce these ceilings at the applicable boundaries. Th
 | Fields per record / parameters per capability / enum cases | 16 / 16 / 16 |
 | UTF-8 bytes in each business/model value string | 256 |
 | Source steps / total calls | 8 / 4 |
-| Possible writes | 1 |
+| Possible writes | 1 for event extensions; 0 for decisions |
 | CEL source bytes per expression | 512 |
 | Expanded AST nodes / depth per expression | 64 / 16 |
 | Total expression AST nodes per artifact | 512 |

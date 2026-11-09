@@ -3,6 +3,8 @@
 
 This engineering reference describes the test workload and measured resource behavior. For runtime requirements, see the [Keir specification](../../docs/specs/runtime.md#limits).
 
+The commands below follow the Core 0.3.0 candidate and its model/artifact generation 3 fixtures. A focused check compiled the normal, title and Inventory examples and matched their complete outcomes in Java and Node. The recorded resource measurements below remain historical Keir 2 evidence; this alignment does not rerun or qualify the full resource workload on the new generation.
+
 Run from the root of an isolated checkout with Java 21, Node 24, the Maven wrapper and seeded task-local caches.
 
 ```sh
@@ -29,7 +31,7 @@ On Windows, create the ignored `build/` directory with `New-Item -ItemType Direc
 | Child supervision | 1 direct child at a time, 45 s per real child, 1 MiB combined capture |
 | Containment probes | 1 direct child at a time, 1 s timeout, 16 KiB combined capture |
 
-The public compiler API produces the artifacts used by both runtimes. The two-file CLI independently checks the admitted source byte boundary. The harness verifies the scalar [Keir 2 fixtures](../keir-2/README.md) against their adjacent pins and compares the exact compiler output. Runtime preparation exercises intentionally modified checked expressions at 65 nodes, depth 17 and 513 total nodes. Invocation covers the 256/257-byte title boundary, a 32-leaf concatenation with 8,192 intermediate string bytes, and a Boolean comparison with an oversized intermediate. The shared-model case holds four adapter responses pending before releasing them. Deadline cases release late success only after checking the settled UNKNOWN or earlier CONFIRMED receipt.
+The public compiler API produces the artifacts used by both runtimes. The two-file CLI independently checks the admitted source byte boundary. The harness verifies the current [model](../keir-3/dcm.json) and adjacent fixture pins and compares the exact compiler output. Runtime preparation exercises intentionally modified checked expressions at 65 nodes, depth 17 and 513 total nodes. Invocation covers the 256/257-byte title boundary, a 32-leaf concatenation with 8,192 intermediate string bytes, and a Boolean comparison with an oversized intermediate. The shared-model case holds four adapter responses pending before releasing them. Deadline cases release late success only after checking the settled UNKNOWN or earlier CONFIRMED receipt.
 
 The qualification prints raw JSON. Wall times include host and engine work. Process CPU includes engine and background threads. Standalone parse timings use the same parsers as the public bind and prepare operations, whose timings also include parsing. Node reports endpoint samples of phase heap and RSS plus process peak RSS. Java reports the sum of phase heap memory-pool peaks, which may occur at different times. Both report post-GC heap before and after the workload and with and after releasing the prepared handles. Forced collection happens outside timed samples. Small phases may be shorter than CPU accounting resolution. Compiler CLI startup and exit are reported separately from in-process compilation.
 
@@ -73,7 +75,8 @@ The fixed allowance covers eight step headers at up to 512 bytes each, up to nin
 
 The runtime boundary cases already live in `BoundEffectRuntimeTest.fourCallsAndEightStepsPassButTheirNextValuesFailStatically` and the fixed-ceiling test in `runtime-node/test/bound-effect.test.js`. The serial run adds the current single-write compiler checks.
 
-## Fully evaluated Keir 2 membership workload
+<a id="fully-evaluated-keir-2-membership-workload"></a>
+## Fully evaluated membership workload
 
 After the same offline package preparation, run the opt-in dense phase on Windows.
 
@@ -99,7 +102,7 @@ Probe compilation and artifact production share the first 45-second phase. Each 
 
 ### Recorded bounded sample
 
-The sample used Core source baseline `a79ceba`, Java 21.0.12 and Node 24.14.1 on Windows x64, with CEL-Java 0.14.0, CEL-ES 0.6.1, protobuf-Java 4.35.1 and protobuf-ES 2.6.2. Both runtimes completed all 5,100 invocations and matched the expected artifact and outcome digests. The complete phase finished in 14.064 seconds.
+This historical Keir 2 sample used Core source baseline `a79ceba`, Java 21.0.12 and Node 24.14.1 on Windows x64, with CEL-Java 0.14.0, CEL-ES 0.6.1, protobuf-Java 4.35.1 and protobuf-ES 2.6.2. Both runtimes completed all 5,100 invocations and matched the expected artifact and outcome digests. The complete phase finished in 14.064 seconds.
 
 | Measurement | Java | Node |
 | --- | ---: | ---: |

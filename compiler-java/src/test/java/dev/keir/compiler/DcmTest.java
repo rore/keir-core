@@ -315,7 +315,7 @@ final class DcmTest {
     }
     @SuppressWarnings("unchecked") private static Map<String,?> stringMap(Map<?,?> value) { return (Map<String,?>)value; }
     static Map<String,Object> sample() {
-        return mutable(Map.of("format","keir-dcm/2","hostKey",Map.of("source","requestKey","type","sample.RequestUuid/1"),
+        return mutable(Map.of("format","keir-dcm/3","hostKey",Map.of("source","requestKey","type","sample.RequestUuid/1"),
             "domain",Map.of("id","sample.tasks","version","1"),
             "types",Map.of(
                 "EventId",Map.of("kind","nominal","base","String"),

@@ -2,12 +2,14 @@
 
 The Java library and standalone CLI compile Keir against the application’s domain capability model (DCM). The output is a compiled artifact that refers to the exact model used for validation. [Compile and run the follow-up rule](../examples/README.md#compile-the-rule)
 
+The Core 0.3.0 candidate compiler accepts source `keir/2` with model `keir-dcm/3` and produces `keir-artifact/3`. That model supports post-commit event extensions and read-only pre-operation decisions. Source syntax stays Keir 2. See the [decision walkthrough](../docs/decision-walkthrough.md) and [exact compatibility matrix](../docs/specs/compiler-artifact.md#source-and-artifact-identity).
+
 <a id="legacy-profile-selection"></a>
 For document identities and the Java compiler API, see the [compiler reference](../docs/specs/compiler-artifact.md).
 
 ## Build and run
 
-The build scaffold uses JDK 21, Maven 3.10.0 through the repository wrapper, and Maven Compiler Plugin 3.14.1 with `release=21`. These versions are documented by [Apache Maven](https://maven.apache.org/download.cgi) and the [compiler plugin](https://maven.apache.org/plugins-archives/maven-compiler-plugin-3.14.1/plugin-info.html). The `dev.keir` Maven coordinates are local development coordinates; release coordinates remain undecided.
+The build scaffold uses JDK 21, Maven 3.10.0 through the repository wrapper, and Maven Compiler Plugin 3.14.1 with `release=21`. These versions are documented by [Apache Maven](https://maven.apache.org/download.cgi) and the [compiler plugin](https://maven.apache.org/plugins-archives/maven-compiler-plugin-3.14.1/plugin-info.html). Development builds use the `dev.keir` snapshot coordinates. The [release packages](../docs/releasing.md) carry their versioned compiler JAR and runtime Maven POMs.
 
 From the repository root, in a disposable PowerShell process:
 

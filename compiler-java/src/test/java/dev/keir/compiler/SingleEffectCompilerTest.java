@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SingleEffectCompilerTest {
     private static final KeirCompiler COMPILER = new KeirCompiler();
     private static final KeirCompiler.Environment ENV = KeirCompiler.Environment.supported();
-    private static Path fixture(String name) { return Path.of("..","conformance","keir-2",name); }
+    private static Path fixture(String name) { return Path.of("..","conformance","keir-3",name); }
     private static byte[] bytes(String name) throws IOException { return Files.readAllBytes(fixture(name)); }
     @SuppressWarnings("unchecked") private static Map<String,Object> map(Object value) { return (Map<String,Object>)value; }
     private static Map<String,Object> source() throws IOException {

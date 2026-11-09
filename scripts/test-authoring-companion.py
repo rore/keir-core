@@ -1,6 +1,7 @@
 """Offline checks for the authoring companion command line."""
 
 import hashlib
+from copy import deepcopy
 import io
 import json
 import os
@@ -21,6 +22,8 @@ SCRIPT = Path(__file__).with_name("authoring-companion.py")
 V1_PIN = "sha256:8e365ff0d14fb0c479e43ace36e941562c94577f793a86b720d54e20622547b6"
 V2_GUIDE_PIN = "sha256:22f3aba081b5653f7f5d4fff8861afe606c840ce56d9b26d7464ffc08ee8ab1d"
 V3_RELEASE_REVISION = "e298e7a4015ea527fca107972aaf2054fd77255b"
+V4_RELEASE_REVISION = "c6a6d171982514569c29c06de7a429d301d25b2a"
+V4_PIN = "sha256:4a9f4f30212ff1d722cf6c993902d0802bee7e7ffebc00304102a5964b5bec63"
 
 
 def command(*args):
@@ -277,6 +280,13 @@ class AuthoringCompanionV3Test(unittest.TestCase):
 
 
 class AuthoringCompanionV4Test(unittest.TestCase):
+    def test_published_archive_bytes_remain_exact(self):
+        module = runpy.run_path(str(SCRIPT))
+        payload = {name: module["read_blob"](V4_RELEASE_REVISION, name) for name in module["V4_FILES"]}
+        compatibility = json.loads(module["read_blob"](V4_RELEASE_REVISION, module["V4_COMPATIBILITY"]))
+        data = module["make_pinned_archive"](4, V4_RELEASE_REVISION, compatibility, payload)
+        self.assertEqual(digest(data), V4_PIN)
+
     def test_inventory_and_exact_example_pins(self):
         module = runpy.run_path(str(SCRIPT))
         root = SCRIPT.resolve().parents[1]
@@ -295,6 +305,146 @@ class AuthoringCompanionV4Test(unittest.TestCase):
         payload[module["V4_MODEL"]] += b" "
         with self.assertRaisesRegex(ValueError, "example or compiler pin"):
             make_archive(4, revision, compatibility, payload)
+
+
+class AuthoringCompanionV5Test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.module = runpy.run_path(str(SCRIPT))
+        root = SCRIPT.resolve().parents[1]
+        build = root / "build"
+        build.mkdir(exist_ok=True)
+        directory = tempfile.TemporaryDirectory(dir=build)
+        cls.addClassCleanup(directory.cleanup)
+        cls.directory = Path(directory.name)
+        cls.payload = {name: (root / name).read_bytes() for name in cls.module["V5_FILES"]}
+        cls.revision = git("rev-parse", "HEAD").decode().strip()
+        cls.compatibility = {"status": "candidate", "coreRevision": cls.revision, "packages": {}}
+        cls.data = cls.module["make_pinned_archive"](5, cls.revision, cls.compatibility, cls.payload)
+        cls.path = cls.directory / "v5.zip"
+        cls.path.write_bytes(cls.data)
+
+    def test_inventory_determinism_and_offline_verification(self):
+        self.assertEqual(self.module["make_pinned_archive"](5, self.revision, self.compatibility, self.payload), self.data)
+        self.assertLessEqual(len(self.data), self.module["MAX_ARCHIVE_BYTES"])
+        with zipfile.ZipFile(self.path) as archive:
+            manifest = json.loads(archive.read("manifest.json"))
+            self.assertEqual(manifest["format"], "keir-authoring-companion/5")
+            self.assertEqual(manifest["producer"], "keir-compiler-java/0.3.0")
+            self.assertEqual(manifest["contracts"], {
+                "language": "keir/2", "dcm": "keir-dcm/3", "artifact": "keir-artifact/3", "scenario": "keir-scenario/3",
+            })
+            self.assertEqual(manifest["compatibility"], self.compatibility)
+            self.assertEqual(archive.namelist(), sorted([*self.payload, "manifest.json"]))
+            for name, data in self.payload.items():
+                self.assertEqual(archive.read(name), data)
+                self.assertEqual(manifest["files"][name], {"bytes": len(data), "digest": digest(data)})
+        result = subprocess.run(
+            [sys.executable, SCRIPT, "verify", self.path, "--version", "5", "--sha256", digest(self.data)],
+            cwd=self.directory, env={**os.environ, "PATH": ""}, capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotEqual(command("verify", self.path, "--version", "4", "--sha256", digest(self.data)).returncode, 0)
+        changed = self.directory / "changed.zip"
+        changed.write_bytes(self.data + b"trailing")
+        for pin in (digest(self.data), digest(changed.read_bytes())):
+            result = command("verify", changed, "--version", "5", "--sha256", pin)
+            self.assertNotEqual(result.returncode, 0)
+
+    def test_rejects_every_example_tuple_mismatch(self):
+        module = self.module
+        make_archive = module["make_pinned_archive"]
+        stem = f'{module["V5_FIXTURES"]}/artifact-guard-input'
+        for field, value in (
+            ("format", "keir-artifact/2"), ("compiler", "keir-compiler-java/0.2.0"),
+            ("modelRef.format", "keir-dcm/2"), ("modelRef.digest", digest(b"wrong model")),
+            ("modelRef.descriptorRecipe", "keir-record-descriptors/1"),
+            *((f"environment.{name}", "wrong") for name in ("celJava", "celNode", "protobufJava", "protobufNode")),
+        ):
+            with self.subTest(field=field):
+                payload = dict(self.payload)
+                artifact = json.loads(payload[f"{stem}.json"])
+                target = artifact
+                parts = field.split(".")
+                for part in parts[:-1]:
+                    target = target[part]
+                target[parts[-1]] = value
+                payload[f"{stem}.json"] = module["json_bytes"](artifact)
+                payload[f"{stem}.sha256"] = digest(payload[f"{stem}.json"]).encode()
+                with self.assertRaisesRegex(ValueError, "example or producer tuple"):
+                    make_archive(5, self.revision, self.compatibility, payload)
+        for path in (module["V5_MODEL"], f"{stem}.json"):
+            payload = dict(self.payload)
+            payload[path] += b" "
+            with self.subTest(pin=path), self.assertRaises(ValueError):
+                make_archive(5, self.revision, self.compatibility, payload)
+        for path, field, value in (
+            (f'{module["V5_FIXTURES"]}/source-guard.json', "language", "keir/1"),
+            (module["V5_SCENARIOS"][0], "format", "keir-scenario/2"),
+        ):
+            payload = dict(self.payload)
+            document = json.loads(payload[path])
+            document[field] = value
+            payload[path] = module["json_bytes"](document)
+            with self.subTest(document=path), self.assertRaises(ValueError):
+                make_archive(5, self.revision, self.compatibility, payload)
+        payload = {**self.payload, module["V5_SCENARIOS"][0]: b"[]"}
+        with self.assertRaisesRegex(ValueError, "scenario format"):
+            make_archive(5, self.revision, self.compatibility, payload)
+
+    def test_rejects_changed_source_with_unchanged_artifact(self):
+        for case in self.module["V5_PROGRAMS"]:
+            path = f'{self.module["V5_FIXTURES"]}/source-{case}.json'
+            payload = dict(self.payload)
+            source = json.loads(payload[path])
+            source["name"] = "changed-without-recompilation"
+            payload[path] = self.module["json_bytes"](source)
+            with self.subTest(source=path), self.assertRaisesRegex(ValueError, "example or producer tuple"):
+                self.module["make_pinned_archive"](5, self.revision, self.compatibility, payload)
+
+    def test_build_provenance_and_exact_release_assets(self):
+        module = self.module
+        assets = self.directory / "assets"
+        assets.mkdir()
+        release = {"status": "release", "coreRevision": self.revision, "packages": {}}
+        for role, template in module["RELEASE_ASSETS"].items():
+            name = template.format("0.3.0")
+            data = role.encode()
+            (assets / name).write_bytes(data)
+            release["packages"][role] = {"version": "0.3.0", "assets": {name: digest(data)}}
+        for role, template in module["RELEASE_ASSETS"].items():
+            record = deepcopy(release)
+            record["packages"][role] = {"version": "0.2.0", "assets": {template.format("0.2.0"): digest(b"old")}}
+            with self.subTest(package=role), self.assertRaisesRegex(ValueError, "Core 0.3.0"):
+                module["make_pinned_archive"](5, self.revision, record, self.payload)
+
+        def read_blob(_revision, name):
+            return module["json_bytes"](release) if name == module["V5_COMPATIBILITY"] else self.payload[name]
+
+        build = module["build_pinned"]
+        with patch.dict(build.__globals__, read_blob=read_blob):
+            with self.assertRaisesRegex(ValueError, "full Git commit"):
+                build(5, "HEAD", None)
+            blob = git("rev-parse", "HEAD:README.md").decode().strip()
+            with self.assertRaisesRegex(ValueError, "must be a Git commit"):
+                build(5, blob, None)
+            with self.assertRaisesRegex(ValueError, "requires --core-assets"):
+                build(5, self.revision, None)
+            release_data = build(5, self.revision, assets)
+            path = self.directory / "release.zip"
+            path.write_bytes(release_data)
+            module["verify"](5, path, digest(release_data), assets)
+            release["coreRevision"] = V3_RELEASE_REVISION
+            with self.assertRaisesRegex(ValueError, "inputs differ"):
+                build(5, self.revision, assets)
+            release["coreRevision"] = self.revision
+            name = module["RELEASE_ASSETS"]["nodeRuntime"].format("0.3.0")
+            (assets / name).write_bytes(b"changed")
+            with self.assertRaisesRegex(ValueError, "digest does not match"):
+                build(5, self.revision, assets)
+            (assets / name).unlink()
+            with self.assertRaises(FileNotFoundError):
+                build(5, self.revision, assets)
 
 
 if __name__ == "__main__":

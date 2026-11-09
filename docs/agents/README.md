@@ -8,9 +8,11 @@ Keir’s compiler and runtime work independently of an assistant. Start with the
 | --- | --- | --- |
 | Application developer with a coding assistant | Define when extensions run, what operations they can call, and how your app implements those operations. | [Design a host integration](host-integration-assistant.md) |
 | Application developer building an in-app assistant | Give customers a way to draft extensions and review simulated behavior before approval and activation. | [Build a customer authoring assistant](extension-assistant.md) |
-| Customer authoring assistant | Follow model-facing instructions for drafting, checking and handing back a proposed extension. | [Authoring guide](customer-authoring-guide-v3.md) · [Build and verify the companion](authoring-companion.md) |
+| Customer authoring assistant | Follow model-facing instructions for drafting, checking and handing back a proposed extension. | [Edition 5 candidate guide](customer-authoring-guide-v5.md) · [Build and verify the companion](authoring-companion.md) |
 | Contributor working on Keir itself | Build and test the repository and follow its development workflow. | [Contributing](../../CONTRIBUTING.md) · [Repository agent instructions](../../AGENTS.md) |
 
-The [authoring companion](authoring-companion.md) packages the guide, schemas and example scenarios as a versioned ZIP. Supply your application’s exact published domain capability model (DCM), policy and scoped tool definitions separately.
+Choose the guide matching the host's packages and model. Edition 5 targets the Core 0.3.0 candidate and `/3` model/artifact contract. Released Core 0.2.0 uses the [edition 4 guide](customer-authoring-guide-v4.md). Earlier guides are historical; do not use them as instructions for current authoring.
+
+The [authoring companion](authoring-companion.md) packages the guide, schemas and example scenarios as a versioned ZIP. Supply your application's exact published domain capability model (DCM), policy and scoped tool definitions separately.
 
 The [embedding guide](../embedding.md) shows how an application calls the compiler and runtime. The application implements its authoring tools and owns tool access, approval and activation.

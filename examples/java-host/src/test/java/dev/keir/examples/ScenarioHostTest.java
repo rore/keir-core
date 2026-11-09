@@ -22,6 +22,25 @@ class ScenarioHostTest {
         assertEquals(20, count);
     }
 
+    @Test void currentCorpusUsesBothEventReportsAndDecisionConsumers() throws Exception {
+        var current = new ScenarioHost(root, System.getenv("KEIR_SCENARIO_PYTHON"), root.resolve("conformance/keir-3"));
+        int events = 0, decisions = 0;
+        for (String group : ScenarioHost.GROUPS) events += current.verifyGroup(group).size();
+        for (String group : ScenarioHost.GUARD_GROUPS) {
+            var rows = current.verifyGroup(group);
+            decisions += rows.size();
+            for (var row : rows) {
+                var nativeHost = new DecisionContinuationTest.Host();
+                nativeHost.operate(row.get("outcome"), () -> {}, false);
+                same(nativeHost.consumption, row.get("consumption"), "Native gate consumed a different decision");
+                assertEquals("ALLOWED".equals(object(row.get("consumption")).get("status")) ? 1 : 0,
+                        nativeHost.nativeAttempts, (String)row.get("id"));
+            }
+        }
+        assertEquals(20, events);
+        assertEquals(11, decisions);
+    }
+
     @Test void teachingVectorsReachTheirFirstFailureWithNoDispatch() throws Exception {
         var manifest = object(EffectJson.parse(Files.readAllBytes(host.corpus().resolve("scenario-vectors.json"))));
         var vectors = array(manifest.get("vectors")).stream().filter(item -> {
@@ -47,6 +66,18 @@ class ScenarioHostTest {
                     assertEquals(0, host.dispatchCount, id);
                 }
             }
+        }
+    }
+
+    @Test void rejectsScenarioRevisionOutsideTheTrustedCorpusBeforeDispatch() throws Exception {
+        var current = new ScenarioHost(root, System.getenv("KEIR_SCENARIO_PYTHON"), root.resolve("conformance/keir-3"));
+        for (var selected : List.of(host, current)) {
+            var document = object(EffectJson.parseScenario(Files.readAllBytes(selected.corpus().resolve("scenarios/main/normal.json"))));
+            document.put("format", selected == host ? "keir-scenario/3" : "keir-scenario/2");
+            var failure = assertThrows(IllegalArgumentException.class,
+                    () -> selected.verify("main", List.of(EffectJson.encode(document)), null));
+            assertEquals("Scenario structure rejected by shared schema", failure.getMessage());
+            assertEquals(0, selected.dispatchCount);
         }
     }
 

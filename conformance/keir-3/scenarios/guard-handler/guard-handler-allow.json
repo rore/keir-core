@@ -1,0 +1,79 @@
+{
+  "format": "keir-scenario/3",
+  "id": "guard-handler-allow",
+  "given": {
+    "input": {
+      "restricted": false
+    },
+    "fixture": "normal"
+  },
+  "stubs": [
+    {
+      "step": "policy",
+      "capability": "policy.get",
+      "version": "1",
+      "args": {},
+      "protectedArgs": {
+        "actorId": "user1"
+      },
+      "response": {
+        "kind": "BUSINESS_REJECTION",
+        "code": "ACCESS_DENIED"
+      }
+    }
+  ],
+  "expect": {
+    "outcome": {
+      "classification": "BUSINESS_REJECTION",
+      "result": {
+        "decision": "ALLOW",
+        "message": "Handled rejection."
+      },
+      "error": {
+        "code": "ACCESS_DENIED",
+        "path": "/steps/0"
+      },
+      "effects": [],
+      "trace": [
+        {
+          "sequence": 0,
+          "event": "INVOCATION_START"
+        },
+        {
+          "sequence": 1,
+          "event": "STEP_START",
+          "step": "policy"
+        },
+        {
+          "sequence": 2,
+          "event": "CALL_DISPATCHED",
+          "step": "policy",
+          "capability": "policy.get"
+        },
+        {
+          "sequence": 3,
+          "event": "RETURNED"
+        },
+        {
+          "sequence": 4,
+          "event": "TERMINATED",
+          "code": "ACCESS_DENIED"
+        }
+      ]
+    },
+    "calls": [
+      {
+        "step": "policy",
+        "capability": "policy.get",
+        "version": "1",
+        "args": {},
+        "protectedArgs": {
+          "actorId": "user1"
+        }
+      }
+    ],
+    "consumption": {
+      "status": "BLOCKED"
+    }
+  }
+}

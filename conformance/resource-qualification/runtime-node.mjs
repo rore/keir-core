@@ -7,7 +7,7 @@ import { boundFixture } from '../../runtime-node/test/bound-fixture.js';
 
 const [, , directory, manifest] = process.argv;
 const read = name => readFileSync(join(directory, name));
-const { limits, dcmMax, dcmOver, wideModel, admissible } = JSON.parse(read(manifest));
+const { limits, dcmMax, dcmOver, titleModel, wideModel, admissible } = JSON.parse(read(manifest));
 const { warmups, repeats, handles, adapterMs, soak } = limits;
 const timings = {}, facts = {};
 const retainedByBlock = {};
@@ -136,7 +136,7 @@ for (const id of ['value-max', 'value-over']) {
 assert.equal(base.calls.length + noCall.calls.length, 0, 'Unexpected dispatch during static or no-call probes');
 
 const title = boundFixture(api, { program: 'title' });
-const titleBound = await measure('bind-title', () => bind(title.dcmBytes, title));
+const titleBound = await measure('bind-title', () => bind(read(titleModel), title));
 for (const id of ['title-256', 'title-257', 'concat', 'boolean-valid', 'boolean-over']) {
   const program = id.startsWith('title') ? 'title' : id.startsWith('boolean') ? 'boolean' : id;
   const bytes = read(program + '.json');

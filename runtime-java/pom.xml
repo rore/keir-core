@@ -19,6 +19,7 @@
   <build>
     <testResources>
       <testResource><directory>${project.basedir}/../conformance/keir-2</directory><targetPath>keir-2</targetPath></testResource>
+      <testResource><directory>${project.basedir}/../conformance/keir-3</directory><targetPath>keir-3</targetPath></testResource>
     </testResources>
   </build>
 </project>

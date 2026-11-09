@@ -1,49 +1,48 @@
 # Keir specification
 
-The specification defines the documents Keir accepts and how a compiled extension runs. For a walkthrough, [get started](../quickstart.md) or [embed Keir](../embedding.md).
-
-## Keir 2
-
-The checkout examples use the `/2` source, model, artifact and scenario formats. The Keir 2 reference defines bounded list membership, optional values and elapsed time, and identifies the matching Core 0.2.0 compiler and runtimes. [Keir 2 workflow expressions](workflow-expressions.md) · [Version matrix](workflow-expressions.md#version-matrix)
+The specification defines the language, host model, compiled artifact and execution rules. Start with [Getting started](../quickstart.md) or [Embed Keir](../embedding.md) for a walkthrough.
 
 <a id="current-profile"></a>
 <a id="current-behavior"></a>
-## Keir 1 baseline
+## Current contract
 
-Keir 1 runs after a host event commits. An extension can read data and contain at most one possible write, including writes behind guards. Both Java and Node.js can run the same compiled bytes with real or simulated host implementations. The host owns permissions and native commits.
+These primary references describe the Core 0.3.0 candidate. Its compiler accepts source `keir/2` against `keir-dcm/3` and produces `keir-artifact/3`. The package and companion edition 5 remain unreleased until qualification and verified release assets are available. For released Core 0.2.0, use the [matching specification snapshot](https://github.com/rore/keir-core/tree/43f28600d8db460db6f22b48c2d4c2c0de9c52b7/docs/specs) and [edition 4 companion](../agents/customer-authoring-guide-v4.md).
 
-These references describe Core 0.1.0 and its `/1` formats. Use them with the Keir 1 compiler and runtimes. [Keir 1 document and compiler identities](compiler-artifact.md#source-and-artifact-identity)
+The host chooses one of two lifecycles. An event extension runs after the original operation commits and may contain at most one possible write. A pre-operation decision runs before the native operation, may only read, and returns a typed `ALLOW` or `DENY`. The host consumes that decision and retains its native permission, consistency and commit checks. Both runtimes execute the same artifact bytes.
 
-| Topic | Contract |
+| Topic | Reference |
 | --- | --- |
-| Source, types, guards, and data flow | [Language](language.md) |
-| Hooks, capabilities, and call and write policy | [Domain capability model](domain-model.md) |
-| Compilation, diagnostics, and serialized artifact | [Compiler and artifact](compiler-artifact.md) |
-| Node and Java APIs, adapter context, and native key | [Host binding and invocation](host-model-binding.md) |
-| Execution, limits, outcomes, and traces | [Runtime semantics](runtime.md) |
-| Verification scenario format and acceptance | [Verification scenarios](single-effect.md#ordered-simulation-protocol-and-acceptance) |
+| Source, types, expressions, guards and data flow | [Language](language.md) |
+| Hooks, capabilities, types and call limits | [Domain capability model](domain-model.md) |
+| Compilation, diagnostics, formats and compatibility | [Compiler and artifact](compiler-artifact.md) |
+| Java and Node APIs, protected context and native key | [Host binding and invocation](host-model-binding.md) |
+| Execution, limits, outcomes and write evidence | [Runtime semantics](runtime.md) |
+| Lists, optional values, elapsed time and descriptor recipe | [Workflow expressions](workflow-expressions.md) |
+| Pre-operation decision and host commit obligations | [Decision contract](pre-operation-decisions.md) · [Walkthrough](../decision-walkthrough.md) |
+| Ordered simulation and outcome consumption | [Verification scenarios](single-effect.md#ordered-simulation-protocol-and-acceptance) |
 
-The [source](../../schemas/source-1/source.schema.json), [DCM](../../schemas/dcm-1/dcm.schema.json), [artifact](../../schemas/artifact-1/artifact.schema.json), and [scenario](../../schemas/scenario-1/scenario.schema.json) schemas validate document structure. This specification defines semantic rules such as matching types, available values and permitted effects.
-
-The [structural checker](../../scripts/check-keir-contracts.py) checks document shape. The [compiler tests](../../compiler-java/src/test/java/dev/keir/compiler/GenericHookCompilerTest.java) check source and model semantics. The [shared scenarios](../../conformance/keir-1/README.md) check invocation outcomes and write evidence in both runtimes. See [verification and resource evidence](../testing.md#current-single-write-behavior-verification) for the tested scope.
+The [format matrix](compiler-artifact.md#source-and-artifact-identity) identifies the structural schemas. Schemas check document shape; these references also define typing, availability, lifecycle and permitted effects. [Conformance fixtures](../../conformance/README.md) and [verification records](../testing.md) identify actual tested scope.
 
 ## Compatibility
 
-Each identifier versions one contract. A change to its accepted structure or meaning changes the identity of that contract.
+Each identifier versions one contract independently.
 
 | Identifier | What it governs |
 | --- | --- |
-| `keir/1` | Extension source syntax, typing and meaning. |
-| `keir-dcm/1` | The model's structure and the meaning of its types, hooks, capabilities and limits. |
-| `keir-artifact/1` | The compiler output's encoding and what runtimes do when they execute it. |
-| `keir-scenario/1` | The test document's structure and the meaning of its fixtures and expectations. |
+| `keir/2` | Source syntax, typing and expression meaning. |
+| `keir-dcm/3` | Host model structure, types, hooks, capabilities and lifecycle rules. |
+| `keir-artifact/3` | Compiler output encoding and execution meaning. |
+| `keir-scenario/3` | Simulation inputs and expected outcomes, calls and consumption. |
+| `keir-record-descriptors/2` | Derivation of typed protobuf records used by CEL. |
 
-These contracts version independently. For example, a new source syntax can keep the same artifact format if it compiles to instructions with unchanged meaning. A change in the meaning of those instructions requires a new artifact identity even if their encoding stays the same.
+Package versions identify compiler and runtime releases. Equal suffixes or package version numbers alone establish no compatibility. Preparation checks the complete artifact/model/producer/descriptor/environment tuple. Binding also checks the capability versions and native key type supplied by the host.
 
-Package versions identify releases of the compiler and runtimes. Choose a tested combination from the release documentation. The shared `/1` suffix and matching package version numbers alone establish no compatibility. The compiler checks the source's exact model identity. At preparation, the runtime checks the artifact format, producer, dependency environment and model reference against the bound model. The host also supplies the exact capability versions declared in that model. A host-owned domain or capability version describes the host's business contract, independently of the Keir document formats. [Artifact identity](compiler-artifact.md#source-and-artifact-identity) · [Core package record](../agents/authoring-companion-v3-compatibility.json)
+Runtime 0.3.0 supports two exact execution pairs: existing `/2` artifacts and models from compiler 0.2.0, and new `/3` artifacts and models from compiler 0.3.0. Both use descriptor recipe `/2` and the exact dependency pins. Mixed pairs fail. Compiler 0.3.0 authors only against `/3` models; retaining old artifacts is an execution path, not a second authoring compiler mode. See the [exact matrix](compiler-artifact.md#source-and-artifact-identity).
 
-Current tooling rejects earlier preview formats. To adopt the current contract, bring the source and model into the supported formats, compile again, and review the new artifact before approval. Keep old artifacts and approvals with their original bytes. [Earlier formats and APIs](../internal/history/README.md)
+Keep existing approved artifacts with their original model snapshots and bytes. Publish the current authoring catalog as `/3`; compile and review new or edited extensions against it. Recompilation creates a new artifact requiring its own approval. Package installation must not silently recompile or deactivate existing selected extensions.
+
+Earlier `/1` and preview contracts require their matching historical tooling. Current tooling rejects them. See [documentation history](../internal/history/README.md) and the [Core 0.1.0 specification snapshot](https://github.com/rore/keir-core/tree/0cae8d4417e19882e4355960b168f49d092f18e6/docs/specs).
 
 ## Maintaining a contract
 
-Specify feature changes in the affected versioned contracts. Update the applicable schemas, fixtures, and Java and Node conformance evidence together. Keep design rationale in [engineering records](../internal/README.md), future scope in the [roadmap](../../roadmap/scope.md), and usage guidance in the [documentation index](../README.md).
+Update affected specifications, schemas, fixtures and Java/Node conformance together. Keep rationale in [engineering records](../internal/README.md), future scope in the [roadmap](../../roadmap/scope.md), and usage guidance in the [documentation index](../README.md).

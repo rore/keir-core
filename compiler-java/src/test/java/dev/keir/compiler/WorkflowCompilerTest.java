@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WorkflowCompilerTest {
-    private static final Path CORPUS = Path.of("..", "conformance", "keir-2");
+    private static final Path CORPUS = Path.of("..", "conformance", "keir-3");
     private static final KeirCompiler COMPILER = new KeirCompiler();
     private static final KeirCompiler.Environment ENV = KeirCompiler.Environment.supported();
 

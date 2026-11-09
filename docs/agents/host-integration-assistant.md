@@ -9,7 +9,7 @@ Supply the assistant with authorized host requirements and interface or source d
 
 Expose reusable native operations, not the customization being demonstrated: `tasks.create` creates a task; the extension supplies its project/title and decides that creation is a follow-up. Do not hide the program's eligibility or composition in a special adapter. Domain-specific atomic operations remain valid when they are actual host contracts. See the [capability ownership rule](../specs/generic-hook-capability-contract.md#responsibility-boundaries).
 
-Design hooks around inputs, outputs, lifecycle and write limits. Use the [DCM reference](../specs/domain-model.md) and its [schema](../../schemas/dcm-1/dcm.schema.json).
+Design hooks around inputs, outputs, lifecycle and write limits. Use the [DCM reference](../specs/domain-model.md) for meaning and the [format matrix](../specs/compiler-artifact.md#source-and-artifact-identity) for matching schemas.
 
 An adapter can call a local service or a remote API. Keep routing, credentials, trusted identity propagation, deadlines and result mapping in the host. A timed-out remote write may still commit. Preserve that uncertainty for the host to reconcile. See the [dispatch boundary](../specs/generic-hook-capability-contract.md#capability-invocation-across-services).
 
@@ -22,6 +22,14 @@ Preserve the host-defined payload, including fields this extension does not use.
 3. Connect the complete catalog using the [binding API](../specs/host-model-binding.md). Propose conformance cases for the real adapters, including denial and uncertain-write outcomes.
 4. Use the [compiler library or CLI](../../compiler-java/README.md) and [shared conformance fixtures](../../conformance/README.md) to check the proposal with the developer.
 5. Submit an exact proposed revision for host-owner approval and publication; identify outstanding native guarantees without presenting engineering evidence as a runtime credential.
+
+## Pre-operation decisions
+
+Use REQUEST/BEFORE_COMMIT/DECISION for a supported authoritative decision. Discover the hook and operations in the host model; do not assume business-specific capabilities. The output is a closed host record with required `decision`, an enum containing exactly ALLOW and DENY. Other declared bounded scalar fields can carry plain-text explanations. The hook permits no possible WRITE, including false-guarded calls.
+
+Use the existing binding and invocation methods. Authenticate and snapshot the proposed operation in host code, consume the host's own outcome, and block DENY or any failed evaluation. Handled BUSINESS_REJECTION with ALLOW is still failed evaluation. Authoritative no binding follows the native path; selected-but-unavailable blocks.
+
+After ALLOW, recheck selection, approval, permissions, business invariants and mutable read facts at native commit. Keep original context, reserve native time within the enclosing deadline, and close cancelled attempts so late results cannot continue. Require actual read consistency evidence for authoritative remote facts. Observe native attempts and persistence separately from the decision. [Walkthrough](../decision-walkthrough.md) · [Complete contract](../specs/pre-operation-decisions.md)
 
 ## Authority and tools
 

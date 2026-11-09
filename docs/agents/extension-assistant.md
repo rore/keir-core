@@ -1,13 +1,13 @@
 <a id="customer-extension-assistant"></a>
 # Build a customer authoring assistant
 
-Use the [model-facing guide](customer-authoring-guide-v3.md) as instructions for an assistant in your application. The [authoring companion](authoring-companion.md) packages the guide with schemas and a worked example.
+Use the [edition 5 candidate guide](customer-authoring-guide-v5.md) for a host adopting Core 0.3.0. Released Core 0.2.0 uses the [edition 4 guide](customer-authoring-guide-v4.md). The [authoring companion](authoring-companion.md) records the exact package and document combination.
 
 ## Task and inputs
 
 Give the assistant the exact model approved for the customer, including hooks, capabilities, result contracts, types and limits. Give it separate access to the authoring tools you want it to use. For example, the follow-up extension chooses a project and title and calls the app’s existing `tasks.create` operation. The project choice belongs in source. Resource permissions belong to the application.
 
-Use the [language reference](../specs/language.md) and [domain capability model reference](../specs/domain-model.md) to understand expression, type and call rules. Use the [schemas bundled with the guide](customer-authoring-guide-v3.md#follow-up-example) to check document structure.
+Use the [language reference](../specs/language.md) and [domain capability model reference](../specs/domain-model.md) to understand expression, type and call rules. Use the matching schemas identified by the [format matrix](../specs/compiler-artifact.md#source-and-artifact-identity) to check document structure.
 
 ## Workflow
 
@@ -28,6 +28,12 @@ A customer asks for a follow-up when someone completes a task in the launch proj
 2. **`compileDraft`** compiles against that exact model. If the draft declares the selected project as a plain string, the compiler reports `NOMINAL_MISMATCH` at the project comparison. The assistant changes the declaration to a typed `ProjectId` literal and compiles again.
 3. **`simulateDraft`** takes the compiled artifact and runs it with the app’s simulated operations. The assistant compares against agreed expectations for a matching task, a task in another project, and a lost write response.
 4. **`submitForReview`** presents the exact artifact, the expected and observed outcomes, and the write receipts. The customer can review the result. The host handles approval and activation separately for that revision.
+
+### Author a pre-operation decision
+
+Discover a REQUEST/BEFORE_COMMIT/DECISION hook in the host's current model. Read its input and result, then compose approved READs if the request needs more facts. Compile against that exact model. A WRITE is rejected even when guarded by false; repair the draft without replacing the requested decision with a mutation.
+
+Agree on ALLOW, DENY, failed read, timeout and changed-fact cases before simulation. Report the runtime result, decision consumption and native result separately. A handled BUSINESS_REJECTION returning ALLOW still blocks. Present the exact artifact and evidence for approval and activation. The [neutral walkthrough](../decision-walkthrough.md) follows this flow; discovery, compilation, simulation and review tool names and permissions are defined by your application.
 
 ## Authority and tools
 

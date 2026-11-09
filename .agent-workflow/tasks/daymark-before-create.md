@@ -48,14 +48,24 @@ No persistence or bypass -> real service/API/adapter tests asserting task/event/
 **Plan review:**
 Agent technical review: independent Core/host-seam review passed design 9d2e593dc2215181593d467873e92cd0117bf402; manager inspected and accepted the designer's retained-form and inline simulation direction. The host native identity/readback contract remains a bounded dependency: implement approved UI, projection and coordinator structure independently, but do not enable unknown-save retry or claim recovery until the architect's focused design and review close it.
 
+Independent manager review subsequently accepted the focused host protocol at 1c0f6c34249dad1d7d6f2c2085c664129abd2e93: owner-scoped exact-candidate replay, atomic task/event/terminal result, absent readback as unresolved, current access checks, historical receipt versus current task rendering, and actual reset/session handling. Implementation of this bounded protocol is authorized; its persistence, race and browser verification remains required.
+
 **Approvals:**
 User authorized this slice, generic framework separation, proper QA and completion. No new environment changes or public visibility change are authorized.
 
 **State:**
-Ready to implement
+Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 Planning initialized before semantic implementation. Final design review resolves the implementation dependency; this is not a new user approval request.
+
+The final unpublished implementation candidate is integrated from its exact 83-file manifest. The integration owner checked every file hash, confirmed the manifest covers the entire change set, installed dependencies offline and passed the build/typecheck. Its browser bundle digest matches the independently reviewed rendered candidate. Candidate compiler/runtime/guide provenance remains explicitly unpublished; this is not an official asset or rollout claim.
+
+All three requested rules compile, simulate, approve, activate and demonstrate native denial/correction using real Core 0.3 components. Regression coverage includes existing approved generation-2 event execution alongside a generation-3 guard, expected self-change after a negative existence read, independent fact changes, permission/selection/deadline/cancellation failures and preserved native input boundaries. The owner reports 513 Node tests passed, 13 documented default skips, all 12 explicit process tests passed, and 229 unique browser cases passed across completed split runs. After the final display-only heading correction, all 16 focused real guard/Studio tests passed again. The integration owner inspected the summary, final logs and real guard test paths and reused that evidence rather than rerunning the full suites.
+
+Independent native-form and combined Studio presentation reviews are accepted. Both native recovery findings and the technical example-heading finding are closed on exact source hashes. Reviews covered desktop, 320-pixel and short-screen layouts, retained input/focus, separate approval and activation, mixed check/action collections and truthful decision-versus-save results. The final heading preserves exact identifiers in Details.
+
+A bounded configured-provider authoring check is prepared for an isolated database with a small test-local spending limit. Automatic approval review rejected credential use and billable provider calls without direct human authorization; no credential was read and no request or charge occurred. The integration owner holds one explicit approval request for that scope. Live AI authoring is not qualified by the scripted-provider/browser evidence. Final official package/guide pins, actual release smoke, preserved-data rollout and running-demo verification remain open.
 

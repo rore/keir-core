@@ -71,7 +71,7 @@ export function narrowPolicy(dcm, policy, previous, path) {
 
 export function validateModel(dcm, p) {
   shape(dcm, ['format', 'domain', 'types', 'capabilities', 'entrypoints', 'hostKey'], p);
-  requireThat(dcm.format === 'keir-dcm/2', p);
+  requireThat(dcm.format === 'keir-dcm/2' || dcm.format === 'keir-dcm/3', p);
   requireThat(canonicalBytes(dcm).length <= LIMITS.dcmBytes, p, 'BUDGET_EXCEEDED');
   shape(dcm.domain, ['id', 'version'], p + '/domain');
   text(dcm.domain.id, p, true); text(dcm.domain.version, p, true);
@@ -134,16 +134,26 @@ export function validateModel(dcm, p) {
     const entry = dcm.entrypoints[id];
     shape(entry, ['input', 'output', 'trigger', 'consumer', 'placement', 'event',
       ...['capabilityPolicy', 'effectGrant'].filter(field => Object.hasOwn(entry, field))], p);
-    requireThat(record(entry.input) && record(entry.output) && entry.trigger === 'EVENT', p);
-    requireThat(entry.placement === 'AFTER_COMMIT', p);
-    if (Object.hasOwn(entry, 'effectGrant')) integer(entry.effectGrant, 1, p, 0);
-    effectGrants[id] = entry.effectGrant ?? 1;
+    requireThat(record(entry.input) && record(entry.output), p);
     shape(entry.event, ['idType', 'sourceType'], p);
     requireThat(typeof entry.event.idType === 'string' && typeof entry.event.sourceType === 'string' &&
       dcm.types[entry.event.idType]?.kind === 'nominal' && dcm.types[entry.event.sourceType]?.kind === 'nominal', p);
     shape(entry.consumer, ['id', 'version', 'kind'], p);
     named(entry.consumer.id, p, true); text(entry.consumer.version, p, true);
-    requireThat(entry.consumer.kind === 'EVENT_REPORT', p);
+    const decision = entry.consumer.kind === 'DECISION';
+    if (decision) {
+      requireThat(dcm.format === 'keir-dcm/3' && entry.trigger === 'REQUEST' && entry.placement === 'BEFORE_COMMIT', p);
+      const field = dcm.types[entry.output].fields.decision;
+      const type = typeof field === 'string' ? dcm.types[field] : undefined;
+      requireThat(type?.kind === 'enum' && type.values.length === 2 &&
+        type.values.includes('ALLOW') && type.values.includes('DENY'), p);
+      requireThat(Object.values(dcm.types[entry.output].fields)
+        .every(declaration => scalar(fieldType(declaration))), p);
+    } else {
+      requireThat(entry.trigger === 'EVENT' && entry.placement === 'AFTER_COMMIT' && entry.consumer.kind === 'EVENT_REPORT', p);
+    }
+    if (Object.hasOwn(entry, 'effectGrant')) integer(entry.effectGrant, decision ? 0 : 1, p, 0);
+    effectGrants[id] = entry.effectGrant ?? (decision ? 0 : 1);
     policies[id] = narrowPolicy(dcm, entry.capabilityPolicy, Object.fromEntries(Object.keys(dcm.capabilities).map(cap => [cap, LIMITS.calls])), p);
   }
   return { scalar, valueType, policies, effectGrants };
@@ -195,10 +205,12 @@ export function validateEnvelope(artifact, bound) {
   shape(artifact.environment, Object.keys(ENVIRONMENT), '/artifact/environment');
   shape(artifact.modelRef, ['domainId', 'domainVersion', 'format', 'digest', 'descriptorRecipe'], '/artifact/modelRef');
   text(artifact.compiler, '/artifact/compiler', true);
-  requireThat(artifact.compiler === 'keir-compiler-java/0.2.0', '/artifact/compiler', 'PIN_MISMATCH');
   requireThat(typeof artifact.entrypoint === 'string' && Object.hasOwn(bound.dcm.entrypoints, artifact.entrypoint), '/artifact/entrypoint');
   requireThat(Object.keys(ENVIRONMENT).every(k => artifact.environment[k] === ENVIRONMENT[k]), '/artifact/environment', 'PIN_MISMATCH');
-  requireThat(artifact.format === 'keir-artifact/2', '/artifact/format');
+  requireThat(['keir-artifact/2', 'keir-artifact/3'].includes(artifact.format), '/artifact/format');
+  const legacy = artifact.format === 'keir-artifact/2';
+  requireThat(artifact.compiler === (legacy ? 'keir-compiler-java/0.2.0' : 'keir-compiler-java/0.3.0'), '/artifact/compiler', 'PIN_MISMATCH');
+  requireThat(bound.dcm.format === (legacy ? 'keir-dcm/2' : 'keir-dcm/3'), '/artifact/modelRef', 'PIN_MISMATCH');
   requireThat(canonicalBytes(artifact.modelRef).equals(canonicalBytes(bound.modelRef)), '/artifact/modelRef');
   requireThat(typeof artifact.sourceDigest === 'string' && /^sha256:[0-9a-f]{64}$/.test(artifact.sourceDigest), '/artifact/sourceDigest');
 }

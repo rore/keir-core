@@ -1,0 +1,68 @@
+{
+  "domain": {
+    "fingerprint": "sha256:db5d85f83c21584d1e094b8fa6d41ad242cf84b5621c383d4fe128e055bf2e65",
+    "id": "sample.inventory",
+    "version": "1"
+  },
+  "entrypoint": "InventoryArrived",
+  "language": "keir/2",
+  "name": "inventory-overflow-after-confirmation",
+  "return": {
+    "record": {
+      "eligible": {
+        "cel": "escaped"
+      }
+    }
+  },
+  "steps": [
+    {
+      "id": "andLeft",
+      "let": {
+        "cel": "input.occurredAt + duration(\"1s\") < input.occurredAt && false"
+      }
+    },
+    {
+      "id": "andRight",
+      "let": {
+        "cel": "false && input.occurredAt + duration(\"1s\") < input.occurredAt"
+      }
+    },
+    {
+      "id": "orLeft",
+      "let": {
+        "cel": "input.occurredAt + duration(\"1s\") < input.occurredAt || true"
+      }
+    },
+    {
+      "id": "orRight",
+      "let": {
+        "cel": "true || input.occurredAt + duration(\"1s\") < input.occurredAt"
+      }
+    },
+    {
+      "id": "masked",
+      "let": {
+        "cel": "!andLeft && !andRight && orLeft && orRight"
+      }
+    },
+    {
+      "id": "adjusted",
+      "call": "inventory.adjust",
+      "when": "masked",
+      "args": {
+        "itemId": {
+          "cel": "input.itemId"
+        },
+        "dueAt": {
+          "cel": "input.occurredAt"
+        }
+      }
+    },
+    {
+      "id": "escaped",
+      "let": {
+        "cel": "input.occurredAt + duration(\"1s\") < input.occurredAt ? false : true"
+      }
+    }
+  ]
+}

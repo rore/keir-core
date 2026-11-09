@@ -2,13 +2,17 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { consumeDecision } from '../../examples/node-host/decision-consumer.mjs';
 import { consumeEffect } from '../../examples/node-host/effect-consumer.mjs';
 import { canonicalBytes, digest } from '../src/canonical.js';
 import { bindModel, invokeProgram, prepareProgram } from '../src/index.js';
 import { validateValue } from '../src/validation.js';
 import { lexical } from './scenario-lexical.mjs';
 
-const corpus = new URL('../../conformance/keir-2/', import.meta.url);
+const revision = process.argv[3] ?? '2';
+assert.ok(['2', '3'].includes(revision), 'Scenario revision must be 2 or 3');
+assert.ok(process.argv.length <= 4, 'Usage: node scenario-conformance.mjs [PYTHON [2|3]]');
+const corpus = new URL('../../conformance/keir-' + revision + '/', import.meta.url);
 const read = path => readFileSync(new URL(path, corpus));
 const groups = new Map([
   ['main', ['artifact', 'dcm']],
@@ -25,6 +29,16 @@ const groups = new Map([
 ]);
 const fixtures = new Set(['normal', 'read-throws', 'lost-response', 'response-expired']);
 const withoutBindings = new Set(['no-call', 'inventory-enum']);
+if (revision === '3') {
+  groups.set('guard', ['artifact-guard', 'dcm-guard']);
+  groups.set('guard-input', ['artifact-guard-input', 'dcm-guard']);
+  groups.set('guard-handler', ['artifact-guard-handler', 'dcm-guard']);
+  groups.set('guard-reversed', ['artifact-guard-reversed', 'dcm-guard-reversed']);
+  fixtures.add('read-expired');
+  fixtures.add('read-malformed');
+  withoutBindings.add('guard-input');
+}
+assert.equal(groups.size, revision === '2' ? 11 : 15);
 
 function vectorBytes(vector) {
   if (Object.hasOwn(vector, 'utf8')) return Buffer.from(vector.utf8);
@@ -56,7 +70,7 @@ function structural(entries, python) {
     decoded.push(entry);
   }
   const checker = fileURLToPath(new URL('./scenario-schema.py', import.meta.url));
-  const result = spawnSync(python, ['-B', checker], {
+  const result = spawnSync(python, ['-B', checker, revision], {
     input: JSON.stringify(decoded.map(entry => entry.document)),
     encoding: 'utf8',
     timeout: 30_000,
@@ -89,7 +103,7 @@ function pinned(name) {
 }
 
 const fixtureNames = new Set([...groups.values()].flat());
-assert.equal(fixtureNames.size, 15);
+assert.equal(fixtureNames.size, revision === '2' ? 15 : 21);
 const pinnedBytes = new Map([...fixtureNames].map(name => [name, pinned(name)]));
 
 function withFormat(bytes, format) {
@@ -155,7 +169,11 @@ function checkSemantics(document, artifact, dcm, report) {
     assert.ok(step?.op === 'CALL' && step.capability === call.capability, 'Scenario expected artifact step');
   }
   const consumption = report(expect.outcome);
-  assert.equal(consumption.status, 'REPORTED', 'Invalid scenario expected outcome');
+  if (report === consumeDecision) {
+    assert.ok(['ALLOWED', 'DENIED', 'BLOCKED'].includes(consumption.status), 'Invalid scenario expected decision');
+  } else {
+    assert.equal(consumption.status, 'REPORTED', 'Invalid scenario expected outcome');
+  }
   assert.deepEqual(consumption, expect.consumption, 'Scenario expected consumer report');
 }
 
@@ -182,8 +200,9 @@ async function run(entry) {
     const artifact = JSON.parse(artifactBytes);
     const requestKey = Object.freeze(Object.create(null));
     const inventory = entry.group.startsWith('inventory');
-    const event = Object.freeze({ id: 'event1', source: inventory ? 'item1' : 'task1' });
-    const report = inventory ? reportInventory : consumeEffect;
+    const guard = dcm.entrypoints[artifact.entrypoint]?.consumer.kind === 'DECISION';
+    const event = Object.freeze(guard ? { id: 'attempt1', source: 'scope1' } : { id: 'event1', source: inventory ? 'item1' : 'task1' });
+    const report = guard ? consumeDecision : inventory ? reportInventory : consumeEffect;
     const expiresAtMs = 10_000;
     let now = 0;
     let fixture;
@@ -213,6 +232,8 @@ async function run(entry) {
         if (fixture === 'read-throws' && index === 0 && !write) throw new Error('Fixture READ failure');
         if (fixture === 'lost-response' && write) throw new Error('Fixture lost WRITE response');
         if (fixture === 'response-expired' && write) now = expiresAtMs;
+        if (fixture === 'read-expired' && !write) now = expiresAtMs;
+        if (fixture === 'read-malformed' && !write) return { kind: 'SUCCESS', value: { restricted: 'false' } };
         return structuredClone(stub.response);
       },
     }]));
@@ -275,7 +296,7 @@ const vectors = JSON.parse(read('scenario-vectors.json')).vectors.map(vector => 
   if (vector.model) assert.ok(pinnedBytes.has(vector.model), 'Missing vector model pin');
   return { vector, group, bytes: vectorBytes(vector), label: vector.id, expected: vector.expect };
 });
-assert.equal(scenarios.length, 28);
+assert.equal(scenarios.length, revision === '2' ? 28 : 39);
 assert.equal(vectors.length, 51);
 const forged = JSON.parse(read('scenarios/main/open.json'));
 const receipt = { ...target(forged.expect.calls[0]), state: 'CONFIRMED' };

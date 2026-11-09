@@ -1,7 +1,7 @@
 <a id="binding-a-host-model-to-capability-invokers"></a>
 # Host model binding
 
-Bind a trusted [DCM](domain-model.md) and its host implementations, prepare an approved [artifact](compiler-artifact.md), and reuse the prepared handle with fresh invocation context. These are the current single-write APIs.
+Bind a trusted [DCM](domain-model.md) and its host implementations, prepare an approved [artifact](compiler-artifact.md), and reuse the prepared handle with fresh invocation context. Event extensions and pre-operation decisions use the same APIs. The [contract matrix](compiler-artifact.md#source-and-artifact-identity) identifies supported exact pairs.
 
 <a id="corrected-host-bound-4-binding"></a>
 <a id="effect4-binding-and-preparation"></a>
@@ -71,7 +71,7 @@ The current invocation accepts only these host context fields. The runtime passe
 
 Supply exactly the union of the parameters marked `binding: host` across all calls in the prepared plan. The runtime checks them before any step runs, including parameters used only by guarded calls whose guard will be false. One value supplies a name shared by several calls and must satisfy every declared type for that name. Missing, extra or mistyped fields fail with `HOST_BINDING_INVALID` at `/hostBindings`.
 
-For the [follow-up rule](../../conformance/keir-1/source.yaml), supply `{actorId: "user1"}` in Node or `Map.of("actorId", "user1")` in Java. For the [no-call rule](../../conformance/keir-1/source-no-call.yaml) against the same [DCM](../../conformance/keir-1/dcm.json), supply `{}` or `Map.of()`. The no-call plan still needs the other invocation fields and a complete implementation map at binding.
+For the [follow-up rule](../../conformance/keir-3/source.yaml), supply `{actorId: "user1"}` in Node or `Map.of("actorId", "user1")` in Java. For the [no-call rule](../../conformance/keir-3/source-no-call.yaml) against the same [DCM](../../conformance/keir-3/dcm.json), supply `{}` or `Map.of()`. The no-call plan still needs the other invocation fields and a complete implementation map at binding.
 
 <a id="request-key"></a>
 ### Original request key and authority
@@ -81,6 +81,12 @@ The host supplies one immutable native key. Every reached READ or WRITE implemen
 The host implementation checks current permissions, key authenticity and event provenance before performing an operation. The host also owns its domain invariants, transport, storage and concurrency. The current runtime has no separate authorization callback or key validator. A plan that reaches no capability can complete without calling a native authorization or key-authentication check, while invocation and resource validation still apply. Keep caller identity, keys and authorization decisions out of shared prepared handles.
 
 Implementations can call local code or remote services. The host owns service routing, credentials, identity propagation and transport. Pass the remaining budget without restarting it, and check the absolute deadline before native commit. An implementation denial counts as an attempted call. It establishes a definite no-effect outcome only when the implementation supplies the evidence defined in [Write evidence](runtime.md#write-evidence). Native reconciliation is a separate host observation. It cannot replace the original runtime receipt.
+
+## Pre-operation invocation
+
+A REQUEST/BEFORE_COMMIT/DECISION hook uses these same methods and context fields. Its `event.id` identifies an operation attempt and `event.source` its host-defined scope, without claiming a prior commit. Its plan has no possible writes; binding still requires registrations for the full catalog. No-call plans legitimately need no protected actor binding, so the host must authenticate and authorize native continuation independently.
+
+The host distinguishes authoritative absence from a selected artifact that is unavailable or incompatible. Absence takes the ordinary native path; unavailable selection blocks. Only a valid completed ALLOW with empty effects is eligible to continue. Recheck approval, selection, permissions, proposed input and read facts at native commit. Reserve part of the enclosing deadline for those checks and commit, and discard late results after cancellation. See the [walkthrough](../decision-walkthrough.md) and [complete decision obligations](pre-operation-decisions.md#host-invocation-and-consistency-obligations).
 
 ## Exact reference artifact
 

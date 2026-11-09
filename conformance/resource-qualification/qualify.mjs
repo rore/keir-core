@@ -7,7 +7,7 @@ import { canonicalBytes, digest } from '../../runtime-node/src/canonical.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const here = dirname(fileURLToPath(import.meta.url));
-const fixture = join(root, 'conformance/keir-2');
+const fixture = join(root, 'conformance/keir-3');
 const compiler = join(root, 'compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar');
 const host = join(root, 'examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar');
 const jdk = name => process.env.JAVA_HOME
