@@ -31,7 +31,7 @@ You can build extensions that:
 
 Each extension has at most eight steps and four capability calls. It can contain one possible write, including guarded calls; a pre-operation decision permits only reads. Lists contain at most 16 scalar values. The application still checks permissions and business constraints before committing. See the [language reference](docs/specs/language.md) for supported expressions and bounds.
 
-Java and Node.js run the same compiled format. [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) includes the current contracts and authoring companion edition 5. See the [specification](docs/specs/README.md) for supported behavior and [verification](docs/testing.md) for tested scope.
+Java and Node.js run the same compiled format. Choose packages from [GitHub Releases](https://github.com/rore/keir-core/releases) and use the [compatibility matrix](docs/specs/compiler-artifact.md#source-and-artifact-identity) and [companion selection guide](docs/agents/authoring-companion.md#choose-an-edition) to match your host. See the [specification](docs/specs/README.md) for supported behavior and [verification](docs/testing.md) for tested scope.
 
 ## Documentation
 

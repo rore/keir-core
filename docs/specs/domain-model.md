@@ -22,6 +22,8 @@ The [source document](language.md#source-document) names the domain ID, version 
 
 The compiler accepts UTF-8 JSON or YAML model bytes. Use UTF-8 JSON without a byte-order mark when binding the model in either runtime. Raw and canonical DCM bytes each have a 65,536-byte ceiling. Nonempty metadata strings such as the domain ID, version and key type have a 256 UTF-8 byte limit. See [canonical bytes and digest rules](compiler-artifact.md#canonical-bytes-and-digest-rules) and [limits](runtime.md#limits).
 
+For a new or changed model, use the [standalone fingerprint recipe](../model-fingerprint.md), copy the result into source `domain.fingerprint`, and compile against that exact model. The recipe implements canonical JSON hashing; it does not replace compiler validation.
+
 ### Binding diagnostics
 
 These are the required `bindModel` results with matching host registrations and otherwise valid input.

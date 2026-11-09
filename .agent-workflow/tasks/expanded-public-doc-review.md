@@ -77,7 +77,9 @@ The independent reviewer approved preservation of structure, immutable released 
 - Consumer installation: released compiler, Node tarball, Java Maven repository and edition-5 companion verified against their published SHA-256 pins. Compiled guard artifact matches sha256:8f0d93951b2026ccd82aaaf3ade53fc77fd755a5ed61f2b69719f8b9b8a5d0a1. Separate Node and Java consumers passed COMPLETED ALLOW/DENY and empty-effect assertions outside both source repositories. npm used normal registry resolution; Maven used cached third-party dependencies. Empty-cache downloads and anonymous access remain unverified.
 - Daymark: isolated dependency installation, TypeScript/Vite build, repeat seed and reset with verified backup passed at the published baseline. No service, browser, provider or Java qualification was run for this prose pass.
 - Core: release CI run 42576060993 independently confirmed successful at b2329440dd2a25acc547f3ebfea214748d912022. Final changed-page scan resolved 164 Core and 89 Daymark local links and anchors; privacy and whitespace checks passed. The approved README opening and diagram content are unchanged. Workflow validation is clean; Redline classifies the component and corpus README paths as gray with no boundary violation or required checkpoint.
-- Engineering dependencies remain open: durable quickstart setup, practical canonical model fingerprint procedure, and fresh accepted Daymark CI/UI evidence. Review assertions are not test results.
+- The source setup helper is independently reviewed at 47306dfa059f1a5066b3cd6efd4756cbfd76e231 and integrated at 41a11a510518e38822a0b2a9af7a325e69c9ceec. A fresh archive of that source plus the final guide passed the literal Windows setup, source compiler/runtime builds and all six Node/Java follow-up, decision and edited-title runs. Installed Node files match source, and only the local archive integrity changes in the lockfile. Third-party caches were seeded. [Hosted Linux CI](https://github.com/rore/keir-core/actions/runs/42619792483) passed at cbc256cb342eb8b00a4774e7aced5353dc5ca334, including shared setup, the independent Node host and retained/current Java/Node scenario comparison; its job is 129168658429. This is separate evidence from the six-flow Windows tutorial replay.
+- The practical fingerprint recipe passed independent review and six matching released-compiler-qualified vectors plus ten rejection cases. It remains a standalone copyable recipe, with model validation performed by the compiler.
+- Overall acceptance still needs fresh accepted Daymark CI/UI evidence and final UI documentation. Review assertions are not test results.
 - Fingerprint investigation evidence: the Core developer's released-0.3 compiler report contains six accepted new/changed/Unicode-control model variants, including all 32 control characters. Pretty and reordered forms produce matching canonical model digests; stale fingerprints are rejected. This supports a spec-derived procedure, but does not establish a public helper or complete the documentation handoff.
 
 ## Result review
@@ -90,9 +92,13 @@ Verification adequacy: sufficient for the bounded documentation increment. Relea
 
 ## Expanded-review disposition
 
+Version-neutral followup: general installation and entry guides now select explicit releases through their metadata rather than repeat a current package version. The exact qualified walkthrough is preserved under docs/examples/installation-core-0.3.0.md with unchanged code blocks and corrected relative links. Core checksums and companion checksums remain separate; runtime installation does not require a companion. Independent technical review approves this followup after correcting the extraction-directory wording. The quickstart now uses the reviewed shared setup command; its final Windows replay passed.
+
+Changed parameterized instructions were checked with retained released assets: Core checksum selection passed and invalid version, duplicate, missing and mismatched checksum cases were rejected. Compiler path substitution reproduced the qualified artifact, the Node command installed the verified tarball with isolated cached dependencies, and Java extraction/POM selection matched the shipped repository. The final followup scan resolved 169 local links and anchors; privacy and whitespace checks passed. Downloads used retained copies, with no anonymous-network or empty-cache claim. Unchanged released-host qualification was not repeated. Workflow blocking predicates pass; its original combined documentation/record commit produces only a nonblocking commit-order advisory. Redline remains gray with no boundary violation or required checkpoint.
+
 | Item | Documentation result | Acceptance |
 | --- | --- | --- |
-| 1. Literal quickstart | Durable setup shared with CI assigned to the Core developer; docs do not prescribe an integrity bypass. | Open: reviewed fix and clean both-host/edited-title replay. |
+| 1. Literal quickstart | Reviewed setup shared with CI; no integrity bypass. | Fresh Windows source-build replay passed all six host flows; Linux setup, host and parity CI passed. |
 | 2. Consumer installation | New installation guide, compiler and dual-runtime consumer proof; linked from entry and component pages. | Passed within the stated cache/download boundary. |
 | 3. Verification currency | Current release/source/CI and `/3` commands separated from historical counts. | Exact release CI independently confirmed. |
 | 4. License and settled choices | Apache 2.0, React/Fastify/SQLite reflected in Daymark contributing and scope. | Source checked; notices preserved. |
@@ -101,7 +107,7 @@ Verification adequacy: sufficient for the bounded documentation increment. Relea
 | 7. Decision consumer | Teaching-model field limits and another host's complete-result validation responsibilities explicit. | Checked against both teaching consumers. |
 | 8. Daymark story | Short request-to-execution journey and ownership explanation added. | Source checked; current browser evidence remains separate. |
 | 9. Annotated Core tour | Existing follow-up source and readable model explained together, with Daymark implementation links. | Source/model checked. |
-| 10. Canonical fingerprint | Practical procedure/tool-gap assessment assigned to the Core developer. | Open: supported procedure and verified command. |
+| 10. Canonical fingerprint | Standalone copyable recipe linked from model identity and embedding; no invented exported helper. | Six qualified-vector matches, ten rejection cases and independent review passed. |
 | 11. Assistant entry | README entry and host-builder input/output checklist added. | Links reviewed. |
 | 12. Current fit | Positive examples with step/call/list/write boundaries and normative link. | Current language checked. |
 | 13. Current corpus | `/3` README added with version pairing, layout and commands. | Runner arguments checked. |

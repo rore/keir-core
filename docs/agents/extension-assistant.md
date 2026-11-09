@@ -1,7 +1,7 @@
 <a id="customer-extension-assistant"></a>
 # Build a customer authoring assistant
 
-Use the [edition 5 guide](customer-authoring-guide-v5.md) for a host using [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). Released Core 0.2.0 uses the [edition 4 guide](customer-authoring-guide-v4.md). The [authoring companion](authoring-companion.md) records the exact package and document combination.
+Select the [authoring companion](authoring-companion.md#choose-an-edition) matching the host's packages and model. Its compatibility record identifies the exact package and document combination.
 
 ## Task and inputs
 

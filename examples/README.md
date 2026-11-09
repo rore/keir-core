@@ -2,7 +2,7 @@
 <a id="run-the-java-and-nodejs-host-examples"></a>
 # Keir examples
 
-The Java and Node.js hosts run the same compiled bytes with simulated services. The current examples use [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) with source `/2` and model/artifact `/3`.
+The Java and Node.js hosts run the same compiled bytes with simulated services. The checked-in examples use source `/2` and model/artifact `/3`; build their packages from the same checkout.
 
 | Example | What it demonstrates |
 | --- | --- |

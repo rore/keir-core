@@ -2,7 +2,7 @@
 
 A pre-operation extension returns a decision before the application performs a native operation. It can use the proposed input and approved reads. The application consumes the result, checks its own permissions and business constraints, then decides whether it can commit.
 
-This walkthrough describes [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). See the [version matrix](specs/compiler-artifact.md#source-and-artifact-identity) for package compatibility and the [decision specification](specs/pre-operation-decisions.md) for the complete host obligations.
+See the [version matrix](specs/compiler-artifact.md#source-and-artifact-identity) for package compatibility and the [decision specification](specs/pre-operation-decisions.md) for the complete host obligations.
 
 [Run the standalone Java or Node example](quickstart.md#try-a-pre-operation-decision) to see ALLOWED, DENIED and BLOCKED with separate simulated native-attempt counts.
 
@@ -36,7 +36,7 @@ return:
     decision: {cel: 'restricted ? "DENY" : "ALLOW"'}
 ```
 
-A complete source document also needs its language, exact domain identity, entrypoint and name. The checked-in [input-only source](../conformance/keir-3/source-guard-input.json) and [READ-based source](../conformance/keir-3/source-guard.json) supply those fields and a declared plain-text message using the [example model](../conformance/keir-3/dcm-guard.json). See [Source document](specs/language.md#source-document). Compile against the host-selected `/3` model using compiler 0.3.0. Use diagnostic codes and paths to repair the draft. A changed model or source requires a new compile.
+A complete source document also needs its language, exact domain identity, entrypoint and name. The checked-in [input-only source](../conformance/keir-3/source-guard-input.json) and [READ-based source](../conformance/keir-3/source-guard.json) supply those fields and a declared plain-text message using the [example model](../conformance/keir-3/dcm-guard.json). See [Source document](specs/language.md#source-document). Compile against the host-selected model using a compatible compiler. Use diagnostic codes and paths to repair the draft. A changed model or source requires a new compile.
 
 If the request needs a lookup, discover an approved READ in the model and call it with its declared arguments. Use the returned typed field to select the decision. The host supplies protected parameters and authorizes the lookup. Do not invent a capability or hide a mutation behind a READ adapter.
 

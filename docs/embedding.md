@@ -2,7 +2,7 @@
 
 An application that embeds Keir is called the **host**. The host decides when rules run, exposes the operations rules may call, and handles permissions and storage. Keir checks rules against the host’s contract and runs them within the executable contract’s limits.
 
-Choose the lifecycle the application needs. An event extension runs after a native operation commits and can contain at most one possible write. A pre-operation decision can only read and returns `ALLOW` or `DENY` before the native operation. [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) supports both lifecycles. The [format matrix](specs/compiler-artifact.md#source-and-artifact-identity) identifies current authoring and historical execution pairs.
+Choose the lifecycle the application needs. An event extension runs after a native operation commits and can contain at most one possible write. A pre-operation decision can only read and returns `ALLOW` or `DENY` before the native operation. The [format matrix](specs/compiler-artifact.md#source-and-artifact-identity) identifies supported authoring and execution pairs.
 
 Start with [released-package installation](installation.md) for a small Node or Java consumer outside this repository. Use the [annotated example](guided-tour.md) to understand how the source and model fit together.
 
@@ -14,7 +14,7 @@ Implement each operation in host code. An implementation can call an existing lo
 
 ## 2. Compile and review a rule
 
-Write the rule in Keir, then compile it against the exact DCM. The compiler produces an **artifact**, the compiled rule the runtime executes. The artifact references the model it was checked against. [Compile and run the example](../examples/README.md#compile-the-rule)
+Write the rule in Keir, then compile it against the exact DCM. For your own model, [calculate its canonical fingerprint](model-fingerprint.md) for the source header. The compiler produces an **artifact**, the compiled rule the runtime executes. The artifact references the model it was checked against. [Compile and run the example](../examples/README.md#compile-the-rule)
 
 Run the same artifact with simulated implementations before enabling it. Write down the expected outcome for each case before running the simulation. For the follow-up rule, check a matching completion, a completion in another project, and a lost response after a write request. For a decision, check ALLOW, DENY and failed evaluation, including a handled rejection returning ALLOW. The host records approval and activation as separate decisions for the exact reviewed artifact. [Run the sample cases](../examples/README.md#run-both-hosts) · [Decision walkthrough](decision-walkthrough.md)
 

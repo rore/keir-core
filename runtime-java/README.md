@@ -36,7 +36,7 @@ $env:MAVEN_USER_HOME = "$PWD/.tools/maven"
 .\mvnw.cmd "-Dmaven.repo.local=.tools/maven/repository" -Pcoverage verify
 ```
 
-The opt-in coverage profile uses [JaCoCo 0.8.16](https://www.jacoco.org/jacoco/index.html). It reports actual component coverage in each module's `target/site/jacoco/` directory; it adds no coverage threshold or CI gate. Tests use local fixtures and simulated callbacks, with no live services. The runtime tests include checked-wire/AST mutations, fresh authority, exact traces, Unicode/false/empty values, and native timeout behavior. Shared scenario execution uses the same externally pinned golden bytes as Node; the batch test driver lives only in test sources.
+The opt-in coverage profile uses [JaCoCo](https://www.jacoco.org/jacoco/index.html), pinned in the [parent POM](../pom.xml). It reports actual component coverage in each module's `target/site/jacoco/` directory; it adds no coverage threshold or CI gate. Tests use local fixtures and simulated callbacks, with no live services. The runtime tests include checked-wire/AST mutations, fresh authority, exact traces, Unicode/false/empty values, and native timeout behavior. Shared scenario execution uses the same externally pinned golden bytes as Node; the batch test driver lives only in test sources.
 
 [Verification results](../docs/testing.md#current-single-write-behavior-verification) identify the tested package versions, scenarios and raw validation cases. See the [conformance index](../conformance/README.md) for the versioned inputs and independent expectations.
 

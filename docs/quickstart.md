@@ -6,7 +6,7 @@ Run an extension that creates a follow-up whenever someone completes a task in t
 
 The app sends the completed task’s ID. The extension reads that task, checks that it is complete and belongs to `project1`, then requests a follow-up titled `Follow up`. The model defines the event and task operations. The host supplies the authenticated actor separately. [Extension source](../examples/node-host/follow-up/source.yaml) · [Readable model](../examples/node-host/follow-up/dcm.json)
 
-The examples in this checkout use [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0): source `keir/2` with model and artifact `/3`. Use the [format matrix](specs/compiler-artifact.md#source-and-artifact-identity) to select matching packages.
+The checked-in examples use source `keir/2` with model and artifact `/3`. This walkthrough builds local packages from the same source checkout. To use published packages in another application, follow [released-package installation](installation.md). See the [format matrix](specs/compiler-artifact.md#source-and-artifact-identity) for matching contracts.
 
 Use a local checkout, **Node.js 24 with npm**, and **JDK 21** to compile. The precompiled run only needs Node.js and npm. The first build and install need access to the Maven and npm dependencies unless they are already cached.
 
@@ -15,15 +15,13 @@ Use a local checkout, **Node.js 24 with npm**, and **JDK 21** to compile. The pr
 <a id="run-your-first-keir-rule"></a>
 ## Run the precompiled example
 
-From the repository root, package the Node runtime and install it in the example app.
+From the repository root, build the local Node runtime archive and install the example's locked dependencies:
 
 ```sh
-mkdir -p .tools/packages
-npm pack ./runtime-node --pack-destination .tools/packages --cache .tools/npm-cache --ignore-scripts
-npm ci --prefix examples/node-host --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
+node scripts/setup-node-example.mjs
 ```
 
-In PowerShell, use `New-Item -ItemType Directory -Force .tools/packages | Out-Null` for the first command and `npm.cmd` for the npm commands.
+Use the same command in PowerShell. It uses checkout-local caches and refreshes the example lockfile's checksum for the freshly built runtime archive. Other dependency pins remain unchanged.
 
 Run the [Node example host](../examples/node-host/follow-up/run.mjs) with the checked-in compiled extension.
 
