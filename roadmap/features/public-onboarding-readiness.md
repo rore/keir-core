@@ -23,13 +23,15 @@ Close the first-use and documentation gaps identified by the expanded review of 
 ## Acceptance
 
 - [ ] A clean checkout follows the literal published setup commands and runs both examples, including an edited title, without disabling integrity or relying on a CI-only workaround.
-- [ ] A consumer verifies release assets and runs a minimal compiler/Node/Java host outside the source tree using documented commands.
+- [x] A consumer verifies release assets and runs a minimal compiler/Node/Java host outside the source tree using documented commands. Verification used qualified release copies and cached third-party dependencies; anonymous and empty-cache downloads remain unverified.
 - [ ] A host builder can obtain the canonical fingerprint for a new or changed DCM through a verified procedure; any needed tool addition has an engineering review.
 - [ ] Current documentation distinguishes implemented behavior, proposals and history; states the actual license, stack, distribution, provider requirements and consequential limits; and clearly links language, DCM, runtime and assistant guides.
-- [ ] Current conformance and test claims identify exact release/source evidence. Failed or incomplete current-head runs are not replaced by old successful counts.
+- [x] Current conformance and test claims identify exact release/source evidence. Failed or incomplete current-head runs are not replaced by old successful counts.
 - [ ] The Daymark walkthrough matches accepted UI behavior and explains approval, activation, replacement and provider-free execution. The existing owner supplies fresh resolved CI evidence.
 - [ ] Literal commands and links are verified at delivered revisions. Anonymous landing-page, asset and cross-repository checks remain a separate post-visibility action after the user chooses to publish.
 
 ## Status
 
-The documentation owner has already received the expanded review and is working on it. A bounded Core engineering offer covers the source setup defect and fingerprint-procedure investigation; acceptance is pending. The manager confirmed the quickstart/CI discrepancy in source. Studio implementation and its independent-review corrections continue separately; the original running demo remains unchanged.
+The reviewed documentation increment is integrated: Core `0827fb4` adds released-package installation outside the source repositories, an annotated source/model tour, assistant entry guidance, current corpus orientation and release-specific verification evidence. Daymark contribution `127f09f` corrects license/stack/setup/privacy and implementation-versus-proposal guidance; it is integrated with the pending Studio source, with its authoring paragraph reconciled to preserve the new behavior explanation and all three trigger choices. Changed-page link/anchor, privacy and whitespace checks passed. The [review disposition](../../.agent-workflow/tasks/expanded-public-doc-review.md) retains all 18 findings and their limits.
+
+The Core developer reproduced the literal source-setup integrity failure and accepted the three-file shared setup/CI correction. Independent plan review passed, including exact original manifest/lock restoration and explicit CI discovery of the focused tests; implementation is released under [the setup record](../../.agent-workflow/tasks/public-onboarding-source-setup.md). Released-compiler fingerprint evidence covers new/changed models, all control characters and stale pins, but the supported documentation procedure and literal quickstart replay remain open. Studio fixes, exact final UI documentation and fresh hosted evidence continue separately. The original running demo remains unchanged.
