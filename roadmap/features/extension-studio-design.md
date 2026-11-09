@@ -1,7 +1,7 @@
 ---
 id: "extension-studio-design"
 title: "Design and prototype the Extension Studio experience"
-status: "active"
+status: "done"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -10,9 +10,9 @@ repo: "keir-demo-app"
 
 ## Summary
 
-**Open correction: before-create rule summaries.** A reported saved rule exposes a coverage gap: the host's checked-artifact summary reader and UI formatter handle post-operation task rules but exclude the supported before-create decision hook. The fallback incorrectly suggests a version issue. The demo developer owns extending the existing host description path to explain supported decision conditions and rejection messages, with a privacy-safe regression derived from the actual accepted artifact and a rendered Summary check. Keep genuinely unsupported constructs explicit, preserve exact revision/evidence binding, and leave rule execution and Core semantics unchanged. Manager acceptance and the running-demo update remain pending.
+**Delivered correction: before-create rule explanations.** [Daymark `74c24cd`](https://github.com/rore/keir-demo-app/commit/74c24cd2cba90aaf804f06cddaeffa873f3c3460) extends the existing host-owned description path to explain supported before-create decision conditions, rejection messages and the other outcome. The collection resolves project names and separates the eligible version in use from a later proposal. Genuinely unsupported constructs retain an explicit fallback; exact revision/evidence binding, rule execution and Core semantics are unchanged.
 
-The same journey also hides the deliberately invalid authorization context in a safety simulation. Show the simulated failure setup and explain that saving was blocked because the required check could not run. Keep a passed safety test distinct from a rule rejection, a successful normal check and an unexpected or inconclusive result. Verify the distinction against the associated scenario and observed evidence.
+The safety simulation now shows its deliberately invalid authorization context and explains that saving stopped because the required check could not run. That explanation requires the exactly associated, matched scenario and observed evidence; an unexpected blocked result remains a mismatch. Regressions exercise actual compiled rules for all three supported triggers through collection, Summary, Simulation and reopening, including active/proposed and owner/project distinctions. Independent technical and rendered desktop/phone/short reviews pass. [Complete CI](https://github.com/rore/keir-demo-app/actions/runs/42648063697) passes 557 Node tests with 12 skips and all 257 browser tests. The running demo serves the exact reviewed assets; saved data/settings and a read-only complete summary of the original saved guard were verified after the backed update.
 
 **Completed corrective slice: business understanding.** The working Studio now explains the actual proposed rule, its simulation outcomes and limits, and its separate approval/use state. The original gap was verified against running source `7ad6d36`; it was a product problem rather than a stale preview. The accepted replacement `840c5ad` is now running with saved data and settings preserved. Earlier scoped checkpoints below remain historical where they differ from this delivered state.
 
