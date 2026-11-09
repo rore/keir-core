@@ -84,17 +84,24 @@ jobs:
         run: |
           mkdir -p .tools/packages
           npm pack ./runtime-node --pack-destination .tools/packages --cache .tools/npm-cache --ignore-scripts
+          python -c 'import base64, hashlib, json; from pathlib import Path; path = Path("examples/node-host/package-lock.json"); lock = json.loads(path.read_bytes()); runtime = lock["packages"]["node_modules/@keir/runtime-node"]; assert runtime["version"] == "0.3.0" and runtime["resolved"] == "file:../../.tools/packages/keir-runtime-node-0.3.0.tgz"; runtime["integrity"] = "sha512-" + base64.b64encode(hashlib.sha512(Path(".tools/packages/keir-runtime-node-0.3.0.tgz").read_bytes()).digest()).decode("ascii"); path.write_text(json.dumps(lock), encoding="utf-8")'
           npm ci --prefix examples/node-host --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
           mkdir -p .tools/node-packed
-          tar -xzf .tools/packages/keir-runtime-node-0.2.0.tgz -C .tools/node-packed
+          tar -xzf .tools/packages/keir-runtime-node-0.3.0.tgz -C .tools/node-packed
           diff -r .tools/node-packed/package examples/node-host/node_modules/@keir/runtime-node
-          node --test examples/node-host/follow-up.test.mjs examples/node-host/verify-scenarios.test.mjs
-      - name: Compare packaged Java and Node scenario results
+          diff -r runtime-node/src .tools/node-packed/package/src
+          node --test examples/node-host/follow-up.test.mjs examples/node-host/verify-scenarios.test.mjs examples/node-host/decision-consumer.test.mjs examples/node-host/decision-host.test.mjs examples/node-host/pre-operation.test.mjs
+      - name: Compare Java and Node old and current scenario results
         run: |
           java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar examples/node-host/follow-up/source.yaml examples/node-host/follow-up/dcm.json > .tools/teaching-artifact.json
-          cmp conformance/keir-2/artifact.json .tools/teaching-artifact.json
+          cmp conformance/keir-3/artifact.json .tools/teaching-artifact.json
+          # The installed-host Node verifier is deliberately fixed to the retained /2 corpus.
           for group in main zero after-write-read no-call handler title title-max title-composed; do
-            java -jar examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar "$group" python > .tools/java-scenarios.json
+            java -jar examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar "$group" python conformance/keir-2 > .tools/java-scenarios.json
             node examples/node-host/verify-scenarios.mjs "$group" python > .tools/node-scenarios.json
             python -c 'import json; from pathlib import Path; assert json.loads(Path(".tools/java-scenarios.json").read_bytes()) == json.loads(Path(".tools/node-scenarios.json").read_bytes())'
           done
+          node runtime-node/test/scenario-conformance.mjs python 3 > .tools/node-current-scenarios.json
+          runtime_classpath="$(python -c 'from xml.etree import ElementTree; report = ElementTree.parse("runtime-java/target/surefire-reports/TEST-dev.keir.runtime.PublicScenarioTest.xml"); print(next(row.get("value") for row in report.findall("./properties/property") if row.get("name") == "java.class.path"))')"
+          java -cp "$runtime_classpath" dev.keir.runtime.PublicScenarioDriver conformance/keir-3 > .tools/java-current-scenarios.json
+          python -c 'import json; from pathlib import Path; normalize = lambda report: {**report, "scenarios": sorted(report["scenarios"], key=lambda row: (row["group"], row["id"])), "vectors": sorted(report["vectors"], key=lambda row: row["id"])}; java = json.loads(Path(".tools/java-current-scenarios.json").read_bytes()); node = json.loads(Path(".tools/node-current-scenarios.json").read_bytes()); assert len(java["scenarios"]) == len(node["scenarios"]) == 39; assert len(java["vectors"]) == len(node["vectors"]) == 51; assert normalize(java) == normalize(node)'
