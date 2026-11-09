@@ -1,7 +1,7 @@
 ---
 id: "extension-studio-design"
 title: "Design and prototype the Extension Studio experience"
-status: "done"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -9,6 +9,8 @@ repo: "keir-demo-app"
 ---
 
 ## Summary
+
+**Open correction: before-create rule summaries.** A reported saved rule exposes a coverage gap: the host's checked-artifact summary reader and UI formatter handle post-operation task rules but exclude the supported before-create decision hook. The fallback incorrectly suggests a version issue. The demo developer owns extending the existing host description path to explain supported decision conditions and rejection messages, with a privacy-safe regression derived from the actual accepted artifact and a rendered Summary check. Keep genuinely unsupported constructs explicit, preserve exact revision/evidence binding, and leave rule execution and Core semantics unchanged. Manager acceptance and the running-demo update remain pending.
 
 **Completed corrective slice: business understanding.** The working Studio now explains the actual proposed rule, its simulation outcomes and limits, and its separate approval/use state. The original gap was verified against running source `7ad6d36`; it was a product problem rather than a stale preview. The accepted replacement `840c5ad` is now running with saved data and settings preserved. Earlier scoped checkpoints below remain historical where they differ from this delivered state.
 
