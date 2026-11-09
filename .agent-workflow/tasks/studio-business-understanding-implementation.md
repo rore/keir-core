@@ -57,7 +57,7 @@ Not required at this risk level. The user selected A on 2026-11-09: "yes, a soun
 **Exceptions:**
 —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Independent plan review
