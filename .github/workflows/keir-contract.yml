@@ -9,6 +9,8 @@ on:
       - schemas/**
       - scripts/check-keir-contracts.py
       - scripts/requirements-read2-contracts.txt
+      - scripts/setup-node-example.mjs
+      - scripts/setup-node-example.test.mjs
       - conformance/**
       - examples/**
       - docs/specs/**
@@ -25,6 +27,8 @@ on:
       - schemas/**
       - scripts/check-keir-contracts.py
       - scripts/requirements-read2-contracts.txt
+      - scripts/setup-node-example.mjs
+      - scripts/setup-node-example.test.mjs
       - conformance/**
       - examples/**
       - docs/specs/**
@@ -82,10 +86,8 @@ jobs:
         env:
           KEIR_SCENARIO_PYTHON: python
         run: |
-          mkdir -p .tools/packages
-          npm pack ./runtime-node --pack-destination .tools/packages --cache .tools/npm-cache --ignore-scripts
-          python -c 'import base64, hashlib, json; from pathlib import Path; path = Path("examples/node-host/package-lock.json"); lock = json.loads(path.read_bytes()); runtime = lock["packages"]["node_modules/@keir/runtime-node"]; assert runtime["version"] == "0.3.0" and runtime["resolved"] == "file:../../.tools/packages/keir-runtime-node-0.3.0.tgz"; runtime["integrity"] = "sha512-" + base64.b64encode(hashlib.sha512(Path(".tools/packages/keir-runtime-node-0.3.0.tgz").read_bytes()).digest()).decode("ascii"); path.write_text(json.dumps(lock), encoding="utf-8")'
-          npm ci --prefix examples/node-host --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
+          node --test scripts/setup-node-example.test.mjs
+          node scripts/setup-node-example.mjs
           mkdir -p .tools/node-packed
           tar -xzf .tools/packages/keir-runtime-node-0.3.0.tgz -C .tools/node-packed
           diff -r .tools/node-packed/package examples/node-host/node_modules/@keir/runtime-node
