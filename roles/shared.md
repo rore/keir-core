@@ -16,6 +16,7 @@ Load only your selected role and this guide at role entry. For assignments, read
 - Core stays domain-independent; host adapters/AI belong to the host/demo. CEL is internal to Keir. Java and Node share one artifact. Product value is accepted; no frozen-catalog/competitor gate. Proposals, mocks and partial tests do not certify real guarantees.
 - Design hook defaults for composition over the host-approved catalog, subject to authorization; never bake a sample program's capability list into the required hook contract. The host defines hook data; customer-specific constants belong in authored programs. Capability filters are advanced opt-in restrictions. Keep effect safety and aggregate resource budgets separate from capability selection.
 - Follow [testing guidance](../docs/testing.md): add regression coverage, keep default tests fast, investigate slowdowns and select slow suites explicitly. When qualification expands, compare measured end-to-end CI time with the job ceiling before delivery. Preserve protected behavioral obligations and per-test limits.
+- For behavior exposed through several hooks or screens, verify a representative saved rule for each supported hook through every affected user entry point. Assert meaningful conditions and outcomes, not just rendering or absence of errors. Treat missing summaries and hidden simulated-failure setup as failed acceptance; a deliberately unsupported construct must have explicit, truthful coverage.
 
 ## Coordination
 

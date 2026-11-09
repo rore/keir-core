@@ -1,5 +1,13 @@
 # Make customization behavior and simulations understandable
 
+## Open follow-up: before-create explanations
+
+After the delivered slice, a saved before-create rule exposed an omitted summary hook and an unclear simulated failure. The demo developer owns the bounded correction from the delivered `840c5ad` baseline; the manager owns integration and rollout. Extend the existing checked-artifact description and formatter to explain supported decision conditions, the rejection message and the other outcome. Preserve exact identity/dataflow checks and honest unsupported coverage; remove wording that implies an app-version problem.
+
+The saved failure scenario deliberately supplies an invalid host context and verifies that the app blocks saving without running the rule. The simulation currently presents only the ordinary task fields, hiding this setup, so the result appears contradictory. Explain the verified simulated failure in the situation and outcome, distinguish it from a rule rejection and an unexpected or inconclusive failure, and retain technical detail secondarily. Derive that distinction from the exact associated scenario and observed evidence, never a case name or an error alone. Use anonymized compiled-shape, projection and rendered regressions; do not change Core semantics, storage, execution, approval criteria or the user's saved rule. Independent plan review, implementation verification and the running-demo update are pending. Earlier acceptance below remains evidence of the delivered slice, not this follow-up.
+
+The collection is another affected caller: it uses the same unavailable description and supplies no project-name resolver. Verify meaningful saved-rule descriptions for all three supported triggers through collection, conversation Summary, Simulation and reopen. Preserve explicit names and distinguish an in-use version from a later proposal. Tests must assert the actual conditions and outcomes and reject an unexpected unavailable fallback, rather than merely accepting a rendered card. The process gap was incomplete acceptance coverage across supported hooks and their consumers; extend existing tests and shared testing guidance instead of adding another approval stage.
+
 <!-- agent-workflow:start -->
 **Outcome:**
 People can understand the actual proposed customization, its simulated consequences and limits, and whether it is approved or in use, from one clear explanation in its continuing conversation.
