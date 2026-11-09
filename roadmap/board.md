@@ -31,3 +31,4 @@
 - runtime-resource-qualification
 - runtime-scale-observability
 - public-package-release
+- public-onboarding-readiness
