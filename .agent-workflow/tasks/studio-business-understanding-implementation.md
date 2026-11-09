@@ -64,7 +64,7 @@ The architect reviewed demo revision `7ad6d36246fbc248255ba3da424e3a1f3ca6977e` 
 
 ## Implementation
 
-Implementation offered to the standing demo developer after the user's design selection. The designer is freezing the selected guidance and prototype handoff. No production implementation or deployment is accepted yet.
+The standing demo developer accepted implementation after the user's design selection. The refined plan covers the shared task-rule helper and focused tests, lifecycle projections and association/naming/read-only tests, shared authoring evidence summary, Studio and collection presentation/styles, browser fixtures and journeys, and affected authoring/testing documentation. The developer confirmed the canonical record is available and began implementation in an isolated checkout. The designer is freezing the selected guidance and prototype handoff. No completed implementation or deployment is accepted yet.
 
 ## Evidence
 
