@@ -35,7 +35,7 @@ Your application defines when extensions run and implements the operations they 
 <a id="current-scope"></a>
 ## What you can build today
 
-- React to an event: read application data and conditionally request a change after an operation completes.
+- React to an event: read application data and conditionally request a change after an operation commits.
 - Check a proposed operation: read relevant data and return an allow-or-deny decision that determines whether the application can continue its own validation.
 
 An event extension may include at most one call that can change data, even if conditional. Pre-operation checks are read-only. Steps, calls and data size are bounded. See the [language reference](docs/specs/language.md) for supported expressions and limits.
