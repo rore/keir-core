@@ -2,7 +2,7 @@
 
 An application that embeds Keir is called the **host**. The host decides when rules run, exposes the operations rules may call, and handles permissions and storage. Keir checks rules against the host’s contract and runs them within the executable contract’s limits.
 
-Choose the lifecycle the application needs. An event extension runs after a native operation commits and can contain at most one possible write. A pre-operation decision can only read and returns `ALLOW` or `DENY` before the native operation. The [current format matrix](specs/compiler-artifact.md#source-and-artifact-identity) distinguishes the Core 0.3.0 candidate from released Core 0.2.0.
+Choose the lifecycle the application needs. An event extension runs after a native operation commits and can contain at most one possible write. A pre-operation decision can only read and returns `ALLOW` or `DENY` before the native operation. [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) supports both lifecycles. The [format matrix](specs/compiler-artifact.md#source-and-artifact-identity) identifies current authoring and historical execution pairs.
 
 ## 1. Define what the host exposes
 

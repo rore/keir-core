@@ -7,7 +7,7 @@ The companion gives an authoring assistant a versioned guide, structural schemas
 
 | Host contract | Companion | Status |
 | --- | --- | --- |
-| Core 0.3.0; source `/2`, model/artifact/scenario `/3` | [Edition 5 guide](customer-authoring-guide-v5.md) | Candidate. Publish only after package and fixture qualification and verified asset pins. |
+| Core 0.3.0; source `/2`, model/artifact/scenario `/3` | [Edition 5 guide](customer-authoring-guide-v5.md) | [Released with Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). [Exact package record](authoring-companion-v5-compatibility.json). |
 | Core 0.2.0; source/model/artifact/scenario `/2` | [Edition 4 guide](customer-authoring-guide-v4.md) | Released. [Exact package record](authoring-companion-v4-compatibility.json). |
 | Core 0.1.0; `/1` documents | [Edition 3 guide](customer-authoring-guide-v3.md) | Historical. [Exact package record](authoring-companion-v3-compatibility.json). |
 
@@ -17,10 +17,10 @@ Editions 1 and 2 use earlier preview contracts. Their original archives remain r
 
 Use Git and Python 3.11 or later. Pass the full companion source commit from the trusted release record, not an arbitrary checkout revision. The builder reads the guide, schemas, examples and compatibility record from that commit and prints the archive's SHA-256 pin.
 
-For released edition 4, supply the three Core 0.2.0 package downloads from its compatibility record.
+For edition 5, supply the three Core 0.3.0 package downloads from its [compatibility record](authoring-companion-v5-compatibility.json). The archive and its `keir-authoring-v5.SHA256SUMS` file are published on the [Core 0.3.0 release](https://github.com/rore/keir-core/releases/tag/v0.3.0).
 
 ```sh
-python scripts/authoring-companion.py build keir-authoring-v4.zip --version 4 --revision c6a6d171982514569c29c06de7a429d301d25b2a --core-assets path/to/core-assets
+python scripts/authoring-companion.py build keir-authoring-v5.zip --version 5 --revision f988c2b147933fcdd8b8f74ce7920f78acd4eca5 --core-assets path/to/core-assets
 ```
 
 The manifest distinguishes the companion input commit from the compatible Core source commit. Nonguide inputs must match that Core revision exactly. A source candidate has `status: candidate` and an empty package map; omit `--core-assets` for that row. Candidate bytes do not establish released-package compatibility.
@@ -31,10 +31,10 @@ Edition 5's bundled example sources are canonical JSON. The builder checks each 
 
 ## Verify before loading
 
-Obtain the archive pin independently from trusted release checksums or the authorized handoff. Verify it before extracting or loading the guide. Edition 4's published pin is shown here.
+Obtain the archive pin independently from the trusted release checksums or authorized handoff. Verify it before extracting or loading the guide. Edition 5's published pin is shown here.
 
 ```sh
-python scripts/authoring-companion.py verify keir-authoring-v4.zip --version 4 --sha256 sha256:4a9f4f30212ff1d722cf6c993902d0802bee7e7ffebc00304102a5964b5bec63
+python scripts/authoring-companion.py verify keir-authoring-v5.zip --version 5 --sha256 sha256:20249307192494acb1cf07cc002e7203bda4f6baf8a8c2257dd752ce1d8cfe44
 ```
 
 Verification checks the trusted digest before reading ZIP members, then checks the exact inventory, deterministic encoding, manifest and payload hashes. It works offline without Git. Add `--core-assets path/to/core-assets` to check the three package files too.
@@ -43,7 +43,16 @@ Load only the guide named by `manifest.json`. Match its contracts and producer t
 
 ## Semantic references
 
-Schemas validate structure. The language and model references explain types, expressions, data flow, lifecycle and effect limits. Edition 4 bundles the matching workflow expression specification. Edition 5 must use matching bundled references or immutable online specification links and actual producer schemas/examples. The [current specification index](../specs/README.md) distinguishes the candidate contract from released snapshots.
+Schemas validate structure. The language and model references explain types, expressions, data flow, lifecycle and effect limits. Edition 5 pins immutable online semantic references and bundles the matching schemas and compiler-produced examples. Edition 4 bundles its matching workflow expression specification. The [specification index](../specs/README.md) explains the released contract and historical compatibility.
+
+## Reproduce historical edition 4
+
+Edition 4 retains its original committed inputs, Core 0.2.0 packages and archive pin. Use the packages in its [compatibility record](authoring-companion-v4-compatibility.json).
+
+```sh
+python scripts/authoring-companion.py build keir-authoring-v4.zip --version 4 --revision c6a6d171982514569c29c06de7a429d301d25b2a --core-assets path/to/core-assets
+python scripts/authoring-companion.py verify keir-authoring-v4.zip --version 4 --sha256 sha256:4a9f4f30212ff1d722cf6c993902d0802bee7e7ffebc00304102a5964b5bec63
+```
 
 ## Record release assets
 

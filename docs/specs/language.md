@@ -5,7 +5,7 @@
 
 Keir source defines how one host entrypoint combines typed data and approved operations. The [`keir/2` source schema](../../schemas/source-2/source.schema.json) checks decoded structure. The compiler also checks the trusted [domain capability model](domain-model.md), expression types, availability, and call limits.
 
-This page describes current `keir/2` authoring, including bounded lists, optional values and timestamps. The [workflow expression reference](workflow-expressions.md) specifies their checked forms and detailed examples. The [pre-operation decision contract](pre-operation-decisions.md) reserves Core 0.3.0 for authoring against DCM `/3`; it adds an entrypoint lifecycle, not source syntax. Core 0.3.0 remains candidate until qualification and release evidence is available. See the [exact version rules](compiler-artifact.md#source-and-artifact-identity) before choosing a compiler or model.
+This page describes current `keir/2` authoring, including bounded lists, optional values and timestamps. The [workflow expression reference](workflow-expressions.md) specifies their checked forms and detailed examples. The [pre-operation decision contract](pre-operation-decisions.md) in [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) adds an entrypoint lifecycle for DCM `/3` without changing source syntax. See the [exact version rules](compiler-artifact.md#source-and-artifact-identity) before choosing a compiler or model.
 
 ## Source document
 
@@ -84,7 +84,7 @@ The [structural checker](../../scripts/check-keir-contracts.py) checks the avail
 
 ## Example source
 
-The complete [input-only decision source](../../conformance/keir-3/source-guard-input.json) reads a Boolean and returns ALLOW or DENY with a message. The [READ-based source](../../conformance/keir-3/source-guard.json) first calls a host capability, then combines its result with the input. Both use the exact [decision model](../../conformance/keir-3/dcm-guard.json). See the [walkthrough](../decision-walkthrough.md) for their roles and independent native checks. These `/3` fixtures are candidate inputs; package qualification is recorded separately.
+The complete [input-only decision source](../../conformance/keir-3/source-guard-input.json) reads a Boolean and returns ALLOW or DENY with a message. The [READ-based source](../../conformance/keir-3/source-guard.json) first calls a host capability, then combines its result with the input. Both use the exact [decision model](../../conformance/keir-3/dcm-guard.json). See the [walkthrough](../decision-walkthrough.md) for their roles and independent native checks. These `/3` fixtures match the [Core 0.3.0 release](https://github.com/rore/keir-core/releases/tag/v0.3.0).
 
 <a id="source-and-example"></a>
 <a id="implementation-reference-earlier-source-rules-and-example"></a>

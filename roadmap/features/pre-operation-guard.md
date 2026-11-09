@@ -1,7 +1,7 @@
 ---
 id: "pre-operation-guard"
 title: "Compile and run an authoritative pre-operation decision"
-status: "active"
+status: "done"
 priority: "high"
 commitment: "committed"
 milestone: "Customize a real task application"
@@ -25,8 +25,8 @@ Patch consumers, policy-chain composition, native persistence or guarantees Keir
 ## Done When
 
 - [x] Design/spec: publish the decision consumer, lifecycle and failure-policy contract without silently renaming an existing profile.
-- [ ] Implementation: compile once and run allow/deny decisions through both runtimes and packaged consumers.
-- [ ] Verification: shared cases cover invalid results, denied reads, timeout, missing binding, effect prohibition and native-consumption receipts.
+- [x] Implementation: compile once and run allow/deny decisions through both runtimes and packaged consumers.
+- [x] Verification: shared cases cover invalid results, denied reads, timeout, missing binding, effect prohibition and native-consumption receipts.
 
 ## Notes
 
@@ -41,6 +41,8 @@ Implementation QA caught a mixed-catalog teaching-harness defect: the invoked en
 Independent architecture review passed the final Node teaching delta and found a Java teaching-consumer gap: malformed trace step identifiers could consume as ALLOWED in Java while Node blocked them. The compiler/Java owner added matching identifier checks and focused malformed/boundary regressions. All four consumer tests passed, and independent re-review closed the finding on the exact integrated two-file delta. Valid runtime-emitted traces are unaffected. The review found no other blocking issue in the inspected Core semantics or the minimal dual-example verifier change; official package verification remains required.
 
 The public documentation and edition-5 guide-tool delta are integrated and reviewed. Four focused edition-5 tests pass in the combined checkout, including a negative proving that stale source bytes cannot be packaged beside an unchanged artifact. The current quickstart, module/example READMEs and release guide reference both concrete standalone hosts. Final guide links and compatibility hashes must come from the actual integrated commit and qualified package build.
+
+The integrated source at `b232944` passed [Core CI](https://github.com/rore/keir-core/actions/runs/42576060993), including coverage, installed host tests and complete current 39-scenario/51-vector Java/Node parity. The release builder and installed dual-host smoke passed against that exact commit. All five Core downloads match the qualified build byte for byte and pass the trusted-checksum verifier. The [published Core 0.3.0 release](https://github.com/rore/keir-core/releases/tag/v0.3.0) also includes guide edition 5, built from committed source `f988c2b`, reproduced deterministically and verified offline, against the Core assets and after download. Generic Core acceptance is complete; Daymark's deployment is tracked separately.
 
 **Dependencies:** [generic-hook-capability-contract](../features/generic-hook-capability-contract.md).
 

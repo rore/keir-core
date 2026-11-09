@@ -6,7 +6,7 @@ Run an extension that creates a follow-up whenever someone completes a task in t
 
 The app sends the completed task’s ID. The extension reads that task, checks that it is complete and belongs to `project1`, then requests a follow-up titled `Follow up`. The model defines the event and task operations. The host supplies the authenticated actor separately. [Extension source](../examples/node-host/follow-up/source.yaml) · [Readable model](../examples/node-host/follow-up/dcm.json)
 
-The examples in this checkout target the Core 0.3.0 candidate: source `keir/2` with model and artifact `/3`. Use the [format matrix](specs/compiler-artifact.md#source-and-artifact-identity) to select matching packages.
+The examples in this checkout use [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0): source `keir/2` with model and artifact `/3`. Use the [format matrix](specs/compiler-artifact.md#source-and-artifact-identity) to select matching packages.
 
 Use a local checkout, **Node.js 24 with npm**, and **JDK 21** to compile. The precompiled run only needs Node.js and npm. The first build and install need access to the Maven and npm dependencies unless they are already cached.
 

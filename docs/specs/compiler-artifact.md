@@ -7,9 +7,9 @@
 
 The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-The current authoring contract is reserved for Core 0.3.0 and remains candidate until qualification and release evidence is available. It keeps the Keir 2 source language and descriptor recipe while adding the [decision lifecycle](pre-operation-decisions.md). These identities version independently:
+The current authoring contract ships in [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). It keeps the Keir 2 source language and descriptor recipe while adding the [decision lifecycle](pre-operation-decisions.md). These identities version independently:
 
-| Field | Current authoring value (Core 0.3.0 candidate) |
+| Field | Current authoring value (Core 0.3.0) |
 | --- | --- |
 | Source `language` | `keir/2` |
 | DCM `format` | `keir-dcm/3` |

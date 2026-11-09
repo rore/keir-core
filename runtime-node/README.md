@@ -38,7 +38,7 @@ A rule result describes what the rule returned. A separate write receipt records
 
 For a pre-operation decision, consume the complete outcome and require valid COMPLETED ALLOW with empty effects before continuing. DENY or failed evaluation blocks the native operation; a handled business rejection returning ALLOW still blocks. Recheck native permissions, selection and mutable facts before commit, within the original deadline. Cancellation closes the attempt. Keep the native result separate from the decision.
 
-The Core 0.3.0 candidate supports the exact old `/2` event execution pair and the new `/3` pair; new authoring uses source `/2` and model `/3`. Use the [compatibility matrix](https://github.com/rore/keir-core/blob/main/docs/specs/compiler-artifact.md#source-and-artifact-identity) to select packages.
+[Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) supports the exact old `/2` event execution pair and the new `/3` pair; new authoring uses source `/2` and model `/3`. Use the [compatibility matrix](https://github.com/rore/keir-core/blob/main/docs/specs/compiler-artifact.md#source-and-artifact-identity) to select packages.
 
 [API signatures](https://github.com/rore/keir-core/blob/main/docs/specs/host-model-binding.md#api-shapes) · [Write evidence](https://github.com/rore/keir-core/blob/main/docs/specs/runtime.md#write-evidence) · [Decision walkthrough](https://github.com/rore/keir-core/blob/main/docs/decision-walkthrough.md)
 

@@ -56,4 +56,6 @@ The entries below retain earlier release evidence. Current dependencies and form
 
 **Design input:** [SDK and compatibility, sections 7-10](../../docs/internal/design-baseline/public/compiler-artifact-and-runners-v0.md); [Trusted artifact and boundaries, section 6](../../docs/internal/design-baseline/public/keir-architecture.md).
 
-An experimental release can retain clear limits. Production claims additionally require the relevant resource and real-host evidence; milestone ordering is not a waterfall dependency.
+Releases retain clear limits. Production claims additionally require the relevant resource and real-host evidence; milestone ordering is not a waterfall dependency.
+
+**Core 0.3.0:** The [release](https://github.com/rore/keir-core/releases/tag/v0.3.0) includes the compiler, Java and Node runtimes, licenses and notices, and authoring guide edition 5 in the same delivery. Source `b232944` passed Core CI and both actual installed-host examples. All five Core asset downloads match the qualified build. The guide was built from committed source `f988c2b`, repeated byte for byte, checked offline and against the exact package hashes, and verified again after download. Historical releases and guide editions remain unchanged. Daymark adoption and the live rollout belong to [task-create-guard](task-create-guard.md).

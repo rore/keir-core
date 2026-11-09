@@ -50,6 +50,8 @@ The additional live-provider check was blocked before launch by automatic approv
 
 The user approved the bounded live-provider check and release commit metadata. Both approval holds are cleared. The isolated provider check, official package build and preserved-data rollout are proceeding; their results remain required for completion.
 
+After removing the validation-only cost ceiling as requested, all three actual provider-authored rules compiled, passed their real simulations and reached eligible review offers. The normal authoring loop recovered from compiler rejections in two journeys. Native task rows, approvals, selections and live settings were unchanged. The schema-13 to schema-14 migration rehearsal preserved all 21 existing tables' data, passed integrity and foreign-key checks, and verified restoration with the previous app. Official package adoption, hosted demo CI and the final running-demo update remain open.
+
 **Dependencies:** [native-task-app](../features/native-task-app.md); [pre-operation-guard](../features/pre-operation-guard.md).
 
 **Design input:** [Guard lifecycle and conformance, sections 6, 12 and 13A](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md); [Pre-create task example, section 4D](../../docs/internal/design-baseline/public/task-management-poc.md).

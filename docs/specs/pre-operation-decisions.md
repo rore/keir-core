@@ -1,6 +1,6 @@
 # Pre-operation decisions
 
-Status: **proposed for independent review; not implemented or released**. Design baseline: Core `a79ceba`. This proposal serves [pre-operation-guard](../../roadmap/features/pre-operation-guard.md). The separate [Daymark integration proposal](../internal/daymark-pre-operation-integration.md) is host-specific, not part of this contract.
+Status: **released in [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0)**. Original design baseline: Core `a79ceba`. This contract serves [pre-operation-guard](../../roadmap/features/pre-operation-guard.md). The separate [Daymark integration proposal](../internal/daymark-pre-operation-integration.md) is host-specific, not part of this contract.
 
 ## Smallest contract
 
@@ -14,7 +14,7 @@ At the inspected baseline, existing custom enums/records can already express ALL
 
 A new entrypoint alternative uses the existing fields:
 
-| Field | Proposed guard value and reason |
+| Field | Guard value and reason |
 | --- | --- |
 | `trigger` | `REQUEST`: synchronous interception of an operation attempt, not an already committed event. |
 | `placement` | `BEFORE_COMMIT`: output must be consumed before the native effect. Existing AFTER_COMMIT cannot prevent it. |
@@ -91,25 +91,26 @@ Cancellation belongs to the host operation lifetime. Mark that attempt closed an
 
 A post-commit extension may call one native WRITE whose host operation has a guard. That nested guard is READ-only. The host bounds synchronous depth and aggregate work across this chain and passes the enclosing expiry. Ordinary READ adapters do not re-enter guards. This adds no second extension WRITE and does not erase the outer write's evidence: if it times out after dispatch, its receipt can remain UNKNOWN even when the inner guard was read-only. Native reconciliation remains host-owned.
 
-## Compatibility and release proposal
+<a id="compatibility-and-release-proposal"></a>
+## Compatibility and releases
 
-Identities version independently. The manager has reserved Core 0.3.0 and companion edition 5 for this design; these are not published assets. The minimum proposed contract pairs are:
+Identities version independently. Core 0.3.0 and companion edition 5 are published together on the [Core 0.3.0 release](https://github.com/rore/keir-core/releases/tag/v0.3.0). Their contract identities are:
 
-| Contract | Proposed value | Reason |
+| Contract | Value | Reason |
 | --- | --- | --- |
 | Source | Keep `keir/2` | No source syntax/type/step change. |
 | DCM | `keir-dcm/3` | New lifecycle/consumer semantics and conditional effect default. |
 | Artifact | `keir-artifact/3` | Newly admitted entrypoint execution meaning; retain envelope/step representation. |
 | Descriptor recipe | Keep `keir-record-descriptors/2` | No value or protobuf representation change. |
 | Scenario | `keir-scenario/3` | New decision-consumption variants; retain outcome/call envelope. |
-| Compiler/packages | Core `0.3.0`, producer `keir-compiler-java/0.3.0` | Exact release pair must advertise and test the new contract. Reserved, not published. |
-| Authoring companion | Edition `5` | Teach pre-operation decisions and failure boundaries; publish only with verified packages. |
+| Compiler/packages | Core `0.3.0`, producer `keir-compiler-java/0.3.0` | Released compiler/runtime pair for this contract. |
+| Authoring companion | Edition `5` | Published with verified packages; covers pre-operation decisions and failure boundaries. |
 
 Keep dependency pins unchanged unless implementation evidence requires a separate change. Compiler 0.3.0 is the single current authoring compiler. It accepts source `keir/2` with DCM `/3` only, producing artifact `/3` with its truthful 0.3.0 identity. It rejects DCM `/2`; it never stamps a 0.2.0 producer. Old `/2` artifacts are preserved for execution/history only, not a parallel authoring path. Runtime 0.3.0 admits exactly (artifact `/2`, DCM `/2`, producer 0.2.0, descriptors `/2`) and (artifact `/3`, DCM `/3`, producer 0.3.0, descriptors `/2`), with the existing exact environment pins in both. Reject mixed tuples and guard semantics in `/2`. This needs two explicit supported cases, not a compatibility framework.
 
 Existing approved post-commit artifacts/model snapshots stay on their old exact pair when the runtime package is upgraded. Do not rewrite approvals or receipts. Publish the current host authoring catalog as `/3`, including unchanged EVENT/AFTER_COMMIT/EVENT_REPORT semantics alongside the new guard alternative. New or edited programs compile against that current catalog and require normal approval before replacing an old selected rule. The host may retain exact old model bindings solely to execute existing approved rules; this reuses existing model binding and is not multiple selected programs at one hook. Historical source can seed a new draft, but old approval never transfers to its recompiled bytes. Package/provenance validation must explicitly recognize the new runtime's support for the old pair rather than fabricate old package integrity. No silent deactivation or recompilation of selected rules during package installation.
 
-Update domain-model, host-model-binding, runtime, compiler-artifact, spec index, schemas, example consumers and release compatibility matrix together during implementation. Update `docs/agents/host-integration-assistant.md`, `extension-assistant.md`, the new customer guide and companion compatibility record: discover the exact hook, compose READs, return a decision, test DENY/failure and native consumption, and never infer native commit from ALLOW. This proposal changes none of those files or package pins yet.
+Update domain-model, host-model-binding, runtime, compiler-artifact, spec index, schemas, example consumers and release compatibility matrix together during implementation. Update `docs/agents/host-integration-assistant.md`, `extension-assistant.md`, the new customer guide and companion compatibility record: discover the exact hook, compose READs, return a decision, test DENY/failure and native consumption, and never infer native commit from ALLOW. Core 0.3.0 includes these reference and package-record updates.
 
 ## Acceptance matrix and implementation split
 
@@ -136,4 +137,4 @@ The generic host harness supplies an independently observed native-operation cou
 
 Compiler/Java owner: DCM validation, compiler identity selection, shared fixtures/schema updates, Java binding/preparation/runtime checks and Java consumer/harness. Node owner: same exact model/artifact pairs, validation and runtime checks, Node consumer/harness, parity and packaged execution. Host owner: activation/absence semantics, creation paths, consistent READ adapters, deadline reserve, replay/nesting, real persistence and UI/API tests. Manager owns independent review, package allocation and combined release acceptance.
 
-Open gates: independent review of the revised output and exact two-pair compatibility contract; independently review the host's read-consistency mechanism and measured reserve; qualify cancellation and packaged Java/Node/native evidence. Do not begin semantic implementation on the strength of this author's review alone.
+Core 0.3.0 has passed contract review and packaged Java/Node verification. Each host integration must still qualify its read-consistency mechanism, time reserved for native checks and commit, cancellation and native persistence. Shared simulation and packaged examples establish Core and harness behavior; real-host guarantees require host-specific evidence.

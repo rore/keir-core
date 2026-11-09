@@ -2,7 +2,7 @@
 
 A pre-operation extension returns a decision before the application performs a native operation. It can use the proposed input and approved reads. The application consumes the result, checks its own permissions and business constraints, then decides whether it can commit.
 
-This walkthrough describes the Core 0.3.0 candidate contract. See the [version matrix](specs/compiler-artifact.md#source-and-artifact-identity) for package compatibility and the [decision specification](specs/pre-operation-decisions.md) for the complete host obligations.
+This walkthrough describes [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). See the [version matrix](specs/compiler-artifact.md#source-and-artifact-identity) for package compatibility and the [decision specification](specs/pre-operation-decisions.md) for the complete host obligations.
 
 [Run the standalone Java or Node example](quickstart.md#try-a-pre-operation-decision) to see ALLOWED, DENIED and BLOCKED with separate simulated native-attempt counts.
 

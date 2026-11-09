@@ -4,7 +4,7 @@
 The compiler and both runtimes use shared fixtures to verify that the same rule produces the same observable behavior. The suites use checked-in source, host models, compiled artifacts and independently written expectations. The checks compare results, calls, traces and any write evidence.
 
 - [Run the current examples](../examples/README.md) to compile and execute event extensions and decisions in both runtimes.
-- [Current `/3` fixtures](keir-3/) cover post-commit events and pre-operation decisions, with shared source, models, artifacts and scenario expectations. Core 0.3.0 remains a candidate until integrated package qualification.
+- [Current `/3` fixtures](keir-3/) cover post-commit events and pre-operation decisions, with shared source, models, artifacts and scenario expectations. They match [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0).
 - [Keir 2 fixtures](keir-2/README.md) preserve the exact `/2` execution pair supported by runtime 0.3.0. Current compiler 0.3.0 authors against `/3` models only.
 - [Contract workflow](../.github/workflows/keir-contract.yml) runs the structural checker, compiler and runtime tests, and the packaged host comparison.
 - [Testing evidence](../docs/testing.md#current-single-write-behavior-verification) records the results and their scope.

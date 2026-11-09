@@ -3,7 +3,7 @@
 
 The domain capability model (DCM) is the host's contract for an extension. It describes which entrypoints the host exposes, the data they pass, and the operations an extension may call. Current authoring targets `keir-dcm/3`, with the bounded values of [Keir 2](workflow-expressions.md) and the [pre-operation decision lifecycle](pre-operation-decisions.md). The compiler and runtimes check decoded structure, references, UTF-8 byte limits and the relationships between fields.
 
-Core 0.3.0 and the `/3` producer contracts remain candidates until qualification and release evidence is available. The [`keir-dcm/3` schema](../../schemas/dcm-3/dcm.schema.json) checks current structure. Use the [version rules](compiler-artifact.md#source-and-artifact-identity) to distinguish current authoring from retained execution of old approved artifacts.
+[Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) implements the `/3` model contract. The [`keir-dcm/3` schema](../../schemas/dcm-3/dcm.schema.json) checks current structure. Use the [version rules](compiler-artifact.md#source-and-artifact-identity) to distinguish current authoring from retained execution of old approved artifacts.
 
 ## Model fields and identity
 
@@ -114,7 +114,7 @@ For a post-commit example, the table below explains the task operations in the [
 
 `TaskId` and `ProjectId` are distinct types, so the extension cannot pass a task ID where a project ID is expected. The example uses the default call and write limits. Each contract has its own model pin.
 
-The [structural checker](../../scripts/check-keir-contracts.py) checks available fixtures against their versioned schemas. The [Java](../../runtime-java/src/test/java/dev/keir/runtime/BoundEffectRuntimeTest.java) and [Node.js](../../runtime-node/test/bound-effect.test.js) tests cover exact model binding, catalog registrations, and call and write ceilings. These links alone do not establish Core 0.3.0 qualification.
+The [structural checker](../../scripts/check-keir-contracts.py) checks available fixtures against their versioned schemas. The [Java](../../runtime-java/src/test/java/dev/keir/runtime/BoundEffectRuntimeTest.java) and [Node.js](../../runtime-node/test/bound-effect.test.js) tests cover exact model binding, catalog registrations, and call and write ceilings. The [Core 0.3.0 release](https://github.com/rore/keir-core/releases/tag/v0.3.0) supplies the qualified package assets.
 
 <a id="legacy-read1-model"></a>
 <a id="implementation-reference-original-read-only-model"></a>

@@ -6,7 +6,7 @@ The specification defines the language, host model, compiled artifact and execut
 <a id="current-behavior"></a>
 ## Current contract
 
-These primary references describe the Core 0.3.0 candidate. Its compiler accepts source `keir/2` against `keir-dcm/3` and produces `keir-artifact/3`. The package and companion edition 5 remain unreleased until qualification and verified release assets are available. For released Core 0.2.0, use the [matching specification snapshot](https://github.com/rore/keir-core/tree/43f28600d8db460db6f22b48c2d4c2c0de9c52b7/docs/specs) and [edition 4 companion](../agents/customer-authoring-guide-v4.md).
+These primary references describe [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). Its compiler accepts source `keir/2` against `keir-dcm/3` and produces `keir-artifact/3`. The Core packages and authoring companion edition 5 are available on that release. For released Core 0.2.0, use the [matching specification snapshot](https://github.com/rore/keir-core/tree/43f28600d8db460db6f22b48c2d4c2c0de9c52b7/docs/specs) and [edition 4 companion](../agents/customer-authoring-guide-v4.md).
 
 The host chooses one of two lifecycles. An event extension runs after the original operation commits and may contain at most one possible write. A pre-operation decision runs before the native operation, may only read, and returns a typed `ALLOW` or `DENY`. The host consumes that decision and retains its native permission, consistency and commit checks. Both runtimes execute the same artifact bytes.
 
