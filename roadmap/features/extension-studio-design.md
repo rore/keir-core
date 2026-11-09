@@ -1,7 +1,7 @@
 ---
 id: "extension-studio-design"
 title: "Design and prototype the Extension Studio experience"
-status: "active"
+status: "done"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -10,7 +10,7 @@ repo: "keir-demo-app"
 
 ## Summary
 
-**Current corrective slice: business understanding.** The user rejects the Studio's rule explanation, simulation hierarchy and vocabulary after an actual saved due-date customization remained difficult to understand. The running bundle was verified against source `7ad6d36`; this is a current product gap, not an assumed stale preview. Earlier functional and layout passes do not establish acceptance of this experience.
+**Completed corrective slice: business understanding.** The working Studio now explains the actual proposed rule, its simulation outcomes and limits, and its separate approval/use state. The original gap was verified against running source `7ad6d36`; it was a product problem rather than a stale preview. The accepted replacement `840c5ad` is now running with saved data and settings preserved. Earlier scoped checkpoints below remain historical where they differ from this delivered state.
 
 Use that exact journey to compare two genuinely different conversation-centered layouts before implementation. Explain the actual saved rule, including its conditions and seven-day timing, with a recognizable before/after example, exceptions and unchecked coverage. Distinguish an intentionally simulated unavailable task from an unsuccessful verification. Preserve separate approval and activation and make their current states unmistakable. The collection must identify the customization the person created rather than its first exploratory question. Preserve explicit user-provided names.
 
@@ -24,9 +24,9 @@ The reviewed implementation direction is one host-owned description derived from
 
 **Selected direction:** After comparing both alternatives and receiving a concrete explanation, the user selected A: normal clarification conversation followed by one inline behavior summary with a before/after preview, simulation outcomes and limits, then separate approval and turn-on actions. Two independent proxy rounds informed revisions; they do not establish human usability or production acceptance. The [frozen design handoff](https://github.com/rore/keir-demo-app/commit/d1eaea993ac705a6bcb9cfc090db03a23299e7b3) is integrated, with Summary and Simulation vocabulary, explicit example-task scope and task-language outcomes. Its twelve files match the reviewed contribution exactly; historical canvas text is preserved with a superseded notice. The developer accepted [implementation](../../.agent-workflow/tasks/studio-business-understanding-implementation.md), confirmed its planning dependency cleared and began work. Actual-app technical, comprehension and responsive review, hosted checks and data-preserving rollout remain open. Production is unchanged.
 
-**Delivery in progress:** The reviewed candidate and final guides are published as [Daymark `840c5ad`](https://github.com/rore/keir-demo-app/commit/840c5ad1dfe750631ec79140c95c5bc4454f5a17). It includes the six selected-A explanation/layout corrections, retained unsent drafts, distinct Summary/Simulation destinations and ordinary version/current-use controls with explicit secondary Developer tools and Configure. Independent technical review and settled desktop/phone/short rendered review pass. The original local aggregate has 237 passes and 12 test-contract/order failures; reviewed test-only corrections pass all 67 affected checks while retaining isolation, recovery and approval assertions. The product/build is unchanged by those corrections, and manager integration matches the reviewed served bytes.
+**Delivered:** The reviewed source and final guides are published as [Daymark `840c5ad`](https://github.com/rore/keir-demo-app/commit/840c5ad1dfe750631ec79140c95c5bc4454f5a17). It includes the six selected-A explanation/layout corrections, retained unsent drafts, distinct Summary/Simulation destinations and ordinary version/current-use controls with explicit secondary Developer tools and Configure. Independent technical review and settled desktop/phone/short rendered review pass. [Complete hosted verification](https://github.com/rore/keir-demo-app/actions/runs/42626934091) passes 550 Node tests with 12 skips and all 249 browser cases. The running demo's HTML/JavaScript/CSS match the reviewed bytes; backup, integrity/foreign-key checks, exact saved-row/settings preservation and read-only saved-customization checks pass. The implementation record preserves the earlier failures and their verified corrections.
 
-[Current hosted verification](https://github.com/rore/keir-demo-app/actions/runs/42626934091) uses the reviewed 25-minute job budget with every test and per-test limit retained. The previous 15-minute job passed 550 Node tests and 208 browser cases before cancellation with 41 cases unfinished; no browser failure or exact cancellation trigger was established. Bounded triage did not reproduce a cause for the immediate-resize or loading-focus observations. The manager retains both as unresolved, nonblocking observations with original captures and instrumented repeats. Final UI guides are published; complete hosted qualification and the backed same-URL running-demo update remain open. The user's original running demo is unchanged. No new generic polish cycle or framework API is required.
+The complete run uses the independently reviewed 25-minute job budget with every test and per-test limit retained. Bounded triage did not reproduce a cause for two isolated immediate-resize/loading focus observations. Both remain unresolved, nonblocking observations with original captures and instrumented repeats. This slice does not claim exhaustive accessibility or new live-provider qualification. Keir Core remains domain-independent; no framework API or persistence schema was added for these UI corrections. The current milestone is closed.
 
 ### Earlier scoped deliveries and review history
 
@@ -66,10 +66,10 @@ A generic agent builder, a second host-design chat, implementation of the comple
 
 ## Done When
 
-- [ ] Design: maintain the demo-owned UX specification, screen/state inventory, interaction rules and visual direction; resolve consequential product questions with the user and architectural contracts with the architect.
-- [ ] Prototype: walk the user through request -> clarification -> behavior review -> scenarios -> simulation -> exact approval/activation -> visible task-app behavior, then edit/retest and disable/rollback. Include a recoverable failed attempt and different customizations for two users.
-- [ ] Review: review the actual prototype with the user and record resolved feedback before implementing the Studio UI. Verify business-user clarity, accessible navigation and continuity across draft/active states; do not substitute a static screenshot for interaction review.
-- [ ] Handoff: connect each screen/state to host-owned authoring/lifecycle tools and define fast regression, UI journeys, visual checks and separate opt-in live-provider acceptance. Track remaining implementation in the existing owning features.
+- [x] Design: maintain the demo-owned inline interaction guidance and historical notices; record the user's selection of A and independently reviewed host/framework boundaries.
+- [x] Prototype: compare two distinct layouts for the same due-date journey and explain the choice to the user. Record selected A and clearly label scripted prototype evidence.
+- [x] Review: exercise the fixed actual application at desktop, narrow and short sizes, including complete behavior explanations, simulation outcomes/limits, exact names, approval/use, later edits, owner isolation and unsent drafts. Preserve the two unconfirmed focus observations; proxy comprehension and bounded keyboard checks are not a human usability study or exhaustive accessibility certification.
+- [x] Handoff and delivery: connect the views to host-owned authoring/lifecycle evidence, pass independent technical/rendered review and complete hosted regression, publish current guides and update the existing running demo with backup and saved-work/settings readback. Live-provider and reusable-Studio packaging qualification retain their separately recorded scope.
 
 ## Notes
 

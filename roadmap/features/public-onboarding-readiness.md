@@ -1,7 +1,7 @@
 ---
 id: "public-onboarding-readiness"
 title: "Make public onboarding reproducible and documentation current"
-status: "active"
+status: "done"
 priority: "high"
 commitment: "committed"
 milestone: "Release an embeddable Keir library"
@@ -25,10 +25,10 @@ Close the first-use and documentation gaps identified by the expanded review of 
 - [x] A clean checkout follows the literal published setup commands and runs both examples, including an edited title, without disabling integrity or relying on a CI-only workaround. Fresh Windows source replay passes all six host flows; hosted Linux setup, host and parity checks pass.
 - [x] A consumer verifies release assets and runs a minimal compiler/Node/Java host outside the source tree using documented commands. Verification used qualified release copies and cached third-party dependencies; anonymous and empty-cache downloads remain unverified.
 - [x] A host builder can obtain the canonical fingerprint for a new or changed DCM through a verified procedure; the reviewed standalone recipe matches six compiler-qualified vectors and rejects ten malformed cases. No runtime/compiler API was added.
-- [ ] Current documentation distinguishes implemented behavior, proposals and history; states the actual license, stack, distribution, provider requirements and consequential limits; and clearly links language, DCM, runtime and assistant guides.
+- [x] Current documentation distinguishes implemented behavior, proposals and history; states the actual license, stack, distribution, provider requirements and consequential limits; and clearly links language, DCM, runtime and assistant guides.
 - [x] Current conformance and test claims identify exact release/source evidence. Failed or incomplete current-head runs are not replaced by old successful counts.
-- [ ] The Daymark walkthrough matches accepted UI behavior and explains approval, activation, replacement and provider-free execution. The existing owner supplies fresh resolved CI evidence.
-- [ ] Literal commands and links are verified at delivered revisions. Anonymous landing-page, asset and cross-repository checks remain a separate post-visibility action after the user chooses to publish.
+- [x] The Daymark walkthrough matches accepted UI behavior and explains approval, activation, replacement and provider-free execution. Complete hosted verification passes at Daymark 840c5ad, and the running build is verified with saved data/settings preserved.
+- [x] Literal commands and links are verified at delivered revisions. Anonymous landing-page, asset and cross-repository checks remain a separate post-visibility action after the user chooses to publish.
 
 ## Status
 
@@ -36,4 +36,4 @@ Core onboarding changes are accepted: `0827fb4` adds the annotated source/model 
 
 The shared setup implementation `41a11a5` passes independent plan/result review, 18 focused tests and six clean-source Node/Java host flows. It preserves exact manifest/lock restoration and existing CI coverage. [Hosted Linux contract verification](https://github.com/rore/keir-core/actions/runs/42619792483) passes at `cbc256c`; see [the setup record](../../.agent-workflow/tasks/public-onboarding-source-setup.md). Consumer installation remains qualified within its recorded cache/download boundary.
 
-Daymark documentation contribution `127f09f` corrects license, stack, setup, privacy and implementation-versus-proposal guidance. It is integrated with the pending Studio source. Final accepted UI labels, complete regression/hosted evidence and the running-demo update remain open. The original running demo remains unchanged.
+Daymark `840c5ad` publishes the accepted final guides and Studio source. [Complete hosted verification](https://github.com/rore/keir-demo-app/actions/runs/42626934091) passes 550 Node tests with 12 skips and all 249 browser cases. The existing running demo serves its exact reviewed build; saved native/customization data and provider settings are preserved. This bounded onboarding milestone is closed. The repositories remain private, and anonymous/empty-cache checks retain their stated limits. The two unconfirmed transient UI focus observations remain nonblocking and explicitly recorded in the [Studio delivery](extension-studio-design.md).

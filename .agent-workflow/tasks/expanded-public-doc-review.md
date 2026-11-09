@@ -79,10 +79,12 @@ The independent reviewer approved preservation of structure, immutable released 
 - Core: release CI run 42576060993 independently confirmed successful at b2329440dd2a25acc547f3ebfea214748d912022. Final changed-page scan resolved 164 Core and 89 Daymark local links and anchors; privacy and whitespace checks passed. The approved README opening and diagram content are unchanged. Workflow validation is clean; Redline classifies the component and corpus README paths as gray with no boundary violation or required checkpoint.
 - The source setup helper is independently reviewed at 47306dfa059f1a5066b3cd6efd4756cbfd76e231 and integrated at 41a11a510518e38822a0b2a9af7a325e69c9ceec. A fresh archive of that source plus the final guide passed the literal Windows setup, source compiler/runtime builds and all six Node/Java follow-up, decision and edited-title runs. Installed Node files match source, and only the local archive integrity changes in the lockfile. Third-party caches were seeded. [Hosted Linux CI](https://github.com/rore/keir-core/actions/runs/42619792483) passed at cbc256cb342eb8b00a4774e7aced5353dc5ca334, including shared setup, the independent Node host and retained/current Java/Node scenario comparison; its job is 129168658429. This is separate evidence from the six-flow Windows tutorial replay.
 - The practical fingerprint recipe passed independent review and six matching released-compiler-qualified vectors plus ten rejection cases. It remains a standalone copyable recipe, with model validation performed by the compiler.
-- Overall acceptance still needs fresh accepted Daymark CI/UI evidence and final UI documentation. Review assertions are not test results.
+- Daymark final Summary/Simulation/version-management guides are published at 840c5ad. [Complete hosted qualification](https://github.com/rore/keir-demo-app/actions/runs/42626934091) passes 550 Node tests with 12 skips and all 249 browser cases. The running demo's served bytes and preserved saved work/settings are verified. Source and bounded rendered review are accepted; the two unconfirmed transient focus observations remain explicit nonblocking limitations.
 - Fingerprint investigation evidence: the Core developer's released-0.3 compiler report contains six accepted new/changed/Unicode-control model variants, including all 32 control characters. Pretty and reordered forms produce matching canonical model digests; stale fingerprints are rejected. That investigation now supports the reviewed standalone recipe; it does not establish a new public compiler/runtime helper.
 
 ## Result review
+
+**Final acceptance:** All 18 findings in this bounded review have been addressed and accepted within their recorded verification limits. Core setup, stable installation, canonical fingerprint, tutorial and entry documentation are published. Daymark current usage/proposal guidance matches the accepted source and running build. The final README explanation preserves its approved opening and diagram and passed an independent reader-first/source-fact review. Anonymous download and empty-cache qualification remain separate; repository visibility was not changed.
 
 Agent technical review: expanded_doc_plan independent result review.
 
@@ -112,9 +114,9 @@ Changed parameterized instructions were checked with retained released assets: C
 | 12. Current fit | Positive examples with step/call/list/write boundaries and normative link. | Current language checked. |
 | 13. Current corpus | `/3` README added with version pairing, layout and commands. | Runner arguments checked. |
 | 14. Daymark currency | Scope, native design and source/assets READMEs reconciled; history and compatibility retained. | Source checked. |
-| 15. UI and prerequisites | Published-source activation labels and replacement semantics aligned; native/simulation/live requirements separated. | Open: fresh accepted UI evidence after implementation fixes. |
+| 15. UI and prerequisites | Final Summary/Simulation/version-management labels and activation semantics aligned; native/simulation/live requirements separated. | Accepted source and rendered review, complete hosted run and running-build/data-preservation readback. |
 | 16. Reproducible setup | Clone/cd, port/data, seed/reset and focused troubleshooting added. | Isolated install/build/repeat seed/reset passed. |
 | 17. Provider privacy | Project names/IDs, provider retention and scoped no-provider behavior explicit. | Supported pairs and discovery source checked. |
 | 18. Historical landings | Editions 1–4 version/index notices and archived canvas link corrected. | Link scan passed; pinned archives unchanged. |
 
-Daymark's reported CI failure remains an implementation-owner investigation. Earlier passing totals do not establish current acceptance. Signed-out landing/release/cross-repository checks await the release owner's visibility decision.
+The earlier Daymark CI failures and cancelled qualification are preserved in their owning implementation record. Current acceptance uses the complete successful run linked above. Signed-out landing/release/cross-repository checks await the release owner's separate visibility decision.
