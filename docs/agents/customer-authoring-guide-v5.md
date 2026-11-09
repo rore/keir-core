@@ -1,6 +1,6 @@
 # Customer authoring guide
 
-Companion edition 5 targets the Core 0.3.0 candidate. It uses source `keir/2`, model `keir-dcm/3`, artifact `keir-artifact/3`, scenario `keir-scenario/3` and descriptor recipe `keir-record-descriptors/2`. This is not a published package claim. Use the verified compatibility record supplied with the companion and the exact host model.
+Companion edition 5 is for Keir Core 0.3.0. It uses source `keir/2`, model `keir-dcm/3`, artifact `keir-artifact/3`, scenario `keir-scenario/3` and descriptor recipe `keir-record-descriptors/2`. Use the verified compatibility record supplied with the companion and the exact host model.
 
 ## Discover
 
@@ -34,6 +34,6 @@ Present the exact checked artifact/model revision and expected and observed evid
 
 ## References
 
-Read the [language rules](../specs/language.md), [model rules](../specs/domain-model.md), [workflow expressions](../specs/workflow-expressions.md) and [pre-operation decision contract](../specs/pre-operation-decisions.md) for semantics. Use the [source](../../schemas/source-2/source.schema.json), [model](../../schemas/dcm-3/dcm.schema.json), [artifact](../../schemas/artifact-3/artifact.schema.json) and [scenario](../../schemas/scenario-3/scenario.schema.json) schemas for structure.
+Read the [language rules](https://github.com/rore/keir-core/blob/5abd13a964fd103cb1e77e6b06592b4068ba069d/docs/specs/language.md), [model rules](https://github.com/rore/keir-core/blob/5abd13a964fd103cb1e77e6b06592b4068ba069d/docs/specs/domain-model.md), [workflow expressions](https://github.com/rore/keir-core/blob/5abd13a964fd103cb1e77e6b06592b4068ba069d/docs/specs/workflow-expressions.md) and [pre-operation decision contract](https://github.com/rore/keir-core/blob/5abd13a964fd103cb1e77e6b06592b4068ba069d/docs/specs/pre-operation-decisions.md) for semantics. These links pin the matching specification revision. Use the bundled [source](../../schemas/source-2/source.schema.json), [model](../../schemas/dcm-3/dcm.schema.json), [artifact](../../schemas/artifact-3/artifact.schema.json) and [scenario](../../schemas/scenario-3/scenario.schema.json) schemas for structure.
 
 The [example model](../../conformance/keir-3/dcm-guard.json) supports [input-only](../../conformance/keir-3/source-guard-input.json), [READ-based](../../conformance/keir-3/source-guard.json) and [handled-rejection](../../conformance/keir-3/source-guard-handler.json) sources. Their separate compiled artifacts and digest files are bundled unchanged. Scenarios cover [input ALLOW](../../conformance/keir-3/scenarios/guard-input/guard-input-allow.json), [input DENY](../../conformance/keir-3/scenarios/guard-input/guard-input-deny.json), [READ ALLOW](../../conformance/keir-3/scenarios/guard/guard-allow.json), [READ DENY](../../conformance/keir-3/scenarios/guard/guard-deny.json) and [handled rejection with ALLOW](../../conformance/keir-3/scenarios/guard-handler/guard-handler-allow.json), which still blocks native continuation. Supply host-specific models and tool definitions separately.

@@ -1,0 +1,24 @@
+{
+  "status": "release",
+  "coreRevision": "b2329440dd2a25acc547f3ebfea214748d912022",
+  "packages": {
+    "compiler": {
+      "version": "0.3.0",
+      "assets": {
+        "keir-compiler-cli-0.3.0.zip": "sha256:596ef85cbec91d9e459fcd67aff83e05099df9b7610fd0fca643e573d27d090c"
+      }
+    },
+    "javaRuntime": {
+      "version": "0.3.0",
+      "assets": {
+        "keir-java-runtime-maven-0.3.0.zip": "sha256:dfcbc22ed7b902b8c9c708da85de371afaeb6c74aa72aecc827931182188ac04"
+      }
+    },
+    "nodeRuntime": {
+      "version": "0.3.0",
+      "assets": {
+        "keir-runtime-node-0.3.0.tgz": "sha256:40d71748bf142872c832e7d48aa6e8f827d0759c6ca5006c1abfd19db52935cc"
+      }
+    }
+  }
+}
