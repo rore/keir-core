@@ -2,14 +2,14 @@
 
 Keir lets developers add AI-assisted customization to their applications. Users describe the business rules they need in plain language, and an AI assistant turns those requests into extensions built from capabilities the application exposes.
 
-![An AI assistant drafts a Keir extension from a customer request and the app’s model. Keir compiles it. At execution, the app checks permissions and performs the operation.](docs/images/extension-flow.svg)
-
 <a id="customizing-an-application"></a>
 Different teams need different behavior from the same application: a follow-up task when work is completed, or a check that must pass before an operation can proceed. Supporting each variation as a new feature or setting puts the application team in the middle of every customization.
 
 With Keir, developers define reusable building blocks. Users can then describe how those building blocks should work together without writing code.
 
 Keir provides the extension language, compiler and runtime behind this workflow. AI helps author the extension. Once activated, the compiled extension runs without another AI request, through the application's own services and permission checks.
+
+![An AI assistant drafts a Keir extension from a customer request and the app’s model. Keir compiles it. At execution, the app checks permissions and performs the operation.](docs/images/extension-flow.svg)
 
 <a id="from-a-request-to-a-running-extension"></a>
 ## From a business request to application behavior
