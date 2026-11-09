@@ -54,17 +54,25 @@ Not required at this risk level. Existing public-readiness and automation author
 **Exceptions:**
 —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 The Core developer completed the isolated reproduction and explicitly adopted the independent plan-review conditions. The manager released the three-file implementation after recording that review. Documentation and Studio work continue independently.
 
+The implementation is frozen as a three-file patch against b038bf42baa4b0d2d873e88df2409e5ba123bbeb: the source setup helper, focused test and existing contract workflow. Native npm refresh replaces the manual CI-only hash edit; both original package files are restored byte for byte on command or postcondition failure. CI uses the same helper, explicitly runs its tests and includes both paths in its event filters. The independent reviewer accepted the bounded result review; integration awaits that verdict and the documentation replay.
+
 ## Evidence
 
 Reproduction and native setup results are reported from the isolated b038bf4 checkout; inspect the retained evidence during plan/result review. The separate documentation owner has already qualified released consumer installation outside both source repositories, so do not duplicate that work.
 
+The manager inspected the frozen patch manifest and retained logs. All 18 focused tests pass, including real native Windows npm with spaces, unrelated working directory, changed cached tar bytes and repeated idempotent setup. Exact restoration, malformed identities, unexpected lock/manifest drift and failed command stages are covered. CI equivalence and shell syntax checks pass, retaining extraction/source comparisons and teaching/parity assertions.
+
+A clean source archive passed the literal shared helper. Source compiler packaging and source Java runtime/dependency builds passed, followed by all six runs: Node and Java follow-up, pre-operation and edited-title examples. Their results agree. These source-build checks are distinct from the earlier released-consumer checks. POSIX native execution remains a hosted-CI requirement after integration; no hosted result is claimed yet.
+
+Frozen patch SHA-256: 35f7c91b48508eece9708d4db180e50b1728daaa81139718df41a95074cd4ed2. Helper SHA-256: e98c500a420306764b086f7cdbc3f3264a079dbeda58649d87480eb6fc31da9d. Test SHA-256: fd10f807ea533a8f393f2658efeb161ece8bd04155e9f8f9cfeeb83c48d9c47f. Workflow SHA-256: 785e6c6ed26483375294ed1da2930f7158e2fcf7665ab2d7e75eb6ac9016a041.
+
 ## Result review
 
-Pending implementation, focused verification and independent result review.
+Independent result review is in progress on the frozen three-file result. Focused and actual source-example evidence is available; final documentation replay, integration and hosted POSIX execution remain open.
