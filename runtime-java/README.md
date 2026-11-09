@@ -1,5 +1,7 @@
 # Java runtime
 
+Use [released-package installation](../docs/installation.md#configure-and-run-in-java) to configure the included Maven repository and run a consumer outside this checkout.
+
 <a id="current-host-bound-profile"></a>
 ## Bind and run a rule
 

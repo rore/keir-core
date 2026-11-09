@@ -1,5 +1,7 @@
 # Java compiler
 
+For the packaged CLI, follow [released-package installation](../docs/installation.md). The build commands below are for contributors working from source.
+
 The Java library and standalone CLI compile Keir against the application’s domain capability model (DCM). The output is a compiled artifact that refers to the exact model used for validation. [Compile and run the follow-up rule](../examples/README.md#compile-the-rule)
 
 The [Core 0.3.0 compiler](https://github.com/rore/keir-core/releases/tag/v0.3.0) accepts source `keir/2` with model `keir-dcm/3` and produces `keir-artifact/3`. That model supports post-commit event extensions and read-only pre-operation decisions. Source syntax stays Keir 2. See the [decision walkthrough](../docs/decision-walkthrough.md) and [exact compatibility matrix](../docs/specs/compiler-artifact.md#source-and-artifact-identity).

@@ -1,6 +1,6 @@
 # Keir 2 customer authoring guide
 
-Authoring companion edition 4 pairs with Keir Core 0.2.0. Use the verified Core packages and a host that has enabled the Keir 2 contract.
+Authoring companion edition 4 pairs with Keir Core 0.2.0 and its `/2` model and artifact contracts. Use the verified Core packages and a host that has enabled that contract. See the [assistant guide index](README.md) for current authoring and package compatibility. Published companion archives retain their pinned contents.
 
 ## Discover the host contract
 

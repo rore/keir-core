@@ -2,14 +2,19 @@
 
 Use [Contributing](../CONTRIBUTING.md#build-and-test) to build the repository and run the default Java and Node.js suites. The [shared conformance guide](../conformance/README.md) describes the checks that compare compiled artifacts and complete outcomes across runtimes. Run the [resource harness](../conformance/resource-qualification/README.md) separately when investigating resource limits.
 
-<a id="effect4-verification"></a>
+<a id="current-single-write-behavior-verification"></a>
 ## Current single-write behavior verification
 
-The public contract passed local and hosted checks on 2026-11-05. The local coverage build passed 144 Java tests, including 59 compiler, 69 runtime and 16 teaching-host tests. Node passed 49 runtime tests and seven installed teaching-host tests. The structural checker passed 31 fixtures and 19 rejection cases.
+The current released baseline is [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0), source [`b232944`](https://github.com/rore/keir-core/commit/b2329440dd2a25acc547f3ebfea214748d912022). Its [contract CI run](https://github.com/rore/keir-core/actions/runs/42576060993) passed. The current `/3` corpus compares 39 shared scenarios and 51 raw verification vectors across Java and Node, including post-commit effects and read-only pre-operation decisions. CI checks normalized complete outcomes for exact parity, alongside compiler, runtime and installed-host tests.
 
-Java and Node matched across 20 scenarios, 45 raw verification vectors and eight packaged scenario groups. The compiler reproduced the pinned artifact byte for byte, and the installed Node files matched the checked tarball. The Windows resource soak ran 3,000 timed invocations per runtime. [Merged Core contract run](https://github.com/rore/keir-core/actions/runs/42072587793) · [Resource qualification](../conformance/resource-qualification/README.md)
+Use the [current corpus guide](../conformance/keir-3/README.md) for fixture layout and commands. The retained [Keir 2 corpus](../conformance/keir-2/README.md) checks the older execution contract; compiler 0.3.0 authors against `/3` models. Test totals belong to their source revision and run, rather than describing every later checkout.
 
-This evidence covers the tested source, packages and controlled hosts. Native-provider qualification, production resource containment and public package release have separate acceptance criteria. [Resource qualification](../roadmap/features/runtime-resource-qualification.md) · [Public release plan](../roadmap/features/public-package-release.md)
+The [release installation guide](installation.md#verification-boundary) records a separate check of the packaged compiler and both runtimes outside the source repositories. These checks cover controlled hosts. Real service guarantees and production resource containment require separate qualification; see [resource qualification](../conformance/resource-qualification/README.md).
+
+<a id="effect4-verification"></a>
+### Historical Core 0.1 verification
+
+The 2026-11-05 baseline passed 144 Java tests, 49 Node runtime tests, seven installed Node teaching-host tests, 31 structural fixtures and 19 rejection cases. Java and Node matched 20 scenarios, 45 raw verification vectors and eight packaged scenario groups. A Windows resource soak ran 3,000 timed invocations per runtime. These are historical measurements, not current test totals. [Original contract run](https://github.com/rore/keir-core/actions/runs/42072587793)
 
 <a id="earlier-profile-results"></a>
 <a id="historical-verification"></a>
@@ -22,9 +27,19 @@ See [earlier verification and coverage results](internal/history/verification.md
 
 ## Fast feedback
 
+From the repository root, run the default Java and Node checks:
+
+```sh
+MAVEN_USER_HOME="$PWD/.tools/maven" ./mvnw -Dmaven.repo.local=.tools/maven/repository verify
+npm ci --prefix runtime-node --cache .tools/npm-cache --ignore-scripts --no-audit --no-fund
+npm test --prefix runtime-node
+```
+
+On Windows, use `mvnw.cmd` and the PowerShell setup in [Contributing](../CONTRIBUTING.md#build-and-test). The [current corpus guide](../conformance/keir-3/README.md) gives the explicit Node scenario command. Slow resource and real-provider checks have separate commands and prerequisites.
+
 ### Historical generic-hook regression
 
-The [generic hook acceptance matrix](specs/generic-hook-capability-contract.md#examples-and-rejection-obligations) records earlier obligations and [fixtures](../conformance/generic-hooks/README.md). Use the [Keir 1 corpus](../conformance/keir-1/README.md) for the current suite. The earlier checks covered the following cases:
+The [generic hook acceptance matrix](specs/generic-hook-capability-contract.md#examples-and-rejection-obligations) records earlier obligations and [fixtures](../conformance/generic-hooks/README.md). Use the [current `/3` corpus](../conformance/keir-3/README.md) for current contracts. The earlier checks covered the following cases:
 
 - Run two programs against one unchanged hook/DCM: select a different already-published compatible READ, then repeat READs within the aggregate bound. Omit advanced policy at hook, admission and invocation. Do not add sample-specific named grants to make these pass.
 - Distinguish omitted/empty policy and quota maps from `allow: []`; prove inherited restrictions, explicit allow/deny/quota narrowing, zero quotas, rejected widening, unknown IDs, null/malformed controls and per-call authorization. No source-controlled policy or binding can widen scope.

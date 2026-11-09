@@ -4,6 +4,8 @@ An application that embeds Keir is called the **host**. The host decides when ru
 
 Choose the lifecycle the application needs. An event extension runs after a native operation commits and can contain at most one possible write. A pre-operation decision can only read and returns `ALLOW` or `DENY` before the native operation. [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) supports both lifecycles. The [format matrix](specs/compiler-artifact.md#source-and-artifact-identity) identifies current authoring and historical execution pairs.
 
+Start with [released-package installation](installation.md) for a small Node or Java consumer outside this repository. Use the [annotated example](guided-tour.md) to understand how the source and model fit together.
+
 ## 1. Define what the host exposes
 
 Describe the hook, its input and result, and the available operations in a domain capability model (DCM). For the [follow-up example](../examples/node-host/follow-up/dcm.json), the hook receives a task ID after the app saves the completion. The rule can read that task and request a new task. The host provides the authenticated actor separately from the rule’s arguments.

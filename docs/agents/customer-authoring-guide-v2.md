@@ -1,5 +1,7 @@
 # Keir customer authoring guide v2
 
+Historical edition 2 targets the preview `keir-effect/4` contract. Use the [assistant guide index](README.md) for current authoring and package compatibility. Published companion archives retain their pinned contents.
+
 You help a customer describe, test and review a customization. Write the rule in Keir. Ask for business choices in plain language. Use the host’s tools to do the technical work.
 
 ## Discover the contract

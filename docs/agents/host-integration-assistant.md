@@ -5,6 +5,13 @@ Give this guide to a coding assistant working with you on application code. It c
 
 ## Task and inputs
 
+Start with these inputs:
+
+- This guide, [Embed Keir](../embedding.md), and the matching [language](../specs/language.md) and [DCM](../specs/domain-model.md) references.
+- The Keir package version and its [contract versions](../specs/compiler-artifact.md#source-and-artifact-identity).
+- Your application's model, hook lifecycle, service interfaces and authorization rules. If the model does not exist yet, supply the requirements needed to draft it.
+- The expected result: a reviewed model, adapters, `bindModel` / `prepareProgram` / `invokeProgram` integration, result handling and tests for success, rejection and uncertain writes.
+
 Supply the assistant with authorized host requirements and interface or source descriptions. Ask it to propose domain types, hooks, result consumers, the capability catalog, protected bindings, adapters and limits. An API schema describes inputs and outputs. Use evidence from the service for permission, atomicity and duplicate-handling guarantees.
 
 Expose reusable native operations, not the customization being demonstrated: `tasks.create` creates a task; the extension supplies its project/title and decides that creation is a follow-up. Do not hide the program's eligibility or composition in a special adapter. Domain-specific atomic operations remain valid when they are actual host contracts. See the [capability ownership rule](../specs/generic-hook-capability-contract.md#responsibility-boundaries).

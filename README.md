@@ -13,14 +13,23 @@ For example, a user of a task application might ask: “When a task in the launc
 ## Start here
 
 - [Getting started](docs/quickstart.md). Run a follow-up extension, edit it, and compile your change.
+- [Install released packages](docs/installation.md). Use Keir from a separate application without building this repository.
+- [How Keir works](docs/guided-tour.md). Follow one extension from the application's model to execution.
 - [Embed Keir](docs/embedding.md). Expose application operations and run a compiled rule from your own code.
+- [Build with a coding assistant](docs/agents/host-integration-assistant.md). Give an assistant the contracts and inputs it needs to help integrate Keir.
 - [Keir specification](docs/specs/README.md). Look up the language, model, compiler, and runtime contracts.
 - [Explore Daymark](https://github.com/rore/keir-demo-app). See how a task application uses Keir for customer authoring, review, and execution.
 
 <a id="supported-contract"></a>
 ## Current scope
 
-An extension can read data and contain at most one possible write, including guarded calls. The pre-operation decision contract allows only reads and returns `ALLOW` or `DENY` before the application performs its own operation. The application still checks permissions and business constraints before committing.
+You can build extensions that:
+
+- React to an application event, read related data and conditionally perform one operation.
+- Check a proposed operation and return `ALLOW` or `DENY` before the application commits it.
+- Make bounded decisions using optional values, timestamps and membership in small lists.
+
+Each extension has at most eight steps and four capability calls. It can contain one possible write, including guarded calls; a pre-operation decision permits only reads. Lists contain at most 16 scalar values. The application still checks permissions and business constraints before committing. See the [language reference](docs/specs/language.md) for supported expressions and bounds.
 
 Java and Node.js run the same compiled format. [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) includes the current contracts and authoring companion edition 5. See the [specification](docs/specs/README.md) for supported behavior and [verification](docs/testing.md) for tested scope.
 

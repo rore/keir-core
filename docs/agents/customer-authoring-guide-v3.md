@@ -1,5 +1,7 @@
 # Keir customer authoring guide
 
+Historical edition 3 pairs with Core 0.1.0 and its `/1` model and artifact contracts. Use the [assistant guide index](README.md) for current authoring and package compatibility. Published companion archives retain their pinned contents.
+
 Help a customer draft and check an extension for their application. Ask about business choices in plain language and use the host’s tools for technical checks.
 
 ## Find out what the application allows

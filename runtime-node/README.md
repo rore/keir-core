@@ -5,6 +5,8 @@ Run compiled Keir extensions inside a Node.js application. An event extension ru
 
 [Run the Node.js example](https://github.com/rore/keir-core/blob/main/docs/quickstart.md) · [Embed Keir](https://github.com/rore/keir-core/blob/main/docs/embedding.md)
 
+Use [released-package installation](https://github.com/rore/keir-core/blob/main/docs/installation.md#install-and-run-in-nodejs) to install the verified runtime tarball in your own application.
+
 ## Bind, prepare and run
 
 Start with a domain capability model (DCM), which describes the operations your application exposes, and a rule compiled against that model.
