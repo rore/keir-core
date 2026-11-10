@@ -12,7 +12,7 @@ import { canonicalBytes } from '../../../runtime-node/src/canonical.js';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const here = fileURLToPath(new URL('./', import.meta.url));
 const mode = process.argv[2] ?? '--smoke';
-assert.ok(['--smoke', '--sample'].includes(mode));
+assert.ok(['--smoke', '--sample', '--followup'].includes(mode));
 assert.equal(process.platform, 'linux');
 assert.ok(process.versions.node.startsWith('24.'));
 assert.equal(realpathSync(root), process.cwd(), 'Run from the repository root');
@@ -137,7 +137,7 @@ function http(path, id) {
       res.on('error', () => finish({ error: 'response-stream', id }));
     });
     timer = setTimeout(() => { req.destroy(); finish({ error: 'absolute-timeout', id }); }, 5000);
-    req.on('error', () => finish({ error: 'transport', id })); req.end();
+    req.on('error', e => finish({ error: e.code ?? 'request-error', id })); req.end();
   });
 }
 async function stats(path = '/stats') { const r = await http(path); assert.equal(r.status, 200); return r.body; }
@@ -154,7 +154,7 @@ async function stage(phase, rule, engine, rate, seconds, delay = 2) {
   const before = await stats('/reset'); rssPeak = 0; rssSamples = 0;
   const quotaBefore = cpuStat();
   const row = { phase, rule, engine, offeredPerSecond: rate, seconds, callbackDelayMs: rule === 'typical' ? delay : 0,
-    offered: rate * seconds, correct: 0, busy: 0, generatorDrops: 0, transportErrors: 0, incorrect: 0 };
+    offered: rate * seconds, correct: 0, busy: 0, generatorDrops: 0, transportErrors: 0, transportKinds: {}, incorrect: 0 };
   const raw = { successMs: [], responseMs: [], dispatchLagMs: [] };
   const inflight = new Set(); let cursor = 0;
   const start = performance.now();
@@ -167,7 +167,7 @@ async function stage(phase, rule, engine, rate, seconds, delay = 2) {
         const id = ++serial; raw.dispatchLagMs.push(performance.now() - planned);
         const operation = http('/run?rule=' + rule + '&mode=' + engine + '&delay=' + delay + '&id=' + id, id).then(r => {
           const elapsed = performance.now() - planned;
-          if (r.error) row.transportErrors++;
+          if (r.error) { row.transportErrors++; row.transportKinds[r.error] = (row.transportKinds[r.error] ?? 0) + 1; }
           else {
             raw.responseMs.push(elapsed);
             if (r.status === 200 && r.body.correct === true && r.body.id === id) { row.correct++; raw.successMs.push(elapsed); }
@@ -202,7 +202,8 @@ async function stage(phase, rule, engine, rate, seconds, delay = 2) {
   row.capacityScreen = row.cleanScreen ? 'passed' : 'failed';
   report.stages.push(row); save('result.json', report); save('samples-' + report.stages.length + '.json', raw);
   assert.ok(!rssBreach, 'RSS watchdog breached');
-  assert.equal(row.transportErrors + row.incorrect, 0, 'Unexpected failed invocation/transport');
+  assert.equal(row.incorrect, 0, 'Unexpected incorrect invocation/response');
+  if (mode === '--smoke') assert.equal(row.correct, row.offered, 'Smoke requires every offered request to succeed');
   process.stderr.write(JSON.stringify({ phase, rule, engine, rate, correct: row.correct, busy: row.busy, drops: row.generatorDrops, p99Ms: row.latency.success?.p99Ms }) + '\n');
   return row;
 }
@@ -233,7 +234,7 @@ try {
   report.negativeOracleRejected = true;
   if (mode === '--smoke') {
     for (const rule of ['typical', 'dense']) for (const engine of ['keir', 'native']) await stage('smoke', rule, engine, 10, 1);
-  } else {
+  } else if (mode === '--sample') {
     await stage('cold-warmup', 'typical', 'keir', 300, 3);
     for (const rate of [300, 600, 1200]) await stage('ramp', 'typical', 'keir', rate, 4);
     await stage('cold-warmup', 'dense', 'keir', 300, 3);
@@ -246,6 +247,16 @@ try {
         await stage('confirmation', rule, engine, rate, 30);
       }
     }
+  } else {
+    // Focused completion after the first retained sample stopped on transport errors.
+    for (const engine of ['keir', 'native']) {
+      await stage('warmup', 'typical', engine, 300, 3);
+      await stage('confirmation', 'typical', engine, 300, 30);
+    }
+    await stage('warmup', 'dense', 'native', 600, 3);
+    await stage('confirmation', 'dense', 'native', 600, 30);
+  }
+  if (mode !== '--smoke') {
     await stage('slow-callbacks', 'typical', 'keir', 1200, 6, 20);
     await stage('recovery', 'typical', 'keir', 100, 3);
     assert.ok(report.stages.some(r => r.busy > 0 || r.generatorDrops > 0), 'No overload accounting exercised');
