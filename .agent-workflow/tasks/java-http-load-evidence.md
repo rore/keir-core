@@ -46,7 +46,7 @@
 
 **Exceptions:** —
 
-**State:** Blocked
+**State:** Ready for review
 
 <!-- agent-workflow:end -->
 
@@ -54,7 +54,7 @@
 
 - Verified repository guidance, current process, source identities and canonical feature reference. No production changes or roadmap edits.
 - Original archive-dependent approach stopped. The revised task excludes archive access and authorizes independent new code and measurements.
-- Current branch: main; reviewed delivery revision c22eef77b97f8efb9b474f500f2f9a3560eb2502 includes current main d484c46. Implementation and diagnostic evidence validation are complete. Final workflow validation and exact-head CI passed. Normal integration is awaiting the required external publication approval; the manager-owned roadmap note remains pending handoff. Historical raw data is not an input.
+- Current branch: main; reviewed delivery revision c22eef77b97f8efb9b474f500f2f9a3560eb2502 includes current main d484c46. Implementation and diagnostic evidence validation are complete. Final workflow validation and exact-head CI passed. The user explicitly approved the draft-to-ready transition and normal merge; the manager-owned roadmap note remains pending handoff. Historical raw data is not an input.
 
 ## Evidence
 
@@ -116,6 +116,6 @@ Manager reconciliation is pending acceptance of this focused contribution; no br
 
 Exact-head integration review accepted `6852adff917368f5195e5036a87a88f0c66bf24f` against main `4fab86b3d1f7baf0c4941c09a84116232f2eef5e`. The updated Keir contract CI (run 42873484282) and Agent Workflow CI (run 42873484310) passed on that head, including the separate bounded resource/concurrency checks. No review comments or unresolved threads were present.
 
-PR #14 remains a draft at the reviewed head; it has not merged. Transitioning it to ready was not approved by the external action review, so delivery is paused for that required approval. This local checkpoint changes only the Work Record and is intentionally not pushed, preserving the reviewed green PR head. Next action: obtain approval covering the draft-to-ready transition, recheck PR/head/checks, then finish normal integration. Do not switch publication routes to avoid the pending approval. Manager roadmap reconciliation is still pending.
+The user subsequently explicitly approved marking draft PR #14 ready and merging it after rechecking the head, CI and review/conflict state. The reviewed head remained unchanged and its two CI workflows were green, with no review findings. Latest main changed only the root README; preserve it by normal merge, refresh exact-head checks, then retry the previously unexecuted ready transition once and complete normal integration. Manager roadmap reconciliation is still pending.
 
 Task-created expanded run directories and transfer helpers were removed after verifying a compact ignored raw-evidence backup against original report bytes. No task worktrees or services were created. Retention is justified for manager acceptance and evidence audit; no duplicated Core source trees, compiled probe classes or raw samples are tracked.
