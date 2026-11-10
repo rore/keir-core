@@ -165,6 +165,37 @@ class InvocationClockTest {
         failure(first, "BUDGET_EXCEEDED", "/steps/0");
     }
 
+    @Test void concurrentExpiryChecksParkWithoutAPlatformThreadForEachHostClock() throws Exception {
+        Thread caller = Thread.currentThread();
+        int count = 64;
+        CountDownLatch entered = new CountDownLatch(count), release = new CountDownLatch(1);
+        AtomicInteger platformChecks = new AtomicInteger();
+        List<CompletionStage<Object>> outcomes = new ArrayList<>();
+        try {
+            for (int index = 0; index < count; index++) {
+                AtomicBoolean dispatched = new AtomicBoolean();
+                InvocationClock clock = new InvocationClock(() -> {
+                    if (dispatched.get() && Thread.currentThread() != caller) {
+                        if (!Thread.currentThread().isVirtual()) platformChecks.incrementAndGet();
+                        entered.countDown();
+                        try { release.await(); }
+                        catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); }
+                    }
+                    return 0;
+                }, 25);
+                outcomes.add(clock.waitFor(left -> {
+                    dispatched.set(true); return new CompletableFuture<>();
+                }, "/steps/0", "ADAPTER_EXCEPTION", null));
+            }
+            assertTrue(entered.await(5, TimeUnit.SECONDS), "Every expiry must reach its own host clock");
+            assertEquals(0, platformChecks.get(), "Blocked clocks must not allocate one platform check per wait");
+            assertTrue(outcomes.stream().noneMatch(stage -> stage.toCompletableFuture().isDone()));
+        } finally {
+            release.countDown();
+        }
+        for (var outcome : outcomes) failure(outcome, "BUDGET_EXCEEDED", "/steps/0");
+    }
+
     @Test void expiryBeforeDispatchCommitPreventsBothTraceHookAndHostAction() {
         AtomicInteger reads = new AtomicInteger(), dispatches = new AtomicInteger(), actions = new AtomicInteger();
         InvocationClock clock = new InvocationClock(() -> reads.incrementAndGet() == 1 ? 0 : 1000, 1000);
