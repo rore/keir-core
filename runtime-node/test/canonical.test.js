@@ -101,3 +101,17 @@ test('minimum container sizes preserve exact and nested remaining-byte boundarie
   assert.throws(() => canonicalBytes(wide, 64), CanonicalLimitError);
   assert.throws(() => canonicalBytes(Array(32).fill(0), 64), CanonicalLimitError);
 });
+
+test('closed root-object scanning counts only root fields and preserves generic decoding', () => {
+  const exact = canonicalBytes({ a: 0, b: 0 });
+  assert.deepEqual(parseCanonical(exact, 1024, 2), { a: 0, b: 0 });
+  assert.throws(() => parseCanonical(exact, 1024, 1));
+  assert.deepEqual(parseCanonical(Buffer.from('{}'), 1024, 0), {});
+  assert.throws(() => parseCanonical(Buffer.from('[]'), 1024, 0));
+  assert.deepEqual(parseCanonical(Buffer.from('[]')), []);
+  const nested = { 'a\":': { a: 0, b: ':,{}[]\\\"', c: 0 } };
+  assert.deepEqual(parseCanonical(canonicalBytes(nested), 1024, 1), nested);
+  for (const text of ['{"a":0,"a":0}', '{ "a":0}', '{"a":0} ', '{"a":0,}']) {
+    assert.throws(() => parseCanonical(Buffer.from(text), 1024, 2));
+  }
+});

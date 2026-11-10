@@ -102,8 +102,9 @@ export function canonicalBytes(value, maxBytes = MAX_BYTES) {
   return Buffer.from(chunks.join(''), 'utf8');
 }
 
-function checkDepth(text) {
-  let depth = 0, quoted = false, escaped = false;
+function checkDepth(text, rootFields) {
+  if (rootFields !== Infinity && text[0] !== '{') throw new Error('Invalid canonical JSON root');
+  let depth = 0, fields = 0, quoted = false, escaped = false;
   for (const char of text) {
     if (quoted) {
       if (escaped) escaped = false;
@@ -113,15 +114,17 @@ function checkDepth(text) {
     else if (char === '{' || char === '[') {
       if (++depth > MAX_DEPTH) throw new Error('Canonical JSON exceeds depth limit');
     } else if (char === '}' || char === ']') depth--;
+    else if (char === ':' && depth === 1 && ++fields > rootFields) throw new Error('Invalid canonical JSON root');
   }
 }
 
-export function parseCanonical(bytes, maxBytes = MAX_BYTES) {
-  if (!(bytes instanceof Uint8Array) || !Number.isSafeInteger(maxBytes) || maxBytes < 0 || bytes.byteLength > maxBytes || bytes.byteLength > MAX_BYTES) throw new Error('Invalid canonical JSON bytes');
+export function parseCanonical(bytes, maxBytes = MAX_BYTES, rootFields = Infinity) {
+  if (!(bytes instanceof Uint8Array) || !Number.isSafeInteger(maxBytes) || maxBytes < 0 || bytes.byteLength > maxBytes || bytes.byteLength > MAX_BYTES ||
+      rootFields !== Infinity && (!Number.isSafeInteger(rootFields) || rootFields < 0)) throw new Error('Invalid canonical JSON bytes');
   let text;
   try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
   catch { throw new Error('Invalid canonical JSON UTF-8'); }
-  checkDepth(text);
+  checkDepth(text, rootFields);
   let value;
   try { value = JSON.parse(text); }
   catch { throw new Error('Invalid canonical JSON'); }

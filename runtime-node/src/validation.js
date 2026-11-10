@@ -3,6 +3,7 @@ import { CanonicalLimitError, canonicalBytes } from './canonical.js';
 
 export const ENVIRONMENT = Object.freeze({ celJava: '0.14.0', celNode: '0.6.1', protobufJava: '4.35.1', protobufNode: '2.6.2' });
 export const LIMITS = Object.freeze({ artifactBytes: 1048576, dcmBytes: 65536, steps: 8, calls: 4, expressionNodes: 64, totalAstNodes: 512, traceEvents: 64, valueBytes: 8192, stringBytes: 256 });
+export const ARTIFACT_FIELDS = Object.freeze(['format', 'compiler', 'environment', 'sourceDigest', 'modelRef', 'entrypoint', 'expressions', 'steps', 'return']);
 const namePattern = /^[A-Za-z][A-Za-z0-9]{0,63}$/;
 const idPattern = /^[A-Za-z][A-Za-z0-9.]{0,99}$/;
 const reserved = new Set(['true', 'false', 'null', 'in', 'as', 'break', 'const', 'continue', 'else', 'for', 'function', 'if', 'import', 'let', 'loop', 'package', 'namespace', 'return', 'var', 'void', 'while']);
@@ -201,7 +202,7 @@ export function validateValue(dcm, typeName, value, path, code) {
 }
 
 export function validateEnvelope(artifact, bound) {
-  shape(artifact, ['format', 'compiler', 'environment', 'sourceDigest', 'modelRef', 'entrypoint', 'expressions', 'steps', 'return'], '/artifact');
+  shape(artifact, ARTIFACT_FIELDS, '/artifact');
   shape(artifact.environment, Object.keys(ENVIRONMENT), '/artifact/environment');
   shape(artifact.modelRef, ['domainId', 'domainVersion', 'format', 'digest', 'descriptorRecipe'], '/artifact/modelRef');
   text(artifact.compiler, '/artifact/compiler', true);
