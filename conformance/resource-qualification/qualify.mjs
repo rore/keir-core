@@ -16,9 +16,10 @@ const MB = 1_048_576;
 const DOC = 65_536;
 const start = performance.now();
 const args = process.argv.slice(2);
-assert.ok(args.length === 0 || args.length === 1 && ['--soak', '--dense'].includes(args[0]), 'Use --soak or --dense for a serial workload');
+assert.ok(args.length === 0 || args.length === 1 && ['--soak', '--dense', '--concurrent'].includes(args[0]), 'Use --soak, --dense or --concurrent');
 const dense = args.includes('--dense');
-const soak = args.length ? {
+const concurrent = args.includes('--concurrent');
+const soak = args.includes('--soak') || dense ? {
   warmups: 100, blocks: 5, perBlock: dense ? 1000 : 200, heapMiB: 256, peakWorkingSetBytes: 512 * MB, sampleIntervalMs: 100,
 } : null;
 if (soak) assert.equal(process.platform, 'win32', 'The serial workload uses the Windows JVM working-set counter');
@@ -117,7 +118,12 @@ assert.equal(resolvedBuild, join(realpathSync(root), 'build'), 'Use an in-checko
 const temporary = mkdtempSync(join(resolvedBuild, 'resource-'));
 const output = { limits, platform: process.platform, arch: process.arch, compiler: {}, runtimes: {}, children: {} };
 try {
-  if (dense) {
+  if (concurrent) {
+    const { runConcurrentQualification } = await import('./concurrent.mjs');
+    output.concurrent = {};
+    await runConcurrentQualification({ here, fixture, compiler, host, jdk, temporary, limits,
+      child, requireExit, metrics, output: output.concurrent });
+  } else if (dense) {
     const { runDenseQualification } = await import('./dense.mjs');
     output.dense = {};
     await runDenseQualification({ here, fixture, compiler, host, jdk, temporary, limits,
@@ -302,21 +308,21 @@ try {
   }
   }
 } catch (error) {
-  if (!dense) throw error;
+  if (!dense && !concurrent) throw error;
   output.status = 'failed';
   output.error = String(error.message).slice(0, 2000);
   output.lastCheckpoints = Object.fromEntries(['java', 'node'].map(engine => {
-    const path = join(temporary, 'dense-' + engine + '-progress.json');
+    const path = join(temporary, (dense ? 'dense' : 'concurrent') + '-' + engine + '-progress.json');
     return [engine, existsSync(path) ? JSON.parse(readFileSync(path)) : null];
   }));
   process.exitCode = 1;
 } finally {
   assert.equal(dirname(realpathSync(temporary)), resolvedBuild);
-  if (!dense) {
+  if (!dense && !concurrent) {
     rmSync(temporary, { recursive: true });
     assert.ok(!existsSync(temporary));
   }
 }
 console.log(JSON.stringify({ ...output, elapsedMs: performance.now() - start,
-  cleanup: { directChildrenClosed: true, temporaryDirectoryRemoved: !dense },
-  ...(dense ? { evidenceDirectory: relative(root, temporary).replaceAll('\\', '/') } : {}) }, null, 2));
+  cleanup: { directChildrenClosed: true, temporaryDirectoryRemoved: !dense && !concurrent },
+  ...(dense || concurrent ? { evidenceDirectory: relative(root, temporary).replaceAll('\\', '/') } : {}) }, null, 2));

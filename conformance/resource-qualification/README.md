@@ -3,7 +3,7 @@
 
 This engineering reference describes the test workload and measured resource behavior. For runtime requirements, see the [Keir specification](../../docs/specs/runtime.md#limits).
 
-The commands below follow the Core 0.3.0 candidate and its model/artifact generation 3 fixtures. A focused check compiled the normal, title and Inventory examples and matched their complete outcomes in Java and Node. The recorded resource measurements below remain historical Keir 2 evidence; this alignment does not rerun or qualify the full resource workload on the new generation.
+The commands below follow the Core 0.3.0 candidate and its model/artifact generation 3 fixtures. The default and concurrent phases qualify current artifacts; the serial and dense recorded measurements below remain explicitly historical Keir 2 evidence.
 
 Run from the root of an isolated checkout with Java 21, Node 24, the Maven wrapper and seeded task-local caches.
 
@@ -38,6 +38,26 @@ The qualification prints raw JSON. Wall times include host and engine work. Proc
 The source and model byte cases use whitespace padding to isolate their raw input bounds. The exact 1 MiB artifact is canonical JSON with an extra member. It reaches structural rejection, and the 1 MiB + 1 input fails the byte gate. The largest semantically admitted artifact in this run is the aggregate AST case. A future full-size admission claim needs a valid near-ceiling fixture or a derived tighter reachable bound. JVM heap telemetry leaves whole-process RSS open. A platform process sampler is the next step if total resident memory is part of a release claim.
 
 The child watchdog covers test-owned direct children. The compiler CLI creates no descendants. The probe checks timeout, cancellation, capture across both streams, overflow during exit, and process close before temporary cleanup. In serial mode, cleanup waits for any started sampler as well as the workload JVM. The adapter deadline measures settlement with a cooperative test host. Hard preemption of synchronous CEL remains unqualified.
+
+## Current-generation concurrent qualification
+
+After the same package preparation, run on Java 21 and Node 24:
+
+```sh
+node conformance/resource-qualification/qualify.mjs --concurrent > build/resource-concurrent.json
+```
+
+Each worker binds and prepares once using the same current compiler-produced normal artifact, checked byte-for-byte against the pinned fixture. It validates 128 warmups and then three blocks of 512 invocations at each concurrency of 1, 32 and 128: 4,608 measured outcomes per runtime. A batch holds every READ response until all invocations reach it, then releases controlled responses without network or database work. Each invocation checks its independent complete outcome, two ordered capability calls and arguments, protected actor/event context, and original opaque immutable native key. Fixture counters live outside those keys. Results include batch waiting and synchronous public invocation work; they are not isolated CEL operation timings.
+
+The report records per-block elapsed/CPU time, invocation median/p95/maximum, post-GC retained heap and process memory observations. Collection and observations occur outside timed blocks. Java reports live platform Java threads separately from Linux OS threads and VmHWM process peak RSS. Other Java platforms explicitly report unsupported process observation. Node uses its process peak RSS counter. The 256 MiB heap settings and assertions on observed 512 MiB process peaks are workload guards, not production address-space limits. Samples and checkpoint arrays remain part of retained heap; this short run does not establish leak freedom.
+
+The Java worker also parks 64 expiry checks in cooperative test clocks under virtual-thread scheduler parallelism 2 and maximum pool size 4, releases them and verifies every budget failure. Those scheduler settings do not restrict the entire JVM to two CPUs. Host-owned monitors, native calls, callbacks and admission remain host responsibilities.
+
+Node measures rejection of a canonical 1 MiB artifact with 60,001 root fields and serialization of an oversized 300,000-field object. Neither may invoke an adapter. Public preparation includes an event-loop tick observation. For an optional paired historical comparison, set `KEIR_CANONICAL_BASELINE_REF` to a locally available pre-hardening commit, such as `566caa4d4b826dc87e6493090bd5a53672dc26f0`. The report records its resolved commit and module digest. Both canonical modules receive the same decoding plus closed-root validation operation and valid controls; the older module ignores the new preflight parameter and rejects after materialization. This isolated comparison is labeled separately from current public preparation. Timings do not decide correctness.
+
+All children use the existing 45-second watchdog and 1 MiB combined capture, with a 135-second total phase budget. Both workers are also replayed with deliberately wrong expected outcomes and, where the memory counter is supported, a one-byte memory budget; qualification requires failure with zero validated outcomes and honest dispatch counts. An unsupported Java memory replay is reported explicitly. Compact generated inputs, classes and per-block checkpoints remain in the ignored evidence directory named by the report after child closure. An interrupted block can contain validated outcomes beyond its last saved checkpoint; the report never extrapolates counts. Run these opt-in commands separately from the default regression suites; the JSON report records every completed check.
+
+This is a bounded component correctness and resource screen. It does not measure sustainable HTTP throughput, queue growth, service dependency latency or the capacity of a consumer application. A host capacity qualification needs a stated CPU/memory allocation, workload and latency/error target, sustained arrivals, host admission and representative dependencies. No universal concurrency ceiling or SLA follows from passing at 128.
 
 ## Serial embedded workload on Windows
 
