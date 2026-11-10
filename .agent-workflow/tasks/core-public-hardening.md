@@ -24,7 +24,7 @@ Task identity: `agent-workflow:core-public-hardening`. Branch `fix/core-public-h
 **Plan review:** Agent technical review: core_hardening_review. Stage1 plan and result approved at equivalent local5c27677; stages2/3 plans approved at equivalent localbd6bdb3 after independent source/evidence inspection. Stage4 detailed plan review remains required.
 **Approvals:** Not required at this risk level. User explicitly authorized substantiated fixes, validation and safe merges: “You should merge things when you finish them.” No deployment or public release is authorized.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Plan review
@@ -74,3 +74,6 @@ Independent reviewer approved the root-envelope guard and Stage4 plan, with the 
 
 ## Stages2/3 delivery checkpoint
 Resource source and regressions are ready for final review and exact-head CI in PR11. This contribution includes Node canonical allocation/byte guards and root-envelope preflight plus Java cooperative timeout thread hardening. The current-generation reproducible qualification remains Stage4 work, so the overall task is still in progress. Independent source review and final CI/merge receipts determine delivery; no general scale or containment claim is made.
+
+## Stage4 implementation checkpoint
+Independent reviewer approved the detailed qualification plan and final Stage2/3 source atab67ea0; resource PR11 awaits its exact-final CI while qualification proceeds on chore/core-public-hardening. Implement the opt-in phase using existing supervised-child conventions, immutable opaque keys, independent expected outcomes and explicitly scoped metrics. Retain compact manifests/checkpoints for negative replays, following the existing dense phase convention; all child processes must close first. Optional baseline canonical comparison is labeled separately from public preparation. No production source changes are planned in this stage.
