@@ -54,7 +54,7 @@
 
 - Verified repository guidance, current process, source identities and canonical feature reference. No production changes or roadmap edits.
 - Original archive-dependent approach stopped. The revised task excludes archive access and authorizes independent new code and measurements.
-- Current branch: main, revision 2f4988dadf6dca1e67984ae9c9098e6916adda93 including latest d484c46. Next action: implement the reviewed fresh harness; historical raw data is not an input.
+- Current branch: main; reviewed delivery revision c22eef77b97f8efb9b474f500f2f9a3560eb2502 includes current main d484c46. Implementation and diagnostic evidence validation are complete. Remaining delivery work is final workflow validation, CI and normal authorized integration; the manager-owned roadmap note remains pending handoff. Historical raw data is not an input.
 
 ## Evidence
 
@@ -69,7 +69,11 @@ Agent technical review: independent non-implementer reviewed main ce98892f898815
 
 ## Result review
 
-Independent exact-final review pending below. Broader resource qualification remains active.
+Agent technical review: independent read-only non-implementer review of the six-file integration against d484c46cc416ad98aa4753d6759586d48d833e01; technical acceptance with no code/evidence blocker.
+
+Reviewed revision: c22eef77b97f8efb9b474f500f2f9a3560eb2502.
+
+Verification adequacy: independently recomputed all 22 load stages' raw percentile distributions and accounting/throughput/CPU arithmetic; verified compact original-report hashes/object equality, fixture/generated/binary/harness/source-tree identities, eight strict smoke stages and cleanup receipts, commissioning references, tables, relative links, unchanged production sources and public-content hygiene. Adequate for the stated bounded diagnostic. Both load reports correctly retain failed status; evidence validation certifies their accuracy, not capacity qualification. Graceful shutdown/actual-server timeout and port-release evidence comes from separate strict smoke. The two transport failures remain unexplained; real application capacity and general resource guarantees remain unqualified. Manager roadmap reconciliation is pending; feature remains active.
 
 ## Revised assignment
 
@@ -85,7 +89,7 @@ Offline packaging initially failed because this Java image lacks release metadat
 
 ## Sample recovery
 
-Measured harness 432307b5ff570ecec83946a60377e40c108bbf4e completed 129 seconds of scheduled arrivals before the dense 600/s confirmation ended with two transport failures, zero incorrect outcomes and no resource breach. Preserve this failed run; no clean capacity claim applies. Initial code stopped on any transport failure after reconciling all client/server counters. A narrow control-flow fix retains reconciled transport errors as failed capacity screens, records their error codes and still stops on incorrect outcomes/counter mismatch/resource breaches. The unchanged Java host and fixtures will be used for a focused 108-second completion: lower-rate ordinary 300/s pair, missing native dense 600/s baseline, slow callbacks and recovery. Combined primary/followup arrival time is 237 seconds, within the roughly five-minute sample budget. No full qualification rerun is planned.
+Measured harness 432307b5ff570ecec83946a60377e40c108bbf4e completed 129 seconds of scheduled arrivals before the dense 600/s confirmation ended with two transport failures, zero incorrect outcomes and no resource breach. This failed run is preserved; no clean capacity claim applies to it. Initial code stopped on any transport failure after reconciling all client/server counters. A narrow control-flow fix retains reconciled transport errors as failed capacity screens, records their error codes and still stops on incorrect outcomes/counter mismatch/resource breaches. The unchanged Java host and fixtures were used for a focused 108-second completion: lower-rate ordinary 300/s pair, missing native dense 600/s baseline, slow callbacks and recovery. It retained failed status because recovery latency/dispatch lag missed the screen. Combined primary/followup arrival time was 237 seconds, within the roughly five-minute sample budget. No further load rerun is planned; proceed to validated integration and manager handoff.
 
 ## Verification of recorded evidence
 
