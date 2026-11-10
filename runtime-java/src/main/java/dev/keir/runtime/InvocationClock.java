@@ -5,6 +5,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.LongFunction;
 import java.util.function.LongSupplier;
 import java.util.function.UnaryOperator;
@@ -15,6 +16,7 @@ final class InvocationClock {
     private static final ScheduledThreadPoolExecutor TIMER = timer();
     private final LongSupplier clock;
     private final long expiresAtMs;
+    private final ReentrantLock clockLock = new ReentrantLock();
     private long last = -1;
 
     InvocationClock(LongSupplier clock, long expiresAtMs) {
@@ -22,14 +24,17 @@ final class InvocationClock {
         this.clock = clock; this.expiresAtMs = expiresAtMs;
     }
 
-    synchronized long remaining(String path) {
-        long now;
-        try { now = clock.getAsLong(); }
-        catch (Throwable failure) { throw invalid(); }
-        if (now < 0 || now > Profile.MAX_INTEGER || now < last) throw invalid();
-        last = now;
-        if (now >= expiresAtMs) throw new RuntimeFault("BUDGET_EXCEEDED", path);
-        return expiresAtMs - now;
+    long remaining(String path) {
+        clockLock.lock();
+        try {
+            long now;
+            try { now = clock.getAsLong(); }
+            catch (Throwable failure) { throw invalid(); }
+            if (now < 0 || now > Profile.MAX_INTEGER || now < last) throw invalid();
+            last = now;
+            if (now >= expiresAtMs) throw new RuntimeFault("BUDGET_EXCEEDED", path);
+            return expiresAtMs - now;
+        } finally { clockLock.unlock(); }
     }
 
     CompletionStage<Object> waitFor(LongFunction<CompletionStage<?>> action, String path, String failureCode, Runnable onDispatch) {
@@ -63,6 +68,7 @@ final class InvocationClock {
         private final Runnable onSettled;
         private final boolean effect;
         private final CompletableFuture<Object> result = new CompletableFuture<>();
+        private final ReentrantLock stateLock = new ReentrantLock();
         private ScheduledFuture<?> timer;
         private boolean active = true;
         private boolean committed;
@@ -74,7 +80,8 @@ final class InvocationClock {
 
         long commit(Runnable onDispatch) {
             Throwable failure;
-            synchronized (this) {
+            stateLock.lock();
+            try {
                 if (!active) return -1;
                 try {
                     long budget = remaining(path);
@@ -84,18 +91,21 @@ final class InvocationClock {
                     return budget;
                 } catch (Throwable error) { failure = error instanceof RuntimeFault ? error : invalid(); }
                 close();
-            }
+            } finally { stateLock.unlock(); }
             deliver(null, failure);
             return -1;
         }
 
-        synchronized void arm(long left) {
-            if (!active) return;
-            long chunk = Math.min(left, MAX_CHUNK_MS);
-            timer = TIMER.schedule(() -> {
-                // Host clock reads may block under monitors; keep them off shared scheduling threads.
-                Thread.ofPlatform().daemon().name("keir-deadline-check").start(() -> expired(left, chunk));
-            }, chunk, TimeUnit.MILLISECONDS);
+        void arm(long left) {
+            stateLock.lock();
+            try {
+                if (!active) return;
+                long chunk = Math.min(left, MAX_CHUNK_MS);
+                timer = TIMER.schedule(() -> {
+                    // Core locks permit a cooperative host clock to park without pinning a carrier.
+                    Thread.ofVirtual().name("keir-deadline-check").start(() -> expired(left, chunk));
+                }, chunk, TimeUnit.MILLISECONDS);
+            } finally { stateLock.unlock(); }
         }
 
         void expired(long left, long chunk) {
@@ -104,7 +114,8 @@ final class InvocationClock {
                 return;
             }
             Throwable failure;
-            synchronized (this) {
+            stateLock.lock();
+            try {
                 if (!active) return;
                 try {
                     remaining(path);
@@ -112,7 +123,7 @@ final class InvocationClock {
                     failure = new RuntimeFault("BUDGET_EXCEEDED", path);
                 } catch (Throwable error) { failure = error instanceof RuntimeFault ? error : invalid(); }
                 close();
-            }
+            } finally { stateLock.unlock(); }
             if (effect) settled(null, failure, false);
             else deliver(null, failure);
         }
@@ -122,21 +133,25 @@ final class InvocationClock {
                 if (claim()) settled(value, failure == null ? null : new RuntimeFault(failureCode, path), failure == null);
                 return;
             }
-            synchronized (this) {
+            stateLock.lock();
+            try {
                 if (!active) return;
                 try {
                     remaining(path);
                     if (failure != null) failure = new RuntimeFault(failureCode, path);
                 } catch (Throwable error) { failure = error instanceof RuntimeFault ? error : invalid(); }
                 close();
-            }
+            } finally { stateLock.unlock(); }
             deliver(value, failure);
         }
 
-        private synchronized boolean claim() {
-            if (!active) return false;
-            close();
-            return true;
+        private boolean claim() {
+            stateLock.lock();
+            try {
+                if (!active) return false;
+                close();
+                return true;
+            } finally { stateLock.unlock(); }
         }
 
         private void settled(Object value, Throwable failure, boolean response) {
@@ -153,10 +168,11 @@ final class InvocationClock {
         }
 
         void finish(Object value, Throwable failure) {
-            synchronized (this) {
+            stateLock.lock();
+            try {
                 if (!active) return;
                 close();
-            }
+            } finally { stateLock.unlock(); }
             deliver(value, failure);
         }
 

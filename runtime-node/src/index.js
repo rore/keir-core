@@ -1,6 +1,6 @@
 import { parseCanonical } from './canonical.js';
 import { prepareExpressions, evaluateBinding } from './cel.js';
-import { ENVIRONMENT, LIMITS, Fault, requireThat as ok, keys, shape, freeze, pointer, validateEnvelope, validatePlan, validateValue } from './validation.js';
+import { ENVIRONMENT, LIMITS, ARTIFACT_FIELDS, Fault, requireThat as ok, keys, shape, freeze, pointer, validateEnvelope, validatePlan, validateValue } from './validation.js';
 import { modelFor } from './model.js';
 
 export { ENVIRONMENT };
@@ -17,7 +17,7 @@ export function prepareProgram(artifactBytes, boundModel) {
     path = '/artifact'; code = 'ARTIFACT_INVALID';
     ok(artifactBytes instanceof Uint8Array, path, code);
     ok(artifactBytes.byteLength <= LIMITS.artifactBytes, path, 'BUDGET_EXCEEDED');
-    const artifact = parseCanonical(Buffer.from(artifactBytes));
+    const artifact = parseCanonical(Buffer.from(artifactBytes), LIMITS.artifactBytes, ARTIFACT_FIELDS.length);
     validateEnvelope(artifact, bound);
     const { contexts, calls, entrypoint, policy, effectGrant } = validatePlan(artifact, bound);
     const cel = prepareExpressions(contexts, bound);

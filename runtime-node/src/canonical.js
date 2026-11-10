@@ -8,10 +8,14 @@ export class CanonicalLimitError extends Error {
 }
 
 function compareScalars(left, right) {
-  const a = Array.from(left, char => char.codePointAt(0));
-  const b = Array.from(right, char => char.codePointAt(0));
-  for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] !== b[i]) return a[i] - b[i];
-  return a.length - b.length;
+  let a = 0, b = 0;
+  while (a < left.length && b < right.length) {
+    const x = left.codePointAt(a), y = right.codePointAt(b);
+    if (x !== y) return x - y;
+    a += x > 0xffff ? 2 : 1;
+    b += y > 0xffff ? 2 : 1;
+  }
+  return (left.length - a) - (right.length - b);
 }
 
 export function canonicalBytes(value, maxBytes = MAX_BYTES) {
@@ -21,12 +25,14 @@ export function canonicalBytes(value, maxBytes = MAX_BYTES) {
   const chunks = [];
   let pending = [];
   let pendingBytes = 0;
+  const overflow = () => {
+    if (!requestedLimit) throw new Error('Canonical JSON exceeds byte limit');
+    throw new CanonicalLimitError();
+  };
+  const fits = minimum => { if (minimum > maxBytes - size) overflow(); };
   const write = chunk => {
     const bytes = Buffer.byteLength(chunk, 'utf8');
-    if (size + bytes > maxBytes) {
-      if (!requestedLimit) throw new Error('Canonical JSON exceeds byte limit');
-      throw new CanonicalLimitError();
-    }
+    if (size + bytes > maxBytes) overflow();
     size += bytes;
     pending.push(chunk);
     pendingBytes += bytes;
@@ -58,6 +64,8 @@ export function canonicalBytes(value, maxBytes = MAX_BYTES) {
     if (typeof item === 'string') return writeString(item);
     if (Array.isArray(item)) {
       if (Object.getPrototypeOf(item) !== Array.prototype) throw new Error('Unsupported canonical JSON array');
+      // Each element needs at least one byte plus separators and brackets.
+      fits(Math.max(2, 2 * item.length + 1));
       const keys = Reflect.ownKeys(item);
       if (keys.length !== item.length + 1 || keys.some(key => key !== 'length' && (!/^(0|[1-9]\d*)$/.test(key) || Number(key) >= item.length))) {
         throw new Error('Unsupported canonical JSON array');
@@ -76,6 +84,8 @@ export function canonicalBytes(value, maxBytes = MAX_BYTES) {
     }
     const keys = Reflect.ownKeys(item);
     if (keys.some(key => typeof key !== 'string')) throw new Error('Unsupported canonical JSON property');
+    // A property needs at least an empty quoted key, colon, one value byte and a separator.
+    fits(keys.length ? 5 * keys.length + 1 : 2);
     keys.sort(compareScalars);
     write('{');
     for (let i = 0; i < keys.length; i++) {
@@ -92,8 +102,9 @@ export function canonicalBytes(value, maxBytes = MAX_BYTES) {
   return Buffer.from(chunks.join(''), 'utf8');
 }
 
-function checkDepth(text) {
-  let depth = 0, quoted = false, escaped = false;
+function checkDepth(text, rootFields) {
+  if (rootFields !== Infinity && text[0] !== '{') throw new Error('Invalid canonical JSON root');
+  let depth = 0, fields = 0, quoted = false, escaped = false;
   for (const char of text) {
     if (quoted) {
       if (escaped) escaped = false;
@@ -103,15 +114,17 @@ function checkDepth(text) {
     else if (char === '{' || char === '[') {
       if (++depth > MAX_DEPTH) throw new Error('Canonical JSON exceeds depth limit');
     } else if (char === '}' || char === ']') depth--;
+    else if (char === ':' && depth === 1 && ++fields > rootFields) throw new Error('Invalid canonical JSON root');
   }
 }
 
-export function parseCanonical(bytes, maxBytes = MAX_BYTES) {
-  if (!(bytes instanceof Uint8Array) || !Number.isSafeInteger(maxBytes) || maxBytes < 0 || bytes.byteLength > maxBytes || bytes.byteLength > MAX_BYTES) throw new Error('Invalid canonical JSON bytes');
+export function parseCanonical(bytes, maxBytes = MAX_BYTES, rootFields = Infinity) {
+  if (!(bytes instanceof Uint8Array) || !Number.isSafeInteger(maxBytes) || maxBytes < 0 || bytes.byteLength > maxBytes || bytes.byteLength > MAX_BYTES ||
+      rootFields !== Infinity && (!Number.isSafeInteger(rootFields) || rootFields < 0)) throw new Error('Invalid canonical JSON bytes');
   let text;
   try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
   catch { throw new Error('Invalid canonical JSON UTF-8'); }
-  checkDepth(text);
+  checkDepth(text, rootFields);
   let value;
   try { value = JSON.parse(text); }
   catch { throw new Error('Invalid canonical JSON'); }
