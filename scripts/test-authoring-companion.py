@@ -496,6 +496,14 @@ class SourceRevisionTest(unittest.TestCase):
 
 
 class AuthoringCompanionV6Test(unittest.TestCase):
+    def test_semantic_reference_links_target_reachable_source(self):
+        guide = (SCRIPT.parent.parent / "docs/agents/customer-authoring-guide-v6.md").read_text()
+        links = re.findall(r"https://github.com/rore/keir-core/blob/([0-9a-f]{40})/([^\s)#]+)", guide)
+        self.assertEqual(len(links), 4)
+        for revision, path in links:
+            with self.subTest(path=path):
+                self.assertEqual(git("cat-file", "-t", f"{revision}:{path}").strip(), b"blob")
+
     def test_license_and_existing_contracts_are_verified_offline(self):
         module = runpy.run_path(str(SCRIPT))
         root = SCRIPT.parent.parent

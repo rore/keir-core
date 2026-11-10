@@ -22,7 +22,7 @@ Task identity: `agent-workflow:public-release-readiness`. Covers Core and Daymar
 **Plan review:** Agent technical review: readiness_review; approved after independent verification of all nine entire-tree mappings and editions 1–5 exact archive identity. Preserve production --core-assets validation; reconstruct historical offline test fixtures from committed blobs without claiming a live package build. Enforce mapping tree pins, unknown-revision rejection and edition 6 license/tuple negative cases.
 **Approvals:** Not required at this risk level. The user's instruction authorizes preparing changes and checks; it does not authorize merge or publication.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -37,3 +37,7 @@ Pending.
 Implementation: added tree-pinned historical revision lookup, licensed candidate edition 6, unchanged old manifests/hashes, authentic Minimap MIT notices, and truthful provenance docs. Found a process gap: packaging tests were not run by existing CI; added a focused Python-only workflow rather than expanding runtime tests. Initial edition6 test exposed line-ending difference between a published LICENSE copy and committed LICENSE; pin now uses the actual committed Apache license bytes read by the builder.
 
 Verification so far: 16 companion tests and 4 Core release-verifier tests pass in the isolated fresh clone. All editions 1–5 retain fixed published pins; edition6 rejects absent/altered LICENSE even with recomputed outer digest, preserves tuple checks and verifies without Git. Both Minimap licenses exactly match upstream v0.3.6. Changed documentation local links resolve; all Daymark vendor bytes and metadata equal baseline. Source mappings independently verified with complete tree equality. Trigger 3 dropped: the fresh-clone defect belongs to this consumer repository, not upstream Agent Workflow. No upstream report or contact is needed.
+
+Independent result review found four new-edition semantic links still used an unavailable original commit. Only edition6 links now target the independently tree-equivalent reachable source; historical edition5 stays byte-identical. Added a regression that resolves all four new guide semantic targets in Git. Refreshing candidate evidence before re-review.
+
+Verification: 17 companion tests and 4 release-verifier tests now pass, including all four new immutable semantic link targets. Secondary fresh clone passed historical hash tests with all nine original commits confirmed absent and built/verified candidate6 without Git. Final link correction requires updated committed candidate digest, then independent re-review. No denied remote reads retried. Daymark change remains documentation-only; no new app behavior or package qualification claimed.
