@@ -5,14 +5,17 @@
 
 **Target:** keir-core.
 
-**Scope:** Canonical resource qualification documentation, a small opt-in HTTP benchmark harness and compact historical results under conformance/resource-qualification; this task's Work Record.
+**Scope:** Canonical resource qualification documentation, a new opt-in Java HTTP benchmark harness and fresh compact measurements under conformance/resource-qualification; attributed historical conclusions and this task's Work Record.
 
 **Constraints:** No production compiler/runtime changes, global tooling, services, releases or deployments. Preserve historical Windows/serial evidence and the measured pre-hardening source identity. Keep raw timing samples, dependencies, compiled outputs and private operational details out of Git. Roadmap reconciliation remains with its manager owner.
 
-**Completion criteria:** The canonical reference links accurate setup/workload/limitations and compact results; historical execution explicitly materializes the measured source; bounded smoke/correctness and cleanup, hash/result/link checks and independent review pass before authorized integration.
+**Completion criteria:** The canonical reference links accurate setup/workload/limitations and fresh compact results tied to source and harness hashes; new bounded HTTP execution and cleanup, correctness-oracle rejection, result/link checks and independent review pass before authorized integration. Earlier conclusions remain explicitly author-reported and separately identified.
 
 **Requirement baseline:**
 {"source":"work-record-initial","outcome":"Readers can assess the measured Java HTTP capacity and reproduce the bounded workload without mistaking historical synthetic measurements for production guarantees.","scope":"Canonical resource qualification documentation, a small opt-in HTTP benchmark harness and compact historical results under conformance/resource-qualification; this task's Work Record.","constraints":"No production compiler/runtime changes, global tooling, services, releases or deployments. Preserve historical Windows/serial evidence and the measured pre-hardening source identity. Keep raw timing samples, dependencies, compiled outputs and private operational details out of Git. Roadmap reconciliation remains with its manager owner.","completion_criteria":"The canonical reference links accurate setup/workload/limitations and compact results; historical execution explicitly materializes the measured source; bounded smoke/correctness and cleanup, hash/result/link checks and independent review pass before authorized integration."}
+
+**Behavior changes:**
+[{"target":"task-context.scope","classification":"requirement-change","before":"Canonical resource qualification documentation, a small opt-in HTTP benchmark harness and compact historical results under conformance/resource-qualification; this task's Work Record.","after":"Canonical resource qualification documentation, a new opt-in Java HTTP benchmark harness and fresh compact measurements under conformance/resource-qualification; attributed historical conclusions and this task's Work Record.","reason":"Task owner revised delivery to independent new implementation and execution; the historical archive remains unavailable and must not be retried or bypassed.","impact":"New evidence qualifies only the new harness/current source; no direct revalidation or reproduction of the prior measured harness is claimed.","alternatives":"Remain blocked on the old archive or document historical conclusions alone.","authority":{"scope":"task","name":"task-owner"},"approval":{"by":"user","reference":"task-owner-followup","verbatim":"Build a small opt-in HTTP benchmark yourself from current Keir public APIs and the repository's existing fixtures/resource-probe documentation. Run a fresh bounded sample in this authorized environment. These are NEW measurements and NEW harness code."}},{"target":"task-context.completion_criteria","classification":"requirement-change","before":"The canonical reference links accurate setup/workload/limitations and compact results; historical execution explicitly materializes the measured source; bounded smoke/correctness and cleanup, hash/result/link checks and independent review pass before authorized integration.","after":"The canonical reference links accurate setup/workload/limitations and fresh compact results tied to source and harness hashes; new bounded HTTP execution and cleanup, correctness-oracle rejection, result/link checks and independent review pass before authorized integration. Earlier conclusions remain explicitly author-reported and separately identified.","reason":"Task owner revised delivery to independent new implementation and execution; the historical archive remains unavailable and must not be retried or bypassed.","impact":"New evidence qualifies only the new harness/current source; no direct revalidation or reproduction of the prior measured harness is claimed.","alternatives":"Remain blocked on the old archive or document historical conclusions alone.","authority":{"scope":"task","name":"task-owner"},"approval":{"by":"user","reference":"task-owner-followup","verbatim":"Build a small opt-in HTTP benchmark yourself from current Keir public APIs and the repository's existing fixtures/resource-probe documentation. Run a fresh bounded sample in this authorized environment. These are NEW measurements and NEW harness code."}}]
 
 **Relationships:**
 {"schema_version":1,"sources":[{"provider":"minimap","scope_ref":"roadmap:v1:git:github.com/rore/keir-core#roadmap","local_ref":"item:v1:runtime-resource-qualification"}],"pull_requests":[]}
@@ -21,36 +24,37 @@
 
 **Complexity:** Moderate
 
-**Reason:** The existing Redline policy leaves benchmark code and conformance documentation unclassified (gray). Historical-source reproduction and evidence transformation need independent review.
+**Reason:** Benchmark paths are gray under existing Redline. New load scheduling, full-outcome assertions and bounded supervision warrant Elevated/Moderate review.
 
-**Discovery:** Main is ce98892f8988158fa2fbae9c329eef3dc1e9504d. Measurements used 566caa4d4b826dc87e6493090bd5a53672dc26f0. The canonical reference already preserves Keir 2 serial Windows measurements. No open Core PR was found. Work proceeds under the explicit task assignment without role adoption or changes to installed tooling.
+**Discovery:** Main advanced to d484c46cc416ad98aa4753d6759586d48d833e01, including separate current-generation concurrency qualification. Preserve that work. Historical HTTP conclusions refer to 566caa4d4b826dc87e6493090bd5a53672dc26f0 and have not been directly revalidated here. New measurements will use repository public compiler/runtime APIs, current fixtures and independently written harness code.
 
-**Material assumptions:** The supplied evidence archive must be locally readable and match its expected SHA-256 before adapting its harness. If transfer fails, stop dependent implementation and publication; continue read-only repository discovery and planning. Manager-owned roadmap changes require coordination rather than assumed role authority.
+**Material assumptions:** Historical archive access is excluded: no retries or alternate transfer. Available task-local Java/Node/build caches support fresh execution. Inspect actual CPU affinity and cgroup controls; stop on resource/time/output breach rather than enlarge limits. Manager-owned roadmap reconciliation must be handed to its owner.
 
-**Plan:** Inspect the verified archive and measured source/fixture manifest, then name exact harness/result/documentation files before implementation. Preserve exact measured harness files where practical, isolating portability changes in a small repository-native wrapper. Materialize historical source from Git objects into ignored build storage and use existing task-local dependency caches. Add a compact result file and detailed page linked prominently from the existing README. Keep overload, warmup and generator-limit negatives visible. Smoke execution must bind loopback, use at most four outstanding requests and five seconds per case, supervise each direct child for at most 45 seconds with at most 1 MiB capture, and prove cleanup after both success and induced failure/timeout. Validate provenance, results, syntax, links and a bounded smoke run; obtain independent final review, reconcile the roadmap with its owner, and integrate using authorized normal Git delivery. Stop on source mismatch, missing input or unreviewed scope expansion.
+**Plan:** Add java-http/{HttpProbe.java,run.mjs,README.md,results.json} under conformance/resource-qualification and a prominent link/summary in the existing README. HttpProbe uses public Keir compile/bind/prepare/invoke APIs, Jackson core already in runtime dependencies, loopback JDK HTTP server, 32 admitted operations, virtual HTTP handlers and controlled delayed callbacks. Prepare once outside measured requests. Compile the ordinary fixture and a generated valid dense 473-node membership rule; verify AST shape and fixture pins. Independently construct full expected traces/outcomes and check per-invocation input/actor/event/native-key identity. Compare manual native logic using equivalent callbacks/trace construction. run.mjs supervises Java with two-CPU affinity, 512 MiB heap, 1 GiB observed RSS watchdog, 1 MiB capture and 300-second workload budget. Use open-loop arrivals with planned-arrival latency/dispatch lag, at most 512 outstanding, at most 4800 offered/sec, at most 60 seconds per stage; label generator guard drops separately. Record warmup, short ramps, up to two 30-second native/Keir confirmation pairs, overload/slow callbacks and recovery. Smoke uses at most four outstanding and one second per case; demonstrate bad expected outcome rejection and induced child timeout cleanup. Hash source inputs, runtime source tree, built jars and harness files. Keep samples/build outputs ignored, publish compact stages. Final independent review, fresh policy/workflow checks and applicable CI precede authorized normal delivery. Prepare the exact roadmap note for its manager owner.
 
 **Verification plan:**
-- Historical identity → archive SHA-256, source/fixture hashes and confirmation that compilation/execution use the measured Git commit.
-- Compact results → reconcile totals and success/rejection/drop arithmetic against archived summaries.
-- Documentation/code integration → syntax and relative-link checks.
-- Smoke correctness → short native/Keir typical/dense cases compare complete expected outcomes; a deliberately incorrect expected outcome must fail.
-- Bounded execution → loopback, duration/concurrency/capture/time bounds and child cleanup checks after success and an induced failure/timeout.
-- Delivery → fresh Redline/Work Record validation, exact-final independent review and applicable CI. These checks do not claim a full product regression or a rerun of historical measurements.
+- New source identity → Git revision, runtime/compiler Git tree IDs, fixture pins, generated artifact/expected hashes, jar/harness SHA-256.
+- Historical attribution → supplied author conclusions retain old source identity and are not labeled directly revalidated.
+- Compact evidence → reconcile offered = correct + busy + generator drops + transport errors + mismatches/failures, recompute raw percentile summaries before discarding samples.
+- Smoke correctness → native/Keir typical/dense HTTP cases, complete-outcome/context assertions and an intentionally wrong expected result that must be rejected.
+- Bounds/cleanup → loopback, affinity, duration/concurrency/capture/RSS watchdogs and child-close receipts after success and induced timeout.
+- Integration → relative links, syntax, fresh Redline/Work Record check, independent exact-final review and applicable CI; no full product regression claim.
 
-**Plan review:** Agent technical review: see Plan review below. Conditional acceptance; archive-dependent exact file naming remains pending. No benchmark implementation has begun.
+**Plan review:** Agent technical review: revised independent plan accepted conditionally at 2f4988dadf6dca1e67984ae9c9098e6916adda93 (Work Record SHA-256 3768fd6716fdd3f26dc32bfc9da5c9300c92e9e0130616e38e8199af6804f937). Stage accounting, equivalent shared native boundaries, recovery/control verification and removal of stale recovery notes are incorporated below.
 
 **Approvals:** Not required at this risk level. User-authorized normal validated delivery applies; no release or environment changes are included.
 
 **Exceptions:** —
 
-**State:** Blocked
+**State:** Ready to implement
+
 <!-- agent-workflow:end -->
 
 ## Implementation
 
 - Verified repository guidance, current process, source identities and canonical feature reference. No production changes or roadmap edits.
-- The required source archive is unavailable. No readable archive bytes are available. Dependent harness implementation and publication are blocked.
-- Current branch: main; last verified main: ce98892f8988158fa2fbae9c329eef3dc1e9504d. Next action: obtain the evidence package through a supported transfer, verify its archive/source identities, then complete plan review and implementation.
+- Original archive-dependent approach stopped. The revised task excludes archive access and authorizes independent new code and measurements.
+- Current branch: main, revision 2f4988dadf6dca1e67984ae9c9098e6916adda93 including latest d484c46. Next action: implement the reviewed fresh harness; historical raw data is not an input.
 
 ## Evidence
 
@@ -66,3 +70,15 @@ Agent technical review: independent non-implementer reviewed main ce98892f898815
 ## Result review
 
 Pending implementation and verification. Broader resource qualification remains active.
+
+## Revised assignment
+
+The task owner authorized independent new harness code and fresh execution instead of historical-archive reproduction. No further archive transfer will be attempted. Source-only discovery found five available logical CPUs, a shared four-core cgroup CPU quota and a 16 GiB cgroup memory limit; these are observations, not exclusive allocation. The existing manager-owned roadmap feature remains active.
+
+Revised review conditions: offered counts follow monotonic scheduled arrivals independently of completions. Stop arrivals then drain at most five seconds; unfinished requests become transport failures. Preserve busy, drops, transport errors and incorrect outcomes separately. Native and Keir share HTTP parsing/serialization, 32-slot admission, callback delays/context checks, outcome assertion boundary and telemetry. This comparison includes shared overhead and does not isolate CEL cost. Record distinct generator/server affinity. Confirm overload accounting, clean recovery, zero admitted operations/pending callbacks, executor shutdown, child close and port release. RSS is a 100 ms sampled watchdog with kill response, not hard memory containment.
+
+## Fresh harness implementation
+
+Implemented the reviewed public-API host and open-loop generator. The first commissioning runs exposed an incorrect artifact-shape assumption, a CPU-list formatting assumption and extra host bindings on the no-call dense program; these harness defects were corrected before sampling. Absolute request deadlines now include connection/agent waiting. A separate idle Java HTTP server is deliberately timed out; child close and port release are verified. Successful server shutdown also verifies executor termination, zero active operations/pending callbacks and all 32 permits returned. Collection completion is distinct from each capacity-screen verdict. Existing JDK HTTP TCP_NODELAY support was checked locally and enabled consistently for both engines.
+
+Offline packaging initially failed because this Java image lacks release metadata. Packaging succeeded in 12.263 seconds using the same Java 21 compiler with explicit source/target 21 and an empty release property; no tooling/environment installation or production source change was needed. First corrected smoke: 40/40 complete outcomes/context checks correct, negative oracle rejected, shutdown/timeout cleanup and port release passed. Exact-final smoke follows any further harness change.
