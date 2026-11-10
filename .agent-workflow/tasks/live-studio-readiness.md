@@ -28,7 +28,7 @@ Task identity: `agent-workflow:live-studio-readiness`. Follow-up branches `fix/l
 **Plan review:** Agent technical review: live_readiness_review, approved against Daymark 96d8b68 and Core c623ccc after clarifying that local argument errors and host scenario diagnostics share the three-rejection bound and only a successful scenario save resets it. Reviewer confirmed raw/effective hold separation, exact arithmetic, reset preservation and verification adequacy.
 **Approvals:** Not required at this risk level. Explicit assignment authorizes these focused fixes and isolated tests; it does not authorize merge or publication.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -36,3 +36,19 @@ Discovery complete. Pre-edit Redline has gray paths and no boundary violation. I
 
 ## Plan review
 Agent technical review: live_readiness_review. Approved the clarified plan. No authority, schema or naming expansion. Apply raw/effective budget separation, count host diagnostics as well as argument errors, and retain meaningful cap tests when fixture allowances change.
+
+## Verification checkpoint
+Implemented corrected 387072-micro OpenAI reservation, explicit 30m TTL, immutable raw/effective historical allowance accounting, and scoped scenario rejection diagnostics with a three-error repair bound. No naming change: optional explicit naming is deliberate. Initial focused 84 tests and production build pass. Existing full-suite assertions exposed the expected diagnostic-envelope and scripted allowance updates; those assertions were updated without changing expectations, fencing or actual cap checks. Nine browser cases passed initially; the one stale reservation assertion was corrected and its mismatch/recovery/approval journey passed on focused recheck. A nine-turn qualification fixture also needed its injected context budget updated alongside its configured cap; the exact test now passes. Final full Node suite and live before-save replay are in progress. No new paid spend result is claimed until responses settle.
+
+Fresh live validation at Daymark eb1f827 used one fictional before-save request and reached exact review on the first explicit turn: six HTTP200 Responses API calls; four saved cases passed (deny, two allows, deliberately unavailable check). Explicit approval remained separate from activation; native denial retained text/tags and one corrected task was saved after a due date was supplied. No paid requests occurred during review, approval, activation or native saves. Reported usage: 83357 input tokens (66244 cached,17095 written,18 ordinary),1481 output tokens. Usage-derived additional cost $0.0737943; combined with earlier qualification $0.4258851, before account adjustments/tax. Independent12-request bound permitted at most $4.644864 additional exposure. All six responses confirmed30m write tokens and zero12h write tokens. Server/browser stopped; no credentials persisted. One trial is not a reliability rate and the original failed argument field remains unknown. Naming behavior was preserved and existing explicit/default-name browser cases pass.
+
+## Evidence
+Daymark implementation commit eb1f827d16e7d3e473f84909ecde4d98ffc7dfb6 against96d8b6876c1180e797ae7cbd0f030cc6f3242604. Production build/typecheck passed. Final full Node regression:581 total,569 passed,12 skips,zero failures in130.900 seconds. Focused regression84/84passed; independent reviewer reran72/72. Affected browser qualification:10 cases passed (nine initial passes and the corrected reservation assertion case on focused recheck), covering mismatch repair, exact review, separate approval/activation, desktop/phone and explicit-name preservation. Browser uses installed Chromium, not the repository-pinned downloaded build. Runtime remains Node24.22.1 rather than the declared24.14.1; exact pinned-toolchain/full-browser/release-package qualification remains outside this focused result. Final Redline classifies implementation paths GRAY and documentation BLUE, with no boundary violations; reporter exits1 for the shadow gray verdict and warns that its optional adjacent policy schema file is absent. No rule relaxation or policy edit was made.
+
+## Result review
+Agent technical review: live_readiness_review.
+Reviewed revision: Daymark eb1f827d16e7d3e473f84909ecde4d98ffc7dfb6.
+Verification adequacy: approved after actual source/call-site inspection and independent72-test replay; effective historical accounting, immutable raw ledger/rollback, bounded argument and host-diagnostic recovery, successful-save-only reset, native authority, explicit names, review/activation and stale/cancel fences retained. Reviewer confirmed final569-pass/12-skip regression and affected browser evidence. No remaining code finding.
+
+## Delivery
+Local review branch fix/live-studio-readiness in both repositories, based on existing readiness tips without changing those branches. Demo implementation is committed; core record retains this task and evidence. No push, merge, release, deployment, visibility or credential/security-setting change. Manager owns roadmap reconciliation and combined release acceptance. Remaining limits: original malformed live argument unavailable; one successful fresh replay is not a reliability rate; pinned toolchain and complete browser/release qualification are not claimed. Work Record validation passed with exit0 against the final demo diff and fresh Redline. The checker could not inspect absent origin/main for its advisory commit-order check; planning record8965366 precedes implementationeb1f827. No blocking governance finding remains.
