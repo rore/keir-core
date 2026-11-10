@@ -24,7 +24,7 @@ Task identity: `agent-workflow:core-public-hardening`. Branch `fix/core-public-h
 **Plan review:** Agent technical review: core_hardening_review. Stage1 plan and result approved at equivalent local5c27677; stages2/3 plans approved at equivalent localbd6bdb3 after independent source/evidence inspection. Stage4 detailed plan review remains required.
 **Approvals:** Not required at this risk level. User explicitly authorized substantiated fixes, validation and safe merges: “You should merge things when you finish them.” No deployment or public release is authorized.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Plan review
@@ -71,3 +71,6 @@ Independent reviewer core_hardening_review correctly identified that the initial
 
 ## Refined Stage2 checkpoint
 Independent reviewer approved the root-envelope guard and Stage4 plan, with the platform-thread labeling correction applied. The root-scan regression failed before implementation and all63 Node tests now pass afterward, including legacy/current shared cases; own-source coverage99.16% lines/95.77% branches. The scanner derives its root-only ceiling from the same frozen nine-field envelope list used by semantic validation; generic decoding stays unchanged. On this executor, paired pre-hardening public wide-root preparation took212–225ms; the final guard takes0.37–1.88ms with the same ARTIFACT_INVALID rejection and zero adapter calls. Oversized-object rejection is substantially lower after allocation-free comparison and serialization-derived bounds. These are measured synthetic cases, not general admission or web-capacity guarantees.
+
+## Stages2/3 delivery checkpoint
+Resource source and regressions are ready for final review and exact-head CI in PR11. This contribution includes Node canonical allocation/byte guards and root-envelope preflight plus Java cooperative timeout thread hardening. The current-generation reproducible qualification remains Stage4 work, so the overall task is still in progress. Independent source review and final CI/merge receipts determine delivery; no general scale or containment claim is made.
