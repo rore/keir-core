@@ -50,12 +50,19 @@ final class Expressions {
 
     static CelAbstractSyntaxTree parse(String text, Set<String> variables, String path) {
         if (text.getBytes(StandardCharsets.UTF_8).length > 512) fail("BUDGET_EXCEEDED", path);
+        CelAbstractSyntaxTree parsed;
+        Expr expression;
         try {
-            var parsed = CelCompilerFactory.standardCelCompilerBuilder().setOptions(OPTIONS)
+            parsed = CelCompilerFactory.standardCelCompilerBuilder().setOptions(OPTIONS)
                     .setStandardMacros(Set.of(CelStandardMacro.HAS)).build().parse(text, "<input>").getAst();
-            available(CelProtoAbstractSyntaxTree.fromCelAst(parsed).getExpr(), variables, path);
-            return parsed;
+            expression = CelProtoAbstractSyntaxTree.fromCelAst(parsed).getExpr();
         } catch (CelValidationException e) { throw new CompileFailure("TYPE_MISMATCH", path); }
+        catch (StackOverflowError exhausted) {
+            // CEL/ANTLR recursion can exhaust the caller stack before a checked AST exists.
+            throw new CompileFailure("BUDGET_EXCEEDED", path);
+        }
+        available(expression, variables, path);
+        return parsed;
     }
 
     static Compiled compile(CelAbstractSyntaxTree parsed, String expected, Map<String, String> variables,
@@ -64,20 +71,23 @@ final class Expressions {
                 .setStandardMacros(Set.of(CelStandardMacro.HAS)).addFileTypes(dcm.fileDescriptor());
         variables.forEach((name, type) -> builder.addVar(name, celType(type, dcm)));
         var compiler = builder.build();
+        CheckedExpr checked;
         try {
-            CheckedExpr checked = CelProtoAbstractSyntaxTree.fromCelAst(compiler.check(parsed).getAst())
+            checked = CelProtoAbstractSyntaxTree.fromCelAst(compiler.check(parsed).getAst())
                     .toCheckedExpr();
-            var walker = new Walker(dcm, variables, checked, path);
-            Value value = walker.visit(checked.getExpr(), 1, Set.of());
-            if (dcm.type(value.type()) == null || dcm.record(value.type()) != null) fail("CEL_POLICY_DENIED", path);
-            String type = expected == null ? value.type() : assign(value, expected, dcm, path);
-            byte[] bytes = deterministic(checked);
-            if (bytes.length > 16_384) fail("BUDGET_EXCEEDED", path);
-            return new Compiled(Map.of("checked", Base64.getEncoder().encodeToString(bytes),
-                    "variables", new TreeMap<>(variables), "resultType", type), type, walker.nodes);
         } catch (CelValidationException e) {
             throw new CompileFailure("TYPE_MISMATCH", path);
+        } catch (StackOverflowError exhausted) {
+            throw new CompileFailure("BUDGET_EXCEEDED", path);
         }
+        var walker = new Walker(dcm, variables, checked, path);
+        Value value = walker.visit(checked.getExpr(), 1, Set.of());
+        if (dcm.type(value.type()) == null || dcm.record(value.type()) != null) fail("CEL_POLICY_DENIED", path);
+        String type = expected == null ? value.type() : assign(value, expected, dcm, path);
+        byte[] bytes = deterministic(checked);
+        if (bytes.length > 16_384) fail("BUDGET_EXCEEDED", path);
+        return new Compiled(Map.of("checked", Base64.getEncoder().encodeToString(bytes),
+                "variables", new TreeMap<>(variables), "resultType", type), type, walker.nodes);
     }
 
     static String literal(Object value, String expected, Dcm dcm, String path) {
