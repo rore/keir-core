@@ -24,7 +24,7 @@ Task identity: `agent-workflow:core-public-hardening`. Branch `fix/core-public-h
 **Plan review:** Agent technical review: core_hardening_review. Stage1 plan and result approved at equivalent local5c27677; stages2/3 plans approved at equivalent localbd6bdb3 after independent source/evidence inspection. Stage4 detailed plan review remains required.
 **Approvals:** Not required at this risk level. User explicitly authorized substantiated fixes, validation and safe merges: “You should merge things when you finish them.” No deployment or public release is authorized.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Plan review
@@ -40,3 +40,11 @@ Java21.0.13 baseline:64 waits with cooperatively blocked host clocks caused64 pl
 
 ## Recovery
 The managed executor disconnected after local Stage1 code, tests and plans were committed and independently reviewed. The approved patch is being preserved through the authorized GitHub connector and will receive exact-head CI and fresh source review before merge. Local work is retained; no force push or configuration change is used. Resource implementations and final qualification are still pending.
+
+## Result review
+Agent technical review: core_hardening_review.
+Reviewed revision: Stage1 local5c27677, preserved with identical source/test contents at remotee568f3f1e2b2f622734159fd9f01debe0a2cf31b.
+Verification adequacy: approved after independent source/test inspection and red/green evidence; foreign-only catches, existing semantics/limits, safe API/CLI diagnostics and recovery retained. Local full Java regression passed. Fetched remote production/test files exactly match the recreated tested patch (blobs df38beecb81d8a2a1739750e3b1132f714019640 and1d7ca0ab679b8a93f01496c301f1231ca0ab18b3). Fresh remote review and exact-final CI still gate merge.
+
+## Stage1 delivery
+PR https://github.com/rore/keir-core/pull/10 contains only the compiler correction, regressions and this record. This checkpoint is ready for review of that contribution; stages2–4 remain unfinished and the overall hardening outcome is not declared complete. The managed environment is unavailable; the connected repository's owner and authorization were verified before the permitted successful retry of the record commit. No force push, credential or configuration change occurred.
