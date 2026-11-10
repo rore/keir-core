@@ -107,3 +107,11 @@ jobs:
           runtime_classpath="$(python -c 'from xml.etree import ElementTree; report = ElementTree.parse("runtime-java/target/surefire-reports/TEST-dev.keir.runtime.PublicScenarioTest.xml"); print(next(row.get("value") for row in report.findall("./properties/property") if row.get("name") == "java.class.path"))')"
           java -cp "$runtime_classpath" dev.keir.runtime.PublicScenarioDriver conformance/keir-3 > .tools/java-current-scenarios.json
           python -c 'import json; from pathlib import Path; normalize = lambda report: {**report, "scenarios": sorted(report["scenarios"], key=lambda row: (row["group"], row["id"])), "vectors": sorted(report["vectors"], key=lambda row: row["id"])}; java = json.loads(Path(".tools/java-current-scenarios.json").read_bytes()); node = json.loads(Path(".tools/node-current-scenarios.json").read_bytes()); assert len(java["scenarios"]) == len(node["scenarios"]) == 39; assert len(java["vectors"]) == len(node["vectors"]) == 51; assert normalize(java) == normalize(node)'
+      - name: Bounded current-generation resource qualification
+        shell: bash
+        run: |
+          mkdir -p build
+          node conformance/resource-qualification/qualify.mjs | tee build/resource-qualification.json
+      - name: Bounded current-generation concurrency qualification
+        shell: bash
+        run: node conformance/resource-qualification/qualify.mjs --concurrent | tee build/resource-concurrent.json
