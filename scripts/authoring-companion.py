@@ -113,7 +113,11 @@ PINNED_EDITIONS = {
     3: (V3_COMPATIBILITY, V3_GUIDE, V3_ARTIFACT, V3_FORMATS, V3_FILES),
     4: (V4_COMPATIBILITY, V4_GUIDE, V4_ARTIFACT, V4_FORMATS, V4_FILES),
     5: (V5_COMPATIBILITY, V5_GUIDE, V5_ARTIFACT, V5_FORMATS, V5_FILES),
+    6: ("docs/agents/authoring-companion-v6-compatibility.json",
+        "docs/agents/customer-authoring-guide-v6.md", V5_ARTIFACT, V5_FORMATS,
+        ("docs/agents/customer-authoring-guide-v6.md", "LICENSE", *V5_FILES[1:])),
 }
+LICENSE_PIN = "sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
 RELEASE_ASSETS = {
     "compiler": "keir-compiler-cli-{}.zip",
     "javaRuntime": "keir-java-runtime-maven-{}.zip",
@@ -134,9 +138,33 @@ def json_bytes(document):
     return (json.dumps(document, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
 
 
+def source_revision(revision):
+    """Resolve retained source trees without relabeling historical package origin."""
+    root = Path(__file__).resolve().parents[1]
+    receipt = json.loads(Path(__file__).with_name("release-source-revisions.json").read_bytes())
+    row = receipt["revisions"].get(revision)
+    reachable = row["reachableRevision"] if row else revision
+    result = subprocess.run(
+        ["git", "--no-replace-objects", "cat-file", "-t", reachable],
+        cwd=root, capture_output=True, text=True,
+    )
+    if result.returncode:
+        raise ValueError(f"Source revision is unavailable in this clone: {revision}. "
+                         "Use a reachable source commit; preserve original release provenance.")
+    if result.stdout.strip() != "commit":
+        raise ValueError("Source revision must be a Git commit.")
+    if row:
+        tree = subprocess.check_output(
+            ["git", "--no-replace-objects", "rev-parse", f"{reachable}^{{tree}}"], cwd=root, text=True,
+        ).strip()
+        if tree != row["tree"]:
+            raise ValueError("Mapped source tree does not match the recorded original tree.")
+    return reachable
+
+
 def read_blob(revision, path):
     return subprocess.check_output(
-        ["git", "--no-replace-objects", "cat-file", "blob", f"{revision}:{path}"],
+        ["git", "--no-replace-objects", "cat-file", "blob", f"{source_revision(revision)}:{path}"],
         cwd=Path(__file__).resolve().parents[1],
     )
 
@@ -211,6 +239,8 @@ def make_pinned_archive(version, revision, compatibility, payload):
     if not matches(r"[0-9a-f]{40}", revision):
         raise ValueError("A pinned edition requires a full Git commit.")
     validate_compatibility(compatibility)
+    if version == 6 and digest(payload.get("LICENSE", b"")) != LICENSE_PIN:
+        raise ValueError("Edition 6 requires the complete Apache-2.0 LICENSE.")
     artifact = json.loads(payload[artifact_path])
     if (not isinstance(artifact, dict) or artifact.get("format") != formats["artifact"]
             or not isinstance(artifact.get("compiler"), str) or not isinstance(artifact.get("environment"), dict)):
@@ -227,7 +257,7 @@ def make_pinned_archive(version, revision, compatibility, payload):
         if compatibility["status"] == "release" and any(
                 package["version"] != "0.2.0" for package in compatibility["packages"].values()):
             raise ValueError("Edition 4 requires Core 0.2.0 packages.")
-    if version == 5:
+    if version in (5, 6):
         model = json.loads(payload[V5_MODEL])
         model_pin = payload[f"{V5_FIXTURES}/dcm-guard.sha256"].decode("ascii").strip()
         environment = {"celJava": "0.14.0", "celNode": "0.6.1", "protobufJava": "4.35.1", "protobufNode": "2.6.2"}
@@ -251,14 +281,14 @@ def make_pinned_archive(version, revision, compatibility, payload):
                     or not isinstance(source, dict) or source.get("language") != formats["language"]
                     or source.get("domain") != {**model["domain"], "fingerprint": model_pin}
                     or source.get("entrypoint") != example.get("entrypoint")):
-                raise ValueError("Invalid edition 5 example or producer tuple.")
+                raise ValueError(f"Invalid edition {version} example or producer tuple.")
         for name in V5_SCENARIOS:
             scenario = json.loads(payload[name])
             if not isinstance(scenario, dict) or scenario.get("format") != formats["scenario"]:
-                raise ValueError("Invalid edition 5 scenario format.")
+                raise ValueError(f"Invalid edition {version} scenario format.")
         if compatibility["status"] == "release" and any(
                 package["version"] != "0.3.0" for package in compatibility["packages"].values()):
-            raise ValueError("Edition 5 requires Core 0.3.0 packages.")
+            raise ValueError(f"Edition {version} requires Core 0.3.0 packages.")
     manifest = {
         "format": f"keir-authoring-companion/{version}",
         "sourceRevision": revision,
@@ -277,21 +307,13 @@ def build_pinned(version, revision, core_assets):
     if not matches(r"[0-9a-f]{40}", revision):
         raise ValueError("A pinned edition requires --revision with a full Git commit.")
     root = Path(__file__).resolve().parents[1]
-    actual = subprocess.check_output(
-        ["git", "--no-replace-objects", "cat-file", "-t", revision], cwd=root, text=True,
-    ).strip()
-    if actual != "commit":
-        raise ValueError("Source revision must be a Git commit.")
+    reachable = source_revision(revision)
     compatibility = json.loads(read_blob(revision, compatibility_path))
     validate_compatibility(compatibility)
     core = compatibility["coreRevision"]
-    actual = subprocess.check_output(
-        ["git", "--no-replace-objects", "cat-file", "-t", core], cwd=root, text=True,
-    ).strip()
-    if actual != "commit":
-        raise ValueError("Core compatibility revision must be a Git commit.")
+    reachable_core = source_revision(core)
     comparison = subprocess.run(
-        ["git", "--no-replace-objects", "diff", "--quiet", core, revision, "--", *files[1:]], cwd=root,
+        ["git", "--no-replace-objects", "diff", "--quiet", reachable_core, reachable, "--", *files[1:]], cwd=root,
     )
     if comparison.returncode:
         raise ValueError("Companion inputs differ from the recorded Core revision.")
@@ -362,7 +384,7 @@ def main():
     check.add_argument("archive", type=Path)
     check.add_argument("--sha256", required=True, help="Trusted archive pin in sha256:<hex> form")
     for command in (create, check):
-        command.add_argument("--version", type=int, choices=(1, 2, 3, 4, 5), default=1,
+        command.add_argument("--version", type=int, choices=(1, 2, 3, 4, 5, 6), default=1,
                              help="Companion version (default: 1)")
         command.add_argument("--core-assets", type=Path, help="Directory containing the pinned Core release assets")
     args = parser.parse_args()

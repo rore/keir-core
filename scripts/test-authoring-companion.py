@@ -21,9 +21,13 @@ import zipfile
 SCRIPT = Path(__file__).with_name("authoring-companion.py")
 V1_PIN = "sha256:8e365ff0d14fb0c479e43ace36e941562c94577f793a86b720d54e20622547b6"
 V2_GUIDE_PIN = "sha256:22f3aba081b5653f7f5d4fff8861afe606c840ce56d9b26d7464ffc08ee8ab1d"
+V2_PIN = "sha256:f073feaefe99e9dfe3b1dd818347f97cdca46c22a780bfb7e70992913aceac04"
 V3_RELEASE_REVISION = "e298e7a4015ea527fca107972aaf2054fd77255b"
 V4_RELEASE_REVISION = "c6a6d171982514569c29c06de7a429d301d25b2a"
 V4_PIN = "sha256:4a9f4f30212ff1d722cf6c993902d0802bee7e7ffebc00304102a5964b5bec63"
+V3_PIN = "sha256:fab92ec08409e9ccf64d5b4db5f58d874b6aabe0bc80be0a81182dc468a6ec39"
+V5_RELEASE_REVISION = "f988c2b147933fcdd8b8f74ce7920f78acd4eca5"
+V5_PIN = "sha256:20249307192494acb1cf07cc002e7203bda4f6baf8a8c2257dd752ce1d8cfe44"
 
 
 def command(*args):
@@ -31,11 +35,26 @@ def command(*args):
 
 
 def git(*args):
+    if args[0] == "show" and ":" in args[1]:
+        revision, path = args[1].split(":", 1)
+        rows = json.loads(SCRIPT.with_name("release-source-revisions.json").read_bytes())["revisions"]
+        revision = rows.get(revision, {}).get("reachableRevision", revision)
+        args = (args[0], f"{revision}:{path}", *args[2:])
     return subprocess.check_output(["git", *args], cwd=SCRIPT.parent.parent)
 
 
 def digest(data):
     return "sha256:" + hashlib.sha256(data).hexdigest()
+
+
+def historical_pinned_archive(version, revision):
+    # Reconstruct the historical byte recipe, not a qualified release build.
+    # Production build_pinned still requires all original pinned Core assets.
+    module = runpy.run_path(str(SCRIPT))
+    compatibility_path, _, _, _, files = module["PINNED_EDITIONS"][version]
+    payload = {name: module["read_blob"](revision, name) for name in files}
+    compatibility = json.loads(module["read_blob"](revision, compatibility_path))
+    return module["make_pinned_archive"](version, revision, compatibility, payload)
 
 
 class AuthoringCompanionTest(unittest.TestCase):
@@ -90,6 +109,7 @@ class AuthoringCompanionTest(unittest.TestCase):
         data = path.read_bytes()
         self.assertEqual(second.read_bytes(), data)
         pin = digest(data)
+        self.assertEqual(pin, V2_PIN)
         self.assertNotEqual(pin, V1_PIN)
         result = command("verify", path, "--version", "2", "--sha256", pin)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -165,20 +185,19 @@ class AuthoringCompanionV3Test(unittest.TestCase):
         cls.revision = V3_RELEASE_REVISION
         cls.path = cls.directory / "companion-v3.zip"
         assets = os.environ.get("KEIR_COMPANION_CORE_ASSETS")
-        cls.build_flags = ("--version", "3", "--revision", cls.revision, *(("--core-assets", assets) if assets else ()))
-        result = command("build", cls.path, *cls.build_flags)
-        if result.returncode:
-            raise AssertionError(result.stderr)
-        cls.data = cls.path.read_bytes()
-        cls.pin = result.stdout.strip()
+        cls.data = historical_pinned_archive(3, cls.revision)
+        cls.path.write_bytes(cls.data)
+        cls.pin = digest(cls.data)
+        if assets:
+            live_path = cls.directory / "qualified-build.zip"
+            result = command("build", live_path, "--version", "3", "--revision", cls.revision,
+                             "--core-assets", assets)
+            if result.returncode or live_path.read_bytes() != cls.data:
+                raise AssertionError(result.stderr)
 
     def test_committed_inventory_links_and_offline_verification(self):
-        second = self.directory / "repeated.zip"
-        result = command("build", second, *self.build_flags)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(second.read_bytes(), self.data)
-        self.assertEqual(result.stdout.strip(), self.pin)
-        self.assertEqual(self.pin, digest(self.data))
+        self.assertEqual(historical_pinned_archive(3, self.revision), self.data)
+        self.assertEqual(self.pin, V3_PIN)
         result = subprocess.run(
             [sys.executable, SCRIPT, "verify", self.path, "--version", "3", "--sha256", self.pin],
             cwd=self.directory, env={**os.environ, "PATH": ""}, capture_output=True, text=True,
@@ -214,6 +233,9 @@ class AuthoringCompanionV3Test(unittest.TestCase):
         bad = self.directory / "invalid-v3.zip"
         self.assertNotEqual(command("build", bad, "--version", "3").returncode, 0)
         self.assertNotEqual(command("build", bad, "--version", "3", "--revision", "HEAD").returncode, 0)
+        result = command("build", bad, "--version", "3", "--revision", self.revision)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("requires --core-assets", result.stderr)
         self.assertNotEqual(command("verify", self.path, "--version", "3", "--sha256", digest(b"old")).returncode, 0)
         self.assertNotEqual(command("verify", self.path, "--version", "2", "--sha256", self.pin).returncode, 0)
         bad.write_bytes(self.data)
@@ -445,6 +467,85 @@ class AuthoringCompanionV5Test(unittest.TestCase):
             (assets / name).unlink()
             with self.assertRaises(FileNotFoundError):
                 build(5, self.revision, assets)
+
+
+class SourceRevisionTest(unittest.TestCase):
+    def test_mapped_trees_and_original_archive_provenance(self):
+        module = runpy.run_path(str(SCRIPT))
+        rows = json.loads(SCRIPT.with_name("release-source-revisions.json").read_bytes())["revisions"]
+        for original, row in rows.items():
+            with self.subTest(original=original):
+                self.assertEqual(module["source_revision"](original), row["reachableRevision"])
+                self.assertEqual(git("rev-parse", row["reachableRevision"] + "^{tree}").decode().strip(), row["tree"])
+        data = historical_pinned_archive(5, V5_RELEASE_REVISION)
+        self.assertEqual(digest(data), V5_PIN)
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            manifest = json.loads(archive.read("manifest.json"))
+            self.assertEqual(manifest["sourceRevision"], V5_RELEASE_REVISION)
+            self.assertEqual(manifest["compatibility"]["coreRevision"], "b2329440dd2a25acc547f3ebfea214748d912022")
+
+    def test_unknown_missing_revision_and_changed_tree_receipt_rejected(self):
+        module = runpy.run_path(str(SCRIPT))
+        with self.assertRaisesRegex(ValueError, "unavailable in this clone"):
+            module["source_revision"]("0" * 40)
+        receipt = json.loads(SCRIPT.with_name("release-source-revisions.json").read_bytes())
+        receipt["revisions"][V5_RELEASE_REVISION]["tree"] = "0" * 40
+        with patch.object(Path, "read_bytes", return_value=json.dumps(receipt).encode()):
+            with self.assertRaisesRegex(ValueError, "original tree"):
+                module["source_revision"](V5_RELEASE_REVISION)
+
+
+class AuthoringCompanionV6Test(unittest.TestCase):
+    def test_semantic_reference_links_target_reachable_source(self):
+        guide = (SCRIPT.parent.parent / "docs/agents/customer-authoring-guide-v6.md").read_text()
+        links = re.findall(r"https://github.com/rore/keir-core/blob/([0-9a-f]{40})/([^\s)#]+)", guide)
+        self.assertEqual(len(links), 4)
+        for revision, path in links:
+            with self.subTest(path=path):
+                self.assertEqual(git("cat-file", "-t", f"{revision}:{path}").strip(), b"blob")
+
+    def test_license_and_existing_contracts_are_verified_offline(self):
+        module = runpy.run_path(str(SCRIPT))
+        root = SCRIPT.parent.parent
+        files = module["PINNED_EDITIONS"][6][4]
+        payload = {name: (root / name).read_bytes() for name in files}
+        payload["LICENSE"] = git("show", "HEAD:LICENSE")
+        revision = git("rev-parse", "HEAD").decode().strip()
+        compatibility = {"status": "candidate", "coreRevision": revision, "packages": {}}
+        data = module["make_pinned_archive"](6, revision, compatibility, payload)
+        self.assertEqual(data, module["make_pinned_archive"](6, revision, compatibility, payload))
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            manifest = json.loads(archive.read("manifest.json"))
+            self.assertEqual(manifest["format"], "keir-authoring-companion/6")
+            self.assertEqual(archive.read("LICENSE"), git("show", "HEAD:LICENSE"))
+            self.assertEqual(manifest["files"]["LICENSE"]["digest"], module["LICENSE_PIN"])
+            self.assertEqual(manifest["contracts"], module["V5_FORMATS"])
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "candidate.zip"
+            path.write_bytes(data)
+            result = subprocess.run([sys.executable, SCRIPT, "verify", path, "--version", "6",
+                                     "--sha256", digest(data)], env={**os.environ, "PATH": ""},
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            for license_data in (None, b"incomplete license"):
+                with zipfile.ZipFile(io.BytesIO(data)) as original, zipfile.ZipFile(path, "w") as changed:
+                    for entry in original.infolist():
+                        value = original.read(entry)
+                        if entry.filename == "LICENSE":
+                            if license_data is None:
+                                continue
+                            value = license_data
+                        changed.writestr(entry, value)
+                with self.assertRaisesRegex(ValueError, "inventory|LICENSE"):
+                    module["verify"](6, path, digest(path.read_bytes()))
+        altered = dict(payload)
+        altered["LICENSE"] = b"incomplete license"
+        with self.assertRaisesRegex(ValueError, "LICENSE"):
+            module["make_pinned_archive"](6, revision, compatibility, altered)
+        altered = dict(payload)
+        altered["conformance/keir-3/source-guard.json"] += b"\n"
+        with self.assertRaisesRegex(ValueError, "example or producer tuple"):
+            module["make_pinned_archive"](6, revision, compatibility, altered)
 
 
 if __name__ == "__main__":
