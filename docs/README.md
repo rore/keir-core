@@ -5,7 +5,7 @@
 
 - [Getting started](quickstart.md) explains the follow-up extension and shows how to run, change, and compile it.
 - [Install released packages](installation.md) sets up the compiler and both runtimes outside this repository.
-- [How Keir works](guided-tour.md) explains the source and application model together.
+- [How Keir works](guided-tour.md) follows the user flow with screenshots, then explains the source and application model.
 
 ## Integrate with an application
 
