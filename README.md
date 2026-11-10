@@ -57,4 +57,4 @@ The [documentation index](docs/README.md) links the guides and references.
 - [Verification and testing](docs/testing.md): tested behavior and its evidence.
 - [Contributing](CONTRIBUTING.md) and [roadmap](roadmap/scope.md).
 
-Keir Core is licensed under the [Apache License 2.0](LICENSE). Packages are available through [GitHub Releases](https://github.com/rore/keir-core/releases).
+Keir Core is licensed under the [Apache License 2.0](LICENSE); bundled components retain their [third-party notices](THIRD-PARTY.md). Packages are available through [GitHub Releases](https://github.com/rore/keir-core/releases).

@@ -1,0 +1,43 @@
+name: Release packaging
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/authoring-companion.py
+      - scripts/test-authoring-companion.py
+      - scripts/release-source-revisions.json
+      - scripts/verify-core-release.py
+      - scripts/test-verify-core-release.py
+      - scripts/release_maven.py
+      - docs/agents/**
+      - LICENSE
+      - .github/workflows/release-packaging.yml
+  pull_request:
+    paths:
+      - scripts/authoring-companion.py
+      - scripts/test-authoring-companion.py
+      - scripts/release-source-revisions.json
+      - scripts/verify-core-release.py
+      - scripts/test-verify-core-release.py
+      - scripts/release_maven.py
+      - docs/agents/**
+      - LICENSE
+      - .github/workflows/release-packaging.yml
+permissions:
+  contents: read
+jobs:
+  packaging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Check companion bytes, license and historical source lookup
+        run: python -B scripts/test-authoring-companion.py
+      - name: Check Core release asset verification
+        run: python -B scripts/test-verify-core-release.py

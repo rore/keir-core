@@ -1,0 +1,8 @@
+Minimap 0.3.6
+Copyright (c) 2026 Rotem Hermon
+
+Source: https://github.com/rore/minimap/tree/c1b311ad9c5df7f5d70ab63b50ce5f8c8603e7b1
+License: MIT; the complete notice is in LICENSE beside this file.
+This bundled copy includes Keir integration changes.
+The vendored js-yaml distribution retains its own LICENSE.js-yaml and NOTICE.js-yaml
+in runtime/src/work-record/vendor/.

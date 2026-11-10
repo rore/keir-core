@@ -7,11 +7,25 @@ The companion gives an authoring assistant a versioned guide, structural schemas
 
 | Host contract | Companion | Status |
 | --- | --- | --- |
+| Core 0.3.0 contracts; licensed packaging | [Edition 6 guide](customer-authoring-guide-v6.md) | Unpublished [candidate](authoring-companion-v6-compatibility.json); includes the full Apache license. Not a replacement for published edition 5. |
 | Core 0.3.0; source `/2`, model/artifact/scenario `/3` | [Edition 5 guide](customer-authoring-guide-v5.md) | [Released with Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). [Exact package record](authoring-companion-v5-compatibility.json). |
 | Core 0.2.0; source/model/artifact/scenario `/2` | [Edition 4 guide](customer-authoring-guide-v4.md) | Released. [Exact package record](authoring-companion-v4-compatibility.json). |
 | Core 0.1.0; `/1` documents | [Edition 3 guide](customer-authoring-guide-v3.md) | Historical. [Exact package record](authoring-companion-v3-compatibility.json). |
 
 Editions 1 and 2 use earlier preview contracts. Their original archives remain reproducible with the matching version and trusted pin. Do not use a historical guide for current authoring.
+
+Published editions 1–5 retain their original bytes and source IDs. Their ZIPs omit the root project license; include [LICENSE](../../LICENSE) alongside a legacy ZIP when redistributing it. The [source provenance note](../releases/source-provenance.md) explains reachable equivalent revisions after the history cleanup.
+
+## Licensed candidate edition 6
+
+Edition 6 adds the complete Apache 2.0 license to edition 5's contracts and examples. It has a separate archive format and guide, and remains a source candidate until its real release inputs are qualified. From a commit containing the edition 6 inputs:
+
+```sh
+REVISION=$(git rev-parse HEAD)
+python scripts/authoring-companion.py build keir-authoring-v6-candidate.zip --version 6 --revision "$REVISION"
+```
+
+The command prints the new candidate's SHA-256 pin. Use that exact pin with `verify --version 6 --sha256 sha256:<hex>` before loading it. Verification works offline without Git and checks the license as part of the archive inventory and manifest. Candidate verification is not a claim that a new companion release has been published or that new package qualification has completed.
 
 ## Build from committed inputs
 
@@ -25,7 +39,7 @@ python scripts/authoring-companion.py build keir-authoring-v5.zip --version 5 --
 
 The manifest distinguishes the companion input commit from the compatible Core source commit. Nonguide inputs must match that Core revision exactly. A source candidate has `status: candidate` and an empty package map; omit `--core-assets` for that row. Candidate bytes do not establish released-package compatibility.
 
-The builder creates a new file and refuses to overwrite an existing archive. Exact historical revisions reproduce the original archive bytes even when current documentation changes.
+The builder creates a new file and refuses to overwrite an existing archive. The checked [source revision receipt](../../scripts/release-source-revisions.json) lets a fresh clone read equivalent historical source trees while preserving original archive manifest IDs. Exact historical inputs reproduce the original archive bytes even when current documentation changes. Release rows still require the original pinned Core assets.
 
 Edition 5's bundled example sources are canonical JSON. The builder checks each source file's exact byte digest against its artifact's `sourceDigest`, as well as the model and artifact pins. An edited source must be recompiled before packaging.
 
