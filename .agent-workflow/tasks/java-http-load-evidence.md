@@ -46,7 +46,7 @@
 
 **Exceptions:** —
 
-**State:** Ready to implement
+**State:** Ready for review
 
 <!-- agent-workflow:end -->
 
@@ -69,7 +69,7 @@ Agent technical review: independent non-implementer reviewed main ce98892f898815
 
 ## Result review
 
-Pending implementation and verification. Broader resource qualification remains active.
+Independent exact-final review pending below. Broader resource qualification remains active.
 
 ## Revised assignment
 
@@ -86,3 +86,20 @@ Offline packaging initially failed because this Java image lacks release metadat
 ## Sample recovery
 
 Measured harness 432307b5ff570ecec83946a60377e40c108bbf4e completed 129 seconds of scheduled arrivals before the dense 600/s confirmation ended with two transport failures, zero incorrect outcomes and no resource breach. Preserve this failed run; no clean capacity claim applies. Initial code stopped on any transport failure after reconciling all client/server counters. A narrow control-flow fix retains reconciled transport errors as failed capacity screens, records their error codes and still stops on incorrect outcomes/counter mismatch/resource breaches. The unchanged Java host and fixtures will be used for a focused 108-second completion: lower-rate ordinary 300/s pair, missing native dense 600/s baseline, slow callbacks and recovery. Combined primary/followup arrival time is 237 seconds, within the roughly five-minute sample budget. No full qualification rerun is planned.
+
+## Verification of recorded evidence
+
+- Exact measured source/harness revisions: `432307b5ff570ecec83946a60377e40c108bbf4e` (primary) and `25ec2ed590a461abee2d1035a313950bd6329be4` (focused follow-up). Java probe SHA-256 is `8f0bd719bb551edc042b4a4d7f68ae96a043684c008f6318c7441eea4067d691`; Node producer hashes remain in each run. Compiler/runtime Git trees match hardened main `d484c46cc416ad98aa4753d6759586d48d833e01`.
+- Strict smoke on both frozen harness revisions: 40/40 requests correct, deliberately wrong expected outcome rejected, successful executor shutdown/returned permits, actual idle-server timeout/reaping and port release passed.
+- Primary/follow-up: 22 load stages, 237 seconds of arrivals; 173,100 offered = 163,689 correct + 3,253 busy + 6,156 generator drops + two transport failures + zero incorrect outcomes. Raw nearest-rank p50/p95/p99, offered/result/throughput/CPU arithmetic, original report hashes, fixture/generated/binary/harness hashes and every child-close receipt checked locally. No observed RSS breach. Raw samples remain ignored; compact results retain all commissioning/measurement failures.
+- Both load collections retained failed status: the primary stopped on two uncategorized transport failures; the focused follow-up completed all recovery requests correctly but failed the latency/dispatch-lag screen. Failure cleanup killed and reaped each JVM. Neither measured run reached graceful-shutdown probes; separate strict smoke verifies those probes. No further load rerun is planned.
+- Clean fresh ordinary Keir point: 9,000/9,000 at 300 offered/s for 30 seconds, p99 12.7750 ms. Higher-rate busy responses, dense saturation/two transport failures and recovery latency miss remain explicit. One trial and synthetic callbacks establish no maximum, production SLA, leak freedom, hard containment or real-database qualification.
+- `node --check conformance/resource-qualification/java-http/run.mjs`: passed. Offline source packaging passed with the recorded Java 21 source/target flags. `python3 scripts/check-keir-contracts.py`: passed (/1, /2 and /3 schemas/rejections); this is not a full native product regression.
+
+## Roadmap contribution for manager owner
+
+Canonical feature: `runtime-resource-qualification`, `roadmap/features/runtime-resource-qualification.md`, active. This task does not adopt a manager identity or edit that owner's file. Proposed exact addition under Notes:
+
+> **Java HTTP diagnostic recorded:** The [HTTP load reference](../../conformance/resource-qualification/java-http/README.md) and [compact results](../../conformance/resource-qualification/java-http/results.json) add a repository-native opt-in harness and fresh hardened-source evidence: 237 seconds of scheduled arrivals, 173,100 offered, zero incorrect outcomes, with busy responses, generator drops, two transport errors and failed latency/recovery screens preserved. One ordinary Keir point completed 9,000/9,000 at 300/s for 30 seconds (12.7750 ms success p99); it is a tested synthetic point, not a maximum or production SLA. Earlier 566caa4 HTTP conclusions remain explicitly author-reported and not directly revalidated by this integration. The broader qualification feature remains active.
+
+Manager reconciliation is pending acceptance of this focused contribution; no broad feature-completion claim is made.

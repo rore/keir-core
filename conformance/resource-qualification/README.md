@@ -5,6 +5,14 @@ This engineering reference describes the test workload and measured resource beh
 
 The commands below follow the Core 0.3.0 candidate and its model/artifact generation 3 fixtures. The default and concurrent phases qualify current artifacts; the serial and dense recorded measurements below remain explicitly historical Keir 2 evidence.
 
+## Java HTTP load evidence
+
+The [Java HTTP capacity diagnostic](java-http/README.md) adds a small opt-in host/generator and [compact stage results](java-http/results.json). It compares prepared Keir execution with native logic under independently scheduled HTTP arrivals, including full outcome/context checks, CPU/RSS/heap observations, busy responses, generator drops, slow callbacks and recovery. The documentation distinguishes fresh hardened-source execution from the earlier author-reported pre-hardening results.
+
+The earlier clean 600 requests/second ordinary and 1,200 requests/second dense points are tested synthetic points, not maximum capacity or consumer-user limits. Both earlier ordinary 1,200/s configurations rejected some requests. Read the workload, environment, failed stages and limitations before using either diagnostic for deployment planning; real application dependencies still need their own validation.
+
+## Existing compiler/runtime phases
+
 Run from the root of an isolated checkout with Java 21, Node 24, the Maven wrapper and seeded task-local caches.
 
 ```sh

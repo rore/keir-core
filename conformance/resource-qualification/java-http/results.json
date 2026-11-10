@@ -1,0 +1,793 @@
+{
+  "schema": "keir-java-http-recorded/1",
+  "description": "Fresh synthetic HTTP execution; both retained load runs stopped on failed diagnostic screens. No maximum-capacity claim. Earlier author-reported results are documented separately, not revalidated here.",
+  "validation": "Raw nearest-rank percentiles, arrival/result/throughput arithmetic, fixture/generated/harness/binary hashes and all child-close receipts verified locally. Raw samples are not committed.",
+  "measuredArrivalSeconds": 237,
+  "measuredTotals": {
+    "offered": 173100,
+    "correct": 163689,
+    "busy": 3253,
+    "generatorDrops": 6156,
+    "transportErrors": 2,
+    "incorrect": 0
+  },
+  "runs": [
+    {
+      "id": "primary-smoke",
+      "reportSha256": "d3275b656b0697d152f2fa711781ca581409f070ba9fda2cc98d227fc59a5ece",
+      "report": {
+        "schema": "keir-java-http/1",
+        "mode": "--smoke",
+        "collectedAtUtc": "2026-11-10T17:58:28.888Z",
+        "sourceCommit": "432307b5ff570ecec83946a60377e40c108bbf4e",
+        "sourceTrees": {
+          "compiler-java/src/main/java": "df072924fa27ea92f5b2db8961d1b5ea8d70eac6",
+          "runtime-java/src/main/java": "37bb6847a347cd3388f2a38ac80de20914118a59"
+        },
+        "trackedChangesAtStart": [],
+        "harnessSha256": {
+          "HttpProbe.java": "8f0bd719bb551edc042b4a4d7f68ae96a043684c008f6318c7441eea4067d691",
+          "run.mjs": "d71f8e98bfad0225fd98007aacdfe0359f8c44fe0c6c47f96709e5b01930951c"
+        },
+        "binarySha256": {
+          "compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar": "c6ee29ec6091f38d29feb4234a08a189be372341d65c74be2dc38c3f73265875",
+          "examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar": "e275cb061c86a407da8aef7e21c82facd8c0b64e7d1c896aad6a516e29cb9f14"
+        },
+        "environment": {
+          "node": "v24.22.1",
+          "kernel": "Linux 6.18.57",
+          "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+          "generatorCpuList": "2-3",
+          "cgroupCpuMax": "400000 100000",
+          "cgroupMemoryMax": "17179869184",
+          "server": {
+            "java": "21.0.13",
+            "availableProcessors": 2,
+            "runtimePins": {
+              "celJava": "0.14.0",
+              "celNode": "0.6.1",
+              "protobufJava": "4.35.1",
+              "protobufNode": "2.6.2"
+            },
+            "tcpNoDelay": true,
+            "cpuList": "0-1"
+          }
+        },
+        "limits": {
+          "hostCpus": "0,1",
+          "activeProcessorCount": 2,
+          "heapMiB": 512,
+          "sampledRssStopBytes": 1073741824,
+          "rssIntervalMs": 100,
+          "admittedSlots": 32,
+          "httpBacklog": 128,
+          "outstandingGuard": 4,
+          "requestTimeoutMs": 5000,
+          "childCaptureBytes": 1048576,
+          "serverWatchdogMs": 300000,
+          "stageMaxSeconds": 60
+        },
+        "fixtureSha256": {
+          "conformance/keir-3/dcm.json": "a8d4195bb72f78a1140f88f5a74ad29294beddacb9a96a18e837bd8bada757d6",
+          "conformance/keir-3/dcm-inventory.json": "db5d85f83c21584d1e094b8fa6d41ad242cf84b5621c383d4fe128e055bf2e65",
+          "conformance/keir-3/scenarios/inventory/inventory-max-no-match.json": "49744936677b7c3b8a49255c888e1f4deae3e3fb74b28b31145be4a2330d65fe",
+          "conformance/keir-3/source.yaml": "b37d7528cb3e5e3bd6f3cf609635f11d39e4a9a476934a6693d6ea7528e1befb",
+          "conformance/keir-3/scenarios/main/normal.json": "d3204215771d46492ec447ff133c1523e4366a8de0dd96283804c94d8dcc5a49",
+          "conformance/keir-3/artifact.json": "26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180"
+        },
+        "stages": [
+          {"phase":"smoke","rule":"typical","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.6933709999994,"successPerOfferedSecond":10,"successPerElapsedSecond":9.993071094302278,"latency":{"success":{"n":10,"minMs":8.672538999999233,"p50Ms":9.620748999999705,"p95Ms":13.479574999999386,"p99Ms":13.479574999999386,"maxMs":13.479574999999386},"allResponses":{"n":10,"minMs":8.672538999999233,"p50Ms":9.620748999999705,"p95Ms":13.479574999999386,"p99Ms":13.479574999999386,"maxMs":13.479574999999386},"dispatchLag":{"n":10,"minMs":0.1589639999992869,"p50Ms":0.4153629999991608,"p95Ms":0.936134999999922,"p99Ms":0.936134999999922,"maxMs":0.936134999999922}},"cpuSeconds":0.19,"meanOccupiedCores":0.18986835079174327,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":95879168,"rssSamples":10,"heapUsedBeforeBytes":21610736,"heapUsedAfterBytes":24756464,"sampledPeakHeapBytes":24756464,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"smoke","rule":"typical","engine":"native","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.8144320000001,"successPerOfferedSecond":10,"successPerElapsedSecond":9.991862307597097,"latency":{"success":{"n":10,"minMs":6.0701169999993,"p50Ms":6.931394999999611,"p95Ms":7.653491000000031,"p99Ms":7.653491000000031,"maxMs":7.653491000000031},"allResponses":{"n":10,"minMs":6.0701169999993,"p50Ms":6.931394999999611,"p95Ms":7.653491000000031,"p99Ms":7.653491000000031,"maxMs":7.653491000000031},"dispatchLag":{"n":10,"minMs":0.003463000000010652,"p50Ms":0.23889299999973446,"p95Ms":0.880525999999918,"p99Ms":0.880525999999918,"maxMs":0.880525999999918}},"cpuSeconds":0.06,"meanOccupiedCores":0.05995117384558259,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":96653312,"rssSamples":10,"heapUsedBeforeBytes":24756464,"heapUsedAfterBytes":25805040,"sampledPeakHeapBytes":24756464,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"smoke","rule":"dense","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":0,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.126397,"successPerOfferedSecond":10,"successPerElapsedSecond":9.998736189741825,"latency":{"success":{"n":10,"minMs":9.813183999999637,"p50Ms":15.770652000000155,"p95Ms":28.833411000000524,"p99Ms":28.833411000000524,"maxMs":28.833411000000524},"allResponses":{"n":10,"minMs":9.813183999999637,"p50Ms":15.770652000000155,"p95Ms":28.833411000000524,"p99Ms":28.833411000000524,"maxMs":28.833411000000524},"dispatchLag":{"n":10,"minMs":0.003942999999708263,"p50Ms":0.5088969999997062,"p95Ms":0.9559580000004644,"p99Ms":0.9559580000004644,"maxMs":0.9559580000004644}},"cpuSeconds":0.32,"meanOccupiedCores":0.31995955807173837,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":108187648,"rssSamples":10,"heapUsedBeforeBytes":25805040,"heapUsedAfterBytes":5996072,"sampledPeakHeapBytes":32096496,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"smoke","rule":"dense","engine":"native","offeredPerSecond":10,"seconds":1,"callbackDelayMs":0,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.1392079999996,"successPerOfferedSecond":10,"successPerElapsedSecond":9.998608113761703,"latency":{"success":{"n":10,"minMs":1.5589319999980944,"p50Ms":2.459302999997817,"p95Ms":3.216796999999133,"p99Ms":3.216796999999133,"maxMs":3.216796999999133},"allResponses":{"n":10,"minMs":1.5589319999980944,"p50Ms":2.459302999997817,"p95Ms":3.216796999999133,"p99Ms":3.216796999999133,"maxMs":3.216796999999133},"dispatchLag":{"n":10,"minMs":0.0032349999992220546,"p50Ms":0.4417969999994966,"p95Ms":1.025932999998986,"p99Ms":1.025932999998986,"maxMs":1.025932999998986}},"cpuSeconds":0.05,"meanOccupiedCores":0.049993040568808524,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":108355584,"rssSamples":10,"heapUsedBeforeBytes":5996072,"heapUsedAfterBytes":7044648,"sampledPeakHeapBytes":7044648,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"}
+        ],
+        "children": [
+          {
+            "label": "javac",
+            "reason": "exit",
+            "code": 0,
+            "signal": null,
+            "capturedBytes": 0,
+            "closed": true
+          },
+          {
+            "label": "compiler",
+            "reason": "exit",
+            "code": 0,
+            "signal": null,
+            "capturedBytes": 329,
+            "closed": true
+          },
+          {
+            "label": "server",
+            "reason": "exit",
+            "code": 0,
+            "signal": null,
+            "capturedBytes": 174,
+            "closed": true
+          },
+          {
+            "label": "server-timeout-probe",
+            "reason": "timeout",
+            "code": null,
+            "signal": "SIGKILL",
+            "capturedBytes": 156,
+            "closed": true
+          }
+        ],
+        "compilation": {
+          "dense": {
+            "artifactBytes": 32675,
+            "artifactDigest": "sha256:d9e28c75842c38b96256edf1faa555f0dd89462c061502f87c88df8b200dac42"
+          },
+          "denseShape": {
+            "depth": 7,
+            "elementVisitsBySemantics": 1280,
+            "nodes": 473,
+            "scans": 80
+          },
+          "typical": {
+            "artifactBytes": 2737,
+            "artifactDigest": "sha256:26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180"
+          }
+        },
+        "generatedSha256": {
+          "typical.source": "b37d7528cb3e5e3bd6f3cf609635f11d39e4a9a476934a6693d6ea7528e1befb",
+          "typical.model": "a8d4195bb72f78a1140f88f5a74ad29294beddacb9a96a18e837bd8bada757d6",
+          "typical.artifact": "26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180",
+          "typical.expected": "904101a2db1ea7ef21708331895ba460d88a87698953b15255da7e6357000621",
+          "dense.source": "806b33eed3a2af68a6ad894d06d622492092e7969d3a1f4164a23e7b1b949965",
+          "dense.model": "db5d85f83c21584d1e094b8fa6d41ad242cf84b5621c383d4fe128e055bf2e65",
+          "dense.artifact": "d9e28c75842c38b96256edf1faa555f0dd89462c061502f87c88df8b200dac42",
+          "dense.expected": "ac36df3179b7953cd347710d5b13734104d7ff9322dfb9e54f5b302eafefa4dd",
+          "dense.input": "4dba98661ea18bc3aecba761591846178f10e41b49e3eabd7feed948c2435add"
+        },
+        "negativeOracleRejected": true,
+        "portReleased": true,
+        "timeoutCleanupVerified": true,
+        "allConfirmationsClean": true,
+        "status": "completed"
+      }
+    },
+    {
+      "id": "primary",
+      "reportSha256": "b206df9d9d36cfff2dcafae693b586476ea590772aacf99d4df85347f385415d",
+      "report": {
+        "schema": "keir-java-http/1",
+        "mode": "--sample",
+        "collectedAtUtc": "2026-11-10T17:58:38.998Z",
+        "sourceCommit": "432307b5ff570ecec83946a60377e40c108bbf4e",
+        "sourceTrees": {
+          "compiler-java/src/main/java": "df072924fa27ea92f5b2db8961d1b5ea8d70eac6",
+          "runtime-java/src/main/java": "37bb6847a347cd3388f2a38ac80de20914118a59"
+        },
+        "trackedChangesAtStart": [],
+        "harnessSha256": {
+          "HttpProbe.java": "8f0bd719bb551edc042b4a4d7f68ae96a043684c008f6318c7441eea4067d691",
+          "run.mjs": "d71f8e98bfad0225fd98007aacdfe0359f8c44fe0c6c47f96709e5b01930951c"
+        },
+        "binarySha256": {
+          "compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar": "c6ee29ec6091f38d29feb4234a08a189be372341d65c74be2dc38c3f73265875",
+          "examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar": "e275cb061c86a407da8aef7e21c82facd8c0b64e7d1c896aad6a516e29cb9f14"
+        },
+        "environment": {
+          "node": "v24.22.1",
+          "kernel": "Linux 6.18.57",
+          "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+          "generatorCpuList": "2-3",
+          "cgroupCpuMax": "400000 100000",
+          "cgroupMemoryMax": "17179869184",
+          "server": {
+            "java": "21.0.13",
+            "availableProcessors": 2,
+            "runtimePins": {
+              "celJava": "0.14.0",
+              "celNode": "0.6.1",
+              "protobufJava": "4.35.1",
+              "protobufNode": "2.6.2"
+            },
+            "tcpNoDelay": true,
+            "cpuList": "0-1"
+          }
+        },
+        "limits": {
+          "hostCpus": "0,1",
+          "activeProcessorCount": 2,
+          "heapMiB": 512,
+          "sampledRssStopBytes": 1073741824,
+          "rssIntervalMs": 100,
+          "admittedSlots": 32,
+          "httpBacklog": 128,
+          "outstandingGuard": 512,
+          "requestTimeoutMs": 5000,
+          "childCaptureBytes": 1048576,
+          "serverWatchdogMs": 300000,
+          "stageMaxSeconds": 60
+        },
+        "fixtureSha256": {
+          "conformance/keir-3/dcm.json": "a8d4195bb72f78a1140f88f5a74ad29294beddacb9a96a18e837bd8bada757d6",
+          "conformance/keir-3/dcm-inventory.json": "db5d85f83c21584d1e094b8fa6d41ad242cf84b5621c383d4fe128e055bf2e65",
+          "conformance/keir-3/scenarios/inventory/inventory-max-no-match.json": "49744936677b7c3b8a49255c888e1f4deae3e3fb74b28b31145be4a2330d65fe",
+          "conformance/keir-3/source.yaml": "b37d7528cb3e5e3bd6f3cf609635f11d39e4a9a476934a6693d6ea7528e1befb",
+          "conformance/keir-3/scenarios/main/normal.json": "d3204215771d46492ec447ff133c1523e4366a8de0dd96283804c94d8dcc5a49",
+          "conformance/keir-3/artifact.json": "26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180"
+        },
+        "stages": [
+          {"phase":"cold-warmup","rule":"typical","engine":"keir","offeredPerSecond":300,"seconds":3,"callbackDelayMs":2,"offered":900,"correct":900,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":3004.6146089999997,"successPerOfferedSecond":300,"successPerElapsedSecond":299.5392478303696,"latency":{"success":{"n":900,"minMs":4.96243400000003,"p50Ms":6.988791333333211,"p95Ms":57.683219333333454,"p99Ms":81.04523933333348,"maxMs":98.11191599999984},"allResponses":{"n":900,"minMs":4.96243400000003,"p50Ms":6.988791333333211,"p95Ms":57.683219333333454,"p99Ms":81.04523933333348,"maxMs":98.11191599999984},"dispatchLag":{"n":900,"minMs":0.005771333333541406,"p50Ms":0.5902253333333647,"p95Ms":1.1143029999998362,"p99Ms":1.5527206666665734,"maxMs":3.4779596666667203}},"cpuSeconds":3.56,"meanOccupiedCores":1.184844135862351,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":259211264,"rssSamples":30,"heapUsedBeforeBytes":21981456,"heapUsedAfterBytes":75121432,"sampledPeakHeapBytes":154990968,"peakAdmitted":20,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"ramp","rule":"typical","engine":"keir","offeredPerSecond":300,"seconds":4,"callbackDelayMs":2,"offered":1200,"correct":1200,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":4002.2499370000005,"successPerOfferedSecond":300,"successPerElapsedSecond":299.8313495882004,"latency":{"success":{"n":1200,"minMs":4.730733333333774,"p50Ms":5.668934666666246,"p95Ms":6.958587666666972,"p99Ms":9.160730000000513,"maxMs":17.554475333333357},"allResponses":{"n":1200,"minMs":4.730733333333774,"p50Ms":5.668934666666246,"p95Ms":6.958587666666972,"p99Ms":9.160730000000513,"maxMs":17.554475333333357},"dispatchLag":{"n":1200,"minMs":0.0010666666657925816,"p50Ms":0.5799103333329185,"p95Ms":1.0629953333336744,"p99Ms":1.2820733333328462,"maxMs":2.0831539999999222}},"cpuSeconds":2.51,"meanOccupiedCores":0.627147239555319,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":267534336,"rssSamples":40,"heapUsedBeforeBytes":75121432,"heapUsedAfterBytes":128612656,"sampledPeakHeapBytes":155861784,"peakAdmitted":4,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"ramp","rule":"typical","engine":"keir","offeredPerSecond":600,"seconds":4,"callbackDelayMs":2,"offered":2400,"correct":2390,"busy":10,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":4003.2919459999994,"successPerOfferedSecond":597.5,"successPerElapsedSecond":597.0086699242695,"latency":{"success":{"n":2390,"minMs":4.5675926666663145,"p50Ms":5.644915000000765,"p95Ms":9.64380066666672,"p99Ms":62.26972733333423,"maxMs":98.27844499999992},"allResponses":{"n":2400,"minMs":4.5675926666663145,"p50Ms":5.64702966666664,"p95Ms":9.990467666666518,"p99Ms":60.53592466666669,"maxMs":98.27844499999992},"dispatchLag":{"n":2400,"minMs":0.0008663333337608492,"p50Ms":0.547646666665969,"p95Ms":1.5347503333341592,"p99Ms":25.297876000000542,"maxMs":49.06314566666697}},"cpuSeconds":3.22,"meanOccupiedCores":0.8043380406511079,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":270098432,"rssSamples":40,"heapUsedBeforeBytes":128612656,"heapUsedAfterBytes":75144088,"sampledPeakHeapBytes":162136616,"peakAdmitted":32,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"ramp","rule":"typical","engine":"keir","offeredPerSecond":1200,"seconds":4,"callbackDelayMs":2,"offered":4800,"correct":4800,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":4004.475038999999,"successPerOfferedSecond":1200,"successPerElapsedSecond":1198.6589885696128,"latency":{"success":{"n":4800,"minMs":4.515575999997964,"p50Ms":5.640451333334568,"p95Ms":7.919925666665222,"p99Ms":11.016509666667844,"maxMs":14.708220000000438},"allResponses":{"n":4800,"minMs":4.515575999997964,"p50Ms":5.640451333334568,"p95Ms":7.919925666665222,"p99Ms":11.016509666667844,"maxMs":14.708220000000438},"dispatchLag":{"n":4800,"minMs":0.0013086666658637114,"p50Ms":0.5855946666670206,"p95Ms":1.374315666667826,"p99Ms":1.8495889999976498,"maxMs":5.711474333333172}},"cpuSeconds":4.65,"meanOccupiedCores":1.1612008951768127,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":283811840,"rssSamples":40,"heapUsedBeforeBytes":75144088,"heapUsedAfterBytes":116812232,"sampledPeakHeapBytes":166053160,"peakAdmitted":16,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"cold-warmup","rule":"dense","engine":"keir","offeredPerSecond":300,"seconds":3,"callbackDelayMs":0,"offered":900,"correct":900,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":3000.111051,"successPerOfferedSecond":300,"successPerElapsedSecond":299.9888953110623,"latency":{"success":{"n":900,"minMs":1.4850773333309917,"p50Ms":2.8832686666683003,"p95Ms":98.92817666666815,"p99Ms":110.94538399999874,"maxMs":115.99759599999743},"allResponses":{"n":900,"minMs":1.4850773333309917,"p50Ms":2.8832686666683003,"p95Ms":98.92817666666815,"p99Ms":110.94538399999874,"maxMs":115.99759599999743},"dispatchLag":{"n":900,"minMs":0.0009699999973236118,"p50Ms":0.5644896666672139,"p95Ms":1.1139263333316194,"p99Ms":1.761513333331095,"maxMs":3.6695646666667017}},"cpuSeconds":3.86,"meanOccupiedCores":1.286619039889667,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":286212096,"rssSamples":30,"heapUsedBeforeBytes":116812232,"heapUsedAfterBytes":46495568,"sampledPeakHeapBytes":157643640,"peakAdmitted":2,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"ramp","rule":"dense","engine":"keir","offeredPerSecond":600,"seconds":4,"callbackDelayMs":0,"offered":2400,"correct":2400,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":4000.8388559999985,"successPerOfferedSecond":600,"successPerElapsedSecond":599.8741979824445,"latency":{"success":{"n":2400,"minMs":1.3293926666665357,"p50Ms":2.3577893333313114,"p95Ms":4.902201333330595,"p99Ms":8.778105333331041,"maxMs":14.063073000001168},"allResponses":{"n":2400,"minMs":1.3293926666665357,"p50Ms":2.3577893333313114,"p95Ms":4.902201333330595,"p99Ms":8.778105333331041,"maxMs":14.063073000001168},"dispatchLag":{"n":2400,"minMs":0.0010346666676923633,"p50Ms":0.5636476666695671,"p95Ms":1.3356219999986934,"p99Ms":1.8169420000012906,"maxMs":8.74758866666889}},"cpuSeconds":4.09,"meanOccupiedCores":1.0222856123950825,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":286281728,"rssSamples":40,"heapUsedBeforeBytes":46495568,"heapUsedAfterBytes":110461752,"sampledPeakHeapBytes":164986744,"peakAdmitted":2,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"ramp","rule":"dense","engine":"keir","offeredPerSecond":1200,"seconds":4,"callbackDelayMs":0,"offered":4800,"correct":4193,"busy":0,"generatorDrops":607,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":4637.669089999999,"successPerOfferedSecond":1048.25,"successPerElapsedSecond":904.1179779387841,"latency":{"success":{"n":4193,"minMs":1.5939299999990908,"p50Ms":513.1248989999985,"p95Ms":666.4511939999975,"p99Ms":680.6599826666679,"maxMs":685.1659406666658},"allResponses":{"n":4193,"minMs":1.5939299999990908,"p50Ms":513.1248989999985,"p95Ms":666.4511939999975,"p99Ms":680.6599826666679,"maxMs":685.1659406666658},"dispatchLag":{"n":4193,"minMs":0.0007183333291322924,"p50Ms":0.6540223333322501,"p95Ms":1.5752466666672262,"p99Ms":2.5724279999994906,"maxMs":12.145158666666248}},"cpuSeconds":9.2,"meanOccupiedCores":1.9837551626608185,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":292814848,"rssSamples":46,"heapUsedBeforeBytes":110461752,"heapUsedAfterBytes":167079256,"sampledPeakHeapBytes":164451624,"peakAdmitted":2,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"ramp","rule":"dense","engine":"keir","offeredPerSecond":2400,"seconds":4,"callbackDelayMs":0,"offered":9600,"correct":4051,"busy":0,"generatorDrops":5549,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":4523.284606999998,"successPerOfferedSecond":1012.75,"successPerElapsedSecond":895.5881294161514,"latency":{"success":{"n":4051,"minMs":1.7294220000003406,"p50Ms":532.7872556666662,"p95Ms":682.6814623333339,"p99Ms":693.9836423333327,"maxMs":697.2961920000016},"allResponses":{"n":4051,"minMs":1.7294220000003406,"p50Ms":532.7872556666662,"p95Ms":682.6814623333339,"p99Ms":693.9836423333327,"maxMs":697.2961920000016},"dispatchLag":{"n":4051,"minMs":0.004689999997935956,"p50Ms":1.0562926666680141,"p95Ms":31.9533716666665,"p99Ms":78.59842466666669,"maxMs":88.91746000000057}},"cpuSeconds":8.97,"meanOccupiedCores":1.9830722095440334,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":297181184,"rssSamples":45,"heapUsedBeforeBytes":167079256,"heapUsedAfterBytes":107372832,"sampledPeakHeapBytes":168975648,"peakAdmitted":2,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"warmup","rule":"typical","engine":"keir","offeredPerSecond":1200,"seconds":3,"callbackDelayMs":2,"offered":3600,"correct":3600,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":3004.9721809999974,"successPerOfferedSecond":1200,"successPerElapsedSecond":1198.0144184902201,"latency":{"success":{"n":3600,"minMs":4.467992333331495,"p50Ms":5.595452666661004,"p95Ms":7.866889666664065,"p99Ms":14.62510766665946,"maxMs":24.02266633333784},"allResponses":{"n":3600,"minMs":4.467992333331495,"p50Ms":5.595452666661004,"p95Ms":7.866889666664065,"p99Ms":14.62510766665946,"maxMs":24.02266633333784},"dispatchLag":{"n":3600,"minMs":0.003496999997878447,"p50Ms":0.6328083333355607,"p95Ms":1.650081333333219,"p99Ms":3.0645880000010948,"maxMs":12.92253666666511}},"cpuSeconds":1.87,"meanOccupiedCores":0.6223019340490866,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":301404160,"rssSamples":30,"heapUsedBeforeBytes":108421408,"heapUsedAfterBytes":85398056,"sampledPeakHeapBytes":170310520,"peakAdmitted":25,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"confirmation","rule":"typical","engine":"keir","offeredPerSecond":1200,"seconds":30,"callbackDelayMs":2,"offered":36000,"correct":35789,"busy":211,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":30004.165749,"successPerOfferedSecond":1192.9666666666667,"successPerElapsedSecond":1192.801036342522,"latency":{"success":{"n":35789,"minMs":4.377777000001515,"p50Ms":5.44841599999927,"p95Ms":7.572296333331906,"p99Ms":12.446394999999029,"maxMs":145.06328599999688},"allResponses":{"n":36000,"minMs":0.7396796666653245,"p50Ms":5.452398000001267,"p95Ms":7.766655999999784,"p99Ms":17.390229999997246,"maxMs":145.06328599999688},"dispatchLag":{"n":36000,"minMs":0.00029366666421992704,"p50Ms":0.608748333332187,"p95Ms":1.4757109999991371,"p99Ms":3.781995333330997,"maxMs":129.03177299999516}},"cpuSeconds":15.16,"meanOccupiedCores":0.5052631733480296,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":301801472,"rssSamples":299,"heapUsedBeforeBytes":85398056,"heapUsedAfterBytes":58180184,"sampledPeakHeapBytes":174562936,"peakAdmitted":32,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"warmup","rule":"typical","engine":"native","offeredPerSecond":1200,"seconds":3,"callbackDelayMs":2,"offered":3600,"correct":3345,"busy":255,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":3004.396059000006,"successPerOfferedSecond":1115,"successPerElapsedSecond":1113.3685220960388,"latency":{"success":{"n":3345,"minMs":4.311907666677143,"p50Ms":5.556301999997231,"p95Ms":40.42656733332842,"p99Ms":135.63389966667455,"maxMs":159.3004903333349},"allResponses":{"n":3600,"minMs":0.6780273333279183,"p50Ms":5.618704333333881,"p95Ms":75.67565733332594,"p99Ms":134.8405773333361,"maxMs":159.3004903333349},"dispatchLag":{"n":3600,"minMs":0.0033793333277571946,"p50Ms":0.7731050000002142,"p95Ms":35.26663466668106,"p99Ms":64.54436833332875,"maxMs":77.25161233333347}},"cpuSeconds":1.84,"meanOccupiedCores":0.6124358985520811,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":302161920,"rssSamples":28,"heapUsedBeforeBytes":58180184,"heapUsedAfterBytes":64472008,"sampledPeakHeapBytes":169329240,"peakAdmitted":32,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"confirmation","rule":"typical","engine":"native","offeredPerSecond":1200,"seconds":30,"callbackDelayMs":2,"offered":36000,"correct":35823,"busy":177,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":30004.689500999986,"successPerOfferedSecond":1194.1,"successPerElapsedSecond":1193.913371401697,"latency":{"success":{"n":35823,"minMs":4.264713999989908,"p50Ms":5.157552999997279,"p95Ms":6.423715999990236,"p99Ms":8.865159333319752,"maxMs":129.15171133332478},"allResponses":{"n":36000,"minMs":0.47222033332218416,"p50Ms":5.159898999991128,"p95Ms":6.475166999996873,"p99Ms":10.796284999989439,"maxMs":129.15171133332478},"dispatchLag":{"n":36000,"minMs":0.0009749999881023541,"p50Ms":0.6070269999909215,"p95Ms":1.440871333325049,"p99Ms":2.91165766667109,"maxMs":113.20834633332561}},"cpuSeconds":7.74,"meanOccupiedCores":0.25795967659462177,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":302370816,"rssSamples":299,"heapUsedBeforeBytes":64472008,"heapUsedAfterBytes":123206344,"sampledPeakHeapBytes":174566696,"peakAdmitted":32,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"warmup","rule":"dense","engine":"keir","offeredPerSecond":600,"seconds":3,"callbackDelayMs":0,"offered":1800,"correct":1800,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":3000.9457189999957,"successPerOfferedSecond":600,"successPerElapsedSecond":599.8109158068389,"latency":{"success":{"n":1800,"minMs":1.330252666666638,"p50Ms":2.398327999995672,"p95Ms":4.288661999991746,"p99Ms":9.21773299999768,"maxMs":18.114443999991636},"allResponses":{"n":1800,"minMs":1.330252666666638,"p50Ms":2.398327999995672,"p95Ms":4.288661999991746,"p99Ms":9.21773299999768,"maxMs":18.114443999991636},"dispatchLag":{"n":1800,"minMs":0.0014099999971222132,"p50Ms":0.564350333326729,"p95Ms":1.3919163333193865,"p99Ms":1.8679866666643647,"maxMs":5.20741333332262}},"cpuSeconds":3.05,"meanOccupiedCores":1.0163462740060325,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":302379008,"rssSamples":30,"heapUsedBeforeBytes":123206344,"heapUsedAfterBytes":131576336,"sampledPeakHeapBytes":168260032,"peakAdmitted":2,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"confirmation","rule":"dense","engine":"keir","offeredPerSecond":600,"seconds":30,"callbackDelayMs":0,"offered":18000,"correct":17998,"busy":0,"generatorDrops":0,"transportErrors":2,"incorrect":0,"elapsedIncludingDrainMs":30000.884955,"successPerOfferedSecond":599.9333333333333,"successPerElapsedSecond":599.9156367219235,"latency":{"success":{"n":17998,"minMs":1.301525999995647,"p50Ms":2.548506000006455,"p95Ms":197.05896133332863,"p99Ms":418.78250366667635,"maxMs":440.07607100000314},"allResponses":{"n":17998,"minMs":1.301525999995647,"p50Ms":2.548506000006455,"p95Ms":197.05896133332863,"p99Ms":418.78250366667635,"maxMs":440.07607100000314},"dispatchLag":{"n":18000,"minMs":0.00041433333535678685,"p50Ms":0.5654370000120252,"p95Ms":1.4157346666761441,"p99Ms":2.645938666682923,"maxMs":113.5842643333308}},"cpuSeconds":34.62,"meanOccupiedCores":1.1539659597351366,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":306081792,"rssSamples":298,"heapUsedBeforeBytes":131576336,"heapUsedAfterBytes":127171512,"sampledPeakHeapBytes":174576488,"peakAdmitted":2,"cleanScreen":false,"capacityScreen":"failed"}
+        ],
+        "children": [
+          {
+            "label": "javac",
+            "reason": "exit",
+            "code": 0,
+            "signal": null,
+            "capturedBytes": 0,
+            "closed": true
+          },
+          {
+            "label": "compiler",
+            "reason": "exit",
+            "code": 0,
+            "signal": null,
+            "capturedBytes": 329,
+            "closed": true
+          },
+          {
+            "label": "server",
+            "reason": "exit",
+            "code": null,
+            "signal": "SIGKILL",
+            "capturedBytes": 156,
+            "closed": true
+          }
+        ],
+        "compilation": {
+          "dense": {
+            "artifactBytes": 32675,
+            "artifactDigest": "sha256:d9e28c75842c38b96256edf1faa555f0dd89462c061502f87c88df8b200dac42"
+          },
+          "denseShape": {
+            "depth": 7,
+            "elementVisitsBySemantics": 1280,
+            "nodes": 473,
+            "scans": 80
+          },
+          "typical": {
+            "artifactBytes": 2737,
+            "artifactDigest": "sha256:26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180"
+          }
+        },
+        "generatedSha256": {
+          "typical.source": "b37d7528cb3e5e3bd6f3cf609635f11d39e4a9a476934a6693d6ea7528e1befb",
+          "typical.model": "a8d4195bb72f78a1140f88f5a74ad29294beddacb9a96a18e837bd8bada757d6",
+          "typical.artifact": "26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180",
+          "typical.expected": "904101a2db1ea7ef21708331895ba460d88a87698953b15255da7e6357000621",
+          "dense.source": "806b33eed3a2af68a6ad894d06d622492092e7969d3a1f4164a23e7b1b949965",
+          "dense.model": "db5d85f83c21584d1e094b8fa6d41ad242cf84b5621c383d4fe128e055bf2e65",
+          "dense.artifact": "d9e28c75842c38b96256edf1faa555f0dd89462c061502f87c88df8b200dac42",
+          "dense.expected": "ac36df3179b7953cd347710d5b13734104d7ff9322dfb9e54f5b302eafefa4dd",
+          "dense.input": "4dba98661ea18bc3aecba761591846178f10e41b49e3eabd7feed948c2435add"
+        },
+        "negativeOracleRejected": true,
+        "status": "failed",
+        "failure": "Unexpected failed invocation/transport\n\n2 !== 0\n"
+      }
+    },
+    {
+      "id": "followup-smoke",
+      "reportSha256": "a142ba9f9a2d396475e613618eed5aef844774f8e3964c1e1560e1d2dc95b510",
+      "report": {
+        "schema": "keir-java-http/1",
+        "mode": "--smoke",
+        "collectedAtUtc": "2026-11-10T18:03:38.601Z",
+        "sourceCommit": "25ec2ed590a461abee2d1035a313950bd6329be4",
+        "sourceTrees": {
+          "compiler-java/src/main/java": "df072924fa27ea92f5b2db8961d1b5ea8d70eac6",
+          "runtime-java/src/main/java": "37bb6847a347cd3388f2a38ac80de20914118a59"
+        },
+        "trackedChangesAtStart": [],
+        "harnessSha256": {
+          "HttpProbe.java": "8f0bd719bb551edc042b4a4d7f68ae96a043684c008f6318c7441eea4067d691",
+          "run.mjs": "622173f0c176d5b56b68ed88bdf55f3da4252e51f3ec1a64f2be6cbfe6c5b649"
+        },
+        "binarySha256": {
+          "compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar": "c6ee29ec6091f38d29feb4234a08a189be372341d65c74be2dc38c3f73265875",
+          "examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar": "e275cb061c86a407da8aef7e21c82facd8c0b64e7d1c896aad6a516e29cb9f14"
+        },
+        "environment": {
+          "node": "v24.22.1",
+          "kernel": "Linux 6.18.57",
+          "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+          "generatorCpuList": "2-3",
+          "cgroupCpuMax": "400000 100000",
+          "cgroupMemoryMax": "17179869184",
+          "server": {
+            "java": "21.0.13",
+            "availableProcessors": 2,
+            "runtimePins": {
+              "celJava": "0.14.0",
+              "celNode": "0.6.1",
+              "protobufJava": "4.35.1",
+              "protobufNode": "2.6.2"
+            },
+            "tcpNoDelay": true,
+            "cpuList": "0-1"
+          }
+        },
+        "limits": {
+          "hostCpus": "0,1",
+          "activeProcessorCount": 2,
+          "heapMiB": 512,
+          "sampledRssStopBytes": 1073741824,
+          "rssIntervalMs": 100,
+          "admittedSlots": 32,
+          "httpBacklog": 128,
+          "outstandingGuard": 4,
+          "requestTimeoutMs": 5000,
+          "childCaptureBytes": 1048576,
+          "serverWatchdogMs": 300000,
+          "stageMaxSeconds": 60
+        },
+        "fixtureSha256": {
+          "conformance/keir-3/dcm.json": "a8d4195bb72f78a1140f88f5a74ad29294beddacb9a96a18e837bd8bada757d6",
+          "conformance/keir-3/dcm-inventory.json": "db5d85f83c21584d1e094b8fa6d41ad242cf84b5621c383d4fe128e055bf2e65",
+          "conformance/keir-3/scenarios/inventory/inventory-max-no-match.json": "49744936677b7c3b8a49255c888e1f4deae3e3fb74b28b31145be4a2330d65fe",
+          "conformance/keir-3/source.yaml": "b37d7528cb3e5e3bd6f3cf609635f11d39e4a9a476934a6693d6ea7528e1befb",
+          "conformance/keir-3/scenarios/main/normal.json": "d3204215771d46492ec447ff133c1523e4366a8de0dd96283804c94d8dcc5a49",
+          "conformance/keir-3/artifact.json": "26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180"
+        },
+        "stages": [
+          {"phase":"smoke","rule":"typical","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":1000.4518340000004,"successPerOfferedSecond":10,"successPerElapsedSecond":9.995483700617612,"latency":{"success":{"n":10,"minMs":8.803775000000314,"p50Ms":10.143767999999909,"p95Ms":13.791911999999684,"p99Ms":13.791911999999684,"maxMs":13.791911999999684},"allResponses":{"n":10,"minMs":8.803775000000314,"p50Ms":10.143767999999909,"p95Ms":13.791911999999684,"p99Ms":13.791911999999684,"maxMs":13.791911999999684},"dispatchLag":{"n":10,"minMs":0.1096720000005007,"p50Ms":0.1734999999998763,"p95Ms":1.084828000000016,"p99Ms":1.084828000000016,"maxMs":1.084828000000016}},"cpuSeconds":0.37,"meanOccupiedCores":0.3698328969228516,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":112115712,"rssSamples":10,"heapUsedBeforeBytes":21663056,"heapUsedAfterBytes":24808784,"sampledPeakHeapBytes":24808784,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"smoke","rule":"typical","engine":"native","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":1000.5937409999997,"successPerOfferedSecond":10,"successPerElapsedSecond":9.994066113191892,"latency":{"success":{"n":10,"minMs":6.956303999999363,"p50Ms":7.118216999999277,"p95Ms":9.849740999999995,"p99Ms":9.849740999999995,"maxMs":9.849740999999995},"allResponses":{"n":10,"minMs":6.956303999999363,"p50Ms":7.118216999999277,"p95Ms":9.849740999999995,"p99Ms":9.849740999999995,"maxMs":9.849740999999995},"dispatchLag":{"n":10,"minMs":0.009500000000116415,"p50Ms":0.8354389999994964,"p95Ms":0.9385290000000168,"p99Ms":0.9385290000000168,"maxMs":0.9385290000000168}},"cpuSeconds":0.07,"meanOccupiedCores":0.06995846279234325,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":112910336,"rssSamples":10,"heapUsedBeforeBytes":24808784,"heapUsedAfterBytes":24808784,"sampledPeakHeapBytes":24808784,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"smoke","rule":"dense","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":0,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":1000.2504900000004,"successPerOfferedSecond":10,"successPerElapsedSecond":9.997495727295265,"latency":{"success":{"n":10,"minMs":9.464853000000403,"p50Ms":16.658886999999595,"p95Ms":41.66885900000034,"p99Ms":41.66885900000034,"maxMs":41.66885900000034},"allResponses":{"n":10,"minMs":9.464853000000403,"p50Ms":16.658886999999595,"p95Ms":41.66885900000034,"p99Ms":41.66885900000034,"maxMs":41.66885900000034},"dispatchLag":{"n":10,"minMs":0.0034159999995608814,"p50Ms":0.5394729999998162,"p95Ms":3.885016999999607,"p99Ms":3.885016999999607,"maxMs":3.885016999999607}},"cpuSeconds":0.32,"meanOccupiedCores":0.3199198632734485,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":121929728,"rssSamples":10,"heapUsedBeforeBytes":24808784,"heapUsedAfterBytes":33197392,"sampledPeakHeapBytes":33197392,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"smoke","rule":"dense","engine":"native","offeredPerSecond":10,"seconds":1,"callbackDelayMs":0,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":1000.8362149999994,"successPerOfferedSecond":10,"successPerElapsedSecond":9.991644836712874,"latency":{"success":{"n":10,"minMs":1.3930569999993168,"p50Ms":2.224134000000049,"p95Ms":5.818131999999423,"p99Ms":5.818131999999423,"maxMs":5.818131999999423},"allResponses":{"n":10,"minMs":1.3930569999993168,"p50Ms":2.224134000000049,"p95Ms":5.818131999999423,"p99Ms":5.818131999999423,"maxMs":5.818131999999423},"dispatchLag":{"n":10,"minMs":0.0025799999993978417,"p50Ms":0.31625399999938963,"p95Ms":0.9519789999994828,"p99Ms":0.9519789999994828,"maxMs":0.9519789999994828}},"cpuSeconds":0.04,"meanOccupiedCores":0.039966579346851494,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":122503168,"rssSamples":10,"heapUsedBeforeBytes":33197392,"heapUsedAfterBytes":33197392,"sampledPeakHeapBytes":33197392,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"}
+        ],
+        "children": [
+          {
+            "label": "javac",
+            "reason": "exit",
+            "code": 0,
+            "signal": null,
+            "capturedBytes": 0,
+            "closed": true
+          },
+          {
+            "label": "compiler",
+            "reason": "exit",
+            "code": 0,
+            "signal": null,
+            "capturedBytes": 329,
+            "closed": true
+          },
+          {
+            "label": "server",
+            "reason": "exit",
+            "code": 0,
+            "signal": null,
+            "capturedBytes": 174,
+            "closed": true
+          },
+          {
+            "label": "server-timeout-probe",
+            "reason": "timeout",
+            "code": null,
+            "signal": "SIGKILL",
+            "capturedBytes": 156,
+            "closed": true
+          }
+        ],
+        "compilation": {
+          "dense": {
+            "artifactBytes": 32675,
+            "artifactDigest": "sha256:d9e28c75842c38b96256edf1faa555f0dd89462c061502f87c88df8b200dac42"
+          },
+          "denseShape": {
+            "depth": 7,
+            "elementVisitsBySemantics": 1280,
+            "nodes": 473,
+            "scans": 80
+          },
+          "typical": {
+            "artifactBytes": 2737,
+            "artifactDigest": "sha256:26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180"
+          }
+        },
+        "generatedSha256": {
+          "typical.source": "b37d7528cb3e5e3bd6f3cf609635f11d39e4a9a476934a6693d6ea7528e1befb",
+          "typical.model": "a8d4195bb72f78a1140f88f5a74ad29294beddacb9a96a18e837bd8bada757d6",
+          "typical.artifact": "26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180",
+          "typical.expected": "904101a2db1ea7ef21708331895ba460d88a87698953b15255da7e6357000621",
+          "dense.source": "806b33eed3a2af68a6ad894d06d622492092e7969d3a1f4164a23e7b1b949965",
+          "dense.model": "db5d85f83c21584d1e094b8fa6d41ad242cf84b5621c383d4fe128e055bf2e65",
+          "dense.artifact": "d9e28c75842c38b96256edf1faa555f0dd89462c061502f87c88df8b200dac42",
+          "dense.expected": "ac36df3179b7953cd347710d5b13734104d7ff9322dfb9e54f5b302eafefa4dd",
+          "dense.input": "4dba98661ea18bc3aecba761591846178f10e41b49e3eabd7feed948c2435add"
+        },
+        "negativeOracleRejected": true,
+        "portReleased": true,
+        "timeoutCleanupVerified": true,
+        "allConfirmationsClean": true,
+        "status": "completed"
+      }
+    },
+    {
+      "id": "followup",
+      "reportSha256": "4a3df4d723702b4447c2719619750631594162b29ef376e444950c7b06cebc99",
+      "report": {
+        "schema": "keir-java-http/1",
+        "mode": "--followup",
+        "collectedAtUtc": "2026-11-10T18:03:48.099Z",
+        "sourceCommit": "25ec2ed590a461abee2d1035a313950bd6329be4",
+        "sourceTrees": {
+          "compiler-java/src/main/java": "df072924fa27ea92f5b2db8961d1b5ea8d70eac6",
+          "runtime-java/src/main/java": "37bb6847a347cd3388f2a38ac80de20914118a59"
+        },
+        "trackedChangesAtStart": [],
+        "harnessSha256": {
+          "HttpProbe.java": "8f0bd719bb551edc042b4a4d7f68ae96a043684c008f6318c7441eea4067d691",
+          "run.mjs": "622173f0c176d5b56b68ed88bdf55f3da4252e51f3ec1a64f2be6cbfe6c5b649"
+        },
+        "binarySha256": {
+          "compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar": "c6ee29ec6091f38d29feb4234a08a189be372341d65c74be2dc38c3f73265875",
+          "examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar": "e275cb061c86a407da8aef7e21c82facd8c0b64e7d1c896aad6a516e29cb9f14"
+        },
+        "environment": {
+          "node": "v24.22.1",
+          "kernel": "Linux 6.18.57",
+          "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+          "generatorCpuList": "2-3",
+          "cgroupCpuMax": "400000 100000",
+          "cgroupMemoryMax": "17179869184",
+          "server": {
+            "java": "21.0.13",
+            "availableProcessors": 2,
+            "runtimePins": {
+              "celJava": "0.14.0",
+              "celNode": "0.6.1",
+              "protobufJava": "4.35.1",
+              "protobufNode": "2.6.2"
+            },
+            "tcpNoDelay": true,
+            "cpuList": "0-1"
+          }
+        },
+        "limits": {
+          "hostCpus": "0,1",
+          "activeProcessorCount": 2,
+          "heapMiB": 512,
+          "sampledRssStopBytes": 1073741824,
+          "rssIntervalMs": 100,
+          "admittedSlots": 32,
+          "httpBacklog": 128,
+          "outstandingGuard": 512,
+          "requestTimeoutMs": 5000,
+          "childCaptureBytes": 1048576,
+          "serverWatchdogMs": 300000,
+          "stageMaxSeconds": 60
+        },
+        "fixtureSha256": {
+          "conformance/keir-3/dcm.json": "a8d4195bb72f78a1140f88f5a74ad29294beddacb9a96a18e837bd8bada757d6",
+          "conformance/keir-3/dcm-inventory.json": "db5d85f83c21584d1e094b8fa6d41ad242cf84b5621c383d4fe128e055bf2e65",
+          "conformance/keir-3/scenarios/inventory/inventory-max-no-match.json": "49744936677b7c3b8a49255c888e1f4deae3e3fb74b28b31145be4a2330d65fe",
+          "conformance/keir-3/source.yaml": "b37d7528cb3e5e3bd6f3cf609635f11d39e4a9a476934a6693d6ea7528e1befb",
+          "conformance/keir-3/scenarios/main/normal.json": "d3204215771d46492ec447ff133c1523e4366a8de0dd96283804c94d8dcc5a49",
+          "conformance/keir-3/artifact.json": "26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180"
+        },
+        "stages": [
+          {"phase":"warmup","rule":"typical","engine":"keir","offeredPerSecond":300,"seconds":3,"callbackDelayMs":2,"offered":900,"correct":900,"busy":0,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":3009.289466,"successPerOfferedSecond":300,"successPerElapsedSecond":299.0739209931491,"latency":{"success":{"n":900,"minMs":4.936180666666587,"p50Ms":8.688478666666924,"p95Ms":21.41197266666677,"p99Ms":30.987059666666937,"maxMs":36.26709466666671},"allResponses":{"n":900,"minMs":4.936180666666587,"p50Ms":8.688478666666924,"p95Ms":21.41197266666677,"p99Ms":30.987059666666937,"maxMs":36.26709466666671},"dispatchLag":{"n":900,"minMs":0.0010170000005018665,"p50Ms":0.577841333332799,"p95Ms":1.236587999999756,"p99Ms":1.9082106666664913,"maxMs":3.5957280000002356}},"cpuSeconds":4.11,"meanOccupiedCores":1.3657709058687144,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":257159168,"rssSamples":30,"heapUsedBeforeBytes":21773624,"heapUsedAfterBytes":75689304,"sampledPeakHeapBytes":158366712,"peakAdmitted":10,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"confirmation","rule":"typical","engine":"keir","offeredPerSecond":300,"seconds":30,"callbackDelayMs":2,"offered":9000,"correct":9000,"busy":0,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":30002.519329999996,"successPerOfferedSecond":300,"successPerElapsedSecond":299.97480881549694,"latency":{"success":{"n":9000,"minMs":4.512394333338307,"p50Ms":5.963790333335055,"p95Ms":8.87273599999753,"p99Ms":12.774991999998747,"maxMs":30.096914666668454},"allResponses":{"n":9000,"minMs":4.512394333338307,"p50Ms":5.963790333335055,"p95Ms":8.87273599999753,"p99Ms":12.774991999998747,"maxMs":30.096914666668454},"dispatchLag":{"n":9000,"minMs":0.00047633333088015206,"p50Ms":0.6030943333316827,"p95Ms":1.314573666666547,"p99Ms":2.0913943333362113,"maxMs":9.288999333333777}},"cpuSeconds":14.6,"meanOccupiedCores":0.4866258009673617,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":281567232,"rssSamples":299,"heapUsedBeforeBytes":75689304,"heapUsedAfterBytes":135656320,"sampledPeakHeapBytes":165143312,"peakAdmitted":9,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"warmup","rule":"typical","engine":"native","offeredPerSecond":300,"seconds":3,"callbackDelayMs":2,"offered":900,"correct":900,"busy":0,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":3001.8641300000018,"successPerOfferedSecond":300,"successPerElapsedSecond":299.81370276075734,"latency":{"success":{"n":900,"minMs":4.45283833333815,"p50Ms":5.454174000005878,"p95Ms":7.144482666670228,"p99Ms":8.515258000006725,"maxMs":9.896215333341388},"allResponses":{"n":900,"minMs":4.45283833333815,"p50Ms":5.454174000005878,"p95Ms":7.144482666670228,"p99Ms":8.515258000006725,"maxMs":9.896215333341388},"dispatchLag":{"n":900,"minMs":0.0011290000038570724,"p50Ms":0.5849883333357866,"p95Ms":1.1284100000048056,"p99Ms":1.7591353333409643,"maxMs":3.2499876666697673}},"cpuSeconds":1.11,"meanOccupiedCores":0.3697702334049341,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":281223168,"rssSamples":30,"heapUsedBeforeBytes":135656320,"heapUsedAfterBytes":19257496,"sampledPeakHeapBytes":163967872,"peakAdmitted":3,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"confirmation","rule":"typical","engine":"native","offeredPerSecond":300,"seconds":30,"callbackDelayMs":2,"offered":9000,"correct":8996,"busy":4,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":30002.659142000004,"successPerOfferedSecond":299.8666666666667,"successPerElapsedSecond":299.84008942083125,"latency":{"success":{"n":8996,"minMs":4.30811900000117,"p50Ms":5.377661999998963,"p95Ms":7.527254333341261,"p99Ms":31.615028000000166,"maxMs":158.39787566667655},"allResponses":{"n":9000,"minMs":4.30811900000117,"p50Ms":5.3777700000064215,"p95Ms":7.537057000001369,"p99Ms":33.8574853333339,"maxMs":158.39787566667655},"dispatchLag":{"n":9000,"minMs":0.0008213333421736024,"p50Ms":0.5827646666730288,"p95Ms":1.2355120000065654,"p99Ms":9.538722666671674,"maxMs":134.001458666673}},"cpuSeconds":4.99,"meanOccupiedCores":0.16631859117496087,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":283754496,"rssSamples":298,"heapUsedBeforeBytes":19257496,"heapUsedAfterBytes":116624872,"sampledPeakHeapBytes":165009560,"peakAdmitted":32,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"warmup","rule":"dense","engine":"native","offeredPerSecond":600,"seconds":3,"callbackDelayMs":0,"offered":1800,"correct":1800,"busy":0,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":3001.041928000006,"successPerOfferedSecond":600,"successPerElapsedSecond":599.7916867491351,"latency":{"success":{"n":1800,"minMs":0.15226433333009481,"p50Ms":1.0186050000047544,"p95Ms":15.997597666675574,"p99Ms":110.32834800001001,"maxMs":144.03676899999846},"allResponses":{"n":1800,"minMs":0.15226433333009481,"p50Ms":1.0186050000047544,"p95Ms":15.997597666675574,"p99Ms":110.32834800001001,"maxMs":144.03676899999846},"dispatchLag":{"n":1800,"minMs":0.0011686666694004089,"p50Ms":0.6326890000054846,"p95Ms":2.9432773333392106,"p99Ms":92.6905956666742,"maxMs":121.70067066667252}},"cpuSeconds":1.27,"meanOccupiedCores":0.42318635676188976,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":283889664,"rssSamples":30,"heapUsedBeforeBytes":116624872,"heapUsedAfterBytes":34842112,"sampledPeakHeapBytes":163810792,"peakAdmitted":2,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"confirmation","rule":"dense","engine":"native","offeredPerSecond":600,"seconds":30,"callbackDelayMs":0,"offered":18000,"correct":18000,"busy":0,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":30000.056952,"successPerOfferedSecond":600,"successPerElapsedSecond":599.9988609621624,"latency":{"success":{"n":18000,"minMs":0.13359166667214595,"p50Ms":0.842003666664823,"p95Ms":1.5094463333225576,"p99Ms":2.697142333316151,"maxMs":54.734723333327565},"allResponses":{"n":18000,"minMs":0.13359166667214595,"p50Ms":0.842003666664823,"p95Ms":1.5094463333225576,"p99Ms":2.697142333316151,"maxMs":54.734723333327565},"dispatchLag":{"n":18000,"minMs":0.00014333332364913076,"p50Ms":0.5728166666667676,"p95Ms":1.0573000000003958,"p99Ms":1.3850076666712994,"maxMs":25.296075333317276}},"cpuSeconds":3.04,"meanOccupiedCores":0.10133314096249854,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":278962176,"rssSamples":300,"heapUsedBeforeBytes":34842112,"heapUsedAfterBytes":162797408,"sampledPeakHeapBytes":165815520,"peakAdmitted":2,"cleanScreen":true,"capacityScreen":"passed"},
+          {"phase":"slow-callbacks","rule":"typical","engine":"keir","offeredPerSecond":1200,"seconds":6,"callbackDelayMs":20,"offered":7200,"correct":4604,"busy":2596,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":6040.029450999995,"successPerOfferedSecond":767.3333333333334,"successPerElapsedSecond":762.2479389132376,"latency":{"success":{"n":4604,"minMs":40.504263666662155,"p50Ms":41.41368133331707,"p95Ms":43.05749366666714,"p99Ms":48.05851633331622,"maxMs":63.23083266666799},"allResponses":{"n":7200,"minMs":0.09990066666796338,"p50Ms":40.994049333326984,"p95Ms":42.584342333328095,"p99Ms":45.829266666667536,"maxMs":63.23083266666799},"dispatchLag":{"n":7200,"minMs":0.0009609999979147688,"p50Ms":0.6164749999879859,"p95Ms":1.3406770000001416,"p99Ms":1.840883999990183,"maxMs":11.858032666670624}},"cpuSeconds":2.31,"meanOccupiedCores":0.3824484663096392,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":279363584,"rssSamples":60,"heapUsedBeforeBytes":162797408,"heapUsedAfterBytes":41994920,"sampledPeakHeapBytes":163845984,"peakAdmitted":32,"cleanScreen":false,"capacityScreen":"failed"},
+          {"phase":"recovery","rule":"typical","engine":"keir","offeredPerSecond":100,"seconds":3,"callbackDelayMs":2,"offered":300,"correct":300,"busy":0,"generatorDrops":0,"transportErrors":0,"transportKinds":{},"incorrect":0,"elapsedIncludingDrainMs":3000.686662999986,"successPerOfferedSecond":100,"successPerElapsedSecond":99.97711647109134,"latency":{"success":{"n":300,"minMs":4.622102999986964,"p50Ms":5.420881999991252,"p95Ms":9.849592999991728,"p99Ms":64.66174099998898,"maxMs":89.32286399998702},"allResponses":{"n":300,"minMs":4.622102999986964,"p50Ms":5.420881999991252,"p95Ms":9.849592999991728,"p99Ms":64.66174099998898,"maxMs":89.32286399998702},"dispatchLag":{"n":300,"minMs":0.003356999994139187,"p50Ms":0.6005889999942156,"p95Ms":1.079117999994196,"p99Ms":29.397569999986445,"maxMs":59.33043099999486}},"cpuSeconds":0.19,"meanOccupiedCores":0.06331884043169118,"sharedCgroupThrottledUsec":0,"sharedCgroupThrottledPeriods":0,"sampledPeakRssBytes":279371776,"rssSamples":30,"heapUsedBeforeBytes":41994920,"heapUsedAfterBytes":132172456,"sampledPeakHeapBytes":131123880,"peakAdmitted":9,"cleanScreen":false,"capacityScreen":"failed"}
+        ],
+        "children": [
+          {
+            "label": "javac",
+            "reason": "exit",
+            "code": 0,
+            "signal": null,
+            "capturedBytes": 0,
+            "closed": true
+          },
+          {
+            "label": "compiler",
+            "reason": "exit",
+            "code": 0,
+            "signal": null,
+            "capturedBytes": 329,
+            "closed": true
+          },
+          {
+            "label": "server",
+            "reason": "exit",
+            "code": null,
+            "signal": "SIGKILL",
+            "capturedBytes": 156,
+            "closed": true
+          }
+        ],
+        "compilation": {
+          "dense": {
+            "artifactBytes": 32675,
+            "artifactDigest": "sha256:d9e28c75842c38b96256edf1faa555f0dd89462c061502f87c88df8b200dac42"
+          },
+          "denseShape": {
+            "depth": 7,
+            "elementVisitsBySemantics": 1280,
+            "nodes": 473,
+            "scans": 80
+          },
+          "typical": {
+            "artifactBytes": 2737,
+            "artifactDigest": "sha256:26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180"
+          }
+        },
+        "generatedSha256": {
+          "typical.source": "b37d7528cb3e5e3bd6f3cf609635f11d39e4a9a476934a6693d6ea7528e1befb",
+          "typical.model": "a8d4195bb72f78a1140f88f5a74ad29294beddacb9a96a18e837bd8bada757d6",
+          "typical.artifact": "26325a1d081f6fa05d6980f08345c2b6ad6d1d1a35837c49d48f7a4851ed9180",
+          "typical.expected": "904101a2db1ea7ef21708331895ba460d88a87698953b15255da7e6357000621",
+          "dense.source": "806b33eed3a2af68a6ad894d06d622492092e7969d3a1f4164a23e7b1b949965",
+          "dense.model": "db5d85f83c21584d1e094b8fa6d41ad242cf84b5621c383d4fe128e055bf2e65",
+          "dense.artifact": "d9e28c75842c38b96256edf1faa555f0dd89462c061502f87c88df8b200dac42",
+          "dense.expected": "ac36df3179b7953cd347710d5b13734104d7ff9322dfb9e54f5b302eafefa4dd",
+          "dense.input": "4dba98661ea18bc3aecba761591846178f10e41b49e3eabd7feed948c2435add"
+        },
+        "negativeOracleRejected": true,
+        "status": "failed",
+        "failure": "Recovery failed"
+      }
+    }
+  ],
+  "commissioning": [
+    {
+      "status": "failed",
+      "issue": "Incorrect generated-artifact root assumption; compiler inspection failed before HTTP.",
+      "reportSha256": "61e00fb09c1bec377ae36e66fd82ce0ac7bec564af915df587719c01a67bccb4",
+      "harnessSha256": {
+        "HttpProbe.java": "911f9acee2fdf8473e6ba9a4fe17084dae30e292c68d752848cc0b9da1dd1015",
+        "run.mjs": "80ee89fea9467b121473ddf545d900d034c090f8d50b4a68fa6a97063408d65a"
+      },
+      "stages": [],
+      "children": [
+        {
+          "label": "javac",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 0,
+          "closed": true
+        },
+        {
+          "label": "compiler",
+          "reason": "exit",
+          "code": 1,
+          "signal": null,
+          "capturedBytes": 247,
+          "closed": true
+        }
+      ]
+    },
+    {
+      "status": "failed",
+      "issue": "Equivalent CPU-list formats compared as strings; failed before HTTP.",
+      "reportSha256": "82e454d51abde34270fdaf64a04ae947020d3c6acc894a652ae0c462dc3f9929",
+      "harnessSha256": {
+        "HttpProbe.java": "4fc1fd5f7a3d869a2bddcf0e4c1a11687ec81c69e2befb57c428cc07ec4f8000",
+        "run.mjs": "80ee89fea9467b121473ddf545d900d034c090f8d50b4a68fa6a97063408d65a"
+      },
+      "stages": [],
+      "children": [
+        {
+          "label": "javac",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 0,
+          "closed": true
+        },
+        {
+          "label": "compiler",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 329,
+          "closed": true
+        },
+        {
+          "label": "server",
+          "reason": "exit",
+          "code": null,
+          "signal": "SIGKILL",
+          "capturedBytes": 156,
+          "closed": true
+        }
+      ]
+    },
+    {
+      "status": "failed",
+      "issue": "Extra host binding supplied to dense no-call program; full-outcome oracle rejected HOST_BINDING_INVALID.",
+      "reportSha256": "1a3383bc3a1528501b01140f90a62589046fc862e9841abb8e12b39c8b7e06dd",
+      "harnessSha256": {
+        "HttpProbe.java": "4fc1fd5f7a3d869a2bddcf0e4c1a11687ec81c69e2befb57c428cc07ec4f8000",
+        "run.mjs": "15b65671ccd48cfee0278c3a1efb1dc4adc6233280546e88cdc1808a21ac1ff5"
+      },
+      "stages": [
+        {"phase":"smoke","rule":"typical","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.7038210000001,"successPerOfferedSecond":10,"successPerElapsedSecond":9.992966740155977,"latency":{"success":{"n":10,"minMs":7.985924999999952,"p50Ms":12.122384000000238,"p95Ms":54.04996500000016,"p99Ms":54.04996500000016,"maxMs":54.04996500000016},"allResponses":{"n":10,"minMs":7.985924999999952,"p50Ms":12.122384000000238,"p95Ms":54.04996500000016,"p99Ms":54.04996500000016,"maxMs":54.04996500000016},"dispatchLag":{"n":10,"minMs":0.13323700000000827,"p50Ms":0.49525400000038644,"p95Ms":1.2221260000005714,"p99Ms":1.2221260000005714,"maxMs":1.2221260000005714}},"cpuSeconds":0.23,"meanOccupiedCores":0.22983823502358744,"sampledPeakRssBytes":95186944,"rssSamples":10,"heapUsedBeforeBytes":21780112,"heapUsedAfterBytes":24925840,"sampledPeakHeapBytes":24925840,"peakAdmitted":1,"cleanScreen":false,"capacityScreen":"failed"},
+        {"phase":"smoke","rule":"typical","engine":"native","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.1426500000007,"successPerOfferedSecond":10,"successPerElapsedSecond":9.998573703461195,"latency":{"success":{"n":10,"minMs":6.41394500000024,"p50Ms":7.40878900000007,"p95Ms":47.922551999999996,"p99Ms":47.922551999999996,"maxMs":47.922551999999996},"allResponses":{"n":10,"minMs":6.41394500000024,"p50Ms":7.40878900000007,"p95Ms":47.922551999999996,"p99Ms":47.922551999999996,"maxMs":47.922551999999996},"dispatchLag":{"n":10,"minMs":0.011232000000745757,"p50Ms":0.7063540000008288,"p95Ms":2.9116380000004938,"p99Ms":2.9116380000004938,"maxMs":2.9116380000004938}},"cpuSeconds":0.09,"meanOccupiedCores":0.08998716333115075,"sampledPeakRssBytes":95977472,"rssSamples":10,"heapUsedBeforeBytes":24925840,"heapUsedAfterBytes":24925840,"sampledPeakHeapBytes":24925840,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+        {"phase":"smoke","rule":"dense","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":0,"offered":10,"correct":0,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":10,"elapsedIncludingDrainMs":1000.4061890000003,"successPerOfferedSecond":0,"successPerElapsedSecond":0,"latency":{"success":null,"allResponses":{"n":10,"minMs":1.4183990000001359,"p50Ms":1.9259760000004462,"p95Ms":43.93287500000042,"p99Ms":43.93287500000042,"maxMs":43.93287500000042},"dispatchLag":{"n":10,"minMs":0.004109000000426022,"p50Ms":0.4819550000001982,"p95Ms":1.0268590000005133,"p99Ms":1.0268590000005133,"maxMs":1.0268590000005133}},"cpuSeconds":0.03,"meanOccupiedCores":0.029987819277675413,"sampledPeakRssBytes":96620544,"rssSamples":10,"heapUsedBeforeBytes":24925840,"heapUsedAfterBytes":25974416,"sampledPeakHeapBytes":25974416,"peakAdmitted":1,"cleanScreen":false,"capacityScreen":"failed"}
+      ],
+      "children": [
+        {
+          "label": "javac",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 0,
+          "closed": true
+        },
+        {
+          "label": "compiler",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 329,
+          "closed": true
+        },
+        {
+          "label": "server",
+          "reason": "exit",
+          "code": null,
+          "signal": "SIGKILL",
+          "capturedBytes": 156,
+          "closed": true
+        }
+      ]
+    },
+    {
+      "status": "failed",
+      "issue": "Diagnostic repeat of dense host-binding commissioning failure.",
+      "reportSha256": "00064d3d174fe4bb2106e7e1fd58e6294addaf0bb9341cba16d7da760bbef243",
+      "harnessSha256": {
+        "HttpProbe.java": "4eed0be85dc2ca1f033dedc6257978e72abc6a84fd76ee799df817d559805a58",
+        "run.mjs": "15b65671ccd48cfee0278c3a1efb1dc4adc6233280546e88cdc1808a21ac1ff5"
+      },
+      "stages": [
+        {"phase":"smoke","rule":"typical","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.1759699999998,"successPerOfferedSecond":10,"successPerElapsedSecond":9.998240609599932,"latency":{"success":{"n":10,"minMs":8.29180599999927,"p50Ms":9.527996999999232,"p95Ms":52.000470000000405,"p99Ms":52.000470000000405,"maxMs":52.000470000000405},"allResponses":{"n":10,"minMs":8.29180599999927,"p50Ms":9.527996999999232,"p95Ms":52.000470000000405,"p99Ms":52.000470000000405,"maxMs":52.000470000000405},"dispatchLag":{"n":10,"minMs":0.04239099999995233,"p50Ms":0.789770999999746,"p95Ms":1.0591629999998986,"p99Ms":1.0591629999998986,"maxMs":1.0591629999998986}},"cpuSeconds":0.21,"meanOccupiedCores":0.20996305280159855,"sampledPeakRssBytes":94887936,"rssSamples":10,"heapUsedBeforeBytes":21920768,"heapUsedAfterBytes":25066496,"sampledPeakHeapBytes":25066496,"peakAdmitted":1,"cleanScreen":false,"capacityScreen":"failed"},
+        {"phase":"smoke","rule":"typical","engine":"native","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.5398539999997,"successPerOfferedSecond":10,"successPerElapsedSecond":9.994604372850903,"latency":{"success":{"n":10,"minMs":6.13144899999952,"p50Ms":7.146077999999761,"p95Ms":48.21051999999963,"p99Ms":48.21051999999963,"maxMs":48.21051999999963},"allResponses":{"n":10,"minMs":6.13144899999952,"p50Ms":7.146077999999761,"p95Ms":48.21051999999963,"p99Ms":48.21051999999963,"maxMs":48.21051999999963},"dispatchLag":{"n":10,"minMs":0.009231999999428808,"p50Ms":0.2567079999998896,"p95Ms":1.0074379999996381,"p99Ms":1.0074379999996381,"maxMs":1.0074379999996381}},"cpuSeconds":0.06,"meanOccupiedCores":0.05996762623710541,"sampledPeakRssBytes":95752192,"rssSamples":10,"heapUsedBeforeBytes":25066496,"heapUsedAfterBytes":25066496,"sampledPeakHeapBytes":25066496,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+        {"phase":"smoke","rule":"dense","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":0,"offered":10,"correct":0,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":10,"elapsedIncludingDrainMs":1001.0280419999999,"successPerOfferedSecond":0,"successPerElapsedSecond":0,"latency":{"success":null,"allResponses":{"n":10,"minMs":1.2949079999998503,"p50Ms":1.558720999999423,"p95Ms":43.88948199999959,"p99Ms":43.88948199999959,"maxMs":43.88948199999959},"dispatchLag":{"n":10,"minMs":0.003945999999814376,"p50Ms":0.18501999999989494,"p95Ms":0.9209780000001047,"p99Ms":0.9209780000001047,"maxMs":0.9209780000001047}},"cpuSeconds":0.04,"meanOccupiedCores":0.039958920551398505,"sampledPeakRssBytes":96485376,"rssSamples":10,"heapUsedBeforeBytes":25066496,"heapUsedAfterBytes":26115072,"sampledPeakHeapBytes":26115072,"peakAdmitted":1,"cleanScreen":false,"capacityScreen":"failed"}
+      ],
+      "children": [
+        {
+          "label": "javac",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 0,
+          "closed": true
+        },
+        {
+          "label": "compiler",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 329,
+          "closed": true
+        },
+        {
+          "label": "server",
+          "reason": "exit",
+          "code": null,
+          "signal": "SIGKILL",
+          "capturedBytes": 2996,
+          "closed": true
+        }
+      ]
+    },
+    {
+      "status": "failed",
+      "issue": "Captured dense HOST_BINDING_INVALID diagnostic; fixed before frozen measured harness.",
+      "reportSha256": "d3c487a985757fe00913e37c650c5ae4b66c4c226704dba74bdbf8726836dcbf",
+      "harnessSha256": {
+        "HttpProbe.java": "4eed0be85dc2ca1f033dedc6257978e72abc6a84fd76ee799df817d559805a58",
+        "run.mjs": "1c2430a58b651648e6fb7ed3612e2064d8b0c2a1a2c2a02f8000dc4ed35e6556"
+      },
+      "stages": [
+        {"phase":"smoke","rule":"typical","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.9706189999997,"successPerOfferedSecond":10,"successPerElapsedSecond":9.990303221877088,"latency":{"success":{"n":10,"minMs":8.738870999999563,"p50Ms":9.5906159999995,"p95Ms":51.928237999999965,"p99Ms":51.928237999999965,"maxMs":51.928237999999965},"allResponses":{"n":10,"minMs":8.738870999999563,"p50Ms":9.5906159999995,"p95Ms":51.928237999999965,"p99Ms":51.928237999999965,"maxMs":51.928237999999965},"dispatchLag":{"n":10,"minMs":0.1357189999998809,"p50Ms":0.7384780000002138,"p95Ms":1.0495410000003176,"p99Ms":1.0495410000003176,"maxMs":1.0495410000003176}},"cpuSeconds":0.16,"meanOccupiedCores":0.15984485155003342,"sampledPeakRssBytes":95727616,"rssSamples":10,"heapUsedBeforeBytes":21815752,"heapUsedAfterBytes":24961480,"sampledPeakHeapBytes":24961480,"peakAdmitted":1,"cleanScreen":false,"capacityScreen":"failed"},
+        {"phase":"smoke","rule":"typical","engine":"native","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.2756939999999,"successPerOfferedSecond":10,"successPerElapsedSecond":9.997243819862328,"latency":{"success":{"n":10,"minMs":5.876442999999199,"p50Ms":7.546322999999575,"p95Ms":47.797748999999385,"p99Ms":47.797748999999385,"maxMs":47.797748999999385},"allResponses":{"n":10,"minMs":5.876442999999199,"p50Ms":7.546322999999575,"p95Ms":47.797748999999385,"p99Ms":47.797748999999385,"maxMs":47.797748999999385},"dispatchLag":{"n":10,"minMs":0.007161999999880209,"p50Ms":0.6429359999992812,"p95Ms":0.950406999999359,"p99Ms":0.950406999999359,"maxMs":0.950406999999359}},"cpuSeconds":0.06,"meanOccupiedCores":0.05998346291917396,"sampledPeakRssBytes":96526336,"rssSamples":10,"heapUsedBeforeBytes":24961480,"heapUsedAfterBytes":24961480,"sampledPeakHeapBytes":24961480,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+        {"phase":"smoke","rule":"dense","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":0,"offered":10,"correct":0,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":10,"elapsedIncludingDrainMs":1000.714207,"successPerOfferedSecond":0,"successPerElapsedSecond":0,"latency":{"success":null,"allResponses":{"n":10,"minMs":1.3932020000002012,"p50Ms":2.0052410000007512,"p95Ms":43.691515000000436,"p99Ms":43.691515000000436,"maxMs":43.691515000000436},"dispatchLag":{"n":10,"minMs":0.003912000000127591,"p50Ms":0.2815450000007331,"p95Ms":0.9149740000002566,"p99Ms":0.9149740000002566,"maxMs":0.9149740000002566}},"cpuSeconds":0.03,"meanOccupiedCores":0.02997858908182764,"sampledPeakRssBytes":97189888,"rssSamples":10,"heapUsedBeforeBytes":24961480,"heapUsedAfterBytes":26010056,"sampledPeakHeapBytes":26010056,"peakAdmitted":1,"cleanScreen":false,"capacityScreen":"failed"}
+      ],
+      "children": [
+        {
+          "label": "javac",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 0,
+          "closed": true
+        },
+        {
+          "label": "compiler",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 329,
+          "closed": true
+        },
+        {
+          "label": "server",
+          "reason": "exit",
+          "code": null,
+          "signal": "SIGKILL",
+          "capturedBytes": 2996,
+          "closed": true
+        }
+      ]
+    },
+    {
+      "status": "completed",
+      "issue": "Corrected pre-freeze smoke passed, including actual-server timeout and port release.",
+      "reportSha256": "2872faf16fe3526c6b07a80367115d32328c990bd2f40024c213a9c51340c0d4",
+      "harnessSha256": {
+        "HttpProbe.java": "8f0bd719bb551edc042b4a4d7f68ae96a043684c008f6318c7441eea4067d691",
+        "run.mjs": "470478ec8e1ac96c5f9409768c1b2460bf5638148e14fd53ecfebef81c0ce42e"
+      },
+      "stages": [
+        {"phase":"smoke","rule":"typical","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1001.0871029999998,"successPerOfferedSecond":10,"successPerElapsedSecond":9.989140775095972,"latency":{"success":{"n":10,"minMs":7.718046999999842,"p50Ms":8.590949999999793,"p95Ms":12.45100900000034,"p99Ms":12.45100900000034,"maxMs":12.45100900000034},"allResponses":{"n":10,"minMs":7.718046999999842,"p50Ms":8.590949999999793,"p95Ms":12.45100900000034,"p99Ms":12.45100900000034,"maxMs":12.45100900000034},"dispatchLag":{"n":10,"minMs":0.04953399999976682,"p50Ms":0.2658609999998589,"p95Ms":0.9332059999997,"p99Ms":0.9332059999997,"maxMs":0.9332059999997}},"cpuSeconds":0.15,"meanOccupiedCores":0.14983711162643956,"sampledPeakRssBytes":94388224,"rssSamples":10,"heapUsedBeforeBytes":21922352,"heapUsedAfterBytes":25068080,"sampledPeakHeapBytes":25068080,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+        {"phase":"smoke","rule":"typical","engine":"native","offeredPerSecond":10,"seconds":1,"callbackDelayMs":2,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1001.0282980000002,"successPerOfferedSecond":10,"successPerElapsedSecond":9.989727583105745,"latency":{"success":{"n":10,"minMs":5.880078999999569,"p50Ms":6.739752999999837,"p95Ms":8.923679999999877,"p99Ms":8.923679999999877,"maxMs":8.923679999999877},"allResponses":{"n":10,"minMs":5.880078999999569,"p50Ms":6.739752999999837,"p95Ms":8.923679999999877,"p99Ms":8.923679999999877,"maxMs":8.923679999999877},"dispatchLag":{"n":10,"minMs":0.009317999999439053,"p50Ms":0.042093999999451626,"p95Ms":1.7709230000000389,"p99Ms":1.7709230000000389,"maxMs":1.7709230000000389}},"cpuSeconds":0.08,"meanOccupiedCores":0.07991782066484596,"sampledPeakRssBytes":95195136,"rssSamples":10,"heapUsedBeforeBytes":25068080,"heapUsedAfterBytes":25068080,"sampledPeakHeapBytes":25068080,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+        {"phase":"smoke","rule":"dense","engine":"keir","offeredPerSecond":10,"seconds":1,"callbackDelayMs":0,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.4651309999999,"successPerOfferedSecond":10,"successPerElapsedSecond":9.995350852462645,"latency":{"success":{"n":10,"minMs":8.086307999999917,"p50Ms":12.364201000000321,"p95Ms":39.92937299999994,"p99Ms":39.92937299999994,"maxMs":39.92937299999994},"allResponses":{"n":10,"minMs":8.086307999999917,"p50Ms":12.364201000000321,"p95Ms":39.92937299999994,"p99Ms":39.92937299999994,"maxMs":39.92937299999994},"dispatchLag":{"n":10,"minMs":0.0036079999999856227,"p50Ms":0.36729400000058376,"p95Ms":1.0666820000005828,"p99Ms":1.0666820000005828,"maxMs":1.0666820000005828}},"cpuSeconds":0.32,"meanOccupiedCores":0.3198512272788046,"sampledPeakRssBytes":104361984,"rssSamples":10,"heapUsedBeforeBytes":25068080,"heapUsedAfterBytes":33456688,"sampledPeakHeapBytes":33456688,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"},
+        {"phase":"smoke","rule":"dense","engine":"native","offeredPerSecond":10,"seconds":1,"callbackDelayMs":0,"offered":10,"correct":10,"busy":0,"generatorDrops":0,"transportErrors":0,"incorrect":0,"elapsedIncludingDrainMs":1000.9003650000004,"successPerOfferedSecond":10,"successPerElapsedSecond":9.991004449279021,"latency":{"success":{"n":10,"minMs":1.5389600000007704,"p50Ms":2.866945000000669,"p95Ms":4.06812600000012,"p99Ms":4.06812600000012,"maxMs":4.06812600000012},"allResponses":{"n":10,"minMs":1.5389600000007704,"p50Ms":2.866945000000669,"p95Ms":4.06812600000012,"p99Ms":4.06812600000012,"maxMs":4.06812600000012},"dispatchLag":{"n":10,"minMs":0.0024650000004839967,"p50Ms":0.7521550000001298,"p95Ms":1.0507290000005014,"p99Ms":1.0507290000005014,"maxMs":1.0507290000005014}},"cpuSeconds":0.04,"meanOccupiedCores":0.039964017797116086,"sampledPeakRssBytes":105058304,"rssSamples":10,"heapUsedBeforeBytes":33456688,"heapUsedAfterBytes":33456688,"sampledPeakHeapBytes":33456688,"peakAdmitted":1,"cleanScreen":true,"capacityScreen":"passed"}
+      ],
+      "children": [
+        {
+          "label": "javac",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 0,
+          "closed": true
+        },
+        {
+          "label": "compiler",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 329,
+          "closed": true
+        },
+        {
+          "label": "server",
+          "reason": "exit",
+          "code": 0,
+          "signal": null,
+          "capturedBytes": 174,
+          "closed": true
+        },
+        {
+          "label": "server-timeout-probe",
+          "reason": "timeout",
+          "code": null,
+          "signal": "SIGKILL",
+          "capturedBytes": 156,
+          "closed": true
+        }
+      ]
+    }
+  ]
+}
