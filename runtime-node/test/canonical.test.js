@@ -76,3 +76,28 @@ test('bounded encoding counts aggregate escaped UTF-8 bytes while preserving def
 test('digest uses the sha256 prefix and lowercase hex', () => {
   assert.equal(digest(bytes('abc')), 'sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
 });
+
+test('scalar key comparison handles supplementary prefixes and empty keys without changing bytes', () => {
+  const input = Object.fromEntries([
+    ['\u{1f600}x', 0], ['\u{1f600}', 0], ['\u{10000}', 0], ['\ue000', 0],
+    ['a\u{1f600}', 0], ['a\ue000', 0], ['a', 0], ['', 0],
+  ]);
+  assert.equal(canonicalBytes(input).toString(),
+    '{"":0,"a":0,"a\ue000":0,"a\u{1f600}":0,"\ue000":0,"\u{10000}":0,"\u{1f600}":0,"\u{1f600}x":0}');
+  assert.deepEqual(parseCanonical(canonicalBytes(input)), input);
+});
+
+test('minimum container sizes preserve exact and nested remaining-byte boundaries', () => {
+  for (const [value, expected] of [
+    [{}, '{}'], [[], '[]'], [{ '': 0 }, '{"":0}'], [[0, 0], '[0,0]'],
+    [{ a: [0], b: {} }, '{"a":[0],"b":{}}'], [[{ a: 0 }, []], '[{"a":0},[]]'],
+  ]) {
+    const encoded = Buffer.from(expected);
+    assert.deepEqual(canonicalBytes(value, encoded.length), encoded);
+    assert.deepEqual(canonicalBytes(value), encoded);
+    assert.throws(() => canonicalBytes(value, encoded.length - 1), CanonicalLimitError);
+  }
+  const wide = Object.fromEntries(Array.from({ length: 32 }, (_, i) => [String(i), 0]));
+  assert.throws(() => canonicalBytes(wide, 64), CanonicalLimitError);
+  assert.throws(() => canonicalBytes(Array(32).fill(0), 64), CanonicalLimitError);
+});
