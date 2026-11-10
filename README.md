@@ -8,20 +8,15 @@ Keir provides a constrained extension language, a compiler that checks extension
 ![An AI assistant drafts a Keir extension from a customer request and the app’s model. Keir compiles it. At execution, the app checks permissions and performs the operation.](docs/images/extension-flow.svg)
 
 <a id="from-a-request-to-a-running-extension"></a>
-## From a business request to application behavior
+## From a request to a running extension
 
-A user of a task application asks: “When a task in the launch project is completed, create a follow-up task.”
+A user asks: “When a task in this project is completed, create a follow-up.”
 
-The [follow-up example](examples/node-host/follow-up/source.yaml) uses `project1` as the selected launch project. It reads the task, checks its project and completed status, and requests a new task titled `Follow up` when both match.
+The application exposes a completion event and operations for reading and creating tasks. The assistant combines those capabilities into a Keir extension, which the compiler checks against the application's model.
 
-Before activation, the application can simulate the extension with sample data:
+The application shows simulated outcomes for the user to review before activation. After a task completion is saved, Keir's runtime executes the compiled extension through the application's own services and permission checks.
 
-| Simulated task completion | Result |
-| --- | --- |
-| Completed task in `project1` | Requests a `Follow up` task in `project1`. |
-| Completed task in another project | Does not request a new task. |
-
-After review and activation, the application runs the compiled extension after it has saved the task's completion. Its task service checks permissions and business rules before creating the follow-up. The extension cannot prevent the completion that has already been saved.
+See the [walkthrough](docs/guided-tour.md) for the complete example.
 
 <a id="how-it-fits-your-application"></a>
 ## What you embed
