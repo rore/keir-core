@@ -18,10 +18,10 @@ Published editions 1–5 retain their original bytes and source IDs. Their ZIPs 
 
 ## Licensed candidate edition 6
 
-Edition 6 adds the complete Apache 2.0 license to edition 5's contracts and examples. It has a separate archive format and guide, and remains a source candidate until its real release inputs are qualified. From a commit containing the edition 6 inputs:
+Edition 6 adds the complete Apache 2.0 license to edition 5's contracts and examples. It has a separate archive format and guide, and remains a source candidate until its real release inputs are qualified. Use the retained 0.3.0-compatible source below for edition 6. The current 0.3.1 candidate uses a distinct producer and must not be substituted into this historical edition:
 
 ```sh
-REVISION=$(git rev-parse HEAD)
+REVISION=f6b51d4e36643b368452e7246fde6a78fda63999
 python scripts/authoring-companion.py build keir-authoring-v6-candidate.zip --version 6 --revision "$REVISION"
 ```
 

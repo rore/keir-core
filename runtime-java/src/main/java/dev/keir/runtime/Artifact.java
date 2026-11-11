@@ -248,7 +248,7 @@ final class Artifact {
         require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment","PIN_MISMATCH");
         require(Set.of("keir-artifact/2","keir-artifact/3").contains(artifact.get("format")),"/artifact/format");
         boolean current="keir-artifact/3".equals(artifact.get("format"));
-        require((current?"keir-compiler-java/0.3.0":"keir-compiler-java/0.2.0").equals(artifact.get("compiler")),"/artifact/compiler","PIN_MISMATCH");
+        require((current ? Set.of("keir-compiler-java/0.3.0", "keir-compiler-java/0.3.1").contains(artifact.get("compiler")) : "keir-compiler-java/0.2.0".equals(artifact.get("compiler"))),"/artifact/compiler","PIN_MISMATCH");
         require((current?"keir-dcm/3":"keir-dcm/2").equals(dcm.get("format")),"/artifact/modelRef","PIN_MISMATCH");
         require(modelRef(dcm).equals(artifact.get("modelRef")),"/artifact/modelRef");
         require(artifact.get("sourceDigest") instanceof String text && text.matches("sha256:[0-9a-f]{64}"),"/artifact/sourceDigest");

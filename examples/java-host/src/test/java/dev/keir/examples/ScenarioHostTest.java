@@ -69,6 +69,27 @@ class ScenarioHostTest {
         }
     }
 
+    @Test void currentScenarioHostRetainsOriginalProducerAndRejectsUnknownProducer() throws Exception {
+        var current = new ScenarioHost(root, System.getenv("KEIR_SCENARIO_PYTHON"), root.resolve("conformance/keir-3"));
+        for (String group : List.of("main", "guard-input")) {
+            var selected = current.selection(group);
+            String original = group.equals("main") ? "event.json" : "decision.json";
+            byte[] oldArtifact = Files.readAllBytes(current.corpus().resolve("compatibility/0.3.0/" + original));
+            Path scenario = current.corpus().resolve("scenarios/" + (group.equals("main") ? "main/normal" : "guard-input/guard-input-allow") + ".json");
+            var documents = List.of(Files.readAllBytes(scenario));
+            same(current.verify(group, documents, selected), current.verify(group, documents,
+                    new ScenarioHost.Selection(group, selected.model(), oldArtifact)), "Producer changed scenario behavior");
+            for (String producer : List.of("keir-compiler-java/0.3.2", "missing")) {
+                var unknown = object(EffectJson.parse(selected.artifact()));
+                if (producer.equals("missing")) unknown.remove("compiler"); else unknown.put("compiler", producer);
+                var failure = assertThrows(IllegalArgumentException.class, () -> current.verify(group, documents,
+                        new ScenarioHost.Selection(group, selected.model(), EffectJson.encode(unknown))));
+                assertEquals("Incompatible scenario contract", failure.getMessage());
+                assertEquals(0, current.dispatchCount);
+            }
+        }
+    }
+
     @Test void rejectsScenarioRevisionOutsideTheTrustedCorpusBeforeDispatch() throws Exception {
         var current = new ScenarioHost(root, System.getenv("KEIR_SCENARIO_PYTHON"), root.resolve("conformance/keir-3"));
         for (var selected : List.of(host, current)) {

@@ -7,29 +7,30 @@
 
 The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-The current authoring contract ships in [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). It keeps the Keir 2 source language and descriptor recipe while adding the [decision lifecycle](pre-operation-decisions.md). These identities version independently:
+The published authoring contract ships in [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). The hardened 0.3.1 candidate keeps the same formats and environment pins, with its own compiler identity; it is not yet a published release. The contract keeps the Keir 2 source language and descriptor recipe while adding the [decision lifecycle](pre-operation-decisions.md). These identities version independently:
 
-| Field | Current authoring value (Core 0.3.0) |
+| Field | Current candidate authoring value (Core 0.3.1) |
 | --- | --- |
 | Source `language` | `keir/2` |
 | DCM `format` | `keir-dcm/3` |
 | Artifact `format` | `keir-artifact/3` |
 | Verification scenario `format` | `keir-scenario/3` |
-| Compiler identity | `keir-compiler-java/0.3.0` |
+| Compiler identity | `keir-compiler-java/0.3.1` |
 | Descriptor recipe | `keir-record-descriptors/2` |
 
 Structural schemas: [source](../../schemas/source-2/source.schema.json), [model](../../schemas/dcm-3/dcm.schema.json), [artifact](../../schemas/artifact-3/artifact.schema.json) and [scenario](../../schemas/scenario-3/scenario.schema.json). Semantic and cross-document checks remain required.
 
-Compiler 0.3.0 is the single current authoring compiler: it accepts source `/2` with DCM `/3` only and produces artifact `/3` with its own 0.3.0 identity. It rejects DCM `/2` and never stamps the old producer identity. The exact Core 0.2.0 contracts remain documented in the [workflow version matrix](workflow-expressions.md#version-matrix) for execution and history.
+Compiler 0.3.1 is the current candidate authoring compiler: it accepts source `/2` with DCM `/3` only and produces artifact `/3` with its own 0.3.1 identity. It rejects DCM `/2` and never stamps the old producer identity. The exact Core 0.2.0 contracts remain documented in the [workflow version matrix](workflow-expressions.md#version-matrix) for execution and history.
 
-Runtime 0.3.0 admits exactly these two tuples, with the environment pins below in both:
+Runtime 0.3.1 admits exactly the three tuples below with the same environment pins. Runtime 0.3.0 admits only the first two:
 
 | Artifact | Bound model | Producer | Descriptor recipe |
 | --- | --- | --- | --- |
 | `keir-artifact/2` | `keir-dcm/2` | `keir-compiler-java/0.2.0` | `keir-record-descriptors/2` |
 | `keir-artifact/3` | `keir-dcm/3` | `keir-compiler-java/0.3.0` | `keir-record-descriptors/2` |
+| `keir-artifact/3` | `keir-dcm/3` | `keir-compiler-java/0.3.1` | `keir-record-descriptors/2` |
 
-Mixed tuples, `/1` contracts and decision semantics inside `/2` are rejected by runtime 0.3.0. Existing approved event artifacts keep their exact old model and approval identities; upgrading the runtime does not recompile or deactivate them. New or edited source uses the current `/3` catalog, including unchanged EVENT entrypoints, and requires normal approval of the new bytes. Historical source can seed a draft, but its prior approval never transfers to the recompiled artifact.
+Mixed tuples, `/1` contracts and decision semantics inside `/2` are rejected by both runtimes. Unknown producers, including `keir-compiler-java/0.3.2`, are also rejected. Existing approved event artifacts keep their exact old model and approval identities; upgrading the runtime does not recompile or deactivate them. New or edited source uses the current `/3` catalog, including unchanged EVENT entrypoints, and requires normal approval of the new bytes. Historical source can seed a draft, but its prior approval never transfers to the recompiled artifact.
 
 ### Compile source
 

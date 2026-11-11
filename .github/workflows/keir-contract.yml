@@ -89,7 +89,7 @@ jobs:
           node --test scripts/setup-node-example.test.mjs
           node scripts/setup-node-example.mjs
           mkdir -p .tools/node-packed
-          tar -xzf .tools/packages/keir-runtime-node-0.3.0.tgz -C .tools/node-packed
+          tar -xzf .tools/packages/keir-runtime-node-0.3.1.tgz -C .tools/node-packed
           diff -r .tools/node-packed/package examples/node-host/node_modules/@keir/runtime-node
           diff -r runtime-node/src .tools/node-packed/package/src
           node --test examples/node-host/follow-up.test.mjs examples/node-host/verify-scenarios.test.mjs examples/node-host/decision-consumer.test.mjs examples/node-host/decision-host.test.mjs examples/node-host/pre-operation.test.mjs

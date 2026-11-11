@@ -210,7 +210,7 @@ export function validateEnvelope(artifact, bound) {
   requireThat(Object.keys(ENVIRONMENT).every(k => artifact.environment[k] === ENVIRONMENT[k]), '/artifact/environment', 'PIN_MISMATCH');
   requireThat(['keir-artifact/2', 'keir-artifact/3'].includes(artifact.format), '/artifact/format');
   const legacy = artifact.format === 'keir-artifact/2';
-  requireThat(artifact.compiler === (legacy ? 'keir-compiler-java/0.2.0' : 'keir-compiler-java/0.3.0'), '/artifact/compiler', 'PIN_MISMATCH');
+  requireThat((legacy ? artifact.compiler === 'keir-compiler-java/0.2.0' : ['keir-compiler-java/0.3.0', 'keir-compiler-java/0.3.1'].includes(artifact.compiler)), '/artifact/compiler', 'PIN_MISMATCH');
   requireThat(bound.dcm.format === (legacy ? 'keir-dcm/2' : 'keir-dcm/3'), '/artifact/modelRef', 'PIN_MISMATCH');
   requireThat(canonicalBytes(artifact.modelRef).equals(canonicalBytes(bound.modelRef)), '/artifact/modelRef');
   requireThat(typeof artifact.sourceDigest === 'string' && /^sha256:[0-9a-f]{64}$/.test(artifact.sourceDigest), '/artifact/sourceDigest');

@@ -7,7 +7,7 @@ Use [Contributing](../CONTRIBUTING.md#build-and-test) to build the repository an
 
 The current released baseline is [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0), source [`b232944`](https://github.com/rore/keir-core/commit/b2329440dd2a25acc547f3ebfea214748d912022). Its [contract CI run](https://github.com/rore/keir-core/actions/runs/42576060993) passed. The current `/3` corpus compares 39 shared scenarios and 51 raw verification vectors across Java and Node, including post-commit effects and read-only pre-operation decisions. CI checks normalized complete outcomes for exact parity, alongside compiler, runtime and installed-host tests.
 
-Use the [current corpus guide](../conformance/keir-3/README.md) for fixture layout and commands. The retained [Keir 2 corpus](../conformance/keir-2/README.md) checks the older execution contract; compiler 0.3.0 authors against `/3` models. Test totals belong to their source revision and run, rather than describing every later checkout.
+Use the [current corpus guide](../conformance/keir-3/README.md) for fixture layout and commands. The retained [Keir 2 corpus](../conformance/keir-2/README.md) checks the older execution contract; candidate compiler 0.3.1 authors against `/3` models. Test totals belong to their source revision and run, rather than describing every later checkout.
 
 The [release installation guide](installation.md#verification-boundary) records a separate check of the packaged compiler and both runtimes outside the source repositories. These checks cover controlled hosts. Real service guarantees and production resource containment require separate qualification; see [resource qualification](../conformance/resource-qualification/README.md).
 

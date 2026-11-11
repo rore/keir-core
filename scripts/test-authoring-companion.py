@@ -27,6 +27,7 @@ V4_RELEASE_REVISION = "c6a6d171982514569c29c06de7a429d301d25b2a"
 V4_PIN = "sha256:4a9f4f30212ff1d722cf6c993902d0802bee7e7ffebc00304102a5964b5bec63"
 V3_PIN = "sha256:fab92ec08409e9ccf64d5b4db5f58d874b6aabe0bc80be0a81182dc468a6ec39"
 V5_RELEASE_REVISION = "f988c2b147933fcdd8b8f74ce7920f78acd4eca5"
+V6_CANDIDATE_REVISION = "f6b51d4e36643b368452e7246fde6a78fda63999"
 V5_PIN = "sha256:20249307192494acb1cf07cc002e7203bda4f6baf8a8c2257dd752ce1d8cfe44"
 
 
@@ -339,8 +340,8 @@ class AuthoringCompanionV5Test(unittest.TestCase):
         directory = tempfile.TemporaryDirectory(dir=build)
         cls.addClassCleanup(directory.cleanup)
         cls.directory = Path(directory.name)
-        cls.payload = {name: (root / name).read_bytes() for name in cls.module["V5_FILES"]}
-        cls.revision = git("rev-parse", "HEAD").decode().strip()
+        cls.payload = {name: git("show", f"{V5_RELEASE_REVISION}:{name}") for name in cls.module["V5_FILES"]}
+        cls.revision = V5_RELEASE_REVISION
         cls.compatibility = {"status": "candidate", "coreRevision": cls.revision, "packages": {}}
         cls.data = cls.module["make_pinned_archive"](5, cls.revision, cls.compatibility, cls.payload)
         cls.path = cls.directory / "v5.zip"
@@ -508,9 +509,8 @@ class AuthoringCompanionV6Test(unittest.TestCase):
         module = runpy.run_path(str(SCRIPT))
         root = SCRIPT.parent.parent
         files = module["PINNED_EDITIONS"][6][4]
-        payload = {name: (root / name).read_bytes() for name in files}
-        payload["LICENSE"] = git("show", "HEAD:LICENSE")
-        revision = git("rev-parse", "HEAD").decode().strip()
+        revision = V6_CANDIDATE_REVISION
+        payload = {name: git("show", f"{revision}:{name}") for name in files}
         compatibility = {"status": "candidate", "coreRevision": revision, "packages": {}}
         data = module["make_pinned_archive"](6, revision, compatibility, payload)
         self.assertEqual(data, module["make_pinned_archive"](6, revision, compatibility, payload))
