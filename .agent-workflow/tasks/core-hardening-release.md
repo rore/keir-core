@@ -25,7 +25,7 @@ Task identity: `agent-workflow:core-hardening-release`. Core branch `feat/core-h
 **Plan review:** Agent technical review: core_hardening_review. Stages A/B and the refined Stage C plan approved; result reviews record source, archive, evidence and consumer findings.
 **Approvals:** User approved the specific preparation and adoption proposal with “Yes do it” and has authorized validated merges. Publication, visibility changes and live rollout are explicitly excluded.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Plan review
@@ -88,3 +88,6 @@ Daymark implementation snapshot `c86ca526d338f1f326acdb686f55b3dca4b26fb5` is pu
 Agent technical review: core_hardening_review. Reviewed revision: Daymark `c86ca526d338f1f326acdb686f55b3dca4b26fb5`. Verification adequacy: source and provenance approved with no blocking findings. Both complete-definition caches, strict producer admission and invocation-local guard identity/consumer satisfy the plan while preserving native authority and transactions. The reviewer checked exact candidate bytes, historical files and captured fixture rows, plus the six reproducing regressions and default/process test logs. Delivery remains gated on complete browser and hosted pinned-browser CI results.
 
 Plain `git diff --check` against the demo base reports CRLF trailing-whitespace diagnostics only in the verbatim packaged `vendor/compiler-0.3.1-notices/LICENSE`; those exact bytes match the qualified compiler ZIP and are intentionally preserved. The complete authored diff excluding only that licensed distribution file passes. This is a formatting/provenance distinction, not a behavioral waiver or an unqualified whitespace-pass claim.
+
+## Stage C complete local verification
+All 257 unchanged browser tests passed in 14.2 minutes on installed Chromium 156.0.8078.79, after the pinned local download was denied. They include scripted-authoring journeys with actual compilation/simulation/review/activation and native task checks, alongside explicitly mocked presentation tests. Build, 576 default Node passes and all 12 opt-in process passes complete the local consumer evidence at `c86ca526d338f1f326acdb686f55b3dca4b26fb5`. No passing check is rerun without a new failure or source change. Hosted exact-head run [42980663142](https://github.com/rore/keir-demo-app/actions/runs/42980663142) has installed its pinned browser and is still running the browser suite; merge waits for that result and a fresh review-thread/head check.
