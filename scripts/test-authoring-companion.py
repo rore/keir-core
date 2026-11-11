@@ -548,5 +548,55 @@ class AuthoringCompanionV6Test(unittest.TestCase):
             module["make_pinned_archive"](6, revision, compatibility, altered)
 
 
+class AuthoringCompanionV7Test(unittest.TestCase):
+    def test_current_candidate_is_licensed_exact_and_verifies_without_git(self):
+        module = runpy.run_path(str(SCRIPT))
+        root = SCRIPT.parent.parent
+        revision = "5c772d02b4dc92bb28ea8aedabd34498ff6d9391"
+        files = module["PINNED_EDITIONS"][7][4]
+        payload = {name: (root / name).read_bytes() for name in files}
+        compatibility = json.loads((root / "docs/agents/authoring-companion-v7-compatibility.json").read_bytes())
+        self.assertEqual(compatibility, {"status": "candidate", "coreRevision": revision, "packages": {}})
+        data = module["make_pinned_archive"](7, revision, compatibility, payload)
+        self.assertEqual(data, module["make_pinned_archive"](7, revision, compatibility, payload))
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            manifest = json.loads(archive.read("manifest.json"))
+            self.assertEqual(manifest["format"], "keir-authoring-companion/7")
+            self.assertEqual(manifest["producer"], "keir-compiler-java/0.3.1")
+            self.assertEqual(archive.read("LICENSE"), git("show", f"{revision}:LICENSE"))
+            self.assertEqual(manifest["files"]["LICENSE"]["digest"], module["LICENSE_PIN"])
+            self.assertEqual(manifest["compatibility"], compatibility)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "candidate.zip"
+            path.write_bytes(data)
+            result = subprocess.run([sys.executable, SCRIPT, "verify", path, "--version", "7", "--sha256", digest(data)],
+                                    env={**os.environ, "PATH": ""}, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        for mutation in ("license", "old-producer", "unknown-producer", "source", "release-version"):
+            altered = dict(payload)
+            record = deepcopy(compatibility)
+            if mutation == "license": altered["LICENSE"] = b"incomplete license"
+            elif mutation == "source": altered["conformance/keir-3/source-guard.json"] += b"\n"
+            elif mutation == "release-version":
+                record.update(status="release", packages={key: {"version": "0.3.0", "assets": {value.format("0.3.0"): "sha256:" + "a" * 64}}
+                    for key, value in module["RELEASE_ASSETS"].items()})
+            else:
+                name = "conformance/keir-3/artifact-guard.json"
+                artifact = json.loads(altered[name])
+                artifact["compiler"] = "keir-compiler-java/" + ("0.3.0" if mutation == "old-producer" else "0.3.2")
+                altered[name] = json.dumps(artifact, sort_keys=True, separators=(",", ":")).encode()
+                altered["conformance/keir-3/artifact-guard.sha256"] = (digest(altered[name]) + "\n").encode()
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                module["make_pinned_archive"](7, revision, record, altered)
+
+    def test_semantic_links_pin_the_qualified_core_source(self):
+        guide = (SCRIPT.parent.parent / "docs/agents/customer-authoring-guide-v7.md").read_text()
+        links = re.findall(r"https://github.com/rore/keir-core/blob/([0-9a-f]{40})/([^\s)#]+)", guide)
+        self.assertEqual(len(links), 4)
+        for revision, path in links:
+            self.assertEqual(revision, "5c772d02b4dc92bb28ea8aedabd34498ff6d9391")
+            self.assertEqual(git("cat-file", "-t", f"{revision}:{path}").strip(), b"blob")
+
+
 if __name__ == "__main__":
     unittest.main()

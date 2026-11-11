@@ -116,6 +116,9 @@ PINNED_EDITIONS = {
     6: ("docs/agents/authoring-companion-v6-compatibility.json",
         "docs/agents/customer-authoring-guide-v6.md", V5_ARTIFACT, V5_FORMATS,
         ("docs/agents/customer-authoring-guide-v6.md", "LICENSE", *V5_FILES[1:])),
+    7: ("docs/agents/authoring-companion-v7-compatibility.json",
+        "docs/agents/customer-authoring-guide-v7.md", V5_ARTIFACT, V5_FORMATS,
+        ("docs/agents/customer-authoring-guide-v7.md", "LICENSE", *V5_FILES[1:])),
 }
 LICENSE_PIN = "sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
 RELEASE_ASSETS = {
@@ -239,8 +242,8 @@ def make_pinned_archive(version, revision, compatibility, payload):
     if not matches(r"[0-9a-f]{40}", revision):
         raise ValueError("A pinned edition requires a full Git commit.")
     validate_compatibility(compatibility)
-    if version == 6 and digest(payload.get("LICENSE", b"")) != LICENSE_PIN:
-        raise ValueError("Edition 6 requires the complete Apache-2.0 LICENSE.")
+    if version in (6, 7) and digest(payload.get("LICENSE", b"")) != LICENSE_PIN:
+        raise ValueError(f"Edition {version} requires the complete Apache-2.0 LICENSE.")
     artifact = json.loads(payload[artifact_path])
     if (not isinstance(artifact, dict) or artifact.get("format") != formats["artifact"]
             or not isinstance(artifact.get("compiler"), str) or not isinstance(artifact.get("environment"), dict)):
@@ -257,7 +260,8 @@ def make_pinned_archive(version, revision, compatibility, payload):
         if compatibility["status"] == "release" and any(
                 package["version"] != "0.2.0" for package in compatibility["packages"].values()):
             raise ValueError("Edition 4 requires Core 0.2.0 packages.")
-    if version in (5, 6):
+    if version in (5, 6, 7):
+        core_version = "0.3.1" if version == 7 else "0.3.0"
         model = json.loads(payload[V5_MODEL])
         model_pin = payload[f"{V5_FIXTURES}/dcm-guard.sha256"].decode("ascii").strip()
         environment = {"celJava": "0.14.0", "celNode": "0.6.1", "protobufJava": "4.35.1", "protobufNode": "2.6.2"}
@@ -275,7 +279,7 @@ def make_pinned_archive(version, revision, compatibility, payload):
                 "format": formats["dcm"], "digest": model_pin, "descriptorRecipe": "keir-record-descriptors/2",
             }
             if (not isinstance(example, dict) or example.get("format") != formats["artifact"]
-                    or example.get("compiler") != "keir-compiler-java/0.3.0" or example.get("environment") != environment
+                    or example.get("compiler") != f"keir-compiler-java/{core_version}" or example.get("environment") != environment
                     or example.get("modelRef") != model_ref or digest(artifact_bytes) != artifact_pin
                     or example.get("sourceDigest") != digest(source_bytes)
                     or not isinstance(source, dict) or source.get("language") != formats["language"]
@@ -287,8 +291,8 @@ def make_pinned_archive(version, revision, compatibility, payload):
             if not isinstance(scenario, dict) or scenario.get("format") != formats["scenario"]:
                 raise ValueError(f"Invalid edition {version} scenario format.")
         if compatibility["status"] == "release" and any(
-                package["version"] != "0.3.0" for package in compatibility["packages"].values()):
-            raise ValueError(f"Edition {version} requires Core 0.3.0 packages.")
+                package["version"] != core_version for package in compatibility["packages"].values()):
+            raise ValueError(f"Edition {version} requires Core {core_version} packages.")
     manifest = {
         "format": f"keir-authoring-companion/{version}",
         "sourceRevision": revision,
@@ -384,7 +388,7 @@ def main():
     check.add_argument("archive", type=Path)
     check.add_argument("--sha256", required=True, help="Trusted archive pin in sha256:<hex> form")
     for command in (create, check):
-        command.add_argument("--version", type=int, choices=(1, 2, 3, 4, 5, 6), default=1,
+        command.add_argument("--version", type=int, choices=(1, 2, 3, 4, 5, 6, 7), default=1,
                              help="Companion version (default: 1)")
         command.add_argument("--core-assets", type=Path, help="Directory containing the pinned Core release assets")
     args = parser.parse_args()

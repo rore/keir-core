@@ -25,7 +25,7 @@ Task identity: `agent-workflow:core-hardening-release`. Core branch `feat/core-h
 **Plan review:** Agent technical review: core_hardening_review. Stage A/B plan approved after the recorded compatibility refinements; Stage C detailed implementation review remains required.
 **Approvals:** User approved the specific preparation and adoption proposal with “Yes do it” and has authorized validated merges. Publication, visibility changes and live rollout are explicitly excluded.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Plan review
@@ -51,3 +51,9 @@ Agent technical review: core_hardening_review.
 Reviewed revision: `394c30c52de1d09d8925319e798dde5f495d0a3a` (implementation `152b10f` plus the three inspected follow-up fixes).
 
 Verification adequacy: approved for source qualification; the reviewer checked all 17 regenerated artifacts, original retained bytes, historical corpora and guides, exact compatibility and candidate wording. The teaching-host omission and null-safe rejection findings were fixed and the final 190-test Java coverage run passed afterward. Required exact-head CI and merge remain pending. Installed package, companion 7 and Daymark evidence remain separate and unfinished. No architecture or host authority expansion was found.
+
+## Stage A delivery and Stage B start
+Core source PR [#19](https://github.com/rore/keir-core/pull/19) merged as `5c772d02b4dc92bb28ea8aedabd34498ff6d9391`. Exact head `b399b816457944591f1bbce363082ea8fe802a46` passed contract, release-packaging and workflow CI; no review threads or required reviewer requests remained. The merged tree equals the validated head. Stage B uses this exact Core source for candidate packages and edition 7 nonguide inputs. No release or tag was created. Offline asset building exposed a missing existing Maven dependency plugin in the local cache; dependency acquisition uses the supplied proxy and CA without changing repository dependencies or security settings.
+
+## Stage C plan refinement
+Independent review found that the native before-save guard also pins the startup current definition. Preserve the selected saved host definition per invocation, with immutable captured identity, while reusing the same DCM binding only when its model digest matches. Consumer selection and authority comparisons must use the captured selected host, never mutable shared host state. Retained 0.3.0 guard regressions must exercise actual native ALLOW, DENY and unavailable-proof BLOCKED outcomes after reopening, and concurrent old/new owner selections. This preserves existing identity and authority requirements without a migration or generic compatibility layer.
