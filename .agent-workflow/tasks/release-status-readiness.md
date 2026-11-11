@@ -70,7 +70,7 @@ Core navigation selects one primary quickstart. Its second example commands and 
 
 Agent technical review: release_docs_review.
 
-Reviewed revision: Core c47983db331f0f0bafef1af10626c81ea9ed8b85; demo 3608190c84add7eaf1cb8b824ae588cd16dbdf82.
+Reviewed revision: Core e9a4ad211b6485f22c96834bf232c991f7d5e597; demo 3648e3c31ba6576fda70ac5a4f0dea473deb80bd (focused reconciliation review; original implementation review c47983d/3608190 remains applicable).
 
 Verification adequacy: Approved both full diffs with no blocking findings. Provider setup, spending/privacy, exact evidence fields, approved-proof independence, owner/revision authority, unknown-effect readback, same-request recovery, cancellation and deleted-item replay are preserved. Compatibility and historical/prototype boundaries remain exact. The reviewer checked protected paths and Redline evidence; 320 links/assets and command/table/coverage checks pass. Node follow-up and decision commands produce the expected output after documented setup in scratch. Java and Windows were not executed; their unchanged command bodies and guidance were compared. Only review/delivery metadata changes after these implementation revisions.
 
@@ -81,3 +81,5 @@ The public-guide cleanup is reviewed and validated. Remote branch docs/version-n
 ## Authorized resume and Studio reconciliation
 
 The explicit PR/merge authorization resolves the earlier delivery block. Current bases are Core 2b6ff33f704c6f71308133ba42831619d5819306 and Daymark f9ea7690adc7eeb9ee617ef6d727bb1d848688b9. Both repositories remain private. Reconciliation retained the merged Studio implementation, tests, screenshots/provenance and Core studio-public-polish Work Record unchanged. The walkthrough merged cleanly: all new Studio text and images remain, followed by the cleanup's recovery section. Branch updates retain the prepared commits and merge the new main histories without force. Focused review and refreshed validation cover this reconciliation before PR creation; both PRs will merge only after their checks pass.
+
+Focused reconciliation review: release_docs_review approved both current heads with no findings. The review verified retained parent histories, all Studio walkthrough text/images/provenance and unchanged Studio code/tests/Work Record. Against the new main bases, the only walkthrough delta is the approved recovery section and reference links. Refreshed validation passes 321 links/assets and seven cross-repository links; original content/command checks remain applicable.
