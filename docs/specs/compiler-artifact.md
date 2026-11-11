@@ -7,9 +7,9 @@
 
 The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-The published authoring contract ships in [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). The hardened 0.3.1 candidate keeps the same formats and environment pins, with its own compiler identity; it is not yet a published release. The contract keeps the Keir 2 source language and descriptor recipe while adding the [decision lifecycle](pre-operation-decisions.md). These identities version independently:
+The current compiler and runtimes are published in [Core 0.3.1](https://github.com/rore/keir-core/releases/tag/v0.3.1). This hardening release keeps the formats and environment pins introduced in Core 0.3.0, with its own compiler identity. The contract keeps the Keir 2 source language and descriptor recipe while adding the [decision lifecycle](pre-operation-decisions.md). These identities version independently:
 
-| Field | Current candidate authoring value (Core 0.3.1) |
+| Field | Current authoring value (Core 0.3.1) |
 | --- | --- |
 | Source `language` | `keir/2` |
 | DCM `format` | `keir-dcm/3` |
@@ -20,7 +20,7 @@ The published authoring contract ships in [Core 0.3.0](https://github.com/rore/k
 
 Structural schemas: [source](../../schemas/source-2/source.schema.json), [model](../../schemas/dcm-3/dcm.schema.json), [artifact](../../schemas/artifact-3/artifact.schema.json) and [scenario](../../schemas/scenario-3/scenario.schema.json). Semantic and cross-document checks remain required.
 
-Compiler 0.3.1 is the current candidate authoring compiler: it accepts source `/2` with DCM `/3` only and produces artifact `/3` with its own 0.3.1 identity. It rejects DCM `/2` and never stamps the old producer identity. The exact Core 0.2.0 contracts remain documented in the [workflow version matrix](workflow-expressions.md#version-matrix) for execution and history.
+Compiler 0.3.1 is the current published authoring compiler: it accepts source `/2` with DCM `/3` only and produces artifact `/3` with its own 0.3.1 identity. It rejects DCM `/2` and never stamps the old producer identity. The exact Core 0.2.0 contracts remain documented in the [workflow version matrix](workflow-expressions.md#version-matrix) for execution and history.
 
 Runtime 0.3.1 admits exactly the three tuples below with the same environment pins. Runtime 0.3.0 admits only the first two:
 

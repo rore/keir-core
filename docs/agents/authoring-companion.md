@@ -7,7 +7,7 @@ The companion gives an authoring assistant a versioned guide, structural schemas
 
 | Host contract | Companion | Status |
 | --- | --- | --- |
-| Core 0.3.1 candidate; source `/2`, model/artifact/scenario `/3` | [Edition 7 guide](customer-authoring-guide-v7.md) | Unpublished [candidate](authoring-companion-v7-compatibility.json); includes the full Apache license and exact 0.3.1 examples. |
+| Core 0.3.1; source `/2`, model/artifact/scenario `/3` | [Edition 7 guide](customer-authoring-guide-v7.md) | Candidate archive available on the [Core 0.3.1 release](https://github.com/rore/keir-core/releases/tag/v0.3.1); [compatibility metadata](authoring-companion-v7-compatibility.json) remains `candidate` with an empty package map. Includes the full Apache license and exact 0.3.1 examples. |
 | Core 0.3.0 contracts; licensed packaging | [Edition 6 guide](customer-authoring-guide-v6.md) | Unpublished [candidate](authoring-companion-v6-compatibility.json); includes the full Apache license. Not a replacement for published edition 5. |
 | Core 0.3.0; source `/2`, model/artifact/scenario `/3` | [Edition 5 guide](customer-authoring-guide-v5.md) | [Released with Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). [Exact package record](authoring-companion-v5-compatibility.json). |
 | Core 0.2.0; source/model/artifact/scenario `/2` | [Edition 4 guide](customer-authoring-guide-v4.md) | Released. [Exact package record](authoring-companion-v4-compatibility.json). |
@@ -19,20 +19,20 @@ Published editions 1–5 retain their original bytes and source IDs. Their ZIPs 
 
 ## Licensed candidate edition 7
 
-Edition 7 targets the distinct 0.3.1 compiler and includes the complete Apache 2.0 license. Its models, formats and environment pins are unchanged from edition 6, while its compiled examples are produced by compiler 0.3.1. Existing editions keep their original producer and source identities.
+Edition 7 targets the distinct 0.3.1 compiler and includes the complete Apache 2.0 license. Its models, formats and environment pins are unchanged from edition 6, while its compiled examples are produced by compiler 0.3.1. Existing editions keep their original producer and source identities. The unchanged `keir-authoring-v7-candidate.zip` and its separate `keir-authoring-v7-candidate.SHA256SUMS` are available on the published Core 0.3.1 release in the private repository. The archive retains its original candidate filename, guide wording and compatibility metadata; archive availability does not change its empty package map into a released-package qualification record.
 
-From a committed revision containing the edition 7 inputs:
+To reproduce the published archive, use its exact companion input commit:
 
 ```sh
-REVISION=$(git rev-parse HEAD)
+REVISION=bdd273112c7a86d255082c1de545a943cc2d87e6
 python scripts/authoring-companion.py build keir-authoring-v7-candidate.zip --version 7 --revision "$REVISION"
 ```
 
-Use the printed SHA-256 pin with `verify --version 7 --sha256 sha256:<hex>`. Offline verification checks the exact inventory, full license, source/model/artifact digests and 0.3.1 producer. The [compatibility record](authoring-companion-v7-compatibility.json) deliberately remains `candidate` with an empty package map; the [preparation record](../releases/core-0.3.1-candidate.md) records separately qualified package bytes. Neither record claims publication.
+Use the published archive pin `sha256:8a4101a64fbbf4d09b59f936083a48df39256fcba8386cee66bd5f7bcad2c4a7` with `verify --version 7 --sha256`. Offline verification checks the exact inventory, full license, source/model/artifact digests and 0.3.1 producer. The [compatibility record](authoring-companion-v7-compatibility.json) deliberately remains `candidate` with an empty package map; do not use `--core-assets` for that candidate record. The [release and preparation record](../releases/core-0.3.1-candidate.md) separately records qualified Core package bytes, publication and verified downloads. The immutable guide's unpublished-candidate wording describes its original preparation status.
 
 ## Licensed candidate edition 6
 
-Edition 6 adds the complete Apache 2.0 license to edition 5's contracts and examples. It has a separate archive format and guide, and remains a source candidate until its real release inputs are qualified. Use the retained 0.3.0-compatible source below for edition 6. The current 0.3.1 candidate uses a distinct producer and must not be substituted into this historical edition:
+Edition 6 adds the complete Apache 2.0 license to edition 5's contracts and examples. It has a separate archive format and guide, and remains a source candidate until its real release inputs are qualified. Use the retained 0.3.0-compatible source below for edition 6. The current 0.3.1 compiler uses a distinct producer and must not be substituted into this historical edition:
 
 ```sh
 REVISION=f6b51d4e36643b368452e7246fde6a78fda63999
