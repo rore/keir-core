@@ -65,7 +65,7 @@ The existing release builder built all five 0.3.1 assets from `5c772d02b4dc92bb2
 
 Edition 7 companion input source is `bdd273112c7a86d255082c1de545a943cc2d87e6`, with nonguide inputs pinned to Core `5c772d0`. Its 78,800-byte archive repeats exactly at SHA-256 `8a4101a64fbbf4d09b59f936083a48df39256fcba8386cee66bd5f7bcad2c4a7` and verifies with PATH empty. Nineteen companion tests and four release-verifier tests pass, including unchanged historical archive recipes, full license, producer/source mutations and mismatched release versions. The preparation note records actual asset hashes and tooling. No upload/download qualification, draft, tag, publication or rollout is claimed.
 
-## Result review
+## Stage B preparation result review
 Agent technical review: core_hardening_review.
 
 Reviewed revision: `bdd273112c7a86d255082c1de545a943cc2d87e6` plus preparation note SHA-256 `3ddac34c9c373321e800980d573106173326c4ae746d93a11496acc2d17bb6b6`.
@@ -91,3 +91,10 @@ Plain `git diff --check` against the demo base reports CRLF trailing-whitespace 
 
 ## Stage C complete local verification
 All 257 unchanged browser tests passed in 14.2 minutes on installed Chromium 156.0.8078.79, after the pinned local download was denied. They include scripted-authoring journeys with actual compilation/simulation/review/activation and native task checks, alongside explicitly mocked presentation tests. Build, 576 default Node passes and all 12 opt-in process passes complete the local consumer evidence at `c86ca526d338f1f326acdb686f55b3dca4b26fb5`. No passing check is rerun without a new failure or source change. Hosted exact-head run [42980663142](https://github.com/rore/keir-demo-app/actions/runs/42980663142) has installed its pinned browser and is still running the browser suite; merge waits for that result and a fresh review-thread/head check.
+
+## Result review
+Agent technical review: core_hardening_review.
+
+Reviewed revision: Daymark `c86ca526d338f1f326acdb686f55b3dca4b26fb5`, reusing approved Core source and companion reviews for unchanged packaged inputs.
+
+Verification adequacy: source, package provenance and compatibility regression coverage approved with no blocking findings. The completed local evidence covers the required artifact/host producer mismatch, unchanged saved approvals/selections, both native event cache orders and concurrent old/new guard decisions. Full build/default/process/browser verification passes. Source/package/class equivalence, repeat builds, complete licensing and exact companion input checks were independently reviewed in the preceding stages. Hosted pinned-browser CI and the final delivery receipt remain pending before merge; no public release, uploaded bytes, live rollout or unmeasured scale is inferred from these tests.
