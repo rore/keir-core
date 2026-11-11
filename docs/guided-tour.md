@@ -13,17 +13,21 @@ A user asks:
 
 > When a task in this project is completed, create a follow-up.
 
-The assistant turns the request into a proposed extension using the operations the application exposes. Keir's compiler checks it against the application's model. The application shows the proposed behavior so the user can ask for a change before continuing.
+The assistant turns the request into a proposed extension using the operations the application exposes. Keir's compiler checks it against the application's model. Daymark's **Summary** separates **When**, **Only when** and **Then**, so the user can review the proposed behavior and ask for a change before continuing. The full explanation remains available under **Rule details**.
+
+![Daymark's proposed Summary separates When, Only when and Then, while the customization is marked Not on.](images/daymark-walkthrough/02-summary.png)
+
+*The application presents the checked behavior in terms the user can review. Keir supplies the compiler checks behind it.*
 
 ## 2. Check examples and approve the version
 
 The application runs the compiled extension with example data and simulated service responses. The user compares expected and observed behavior, including cases where the extension should do nothing or cannot read the data it needs. These checks leave real saved tasks unchanged.
 
-![Daymark's simulation shows checked outcomes and an Approve this change button.](images/daymark-walkthrough/03-simulation.png)
+![Daymark's simulation shows the triggering task beside the separate created task, recorded values and expandable checked examples.](images/daymark-walkthrough/03-simulation.png)
 
-*Keir executes the extension; Daymark supplies the example data and presents the results. The screen also states which situations these checks do not cover.*
+*Keir executes the extension; Daymark supplies the example data and presents the results. This example records the new task's title, project and tags, and explicitly says that its other details were not checked.*
 
-When the behavior is right, **Approve this change** records agreement to this exact version and its saved checks. Changing the extension requires new checks and approval.
+The user reads the examples and their coverage limits, then chooses **Go to approval**. When the behavior is right, **Approve this change** records agreement to this exact version and its saved checks. Changing the extension requires new checks and approval.
 
 ## 3. Turn it on separately
 
