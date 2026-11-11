@@ -41,4 +41,10 @@ The actual extracted Bash passed 27 isolated Git fixtures: prose/image changes; 
 
 ## Result review
 
-Independent result review is pending. Recover at the local chore/ci-budget branches, which have not been uploaded; publish only the reviewed final heads to avoid redundant runs.
+Agent technical review: ci_budget_review.
+
+Reviewed revision: Core `601b3dc0b5a361a780b4b2d0816a453937f01049` and Daymark `7c43308f14f740b29b163c643dc39b16e4e4e165`.
+
+Verification adequacy: approved with no blocking findings. The reviewer independently reran all 27 extracted-Bash fixtures, structural/concurrency checks, actionlint and policy-schema validation; all passed. Exact workflow hashes matched. Subsequent recording of this result changes no reviewed workflow bytes. Native PR/main checks and current protection/review-state checks remain the delivery gate; record their authoritative results in the PR and task handoff rather than adding another public tracker.
+
+Recover on chore/ci-budget with this result record and the unchanged reviewed Daymark head. Publish each final head once; ordinary PR and main runs provide the remaining validation. No application implementation or benchmark was changed.
