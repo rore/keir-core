@@ -3,7 +3,7 @@
 
 This engineering reference describes the test workload and measured resource behavior. For runtime requirements, see the [Keir specification](../../docs/specs/runtime.md#limits).
 
-The commands below follow the Core 0.3.1 candidate and its model/artifact generation 3 fixtures. The default and concurrent phases qualify current artifacts; the serial and dense recorded measurements below remain explicitly historical Keir 2 evidence.
+The commands below follow Core 0.3.1 and its model/artifact generation 3 fixtures. The default and concurrent phases qualify current artifacts; the serial and dense recorded measurements below remain explicitly historical Keir 2 evidence.
 
 ## Java HTTP load evidence
 
