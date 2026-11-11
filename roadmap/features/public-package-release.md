@@ -14,7 +14,7 @@ Let an external developer install and embed a documented, explicitly supported K
 
 The first public milestone supports at most one mutation per run with the existing host-owned key, authorization and outcome contract. Multi-mutation composition follows later. The documentation track begins with a source-checkout binding and runtime guide for Java and Node while release qualification proceeds. Opening the repositories and publishing registry packages are separate release actions.
 
-Core 0.3.0 is the current private release, with the versioned Keir 3 contracts and authoring companion edition 5. Daymark consumes these published packages. Format compatibility is versioned independently of package versions. The [public onboarding follow-up](public-onboarding-readiness.md) addresses first-use and documentation gaps without undoing the completed package qualification.
+Core 0.3.1 is the current release in the private repository, with the [supported format and producer matrix](../../docs/specs/compiler-artifact.md). Daymark consumes the exact published compiler/runtime bytes and the licensed companion edition 7 guide. That companion archive is available on the release, but its immutable candidate wording and empty package compatibility map remain unchanged; archive availability is not a new released-package qualification row. Package versions are independent of document formats. The [public onboarding follow-up](public-onboarding-readiness.md) is delivered.
 
 ## In Scope
 
@@ -36,11 +36,15 @@ Supporting or migrating development formats, requiring AI or every optional prop
 
 ## Notes
 
-The [Core 0.3.0 release](https://github.com/rore/keir-core/releases/tag/v0.3.0), including authoring companion edition 5, is qualified and published privately. The [pre-operation feature](pre-operation-guard.md) records its package, conformance, guide and download-verification evidence. Public onboarding is tracked separately from package delivery.
+The [Core 0.3.1 release](https://github.com/rore/keir-core/releases/tag/v0.3.1) is published as a normal release. Its [release and preparation record](../../docs/releases/core-0.3.1-candidate.md) records repeat-build identity, installed Java/Node consumers, compatibility regressions and verified downloads of all seven assets. The [Windows delivery record](../../.agent-workflow/tasks/windows-authoring-guide-integrity.md) records Daymark's later data-preserving update and guide checkout fix. That rollout made no live provider request. Repository visibility, registry publication, anonymous empty-cache access and broader production-containment claims remain separate, not unfinished package delivery.
+
+### Earlier release evidence
+
+The [Core 0.3.0 release](https://github.com/rore/keir-core/releases/tag/v0.3.0), including authoring companion edition 5, remains qualified and published privately. The [pre-operation feature](pre-operation-guard.md) retains its original package, conformance, guide and download-verification evidence.
 
 The earlier [Core 0.2.0](https://github.com/rore/keir-core/releases/tag/v0.2.0) and [authoring companion v4](https://github.com/rore/keir-core/releases/tag/authoring-v4) passed package verification and download comparisons. Java and Node agreed on 28 shared scenarios and 51 validation vectors. Daymark's four native workflows passed the integrated build, Node and Chromium qualification using these published assets. The running demo was updated and its served browser asset verified. Release packaging and verification are scripted, and the [release checklist](../../docs/releasing.md) includes updating the running demo. Public launch still requires the privacy review and a repository visibility decision. [Core qualification](https://github.com/rore/keir-core/actions/runs/42258542838) · [Daymark qualification](https://github.com/rore/keir-demo-app/actions/runs/42261861370)
 
-The entries below retain earlier release evidence. Current dependencies and format guidance are documented in the [Keir 2 version matrix](../../docs/specs/workflow-expressions.md#version-matrix).
+The entries below retain earlier release evidence. Current dependencies and format guidance are documented in the [compiler/artifact compatibility matrix](../../docs/specs/compiler-artifact.md#source-and-artifact-identity); the [Keir 2 version matrix](../../docs/specs/workflow-expressions.md#version-matrix) retains its named historical contract.
 
 **Private release delivered:** [Core 0.1.0](https://github.com/rore/keir-core/releases/tag/v0.1.0) and [authoring companion v3](https://github.com/rore/keir-core/releases/tag/authoring-v3) are published in the private repository. The Core prerelease uses the Keir 1 source, model, artifact and verification formats. All eight published files matched the verified downloads, and the companion verifier checked the three Core package digests. [Daymark](https://github.com/rore/keir-demo-app/commit/e496f82c4b3ef97b3eaf0e946e256002960e0e41) consumes the exact published runtime, compiler and guide. A clean install and both scripted-provider Studio journeys passed through example checks, separate approval and activation, and confirmed native task creation. The local preview uses a fresh database, with the previous data available for rollback. Public launch still requires the privacy review and a separate repository visibility decision.
 

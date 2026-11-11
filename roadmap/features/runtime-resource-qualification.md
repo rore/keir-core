@@ -1,7 +1,7 @@
 ---
 id: "runtime-resource-qualification"
 title: "Qualify CPU, memory and deadline containment"
-status: "active"
+status: "queued"
 priority: "high"
 commitment: "committed"
 milestone: "Release an embeddable Keir library"
@@ -11,6 +11,8 @@ repo: "keir-core"
 ## Summary
 
 Close the production resource-evidence gap while preserving the already tested restricted scalar profile.
+
+Bounded measurements are delivered; the residual production-containment work is unassigned. Queued status does not invalidate earlier measurements or imply that the existing demo cannot execute. Current package hardening and installed-consumer qualification are recorded in the [Core 0.3.1 release record](../../docs/releases/core-0.3.1-candidate.md); those checks do not establish arbitrary host-code preemption or unmeasured scale.
 
 ## In Scope
 
@@ -36,11 +38,11 @@ Assuming worker limits cover all process memory, adopting an isolation platform 
 
 **Still open:** Worst-case admitted CPU and memory behavior, longer-duration retention, capacity beyond the serial workload, general near-ceiling artifact admission, and enforceable limits for synchronous evaluation. The 1 MiB probe remains byte and structural rejection evidence.
 
-**Current Keir 2 baseline:** [The delivered expression slice](enrich-followup-expressions.md) adds packaged Java/Node parity and serial whole-artifact measurements, including deadline expiry before a write and retained confirmed evidence after a later read expires. These qualify the stated serial workloads, not general concurrency or CPU preemption.
+**Keir 2 measurement baseline:** [The delivered expression slice](enrich-followup-expressions.md) adds packaged Java/Node parity and serial whole-artifact measurements, including deadline expiry before a write and retained confirmed evidence after a later read expires. These retain their recorded source/producer identities and qualify the stated serial workloads, not general concurrency or CPU preemption.
 
-**Next bounded measurement assigned:** Exercise one compiler-produced Keir 2 artifact that fully evaluates eight bindings and a verified maximum-list membership workload, using identical bytes in Java and Node. Each runtime receives 100 warmups and 5,000 measured serial invocations under the existing isolated supervisor, a 45-second worker watchdog, 256 MiB engine heap and 512 MiB observed process budget. Record CPU, latency and post-GC retention; the last three retained-heap samples must span no more than the larger of 8 MiB or 10% of warmed heap. This is a screening threshold, not proof of leak freedom. Stop on a resource breach rather than widening limits. Sustained concurrency and hard containment remain separate, unqualified work.
+**Completed bounded measurement contract:** The accepted dense serial screen below exercised one compiler-produced Keir 2 artifact with fully evaluated bindings and maximum-list membership, using identical bytes in Java and Node. Its agreed bounds were 100 warmups and 5,000 measured serial invocations per runtime under the isolated supervisor, a 45-second watchdog, 256 MiB engine heap and 512 MiB observed process budget. The last three retained-heap samples had to span no more than the larger of 8 MiB or 10% of warmed heap. This historical screening threshold is not proof of leak freedom or a new assignment. Sustained concurrency and hard containment remain separate, unqualified work.
 
-**Dense serial screen accepted:** [The opt-in phase](../../conformance/resource-qualification/README.md#fully-evaluated-keir-2-membership-workload) verified 473 checked nodes and 80 fully reached membership scans. Both runtimes completed 100 warmups plus 5,000 measured invocations with identical artifact/outcome digests and zero dispatch. The run took 14.064 seconds and passed the agreed observed-memory and retained-heap screens. [Independent integration review](../../.agent-workflow/tasks/dense-resource-qualification.md#result-review) inspected the code and asserted the retained report. This closes that bounded measurement only; the broader feature stays active. Adapt the producer/fixture path deliberately for the next DCM/compiler release and keep the historical sample's identity intact.
+**Dense serial screen accepted:** [The opt-in phase](../../conformance/resource-qualification/README.md#fully-evaluated-keir-2-membership-workload) verified 473 checked nodes and 80 fully reached membership scans. Both runtimes completed 100 warmups plus 5,000 measured invocations with identical artifact/outcome digests and zero dispatch. The run took 14.064 seconds and passed the agreed observed-memory and retained-heap screens. [Independent integration review](../../.agent-workflow/tasks/dense-resource-qualification.md#result-review) inspected the code and asserted the retained report. This closes that bounded measurement only; broader qualification remains queued. Keep the historical sample's identity intact when adapting future producer/fixture paths.
 
 **Current compiler alignment verified:** The runtime developer updated the three existing harness paths needed by Core 0.3: current fixture selection, the already supplied title model at Node binding, and the independent Inventory-model assertion. Syntax checks pass. Three actual compiler-produced examples (normal, title and Inventory) prepare and execute once in each runtime with matching complete outcomes and expected artifact pins. The integration owner inspected the three-file diff, checked the final file hashes and independently compared the report objects and artifact/model digests. This is command-generation maintenance, not a new benchmark, resource allowance or command option. Historical Keir 2 measurements retain their original identity and do not qualify the new generation's full resource workload.
 

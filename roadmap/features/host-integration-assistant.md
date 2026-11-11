@@ -33,7 +33,7 @@ An agent runtime in core, automatic certification, mandatory API importers or a 
 
 ## Notes
 
-Remaining skill/checkpoint distribution work is unassigned and queued behind the current real-task customization increment. The delivered runnable guide and its verification remain valid; this status does not undo that contribution.
+Skill/checkpoint distribution and a newly approved host-integration walkthrough remain unassigned and queued. The real-task customization increment is delivered, not an active dependency hold. The [current coding-assistant guide](../../docs/agents/host-integration-assistant.md) covers the maintained binding, authority and pre-operation contracts; its original catalog-bound runnable walkthrough is explicitly archived. Existing guide evidence remains valid for its recorded scope without claiming the unperformed visitor skill/checkpoint journey.
 
 **Dependencies:** [real-task-reads](../features/real-task-reads.md); [machine-readable-contracts](../features/machine-readable-contracts.md).
 

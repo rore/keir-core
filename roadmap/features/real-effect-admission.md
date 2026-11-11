@@ -10,9 +10,9 @@ repo: "keir-core"
 
 ## Summary
 
-Bind a host DCM and complete compatible implementations, prepare an extension, and execute a real single WRITE with fresh context and honest outcomes. The corrected effect/4 API needs no deployment credential. Legacy effect/2 remains SIMULATION_ONLY; old /3 semantics stay on explicit legacy paths.
+Bind a host DCM and complete compatible implementations, prepare an extension, and execute at most one real WRITE with fresh context and honest outcomes. The current host API needs no deployment credential. Supported source/model/artifact tuples follow the [compiler and runtime compatibility matrix](../../docs/specs/compiler-artifact.md); earlier internal profile names below identify historical evidence, not current public format labels.
 
-**Current assignment — corrective implementation:** The user approved the [audit](../../docs/internal/real-application-design-audit.md) and requested the necessary changes. The [corrective work record](../../.agent-workflow/tasks/host-contract-alignment.md) owns the exact generic contract, consumer/state inventory, compatibility choice and subsequent reviewed core correction. Inventories and independent plan review are complete. Manager accepts the simplified bind/prepare/run contract and bounded effect/4 compatibility choice, and releases isolated compiler/Java/Node correction with the reviewed test/package plan. Earlier qualification machinery remains legacy-only; corrected source/result verification is pending. Preserve host guarantees and prior measured evidence while removing prescribed core deployment-report/build gates. Source release follows the concrete corrected plan and baseline-alignment review.
+**Delivered correction:** The [audit](../../docs/internal/real-application-design-audit.md) and [host-contract alignment](../../.agent-workflow/tasks/host-contract-alignment.md) led to the reviewed simple bind/prepare/invoke boundary and explicit host-owned authority. Compiler/Java/Node correction, shared and installed conformance, hosted CI and the native demo integration are complete, as recorded below and in [real task integration](demo-task-integration.md). The [Core 0.3.1 release record](../../docs/releases/core-0.3.1-candidate.md) supplies the later package/compatibility evidence. No corrective implementation assignment or deployment-report gate remains open on this card.
 
 ## In Scope
 
@@ -36,7 +36,7 @@ Multiple writes, self-certifying declarations, exactly-once claims, automatic re
 
 **Design input:** [Native contracts and evidence, sections 3 and 8](../../docs/internal/design-baseline/public/domain-model-v0.md); [Host integration, sections 5-7 and 12](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md); [Keys and admission, sections 3-7](../../docs/internal/design-baseline/public/host-owned-idempotency-and-multi-effect-contracts-v0.7.md).
 
-Design this alongside the native event/effect prototype, without a dependency cycle: the prototype supplies requirements; real execution is accepted only after this gate. Rich collections and AI are not prerequisites.
+The checkpoints below preserve the earlier prototype-to-correction sequence and its then-pending gates. The accepted completion at the end supersedes those pending statements; neither rich collections nor AI is a prerequisite to executing a supported approved artifact.
 
 **Historical effect/3 contract:** [Real single-effect admission](../../docs/specs/real-single-effect-admission.md) and [native handoff](../../docs/internal/real-task-effect-handoff.md) pass independent architecture review, including the frozen host clarification delta. This selects a new effect/3 boundary without changing effect/2. The concrete source/test plan under [the implementation record](../../.agent-workflow/tasks/real-single-effect-admission.md) passes independent review and implementation is underway. Final combined conformance, packaged verification and independent result review remain. Design and plan approval do not qualify production use or the native host.
 

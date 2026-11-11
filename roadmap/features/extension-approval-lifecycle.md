@@ -1,7 +1,7 @@
 ---
 id: "extension-approval-lifecycle"
 title: "Review, activate, disable and roll back exact extension revisions"
-status: "active"
+status: "done"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -10,7 +10,7 @@ repo: "keir-demo-app"
 
 ## Summary
 
-**Current assignment:** Real-task lifecycle implementation and verification resume under the reviewed host-contract correction. Preserve exact revisions, independent examples, separate approval/use, captured admissions, permanent revocation and historical receipts. The candidate must pass actual effect/4 runtime/browser and business-persona acceptance before normal rollout; old approvals never become write authority.
+**Delivered for the Daymark host:** Exact revisions, independent examples, separate approval/activation, captured event admissions, permanent revocation, history, deletion and recovery are implemented and documented. The current workflow covers before-create decisions and both post-commit task hooks; it is not limited to the earlier read-only demo. The [lifecycle reference](https://github.com/rore/keir-demo-app/blob/main/docs/read-extension-lifecycle.md) defines approval/evidence identity and invalidation, while the [native host contract](https://github.com/rore/keir-demo-app/blob/main/docs/task-effects.md#native-outcomes) distinguishes active selection from captured admissions and current native authority. The [accepted application record](../../.agent-workflow/tasks/studio-business-understanding-implementation.md#result-review) and [later packaged rollout](../../.agent-workflow/tasks/windows-authoring-guide-integrity.md#delivery) retain review, regression and delivery evidence. No lifecycle implementation assignment remains open here.
 
 Let a business user understand checked examples, approve an exact customization and separately turn it on, with later disable/restore and retained history. The demo authors through agent chat; manual source examples belong in core.
 
@@ -30,12 +30,16 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 
 ## Done When
 
-- [ ] Design/spec: define approval authority, invalidation/reapproval and lifecycle behavior, including selection versus event admission.
+- [x] Design/spec: define approval authority, exact checked evidence, invalidation/reapproval, selection versus event admission, fresh native authority and durable revocation across reenable/restart.
 - [x] Implementation: manually compile, simulate, inspect actual behavior, approve and activate an exact revision; disable and roll back it.
 - [x] Verification: tampering, unauthorized/cross-user approval or selection, edits after review, restart, revoked dependencies and old snapshot coexistence behave as specified. The owning demo user may approve their own extension where host policy permits; the agent cannot self-approve.
 - [x] Customization deletion: confirmed removal, selected-item handling, owner isolation and protection against stale work or replay resurrecting the item.
 
 ## Notes
+
+**Current acceptance:** The [verification guide](https://github.com/rore/keir-demo-app/blob/main/tests/README.md) separates actual compiler/runtime/native/lifecycle checks from mocked UI projections and scripted providers. Compatible old/new producer artifacts retain exact approvals, selections and receipts across all three hooks. [Current customer actions](https://github.com/rore/keir-demo-app/blob/main/docs/customization-walkthrough.md) demonstrate explicit review, approval, separate activation and a real native outcome. Neither a second live provider nor a generic multi-host lifecycle service is a completion requirement for this demo-owned card; those broader scopes keep their own evidence boundaries.
+
+The earlier increments below retain their original source, scope and tests. Their read-only limitations and then-open contract statements are superseded by the current Daymark contract and accepted delivery above, not new assignments.
 
 **Deletion delivered:** [Customization deletion](https://github.com/rore/keir-demo-app/commit/0b4f6d9060c95a458824db84cac3e7e52a65c671) is reviewed, pushed and running in the normal demo. Each card has a confirmed Delete action; deleting the selected item turns it off atomically. Owner/stale/busy checks, terminal replay guards and retained audit/accounting protect existing work. Independent review, real compiler/runtime browser deletion, desktop/mobile confirmation and current-data migration checks pass. [Hosted CI](https://github.com/rore/keir-demo-app/actions/runs/41827591355) passes all 265 fast tests and 131 browser cases after two existing browser fixtures/assertions were corrected without weakening behavior checks. The backed-up rollout preserves all 18 migrated tables, settings and accounting and serves the exact tested assets. Verified recovery archives and task cleanup are recorded in the [Work Record](../../.agent-workflow/tasks/customization-deletion.md). The broader approval-contract design remains open.
 
@@ -43,7 +47,7 @@ An LLM requirement, a generic registry service in core or implicit migration to 
 
 **First increment delivered:** Demo [df06843](https://github.com/rore/keir-demo-app/commit/df0684301ff4a3909d7b71d019e5c63d93d23193) adds the actual read-only Studio lifecycle: choose a prepared program, run six-case simulation, inspect exact evidence, explicitly approve and activate it for one user, observe real task advice, then disable or restore a named previous choice. Native tasks and other users remain unaffected. Transactional migration, operator provenance, owner-scoped evidence/approval, selection generations, stale-response suppression and bounded execution are implemented. Independent result review approved the corrected source; 38 fast checks, nine native browser journeys, eight lifecycle journeys and the standalone smoke pass. [Hosted CI passes](https://github.com/rore/keir-demo-app/actions/runs/41432168250). See the [Work Record](../../.agent-workflow/tasks/read-extension-lifecycle.md) and [usage/contract guide](https://github.com/rore/keir-demo-app/blob/main/docs/read-extension-lifecycle.md).
 
-**Remaining:** The implemented and verified scope is the local read-only host, including prepared and newly authored revisions. This feature stays active for a normative approval contract covering selection versus event admission and broader hosts. Real effects belong to later milestones. AI authoring is tracked separately in [conversational authoring](conversational-authoring.md).
+**Earlier scope, now superseded:** The first increment qualified a local read-only host. Subsequent Daymark deliveries define and verify selection versus captured event admission, real effects and before-create authority. This closes the owning host's lifecycle feature, not a generic registry or certification of every future host. Additional host proofs belong with their own integration/reusable-conformance work; [conversational authoring](conversational-authoring.md) separately retains the live-provider matrix gap.
 
 **Design input:** [Review and immutable activation, sections 1 and 6](../../docs/internal/design-baseline/public/simulation-and-authoring-v0.md); [Selection/lifecycle, sections 5, 7 and 11](../../docs/internal/design-baseline/public/host-integration-and-hook-contracts-v0.5.md).
 
