@@ -80,3 +80,11 @@ Agent technical review: independent non-implementer result review PASS for the e
 Reviewed revision: demo aca2068 plus the two frozen file hashes above. The reviewer noticed a transient modified-status flag on the guide despite identical HEAD, index and working bytes. Refreshing the staged metadata confirms the guide has no diff; only .gitattributes and the regression test are staged.
 
 Verification adequacy: the new test reproduces the specific Windows conversion even on a non-Windows CI worker, then checks the actual loader. Existing authoring tests cover the unchanged trust policy; copied-data readiness and saved-rule browser checks cover this installation. Broad full CI is reused for the unchanged baseline application code. No live provider response has been tested by this deployment task.
+
+## Delivery
+
+Accepted and delivered as demo [2397667](https://github.com/rore/keir-demo-app/commit/2397667293be19900eed790ca47cdd9208c1f5dd). The commit contains only the reviewed attribute change and checkout regression. Both repositories are published on main; the updated local demo runs the pinned Keir 0.3.1 package.
+
+The actual served HTML, JavaScript and CSS match the built deployment byte-for-byte. Live authoring and native execution report available; both saved customizations remain readable. Startup preserved schema 14, database integrity, foreign keys, every existing table/row and exact provider-setting bytes. The old lock was recovered only after confirming its recorded owner had stopped and its port was free. No unrelated process, global tool, configuration, provider/model choice or user-data location changed.
+
+The obsolete deployment checkout was removed after verifying the new process and data. Only the active deployment and compact stopped-state backup are retained. The same desktop/mobile Summary and Simulation journeys passed on the isolated data copy. No paid provider turn was performed; that remains outside these delivery checks.
