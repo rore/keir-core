@@ -6,7 +6,7 @@ The specification defines the language, host model, compiled artifact and execut
 <a id="current-behavior"></a>
 ## Current contract
 
-These primary references describe [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). Its compiler accepts source `keir/2` against `keir-dcm/3` and produces `keir-artifact/3`. The Core packages and authoring companion edition 5 are available on that release. For released Core 0.2.0, use the [matching specification snapshot](https://github.com/rore/keir-core/tree/43f28600d8db460db6f22b48c2d4c2c0de9c52b7/docs/specs) and [edition 4 companion](../agents/customer-authoring-guide-v4.md).
+These primary references describe [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). Its compiler accepts source `keir/2` against `keir-dcm/3` and produces `keir-artifact/3`. The Core packages and authoring companion edition 5 are available on that release. The unpublished [0.3.1 candidate](../releases/core-0.3.1-candidate.md) adds hardening with its own compiler identity; current compiled fixtures use that producer while retaining the same formats. For released Core 0.2.0, use the [matching specification snapshot](https://github.com/rore/keir-core/tree/43f28600d8db460db6f22b48c2d4c2c0de9c52b7/docs/specs) and [edition 4 companion](../agents/customer-authoring-guide-v4.md).
 
 The host chooses one of two lifecycles. An event extension runs after the original operation commits and may contain at most one possible write. A pre-operation decision runs before the native operation, may only read, and returns a typed `ALLOW` or `DENY`. The host consumes that decision and retains its native permission, consistency and commit checks. Both runtimes execute the same artifact bytes.
 
@@ -37,7 +37,7 @@ Each identifier versions one contract independently.
 
 Package versions identify compiler and runtime releases. Equal suffixes or package version numbers alone establish no compatibility. Preparation checks the complete artifact/model/producer/descriptor/environment tuple. Binding also checks the capability versions and native key type supplied by the host.
 
-Runtime 0.3.0 supports two exact execution pairs: existing `/2` artifacts and models from compiler 0.2.0, and new `/3` artifacts and models from compiler 0.3.0. Both use descriptor recipe `/2` and the exact dependency pins. Mixed pairs fail. Compiler 0.3.0 authors only against `/3` models; retaining old artifacts is an execution path, not a second authoring compiler mode. See the [exact matrix](compiler-artifact.md#source-and-artifact-identity).
+Published runtime 0.3.0 supports two exact execution pairs: existing `/2` artifacts and models from compiler 0.2.0, and new `/3` artifacts and models from compiler 0.3.0. Both use descriptor recipe `/2` and the exact dependency pins. Mixed pairs fail. Candidate runtime 0.3.1 also admits producer 0.3.1 for the `/3` pair. Candidate compiler 0.3.1 authors only against `/3` models; retaining old artifacts is an execution path, not a second authoring compiler mode. See the [exact matrix](compiler-artifact.md#source-and-artifact-identity).
 
 Keep existing approved artifacts with their original model snapshots and bytes. Publish the current authoring catalog as `/3`; compile and review new or edited extensions against it. Recompilation creates a new artifact requiring its own approval. Package installation must not silently recompile or deactivate existing selected extensions.
 

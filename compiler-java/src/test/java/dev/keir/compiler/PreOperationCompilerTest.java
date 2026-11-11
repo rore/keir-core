@@ -127,7 +127,7 @@ class PreOperationCompilerTest {
                 map(map(source.get("return")).get("record")).put("decision", Map.of("literal", value));
                 var artifact = compiled(source, model);
                 assertEquals("keir-artifact/3", artifact.get("format"));
-                assertEquals("keir-compiler-java/0.3.0", artifact.get("compiler"));
+                assertEquals("keir-compiler-java/0.3.1", artifact.get("compiler"));
                 assertEquals("keir-dcm/3", map(artifact.get("modelRef")).get("format"));
                 assertEquals("keir-record-descriptors/2", map(artifact.get("modelRef")).get("descriptorRecipe"));
                 assertEquals(ENV.packages(), artifact.get("environment"));

@@ -92,7 +92,7 @@ Serialize descriptors deterministically. Validation rejects unknown fields and a
 
 ## Version matrix
 
-This table preserves the exact released Core 0.2.0 pair. New authoring uses the [Core 0.3.0 matrix](compiler-artifact.md#source-and-artifact-identity). Its source and descriptor recipe retain `/2`; model, artifact and scenario use `/3`.
+This table preserves the exact released Core 0.2.0 pair. New authoring uses the [current version matrix](compiler-artifact.md#source-and-artifact-identity). Its source and descriptor recipe retain `/2`; model, artifact and scenario use `/3`.
 
 | Component | Core 0.2.0 |
 | --- | --- |

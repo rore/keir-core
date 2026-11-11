@@ -92,7 +92,7 @@ class GenericHookCompilerTest {
             assertEquals(Set.of("format","compiler","environment","sourceDigest","modelRef","entrypoint",
                     "expressions","steps","return"),artifact.keySet());
             assertEquals("keir-artifact/3",artifact.get("format"));
-            assertEquals("keir-compiler-java/0.3.0",artifact.get("compiler"));
+            assertEquals("keir-compiler-java/0.3.1",artifact.get("compiler"));
             assertEquals(StrictData.digest(StrictData.parse(source,"/source")),artifact.get("sourceDigest"));
             assertEquals(Map.of("celJava","0.14.0","celNode","0.6.1","protobufJava","4.35.1",
                     "protobufNode","2.6.2"),artifact.get("environment"));
@@ -122,7 +122,7 @@ class GenericHookCompilerTest {
                 "artifact.schema.json")),"/schema"));
         assertEquals("urn:keir:schema:artifact:3",schema.get("$id"));
         var properties=map(schema.get("properties"));
-        assertEquals(ENV.compiler(),map(properties.get("compiler")).get("const"));
+        assertEquals(List.of("keir-compiler-java/0.3.0", ENV.compiler()),map(properties.get("compiler")).get("enum"));
         var environment=map(map(properties.get("environment")).get("properties"));
         var packages=new TreeMap<String,Object>();
         environment.forEach((key,value) -> packages.put(key,map(value).get("const")));

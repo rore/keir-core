@@ -84,7 +84,7 @@ The [structural checker](../../scripts/check-keir-contracts.py) checks the avail
 
 ## Example source
 
-The complete [input-only decision source](../../conformance/keir-3/source-guard-input.json) reads a Boolean and returns ALLOW or DENY with a message. The [READ-based source](../../conformance/keir-3/source-guard.json) first calls a host capability, then combines its result with the input. Both use the exact [decision model](../../conformance/keir-3/dcm-guard.json). See the [walkthrough](../decision-walkthrough.md) for their roles and independent native checks. These `/3` fixtures match the [Core 0.3.0 release](https://github.com/rore/keir-core/releases/tag/v0.3.0).
+The complete [input-only decision source](../../conformance/keir-3/source-guard-input.json) reads a Boolean and returns ALLOW or DENY with a message. The [READ-based source](../../conformance/keir-3/source-guard.json) first calls a host capability, then combines its result with the input. Both use the exact [decision model](../../conformance/keir-3/dcm-guard.json). See the [walkthrough](../decision-walkthrough.md) for their roles and independent native checks. Their formats are unchanged from Core 0.3.0; the current compiled fixtures use the distinct 0.3.1 candidate producer in the [version matrix](compiler-artifact.md#source-and-artifact-identity).
 
 <a id="source-and-example"></a>
 <a id="implementation-reference-earlier-source-rules-and-example"></a>

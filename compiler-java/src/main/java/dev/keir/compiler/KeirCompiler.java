@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 /** Compiles the public Keir single-mutation contract. */
 public final class KeirCompiler {
-    public static final String IDENTITY = "keir-compiler-java/0.3.0";
+    public static final String IDENTITY = "keir-compiler-java/0.3.1";
     private static final Map<String, String> PACKAGES = Map.of("celJava", "0.14.0", "celNode", "0.6.1",
             "protobufJava", "4.35.1", "protobufNode", "2.6.2");
     private static final Set<String> RESERVED = Set.of("input", "as", "break", "const", "continue", "else",

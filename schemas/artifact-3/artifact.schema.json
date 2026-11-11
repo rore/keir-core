@@ -21,7 +21,10 @@
       "const": "keir-artifact/3"
     },
     "compiler": {
-      "const": "keir-compiler-java/0.3.0"
+      "enum": [
+        "keir-compiler-java/0.3.0",
+        "keir-compiler-java/0.3.1"
+      ]
     },
     "environment": {
       "type": "object",
