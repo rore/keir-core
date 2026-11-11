@@ -20,7 +20,7 @@ Task identity: `agent-workflow:ci-budget`. Manager owns any roadmap reconciliati
 **Plan review:** Agent technical review: ci_budget_review; approved planning commit 0f92c82 with no blocking findings. See Plan review below.
 **Approvals:** User authorized the described CI reduction, appropriate PRs and merges after validation. Visibility changes are exclusively owner-managed.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Blocked
 <!-- agent-workflow:end -->
 
 ## Discovery and recovery
@@ -48,3 +48,7 @@ Reviewed revision: Core `601b3dc0b5a361a780b4b2d0816a453937f01049` and Daymark `
 Verification adequacy: approved with no blocking findings. The reviewer independently reran all 27 extracted-Bash fixtures, structural/concurrency checks, actionlint and policy-schema validation; all passed. Exact workflow hashes matched. Subsequent recording of this result changes no reviewed workflow bytes. Native PR/main checks and current protection/review-state checks remain the delivery gate; record their authoritative results in the PR and task handoff rather than adding another public tracker.
 
 Recover on chore/ci-budget with this result record and the unchanged reviewed Daymark head. Publish each final head once; ordinary PR and main runs provide the remaining validation. No application implementation or benchmark was changed.
+
+## Delivery blocker
+
+Local verification and independent result review are complete. Automatic external-action review rejected creation of the public Core PR, requiring explicit authority for publishing the PR and description. The owner history was checked; the denied operation was not retried, and no alternate publication or merge route was attempted. Both final workflow branches are available for review; no task CI runs have been queued. Main, repository protection, billing and visibility remain untouched by this task. Resume by resolving the PR-publication approval, then recheck current branches, protection, required statuses and reviews before ordinary PR/main verification and guarded delivery.
