@@ -3,7 +3,8 @@
 <a id="learn-and-run-keir"></a>
 ## Get started
 
-- [Getting started](quickstart.md) explains the follow-up extension and shows how to run, change, and compile it.
+Start with [Getting started](quickstart.md): run one follow-up extension, change it and compile your version.
+
 - [Install released packages](installation.md) sets up the compiler and both runtimes outside this repository.
 - [How Keir works](guided-tour.md) follows the user flow with screenshots, then explains the source and application model.
 

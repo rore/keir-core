@@ -40,8 +40,9 @@ An event extension may include at most one call that can change data, even if co
 
 ## Start here
 
-- [Install released packages](docs/installation.md): use published compiler and runtime packages in your application without building this repository.
-- [Run the repository example](docs/quickstart.md): build local packages, run the follow-up extension and change its title.
+Start with [Getting started](docs/quickstart.md) to run and change one extension.
+
+- [Install released packages](docs/installation.md) when embedding Keir without building this repository.
 - [Understand the flow](docs/guided-tour.md): follow a request through review and execution, then explore the code.
 - [Integrate Keir](docs/embedding.md): expose application operations and call the compiler and runtime from your code.
 - [Build an authoring assistant](docs/agents/extension-assistant.md): connect a customer conversation to compilation, simulation and review.

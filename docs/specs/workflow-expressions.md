@@ -1,6 +1,6 @@
 # Keir 2 workflow expressions
 
-This reference defines the Keir 2 workflow expressions introduced in Core 0.2.0 and retained by [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). Source remains `keir/2`; the [current version matrix](compiler-artifact.md#source-and-artifact-identity) identifies the model, artifact and package pair.
+This reference defines the Keir 2 workflow expressions introduced in Core 0.2.0. Source remains `keir/2`; the [current version matrix](compiler-artifact.md#source-and-artifact-identity) identifies the model, artifact and package pair.
 
 Keir 2 adds bounded list membership, optional values and elapsed-time expressions. The host defines input data, operations and lifecycle. It binds a model and prepares the compiled artifact. Event extensions run after commit; read-only [decisions](pre-operation-decisions.md) run before a native operation under the `/3` model contract.
 

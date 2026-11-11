@@ -16,7 +16,7 @@ The Java and Node.js hosts run the same compiled bytes with simulated services. 
 
 Each follow-up host prints three outcomes. A matching completion creates a follow-up, a completion in another project skips the write, and a lost response leaves the write unconfirmed.
 
-[Run the decision in both languages](../docs/quickstart.md#try-a-pre-operation-decision) to see ALLOWED, DENIED and BLOCKED with separate simulated native-attempt counts. The [walkthrough](../docs/decision-walkthrough.md) explains the host's own commit responsibilities.
+[Run the decision in both languages](../docs/decision-walkthrough.md#run-the-example) to see ALLOWED, DENIED and BLOCKED with separate simulated native-attempt counts. The [walkthrough](../docs/decision-walkthrough.md) explains the host's own commit responsibilities.
 
 ## Compile the rule
 

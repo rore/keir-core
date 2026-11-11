@@ -5,11 +5,11 @@ Use [Contributing](../CONTRIBUTING.md#build-and-test) to build the repository an
 <a id="current-single-write-behavior-verification"></a>
 ## Current single-write behavior verification
 
-The current published release is [Core 0.3.1](https://github.com/rore/keir-core/releases/tag/v0.3.1). Its [release and preparation record](releases/core-0.3.1-candidate.md) identifies the qualified source, compiler/runtime package checks and verified published downloads.
+Package verification follows the [release checklist](releasing.md). Each release records its qualified source, package checks and verified downloads.
 
 The historical [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) qualification baseline used source [`b232944`](https://github.com/rore/keir-core/commit/b2329440dd2a25acc547f3ebfea214748d912022). Its [contract CI run](https://github.com/rore/keir-core/actions/runs/42576060993) passed and compared 39 shared scenarios and 51 raw verification vectors across Java and Node, including post-commit effects and read-only pre-operation decisions. That run checked normalized complete outcomes for exact parity, alongside compiler, runtime and installed-host tests.
 
-Use the [current corpus guide](../conformance/keir-3/README.md) for fixture layout and commands. The retained [Keir 2 corpus](../conformance/keir-2/README.md) checks the older execution contract; compiler 0.3.1 authors against `/3` models. Test totals belong to their source revision and run, rather than describing every later checkout.
+Use the [current corpus guide](../conformance/keir-3/README.md) for fixture layout and commands. The retained [Keir 2 corpus](../conformance/keir-2/README.md) checks the older execution contract; the [compatibility matrix](specs/compiler-artifact.md#source-and-artifact-identity) distinguishes current authoring from retained execution. Test totals belong to their source revision and run, rather than describing every later checkout.
 
 The [release installation guide](installation.md#verification-boundary) records a separate check of the packaged compiler and both runtimes outside the source repositories. These checks cover controlled hosts. Real service guarantees and production resource containment require separate qualification; see [resource qualification](../conformance/resource-qualification/README.md).
 
