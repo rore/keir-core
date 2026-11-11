@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  redline:
+  agent-workflow:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -114,24 +114,6 @@ jobs:
             build/diff-unified.patch
             build/base-ref.txt
           if-no-files-found: error
-
-  agent-workflow:
-    needs: [redline]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: python -m pip install pyyaml jsonschema
-      - uses: actions/download-artifact@v4
-        with:
-          name: redline-evidence
-          path: build
 
       - name: Report workflow findings
         env:

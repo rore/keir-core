@@ -17,12 +17,28 @@ Task identity: `agent-workflow:ci-budget`. Manager owns any roadmap reconciliati
 **Material assumptions:** The narrow Daymark prose/raster-image paths are not runtime inputs; any executable/prototype/unknown path requires full verification. Whole git diffs avoid hosted path-filter truncation. PR updates may supersede prior PR work because each diff is cumulative; main commits must not cancel each other, as a following docs diff could otherwise suppress preceding code validation. If protection/status requirements change, preserve them and revise the plan before delivery.
 **Plan:** Keep one Daymark verify job and classify the complete checkout diff before dependency installation. Allow only README.md, CONTRIBUTING.md, docs/**/*.md and supported raster files under docs/images; leave code, configuration, vendor packages, models, tests, prototypes and uncertainty on the full path. Docs run diff whitespace validation and an explicit summary. Use main push plus PR triggers, contents:read, credential-free checkout and a PR-number concurrency group with unique main-commit groups. Combine Core redline and workflow reporting sequentially in agent-workflow with existing policy validation, artifacts, failure handling and summaries, eliminating duplicate runner setup/download. Retain contract workflow unchanged; add packaging supersession cancellation. Stop on required-status drift, access denial or test/review failure; do not bypass controls.
 **Verification plan:** Trigger/coverage -> parse workflows, compare every prior substantive command and contract/packaging path; verify full execution for mixed, executable, dependency, model, rename and unknown diffs. Classification -> run the actual extracted Bash against isolated repositories for docs, image, empty, missing base, multi-commit and large/newline-path diffs. Concurrency -> evaluate PR update and separate PR/main group identities, proving later main docs cannot cancel earlier code. Advisory -> validate both policies and run unchanged reporters/checker with fresh complete evidence, preserving nonzero report handling. Delivery/cost -> independent plan/result review, current protection/status and native thread checks, one PR plus main run per repo where applicable; record jobs elapsed rather than assume invoice totals.
-**Plan review:** Pending independent technical review before implementation.
+**Plan review:** Agent technical review: ci_budget_review; approved planning commit 0f92c82 with no blocking findings. See Plan review below.
 **Approvals:** User authorized the described CI reduction, appropriate PRs and merges after validation. Visibility changes are exclusively owner-managed.
 **Exceptions:** —
-**State:** Blocked
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Discovery and recovery
 
-Planning only; implementation has not begun. Independent technical plan review is pending. Source bases are Core `7cbadad6c8707274719cd200b261b0e35be6beb0` and Daymark `41decd5e68b5bb4a1662436bdb613bdc0d509666`; both use `chore/ci-budget`. Relay discovery is unavailable; no named role is assumed. Keep measurement details in ignored evidence and publish only a concise summary.
+The initial planning checkpoint was committed before implementation and then independently approved. Source bases are Core `7cbadad6c8707274719cd200b261b0e35be6beb0` and Daymark `41decd5e68b5bb4a1662436bdb613bdc0d509666`; both use `chore/ci-budget`. Relay discovery is unavailable; no named role is assumed. Keep measurement details in ignored evidence and publish only a concise summary.
+
+## Plan review
+
+Agent technical review: ci_budget_review. Reviewed Core `0f92c82155888b200e58720a43d98a01d8c6edc3` and Daymark `41decd5e68b5bb4a1662436bdb613bdc0d509666`; approved before implementation with no blocking findings. Verification is adequate for Elevated workflow risk. Review specifically requires complete NUL-safe no-renames diffs, full verification on invalid bases, executable/symlink changes and unknown paths, cumulative PR classification against the test merge checkout, and isolated main integration groups.
+
+Both repositories are now public by the owner’s action. Fresh branch summaries still report no required statuses and rulesets are empty. No visibility or protection mutation is part of this task. Future commits use the owner-authorized verified personal Git identity; the preexisting local planning commit is preserved without history rewriting.
+
+## Implementation and local verification
+
+Combined Core advisory reporting in one agent-workflow job, preserving both scripts, policy validation, complete evidence, summaries, advisory nonzero handling and both artifacts; only repeated checkout/setup/install/download was removed. Packaging gained workflow-scoped cancellation; the contract workflow is byte-for-byte unchanged. Daymark keeps the default PR merge checkout and verify status, uses main pushes plus PRs, read-only permissions and credential-free checkout, and limits the docs path to ordinary non-executable Markdown or supported raster files under the declared paths. Main commit groups are independent; same-PR updates supersede earlier PR work.
+
+The actual extracted Bash passed 27 isolated Git fixtures: prose/image changes; code, mixed and integration-boundary changes; missing/invalid/zero bases and empty diffs; executable and symlink Markdown; renamed source paths, deleted prose, more than 300 files, newline paths, cumulative multi-commit PR diffs, test-merge checkout and diff-command failure. Docs whitespace errors fail the job. Structural comparison preserved every prior substantive command, timeout, contract/packaging path, manual trigger and failure handler. YAML parsed; actionlint v1.7.12 passed on all three changed workflows; both existing policy schemas validate. No local broad application/benchmark suite or remote workflow dispatch was run. Native PR/main validation remains required after final result review.
+
+## Result review
+
+Independent result review is pending. Recover at the local chore/ci-budget branches, which have not been uploaded; publish only the reviewed final heads to avoid redundant runs.
