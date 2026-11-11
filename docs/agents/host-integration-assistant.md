@@ -38,6 +38,14 @@ Use the existing binding and invocation methods. Authenticate and snapshot the p
 
 After ALLOW, recheck selection, approval, permissions, business invariants and mutable read facts at native commit. Keep original context, reserve native time within the enclosing deadline, and close cancelled attempts so late results cannot continue. Require actual read consistency evidence for authoritative remote facts. Observe native attempts and persistence separately from the decision. [Walkthrough](../decision-walkthrough.md) · [Complete contract](../specs/pre-operation-decisions.md)
 
+## Adopting guarded-result scalar dataflow
+
+The development 0.4.0 producer changes conditional-result availability, not the host API or native guarantees. Admit its exact [producer tuple](../specs/compiler-artifact.md#source-and-artifact-identity) only with matching compiler/runtime packages and qualification. Do not teach an older installed host this capability, silently migrate approved bytes, or rewrite old companion editions.
+
+Keep the complete native result contract and validate it normally. An earlier successful guarded result is retained per invocation; a skipped result is genuinely absent. Source must prove existence with its exact Boolean BIND guard in a conditional true arm and prove optional-field presence separately. Supply no sentinel/default result and add no projection callback, consumer field or operation solely to hide this distinction.
+
+Test identical compiler-produced bytes in Java and Node for true/skipped/failed calls, optional scalar presence, actual returned references, prepared-program reuse and effect receipts. Include unknown outcomes and invalid values after confirmation; neither may become fallback success. Preserve host-bound original keys, protected arguments, approval, deadlines and all static limits. Authoritative decisions remain zero-write and still require fresh native checks after ALLOW. Actual packaged-consumer evidence and deliberate host adoption are separate from passing source tests.
+
 ## Authority and tools
 
 Use the coding assistant’s existing workspace tools for authorized source inspection, edits and tests. The [compiler](../../compiler-java/README.md) and [runtime APIs](../specs/host-model-binding.md) are available to those tools. Host-specific discovery, model review and publication workflows belong to the application. The host owner controls secrets, published definitions, permissions and approval.

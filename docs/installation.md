@@ -8,6 +8,8 @@ Install the runtime your application uses and the compiler if you need to compil
 
 Read the selected release's notes before installing. Use its required Java, Node.js and build tools, and check the [contract matrix](specs/compiler-artifact.md#source-and-artifact-identity) against your application's model. Record the release tag, exact asset names and checksums with your dependency configuration. Update these pins deliberately when adopting another release.
 
+Guarded-result scalar dataflow belongs only to the development 0.4.0 producer/runtime tuple until matching packages are separately qualified and released. Older installed runtimes reject that producer; do not use development guidance or companion edition 8 to infer installed support. Existing artifact/model approvals stay tied to their bytes. A deliberate runtime adoption does not automatically recompile, migrate or approve existing extensions.
+
 The PowerShell examples below use one explicit release throughout. Start in an empty consumer directory outside the Keir source checkout.
 
 ## Download and verify

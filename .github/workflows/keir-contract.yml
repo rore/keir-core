@@ -89,14 +89,14 @@ jobs:
           node --test scripts/setup-node-example.test.mjs
           node scripts/setup-node-example.mjs
           mkdir -p .tools/node-packed
-          tar -xzf .tools/packages/keir-runtime-node-0.3.1.tgz -C .tools/node-packed
+          tar -xzf .tools/packages/keir-runtime-node-0.4.0.tgz -C .tools/node-packed
           diff -r .tools/node-packed/package examples/node-host/node_modules/@keir/runtime-node
           diff -r runtime-node/src .tools/node-packed/package/src
           node --test examples/node-host/follow-up.test.mjs examples/node-host/verify-scenarios.test.mjs examples/node-host/decision-consumer.test.mjs examples/node-host/decision-host.test.mjs examples/node-host/pre-operation.test.mjs
       - name: Compare Java and Node old and current scenario results
         run: |
           java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar examples/node-host/follow-up/source.yaml examples/node-host/follow-up/dcm.json > .tools/teaching-artifact.json
-          cmp conformance/keir-3/artifact.json .tools/teaching-artifact.json
+          cmp conformance/keir-3/producers/0.4.0/artifact.json .tools/teaching-artifact.json
           # The installed-host Node verifier is deliberately fixed to the retained /2 corpus.
           for group in main zero after-write-read no-call handler title title-max title-composed; do
             java -jar examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar "$group" python conformance/keir-2 > .tools/java-scenarios.json
@@ -106,12 +106,13 @@ jobs:
           node runtime-node/test/scenario-conformance.mjs python 3 > .tools/node-current-scenarios.json
           runtime_classpath="$(python -c 'from xml.etree import ElementTree; report = ElementTree.parse("runtime-java/target/surefire-reports/TEST-dev.keir.runtime.PublicScenarioTest.xml"); print(next(row.get("value") for row in report.findall("./properties/property") if row.get("name") == "java.class.path"))')"
           java -cp "$runtime_classpath" dev.keir.runtime.PublicScenarioDriver conformance/keir-3 > .tools/java-current-scenarios.json
-          python -c 'import json; from pathlib import Path; normalize = lambda report: {**report, "scenarios": sorted(report["scenarios"], key=lambda row: (row["group"], row["id"])), "vectors": sorted(report["vectors"], key=lambda row: row["id"])}; java = json.loads(Path(".tools/java-current-scenarios.json").read_bytes()); node = json.loads(Path(".tools/node-current-scenarios.json").read_bytes()); assert len(java["scenarios"]) == len(node["scenarios"]) == 39; assert len(java["vectors"]) == len(node["vectors"]) == 51; assert normalize(java) == normalize(node)'
+          python -c 'import json; from pathlib import Path; normalize = lambda report: {**report, "scenarios": sorted(report["scenarios"], key=lambda row: (row["group"], row["id"])), "vectors": sorted(report["vectors"], key=lambda row: row["id"])}; java = json.loads(Path(".tools/java-current-scenarios.json").read_bytes()); node = json.loads(Path(".tools/node-current-scenarios.json").read_bytes()); assert len(java["scenarios"]) == len(node["scenarios"]) == 54; assert len(java["vectors"]) == len(node["vectors"]) == 51; assert normalize(java) == normalize(node)'
       - name: Bounded current-generation resource qualification
         shell: bash
         run: |
           mkdir -p build
           node conformance/resource-qualification/qualify.mjs | tee build/resource-qualification.json
+          node conformance/resource-qualification/qualify.mjs --guarded-results | tee build/resource-guarded.json
       - name: Bounded current-generation concurrency qualification
         shell: bash
         run: node conformance/resource-qualification/qualify.mjs --concurrent | tee build/resource-concurrent.json

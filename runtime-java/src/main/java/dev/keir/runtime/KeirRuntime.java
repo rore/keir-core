@@ -294,7 +294,7 @@ public final class KeirRuntime {
                         shape(value,write?Set.of("kind","value","effect"):Set.of("kind","value"),path);
                         if (write) require("CONFIRMED".equals(value.get("effect")),"ADAPTER_INVALID",path);
                         Object result=Artifact.value(prepared.plan.dcm(),(String)cap.get("result"),value.get("value"),path,"ADAPTER_INVALID");
-                        if (!step.containsKey("when")) state.put(id,result);
+                        if (!step.containsKey("when") || Artifact.guardedResultDataflow(prepared.plan.document())) state.put(id,result);
                     } else if ("BUSINESS_REJECTION".equals(value.get("kind"))) {
                         shape(value,write?Set.of("kind","code","effect"):Set.of("kind","code"),path);
                         if (write) require("NONE".equals(value.get("effect")),"ADAPTER_INVALID",path);

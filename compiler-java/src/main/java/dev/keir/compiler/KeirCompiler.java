@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 /** Compiles the public Keir single-mutation contract. */
 public final class KeirCompiler {
-    public static final String IDENTITY = "keir-compiler-java/0.3.1";
+    public static final String IDENTITY = "keir-compiler-java/0.4.0";
     private static final Map<String, String> PACKAGES = Map.of("celJava", "0.14.0", "celNode", "0.6.1",
             "protobufJava", "4.35.1", "protobufNode", "2.6.2");
     private static final Set<String> RESERVED = Set.of("input", "as", "break", "const", "continue", "else",
@@ -55,6 +55,7 @@ public final class KeirCompiler {
             preflight(source, dcm, entry);
             var variables = new TreeMap<String, String>();
             variables.put("input", entry.input());
+            var guardedResults = new TreeMap<String, String>();
             var expressions = new TreeMap<String, Object>();
             var steps = new ArrayList<Map<String, Object>>();
             int[] nodes = {0};
@@ -73,7 +74,7 @@ public final class KeirCompiler {
                     for (var parameter : definition.parameters().entrySet()) {
                         if (!parameter.getValue().binding().equals("agent") || !supplied.containsKey(parameter.getKey())) continue;
                         String name = parameter.getKey(), argPath = pointer(path + "/args", name);
-                        args.put(name, binding(supplied.get(name), parameter.getValue().type(), variables,
+                        args.put(name, binding(supplied.get(name), parameter.getValue().type(), variables, guardedResults,
                                 dcm, expressions, nodes, argPath));
                     }
                     var call = new TreeMap<String,Object>(Map.of("op", "CALL", "id", id, "capability", capability,
@@ -85,15 +86,16 @@ public final class KeirCompiler {
                             String handlerPath = pointer(path + "/onError", handler.getKey());
                             var fields = object(object(handler.getValue(), handlerPath).get("record"), handlerPath + "/record");
                             handlers.put(handler.getKey(), Map.of("type", entry.output(), "fields",
-                                    lowerRecord(fields, dcm.record(entry.output()).fields(), variables, dcm,
+                                    lowerRecord(fields, dcm.record(entry.output()).fields(), variables, guardedResults, dcm,
                                             expressions, nodes, handlerPath + "/record")));
                         }
                         call.put("onError", handlers);
                     }
                     steps.add(call);
-                    if (!step.containsKey("when")) variables.put(id, definition.result());
+                    variables.put(id, definition.result());
+                    if (step.containsKey("when")) guardedResults.put(id, (String) step.get("when"));
                 } else {
-                    var value = binding(step.get("let"), null, variables, dcm, expressions, nodes, path + "/let");
+                    var value = binding(step.get("let"), null, variables, guardedResults, dcm, expressions, nodes, path + "/let");
                     String type = (String) value.get("type");
                     steps.add(Map.of("op", "BIND", "id", id, "value", value, "resultType", type));
                     variables.put(id, type);
@@ -101,7 +103,7 @@ public final class KeirCompiler {
             }
             var output = dcm.record(entry.output()).fields();
             var returned = object(object(source.get("return"), "/source/return").get("record"), "/source/return/record");
-            var fields = lowerRecord(returned, output, variables, dcm, expressions, nodes, "/source/return/record");
+            var fields = lowerRecord(returned, output, variables, guardedResults, dcm, expressions, nodes, "/source/return/record");
             if (nodes[0] > 512) fail("BUDGET_EXCEEDED", "/source/steps");
             if (dcm.descriptors().getSerializedSize() > 65_536) fail("BUDGET_EXCEEDED", "/dcm/types");
             var artifact = new TreeMap<String, Object>();
@@ -121,7 +123,7 @@ public final class KeirCompiler {
     }
 
     private static Map<String, Object> binding(Object raw, String expected, Map<String, String> variables,
-            Dcm dcm, Map<String, Object> expressions, int[] nodes, String path) {
+            Map<String, String> guardedResults, Dcm dcm, Map<String, Object> expressions, int[] nodes, String path) {
         var binding = object(raw, path);
         if (binding.containsKey("literal")) {
             Object value = binding.get("literal");
@@ -131,7 +133,7 @@ public final class KeirCompiler {
             return Map.of("literal", value, "type", type);
         }
         var parsed = Expressions.parse((String) binding.get("cel"), variables.keySet(), path + "/cel");
-        var compiled = Expressions.compile(parsed, expected, variables, dcm, path + "/cel");
+        var compiled = Expressions.compile(parsed, expected, variables, guardedResults, dcm, path + "/cel");
         String id = "e" + expressions.size();
         nodes[0] += compiled.nodes();
         expressions.put(id, compiled.metadata());
@@ -139,11 +141,12 @@ public final class KeirCompiler {
     }
 
     private static Map<String,Object> lowerRecord(Map<String,Object> fields, Map<String,String> types,
-            Map<String,String> variables, Dcm dcm, Map<String,Object> expressions, int[] nodes, String path) {
+            Map<String,String> variables, Map<String,String> guardedResults, Dcm dcm,
+            Map<String,Object> expressions, int[] nodes, String path) {
         var lowered = new TreeMap<String,Object>();
         for (var field : types.entrySet()) {
             if (fields.containsKey(field.getKey())) lowered.put(field.getKey(), binding(fields.get(field.getKey()),
-                    field.getValue(), variables, dcm, expressions, nodes, pointer(path, field.getKey())));
+                    field.getValue(), variables, guardedResults, dcm, expressions, nodes, pointer(path, field.getKey())));
         }
         return lowered;
     }

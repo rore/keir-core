@@ -1,9 +1,11 @@
 import hashlib
+import json
 from io import BytesIO
 from pathlib import Path
 import runpy
 import tempfile
 import unittest
+from unittest.mock import patch
 import warnings
 from zipfile import ZipFile
 
@@ -14,6 +16,36 @@ verify_assets = verifier["verify_assets"]
 
 
 class ReleaseAssetTest(unittest.TestCase):
+    def test_guarded_smoke_keeps_exact_compiled_and_historical_inputs(self):
+        root = Path(__file__).resolve().parents[1]
+        fixture = root / "conformance/keir-3"
+        self.assertIn("guarded_smoke_inputs", verifier)
+        compile_inputs = verifier["guarded_smoke_inputs"]
+        calls = []
+
+        def fixture_compiler(args, **kwargs):
+            # Explicit unit stub for inventory/pin validation, never package evidence.
+            from subprocess import CompletedProcess
+            calls.append(args)
+            name = Path(args[-2]).name.replace("source-", "artifact-", 1)
+            return CompletedProcess(args, 0, stdout=(fixture / name).read_bytes())
+
+        with tempfile.TemporaryDirectory() as directory, patch.dict(compile_inputs.__globals__, {"run": fixture_compiler}):
+            cases = compile_inputs(root, Path("compiler.jar"), Path(directory))
+            self.assertEqual(len(cases), 20)
+            self.assertEqual(len(calls), 4)
+            self.assertEqual(cases[-1]["bindings"], {})
+            self.assertEqual(cases[0]["bindings"], {"actorId": "user1"})
+            producers = {json.loads(Path(row["artifact"]).read_bytes())["compiler"] for row in cases}
+            self.assertEqual(producers, {f"keir-compiler-java/{version}" for version in ("0.2.0", "0.3.0", "0.3.1", "0.4.0")})
+            self.assertTrue(any(row["scenario"]["given"]["fixture"] == "response-expired" for row in cases))
+            self.assertEqual(sum(row["scenario"]["expect"]["outcome"]["classification"] == "UNCERTAIN" for row in cases), 1)
+        from subprocess import CompletedProcess
+        with tempfile.TemporaryDirectory() as directory, patch.dict(compile_inputs.__globals__, {
+                "run": lambda *args, **kwargs: CompletedProcess(args, 0, stdout=b"changed") }):
+            with self.assertRaisesRegex(ValueError, "Packaged compiler differs"):
+                compile_inputs(root, Path("compiler.jar"), Path(directory))
+
     def test_rejects_changed_missing_and_extra_assets_or_changed_manifest(self):
         files = (
             "LICENSE",
@@ -83,5 +115,74 @@ class ReleaseAssetTest(unittest.TestCase):
             verifier["check_compiler_notices"](archive, "compiler.jar")
 
 
+def source_probe_check():
+    """Opt-in real source-build check of probe code; not installed-package qualification."""
+    import os
+    import subprocess
+    from xml.etree import ElementTree
+    root = Path(__file__).resolve().parents[1]
+    assert "GUARDED_JAVA_SMOKE" in verifier and "GUARDED_NODE_SMOKE" in verifier, "Missing guarded consumer probes"
+    report = ElementTree.parse(root / "runtime-java/target/surefire-reports/TEST-dev.keir.runtime.PublicScenarioTest.xml")
+    classpath = next(row.attrib["value"] for row in report.findall("./properties/property") if row.get("name") == "java.class.path")
+    jars = [str(root / "runtime-java/target/keir-runtime-java-0.1.0-SNAPSHOT.jar"),
+            *(part for part in classpath.split(os.pathsep) if part.endswith(".jar"))]
+    with tempfile.TemporaryDirectory() as directory:
+        work = Path(directory)
+        assert not work.resolve().is_relative_to(root.resolve())
+        cases = verifier["guarded_smoke_inputs"](root, root / "compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar", work)
+        fixture = root / "conformance/keir-3"
+        source = json.loads((fixture / "source-guarded-result.json").read_bytes())
+        fields = source["return"]["record"]
+        types = {"at": "Timestamp", "enabled": "Boolean", "flag": "Boolean", "message": "String", "state": "RecordState"}
+        for field in sorted(types):
+            name = "bound" + field[0].upper() + field[1:]
+            source["steps"].append({"id": name, "let": fields[field]})
+            fields[field] = {"cel": name}
+        source_path = work / "scalar-bindings-source.json"
+        source_path.write_text(json.dumps(source, ensure_ascii=False, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+        compiled = subprocess.run(["java", "-jar", str(root / "compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar"),
+                                   str(source_path), str(fixture / "dcm-guarded-result.json")],
+                                  cwd=work, capture_output=True, timeout=45)
+        assert compiled.returncode == 0, compiled.stderr
+        artifact = json.loads(compiled.stdout)
+        assert len(artifact["steps"]) == 8 and artifact["compiler"] == "keir-compiler-java/0.4.0"
+        for field, kind in types.items():
+            name = "bound" + field[0].upper() + field[1:]
+            assert next(step["resultType"] for step in artifact["steps"] if step["id"] == name) == kind
+        artifact_path = work / "scalar-bindings-artifact.json"; artifact_path.write_bytes(compiled.stdout)
+        for name in ("true", "false"):
+            scenario = json.loads((fixture / f"scenarios/guarded-result/{name}.json").read_bytes())
+            trace = scenario["expect"]["outcome"]["trace"][:-2]
+            for step in source["steps"][3:]:
+                for event in ("STEP_START", "VALUE_BOUND"):
+                    trace.append({"sequence": len(trace), "event": event, "step": step["id"]})
+            for event in ("RETURNED", "TERMINATED"):
+                trace.append({"sequence": len(trace), "event": event})
+            scenario["expect"]["outcome"]["trace"] = trace
+            cases.append({**cases[0], "artifact": str(artifact_path), "scenario": scenario})
+        manifest = work / "cases.json"; manifest.write_text(json.dumps(cases), encoding="utf-8")
+        java = work / "GuardedResultSmoke.java"; java.write_text(verifier["GUARDED_JAVA_SMOKE"], encoding="utf-8")
+        node = work / "smoke.mjs"
+        node.write_text(verifier["GUARDED_NODE_SMOKE"].replace("'@keir/runtime-node'", repr((root / "runtime-node/src/index.js").as_uri())), encoding="utf-8")
+        outcomes = []
+        commands = (["java", "-cp", os.pathsep.join(jars), str(java), str(manifest)], ["node", str(node), str(manifest)])
+        for args in commands:
+            result = subprocess.run(args, cwd=work, capture_output=True, text=True, timeout=45)
+            assert result.returncode == 0, result.stderr
+            rows = [json.loads(line) for line in result.stdout.splitlines()]
+            assert rows == [row["scenario"]["expect"]["outcome"] for row in cases]
+            outcomes.append(rows)
+        assert outcomes[0] == outcomes[1] and len(outcomes[0]) == 22
+        cases[0]["scenario"]["expect"]["outcome"]["classification"] = "WRONG"
+        manifest.write_text(json.dumps(cases), encoding="utf-8")
+        for args in commands:
+            assert subprocess.run(args, cwd=work, capture_output=True, timeout=45).returncode != 0
+        print(f"Source-build probes matched {len(outcomes[0])} complete outcomes per runtime and rejected wrong expectations; packages remain unqualified.")
+
+
 if __name__ == "__main__":
-    unittest.main()
+    import sys
+    if sys.argv[1:] == ["--source-probes"]:
+        source_probe_check()
+    else:
+        unittest.main()

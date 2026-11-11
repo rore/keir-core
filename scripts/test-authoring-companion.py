@@ -548,6 +548,49 @@ class AuthoringCompanionV6Test(unittest.TestCase):
             module["make_pinned_archive"](6, revision, compatibility, altered)
 
 
+class AuthoringCompanionV8Test(unittest.TestCase):
+    def test_unreleased_recipe_is_exact_offline_and_preserves_prior_editions(self):
+        module = runpy.run_path(str(SCRIPT))
+        self.assertIn(8, module["PINNED_EDITIONS"])
+        root = SCRIPT.parent.parent
+        # In-memory recipe test only. No claim that these uncommitted payloads belong to HEAD.
+        revision = git("rev-parse", "HEAD").decode().strip()
+        files = module["PINNED_EDITIONS"][8][4]
+        payload = {name: (root / name).read_bytes() for name in files}
+        payload["LICENSE"] = git("show", "HEAD:LICENSE")
+        compatibility = {"status": "candidate", "coreRevision": revision, "packages": {}}
+        data = module["make_pinned_archive"](8, revision, compatibility, payload)
+        self.assertLessEqual(len(data), module["MAX_ARCHIVE_BYTES"])
+        self.assertEqual(data, module["make_pinned_archive"](8, revision, compatibility, payload))
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "recipe-test.zip"; path.write_bytes(data)
+            module["verify"](8, path, digest(data))
+        for mutation in ("license", "old-producer", "source", "model", "scenario", "release-version"):
+            changed = dict(payload); record = deepcopy(compatibility)
+            if mutation == "license":
+                changed["LICENSE"] = b"incomplete"
+            elif mutation == "source":
+                changed["conformance/keir-3/source-guarded-result.json"] += b"\n"
+            elif mutation == "model":
+                changed["conformance/keir-3/dcm-guarded-result.json"] += b"\n"
+            elif mutation == "scenario":
+                scenario = json.loads(changed["conformance/keir-3/scenarios/guarded-result/true.json"])
+                scenario["format"] = "keir-scenario/2"
+                changed["conformance/keir-3/scenarios/guarded-result/true.json"] = json.dumps(scenario).encode()
+            elif mutation == "old-producer":
+                artifact = json.loads(changed["conformance/keir-3/artifact-guarded-result.json"])
+                artifact["compiler"] = "keir-compiler-java/0.3.1"
+                changed["conformance/keir-3/artifact-guarded-result.json"] = json.dumps(artifact).encode()
+            else:
+                record = {"status": "release", "coreRevision": revision, "packages": {
+                    role: {"version": "0.3.1", "assets": {pattern.format("0.3.1"): "sha256:" + "0" * 64}}
+                    for role, pattern in module["RELEASE_ASSETS"].items()}}
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                module["make_pinned_archive"](8, revision, record, changed)
+        with self.assertRaisesRegex(ValueError, "Core compatibility"):
+            module["make_pinned_archive"](8, revision, {"status": "candidate", "coreRevision": None, "packages": {}}, payload)
+
+
 class AuthoringCompanionV7Test(unittest.TestCase):
     def test_current_candidate_is_licensed_exact_and_verifies_without_git(self):
         module = runpy.run_path(str(SCRIPT))
@@ -555,6 +598,8 @@ class AuthoringCompanionV7Test(unittest.TestCase):
         revision = "5c772d02b4dc92bb28ea8aedabd34498ff6d9391"
         files = module["PINNED_EDITIONS"][7][4]
         payload = {name: (root / name).read_bytes() for name in files}
+        # Match Git-archive input bytes, not platform checkout line-ending conversion.
+        payload["LICENSE"] = git("show", f"{revision}:LICENSE")
         compatibility = json.loads((root / "docs/agents/authoring-companion-v7-compatibility.json").read_bytes())
         self.assertEqual(compatibility, {"status": "candidate", "coreRevision": revision, "packages": {}})
         data = module["make_pinned_archive"](7, revision, compatibility, payload)

@@ -109,6 +109,24 @@ V5_FILES = (
     )),
     *V5_SCENARIOS,
 )
+V8_FIXTURES = "conformance/keir-3"
+V8_PROGRAMS = ("guarded-result", "guarded-result-read", "guarded-result-handler", "guarded-result-unused")
+V8_SCENARIOS = tuple(f"{V8_FIXTURES}/scenarios/{group}/{case}.json" for group, cases in (
+    ("guarded-result", ("true", "false", "optional-absent", "optional-empty-false", "rejected", "transient", "unknown", "later-failure")),
+    ("guarded-result-read", ("allow", "deny", "false")),
+    ("guarded-result-handler", ("handled", "false")),
+    ("guarded-result-unused", ("true", "false")),
+) for case in cases)
+V8_FILES = (
+    "docs/agents/customer-authoring-guide-v8.md", "LICENSE",
+    *(f"docs/specs/{name}.md" for name in ("language", "compiler-artifact", "runtime", "workflow-expressions", "domain-model", "pre-operation-decisions")),
+    "schemas/source-2/source.schema.json", "schemas/dcm-3/dcm.schema.json",
+    "schemas/artifact-3/artifact.schema.json", "schemas/scenario-3/scenario.schema.json",
+    *(f"{V8_FIXTURES}/{name}.{extension}" for name in ("dcm-guarded-result", "dcm-guarded-result-read") for extension in ("json", "sha256")),
+    *(f"{V8_FIXTURES}/{kind}-{case}.{extension}" for case in V8_PROGRAMS for kind, extension in (
+        ("source", "json"), ("artifact", "json"), ("artifact", "sha256"))),
+    *V8_SCENARIOS,
+)
 PINNED_EDITIONS = {
     3: (V3_COMPATIBILITY, V3_GUIDE, V3_ARTIFACT, V3_FORMATS, V3_FILES),
     4: (V4_COMPATIBILITY, V4_GUIDE, V4_ARTIFACT, V4_FORMATS, V4_FILES),
@@ -119,6 +137,8 @@ PINNED_EDITIONS = {
     7: ("docs/agents/authoring-companion-v7-compatibility.json",
         "docs/agents/customer-authoring-guide-v7.md", V5_ARTIFACT, V5_FORMATS,
         ("docs/agents/customer-authoring-guide-v7.md", "LICENSE", *V5_FILES[1:])),
+    8: ("docs/agents/authoring-companion-v8-compatibility.json",
+        "docs/agents/customer-authoring-guide-v8.md", f"{V8_FIXTURES}/artifact-guarded-result.json", V5_FORMATS, V8_FILES),
 }
 LICENSE_PIN = "sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
 RELEASE_ASSETS = {
@@ -242,7 +262,7 @@ def make_pinned_archive(version, revision, compatibility, payload):
     if not matches(r"[0-9a-f]{40}", revision):
         raise ValueError("A pinned edition requires a full Git commit.")
     validate_compatibility(compatibility)
-    if version in (6, 7) and digest(payload.get("LICENSE", b"")) != LICENSE_PIN:
+    if version in (6, 7, 8) and digest(payload.get("LICENSE", b"")) != LICENSE_PIN:
         raise ValueError(f"Edition {version} requires the complete Apache-2.0 LICENSE.")
     artifact = json.loads(payload[artifact_path])
     if (not isinstance(artifact, dict) or artifact.get("format") != formats["artifact"]
@@ -293,6 +313,36 @@ def make_pinned_archive(version, revision, compatibility, payload):
         if compatibility["status"] == "release" and any(
                 package["version"] != core_version for package in compatibility["packages"].values()):
             raise ValueError(f"Edition {version} requires Core {core_version} packages.")
+    if version == 8:
+        environment = {"celJava": "0.14.0", "celNode": "0.6.1", "protobufJava": "4.35.1", "protobufNode": "2.6.2"}
+        for case in V8_PROGRAMS:
+            model_name = "dcm-guarded-result-read" if case.endswith("-read") else "dcm-guarded-result"
+            model_bytes = payload[f"{V8_FIXTURES}/{model_name}.json"]
+            model = json.loads(model_bytes)
+            model_pin = payload[f"{V8_FIXTURES}/{model_name}.sha256"].decode("ascii").strip()
+            source_bytes = payload[f"{V8_FIXTURES}/source-{case}.json"]
+            source = json.loads(source_bytes)
+            artifact_bytes = payload[f"{V8_FIXTURES}/artifact-{case}.json"]
+            example = json.loads(artifact_bytes)
+            artifact_pin = payload[f"{V8_FIXTURES}/artifact-{case}.sha256"].decode("ascii").strip()
+            if (not isinstance(model, dict) or model.get("format") != formats["dcm"]
+                    or not isinstance(model.get("domain"), dict) or digest(model_bytes) != model_pin
+                    or not isinstance(example, dict) or example.get("format") != formats["artifact"]
+                    or example.get("compiler") != "keir-compiler-java/0.4.0" or example.get("environment") != environment
+                    or digest(artifact_bytes) != artifact_pin or example.get("sourceDigest") != digest(source_bytes)
+                    or example.get("modelRef") != {"domainId": model["domain"]["id"], "domainVersion": model["domain"]["version"],
+                        "format": formats["dcm"], "digest": model_pin, "descriptorRecipe": "keir-record-descriptors/2"}
+                    or not isinstance(source, dict) or source.get("language") != formats["language"]
+                    or source.get("domain") != {**model["domain"], "fingerprint": model_pin}
+                    or source.get("entrypoint") != example.get("entrypoint")):
+                raise ValueError("Invalid edition 8 example or producer tuple.")
+        for name in V8_SCENARIOS:
+            scenario = json.loads(payload[name])
+            if not isinstance(scenario, dict) or scenario.get("format") != formats["scenario"]:
+                raise ValueError("Invalid edition 8 scenario format.")
+        if compatibility["status"] == "release" and any(
+                package["version"] != "0.4.0" for package in compatibility["packages"].values()):
+            raise ValueError("Edition 8 requires Core 0.4.0 packages.")
     manifest = {
         "format": f"keir-authoring-companion/{version}",
         "sourceRevision": revision,
@@ -388,7 +438,7 @@ def main():
     check.add_argument("archive", type=Path)
     check.add_argument("--sha256", required=True, help="Trusted archive pin in sha256:<hex> form")
     for command in (create, check):
-        command.add_argument("--version", type=int, choices=(1, 2, 3, 4, 5, 6, 7), default=1,
+        command.add_argument("--version", type=int, choices=(1, 2, 3, 4, 5, 6, 7, 8), default=1,
                              help="Companion version (default: 1)")
         command.add_argument("--core-assets", type=Path, help="Directory containing the pinned Core release assets")
     args = parser.parse_args()

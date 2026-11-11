@@ -17,7 +17,7 @@ export async function runConcurrentQualification(context) {
     assert.equal(digest(bytes), readFileSync(join(fixture, name + '.sha256'), 'ascii').trim());
     return bytes;
   };
-  const model = pinned('dcm'), artifact = pinned('artifact');
+  const model = pinned('dcm'), artifact = pinned('producers/0.4.0/artifact');
   assert.equal(JSON.parse(model).format, 'keir-dcm/3');
   const source = readFileSync(join(fixture, 'source.yaml'));
   const scenario = JSON.parse(readFileSync(join(fixture, 'scenarios/main/normal.json')));

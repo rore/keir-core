@@ -35,6 +35,14 @@ Discover a REQUEST/BEFORE_COMMIT/DECISION hook in the host's current model. Read
 
 Agree on ALLOW, DENY, failed read, timeout and changed-fact cases before simulation. Report the runtime result, decision consumption and native result separately. A handled BUSINESS_REJECTION returning ALLOW still blocks. Present the exact artifact and evidence for approval and activation. The [neutral walkthrough](../decision-walkthrough.md) follows this flow; discovery, compilation, simulation and review tool names and permissions are defined by your application.
 
+## Guarded results require matching host support
+
+Use guarded-result scalar access only when the host explicitly supports producer `keir-compiler-java/0.4.0` and matching runtimes. The development allocation is not a published release. Older installed consumers and companion editions retain their original limits; do not suggest an automatic upgrade or recompile an approved artifact in place.
+
+For an earlier CALL `r` with `when: g`, use `g ? r.reference : input.existingReference`. For an optional scalar, keep both proofs: `g ? (has(r.note) ? r.note : "") : ""`. Use the exact Boolean BIND identifier named by the CALL's `when`, not an equivalent expression or an alias of a different guard. If the CALL itself names an alias as its guard, use that exact identifier. Do not read the record or its lists, infer proof from a later CALL's guard, or refer to a CALL's own result in its arguments/handler. Preserve exact nominal/enum/timestamp types and the one-possible-WRITE ceiling (zero for decisions).
+
+Agree on true, skipped, optional absent/empty/false, rejected and uncertain cases before simulation. Return the adapter's actual validated reference on success. Failure is not absence: never replace rejection, expiry, invalid data or UNKNOWN effect with the skipped fallback. Show receipts separately, including CONFIRMED beside a later failure. The [complete neutral examples](../../conformance/keir-3/README.md) and [language rules](../specs/language.md#steps-and-data-flow) define the bounded capability.
+
 ## Authority and tools
 
 The application selects the DCM and capabilities available for authoring. It supplies protected values at execution and owns permissions, native commits, approval and activation. Keep catalog publication and capability registration outside the assistant’s authority. See the [embedding guide](../embedding.md) for runtime setup.

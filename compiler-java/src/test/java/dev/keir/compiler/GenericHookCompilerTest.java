@@ -14,7 +14,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class GenericHookCompilerTest {
     private static final KeirCompiler COMPILER = new KeirCompiler();
     private static final KeirCompiler.Environment ENV = KeirCompiler.Environment.supported();
-    private static Path fixture(String name) { return Path.of("..","conformance","keir-3",name); }
+    private static Path fixture(String name) {
+        Path root = Path.of("..","conformance","keir-3");
+        return (name.startsWith("artifact") ? root.resolve("producers/0.4.0") : root).resolve(name);
+    }
     private static byte[] bytes(String name) throws IOException { return Files.readAllBytes(fixture(name)); }
     private static Map<String,Object> map(Object value) { return (Map<String,Object>)value; }
     private static List<Map<String,Object>> steps(Map<String,Object> value) { return (List<Map<String,Object>>)value.get("steps"); }
@@ -92,7 +95,7 @@ class GenericHookCompilerTest {
             assertEquals(Set.of("format","compiler","environment","sourceDigest","modelRef","entrypoint",
                     "expressions","steps","return"),artifact.keySet());
             assertEquals("keir-artifact/3",artifact.get("format"));
-            assertEquals("keir-compiler-java/0.3.1",artifact.get("compiler"));
+            assertEquals("keir-compiler-java/0.4.0",artifact.get("compiler"));
             assertEquals(StrictData.digest(StrictData.parse(source,"/source")),artifact.get("sourceDigest"));
             assertEquals(Map.of("celJava","0.14.0","celNode","0.6.1","protobufJava","4.35.1",
                     "protobufNode","2.6.2"),artifact.get("environment"));
@@ -122,7 +125,7 @@ class GenericHookCompilerTest {
                 "artifact.schema.json")),"/schema"));
         assertEquals("urn:keir:schema:artifact:3",schema.get("$id"));
         var properties=map(schema.get("properties"));
-        assertEquals(List.of("keir-compiler-java/0.3.0", ENV.compiler()),map(properties.get("compiler")).get("enum"));
+        assertEquals(List.of("keir-compiler-java/0.3.0", "keir-compiler-java/0.3.1", ENV.compiler()),map(properties.get("compiler")).get("enum"));
         var environment=map(map(properties.get("environment")).get("properties"));
         var packages=new TreeMap<String,Object>();
         environment.forEach((key,value) -> packages.put(key,map(value).get("const")));

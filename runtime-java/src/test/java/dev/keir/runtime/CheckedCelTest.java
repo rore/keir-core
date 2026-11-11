@@ -1,14 +1,19 @@
 package dev.keir.runtime;
 
 import com.google.protobuf.CodedOutputStream;
+import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.DynamicMessage;
 import com.google.protobuf.Message;
 import com.google.protobuf.UnknownFieldSet;
+import dev.cel.common.CelProtoAbstractSyntaxTree;
 import dev.cel.expr.CheckedExpr;
 import dev.cel.expr.Constant;
 import dev.cel.expr.Expr;
 import dev.cel.expr.Reference;
 import dev.cel.expr.SourceInfo;
 import dev.cel.expr.Type;
+import dev.cel.runtime.CelRuntimeFactory;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
@@ -69,6 +74,38 @@ class CheckedCelTest {
         assertEquals("NO_OP",bundle.evaluate(Map.of("expr","e3"),state(false),"/return"));
         assertEquals(false,bundle.evaluate(Map.of("literal",false,"type","Boolean"),Map.of(),"/steps/0"));
         assertEquals("",bundle.evaluate(Map.of("literal","","type","String"),Map.of(),"/return"));
+    }
+
+    @Test void pinnedEngineLazilyResolvesAnOmittedRecordAndOptionalPresence() throws Exception {
+        var message = DescriptorProtos.DescriptorProto.newBuilder().setName("Result")
+                .addOneofDecl(DescriptorProtos.OneofDescriptorProto.newBuilder().setName("_note"))
+                .addField(DescriptorProtos.FieldDescriptorProto.newBuilder().setName("note").setNumber(1)
+                        .setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING)
+                        .setLabel(DescriptorProtos.FieldDescriptorProto.Label.LABEL_OPTIONAL)
+                        .setProto3Optional(true).setOneofIndex(0));
+        var file = Descriptors.FileDescriptor.buildFrom(DescriptorProtos.FileDescriptorProto.newBuilder()
+                .setName("sparse_test.proto").setPackage("keir.read").setSyntax("proto3")
+                .addMessageType(message).build(), new Descriptors.FileDescriptor[0]);
+        Type record = Type.newBuilder().setMessageType("keir.read.Result").build();
+        Expr present = Expr.newBuilder().setId(4).setSelectExpr(Expr.Select.newBuilder()
+                .setOperand(ident(5, "result")).setField("note").setTestOnly(true)).build();
+        Expr selected = Expr.newBuilder().setId(6).setSelectExpr(Expr.Select.newBuilder()
+                .setOperand(ident(7, "result")).setField("note")).build();
+        Expr conditional = call(1, "_?_:_", ident(2, "guard"),
+                call(3, "_?_:_", present, selected, string(8, "absent")), string(9, "skipped"));
+        var checked = synthetic(conditional, Map.of(1L, STRING, 3L, STRING, 5L, record,
+                6L, STRING, 7L, record, 8L, STRING, 9L, STRING));
+        var program = CelRuntimeFactory.plannerRuntimeBuilder().addFileTypes(file).build()
+                .createProgram(CelProtoAbstractSyntaxTree.fromCheckedExpr(checked).getAst());
+        assertEquals("skipped", program.eval(Map.of("guard", false)));
+        assertThrows(Exception.class, () -> program.eval(Map.of("guard", true)));
+        var descriptor = file.findMessageTypeByName("Result");
+        assertEquals("absent", program.eval(Map.of("guard", true, "result", DynamicMessage.newBuilder(descriptor).build())));
+        for (String note : List.of("", "actual")) {
+            var result = DynamicMessage.newBuilder(descriptor).setField(descriptor.findFieldByName("note"), note).build();
+            assertEquals(note, program.eval(Map.of("guard", true, "result", result)));
+        }
+        assertEquals("skipped", program.eval(Map.of("guard", false)));
     }
 
     @Test void projectionPreservesFalseEmptyUnicodeControlsAndReservedFieldNames() throws Exception {

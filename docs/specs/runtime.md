@@ -12,10 +12,20 @@ Implementation evidence belongs in [testing](../testing.md); pending resource qu
 
 1. Validate the [fresh invocation context](host-model-binding.md#invocation-inputs-and-adapter-context), including deadline, input, protected bindings, event and presence of the original key. Start with only the validated business record in the source environment as `input`.
 2. Visit steps in source order. A BIND evaluates and saves its value. A CALL with a false guard skips argument evaluation and dispatch, binds no result and consumes no dynamic call or write budget. It still counts as a reached step. Static validation counts every possible call and write regardless of its guard.
-3. For a reached call, check limits and the DCM's restrictions, validate arguments and dispatch once. The implementation receives business and protected arguments separately. Validate a successful response's result against the declared type. Make that result available to later expressions only when the call was unguarded.
+3. For a reached call, check limits and the DCM's restrictions, validate arguments and dispatch once. The implementation receives business and protected arguments separately. Validate a successful response's result against the declared type. Retained producers make it available only for unguarded calls. The exact development 0.4.0 producer also retains successful guarded results under the scalar proof rules below.
 4. A declared business rejection ends step execution. Evaluate its matching handler, if present, in the environment immediately before the call and validate the handler's output. A handler does not catch malformed responses, runtime failures, limits or uncertain effects. On the normal path, evaluate and validate the root return after all steps. A failure stops further steps and dispatch.
 
 The same artifact and exact model can run against separately bound real or simulated implementations. Simulation reports what its own implementations did. It supplies no evidence of a native commit.
+
+### Guarded-result activation
+
+For producer `keir-compiler-java/0.4.0`, retain each complete validated successful result at most once in invocation state, after existing response/value/deadline checks. A skipped CALL leaves its result absent. Do not fabricate null, empty/default protobuf messages or placeholder records. Availability follows the exact [conditional guard proof](language.md#steps-and-data-flow), not mere declaration.
+
+Build each CEL activation from actually bound values. For a conditional result whose known guard is false, omit the name without reading or converting any supplied value for it. For a true guard on a continuing path, require a validated result, including unused declarations. Required ordinary values and Boolean guard values must also be present and valid. Missing required state fails with `EXPRESSION_FAILED` at the expression binding before CEL presence tests; it is not optional-field absence or a reason to select fallback. Convert only present validated record values. The pinned engines evaluate only the selected conditional arm; static validation still checks every arm.
+
+Fresh invocation state prevents a prepared artifact from leaking a prior result into later true/false or mixed-guard invocations. At most four complete result records are retained, each within the existing 8,192-byte cap, including validation of bounded list fields that guarded expressions cannot select. The existing declaration, AST, value and deadline ceilings remain unchanged. Measured conversion and retention costs are engineering evidence, not an enforced process-memory or CPU-preemption guarantee.
+
+Rejection, transient failure, invalid/oversized response, exception, expiry and unknown commit terminate normal continuation; none becomes an absent result or successful fallback. Preserve receipt settlement before later value/deadline failure. An own-call rejection handler never sees its rejecting result; a later handler can use earlier successful results only with an explicit valid proof, and still terminates as BUSINESS_REJECTION. Result retention adds no trace event or native authority. Older tuples retain their original behavior.
 
 <a id="effect-evidence-and-outcomes"></a>
 ## Adapter responses

@@ -22,7 +22,7 @@ class WorkflowCompilerTest {
             assertTrue(result.succeeded(), result.diagnostics().toString());
             assertArrayEquals(file("artifact-" + name + ".json"), result.artifact());
             assertArrayEquals(result.artifact(), COMPILER.compile(source, selected, ENV).artifact());
-            assertEquals(Files.readString(CORPUS.resolve("artifact-" + name + ".sha256")).strip(), result.artifactDigest());
+            assertEquals(Files.readString(CORPUS.resolve("producers/0.4.0/artifact-" + name + ".sha256")).strip(), result.artifactDigest());
         }
         assertEquals(Files.readString(CORPUS.resolve("dcm-inventory.sha256")).strip(),
                 StrictData.digest(StrictData.parse(model, "/dcm")));
@@ -77,6 +77,6 @@ class WorkflowCompilerTest {
     }
 
     private static byte[] file(String name) throws Exception {
-        return Files.readAllBytes(CORPUS.resolve(name));
+        return Files.readAllBytes((name.startsWith("artifact") ? CORPUS.resolve("producers/0.4.0") : CORPUS).resolve(name));
     }
 }

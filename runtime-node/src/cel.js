@@ -147,6 +147,7 @@ export function prepareExpressions(contexts, { dcm, types: { registry } }) {
     return type === 'Boolean' ? CelScalar.BOOL : CelScalar.STRING;
   }
   for (const [id, context] of contexts) {
+    const guardedResults = context.guardedResults ?? {};
     const checkedBytes = base64(context.checked, 16384, p);
     const checked = decode(CheckedExprSchema, checkedBytes);
     ok(checked.expr && checked.exprVersion === '' && checked.sourceInfo && checked.sourceInfo.syntaxVersion === '' && checked.sourceInfo.extensions.length === 0 && Object.keys(checked.sourceInfo.macroCalls).length === 0, p);
@@ -154,7 +155,7 @@ export function prepareExpressions(contexts, { dcm, types: { registry } }) {
     // CEL-Java records the final line boundary one past the source length.
     ok(checked.sourceInfo.lineOffsets.every(n => Number.isSafeInteger(n) && n >= 0 && n <= 513) && Object.values(checked.sourceInfo.positions).every(n => Number.isSafeInteger(n) && n >= 0 && n <= 512), p);
     const ids = new Set(), references = new Set();
-    function visit(expr, depth = 1, present = new Set()) {
+    function visit(expr, depth = 1, present = new Set(), guards = new Set(), selectionOperand = false) {
       ok(depth <= 16 && ids.size < 64, p, 'BUDGET_EXCEEDED');
       ok(expr && expr.id > 0n && expr.id <= BigInt(Number.MAX_SAFE_INTEGER) && !ids.has(String(expr.id)), p);
       const node = String(expr.id); ids.add(node);
@@ -172,12 +173,15 @@ export function prepareExpressions(contexts, { dcm, types: { registry } }) {
         ok(Object.hasOwn(context.variables, value.name), p);
         const ref = checked.referenceMap[node];
         ok(ref && ref.name === value.name && ref.overloadId.length === 0 && ref.value === undefined, p); references.add(node);
+        if (Object.hasOwn(guardedResults, value.name)) ok(selectionOperand && guards.has(guardedResults[value.name]), p);
         inferred = { type: context.variables[value.name] };
       } else if (kind.case === 'selectExpr') {
-        const operand = visit(value.operand, depth + 1, present);
+        const operand = visit(value.operand, depth + 1, present, guards, true);
         const record = dcm.types[operand.type];
         ok(record?.kind === 'record' && Object.hasOwn(record.fields, value.field), p);
         const field = record.fields[value.field];
+        if (value.operand.exprKind.case === 'identExpr' && Object.hasOwn(guardedResults, value.operand.exprKind.value.name))
+          ok(scalar(fieldType(field)), p);
         if (value.testOnly || typeof field !== 'string') {
           const variable = value.operand.exprKind;
           ok(variable.case === 'identExpr' && typeof field !== 'string', p);
@@ -192,12 +196,16 @@ export function prepareExpressions(contexts, { dcm, types: { registry } }) {
         const operation = value.function;
         const pair = Object.hasOwn(pairs, operation) ? pairs[operation] : undefined;
         ok(pair && !value.target && value.args.length === pair[1], p);
-        const first = visit(value.args[0], depth + 1, present);
+        const first = visit(value.args[0], depth + 1, present, guards);
         const args = [first, ...value.args.slice(1).map((arg, index) => {
           const proof = first.presence;
           const guarded = proof && (operation === '_&&_' && proof.positive ||
             operation === '_?_:_' && proof.positive === (index === 0));
-          return visit(arg, depth + 1, guarded ? new Set([...present, proof.key]) : present);
+          const condition = value.args[0].exprKind;
+          const guardId = condition.case === 'identExpr' ? condition.value.name : undefined;
+          const exactGuard = operation === '_?_:_' && index === 0 && Object.values(guardedResults).includes(guardId);
+          return visit(arg, depth + 1, guarded ? new Set([...present, proof.key]) : present,
+            exactGuard ? new Set([...guards, guardId]) : guards);
         })];
         const timeAddition = operation === '_+_' && args[0].type === 'Timestamp' && args[1].type === 'Duration';
         const overload = timeAddition ? 'add_timestamp_duration' : pair[0];
@@ -250,7 +258,8 @@ export function prepareExpressions(contexts, { dcm, types: { registry } }) {
     totalNodes += ids.size; ok(totalNodes <= 512, p, 'BUDGET_EXCEEDED');
     const variables = Object.fromEntries(Object.entries(context.variables).map(([name, type]) => [name, engineType(type)]));
     const evaluate = plan(celEnv({ registry, variables, funcs: [checkedAddition] }), checked);
-    prepared.set(id, { evaluate, variables: context.variables, resultType: context.resultType });
+    prepared.set(id, { evaluate, variables: context.variables, resultType: context.resultType,
+      guardedResults: context.guardedResults });
   }
   return { expressions: prepared, registry, totalNodes };
 }
@@ -258,11 +267,21 @@ export function prepareExpressions(contexts, { dcm, types: { registry } }) {
 export function evaluateBinding(binding, state, dcm, prepared, path) {
   if (Object.hasOwn(binding, 'literal')) return binding.literal;
   const expression = prepared.expressions.get(binding.expr);
-  const variables = Object.fromEntries(Object.entries(expression.variables).map(([name, type]) => {
+  const variables = Object.create(null);
+  for (const [name, type] of Object.entries(expression.variables)) {
+    if (expression.guardedResults !== undefined) {
+      if (Object.hasOwn(expression.guardedResults, name)) {
+        const guard = state[expression.guardedResults[name]];
+        ok(typeof guard === 'boolean', path, 'EXPRESSION_FAILED');
+        if (!guard) continue;
+      }
+      ok(Object.hasOwn(state, name), path, 'EXPRESSION_FAILED');
+      validateValue(dcm, type, state[name], path, 'EXPRESSION_FAILED');
+    }
     const schema = type === 'Timestamp' ? TimestampSchema : dcm.types[type]?.kind === 'record'
       ? prepared.registry.getMessage('keir.read.' + type) : undefined;
-    return [name, schema ? fromJson(schema, state[name]) : state[name]];
-  }));
+    variables[name] = schema ? fromJson(schema, state[name]) : state[name];
+  }
   let result;
   try { result = expression.evaluate(variables); }
   catch { throw new Fault('EXPRESSION_FAILED', path); }

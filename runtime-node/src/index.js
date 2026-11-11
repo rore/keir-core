@@ -19,7 +19,7 @@ export function prepareProgram(artifactBytes, boundModel) {
     ok(artifactBytes.byteLength <= LIMITS.artifactBytes, path, 'BUDGET_EXCEEDED');
     const artifact = parseCanonical(Buffer.from(artifactBytes), LIMITS.artifactBytes, ARTIFACT_FIELDS.length);
     validateEnvelope(artifact, bound);
-    const { contexts, calls, entrypoint, policy, effectGrant } = validatePlan(artifact, bound);
+    const { contexts, calls, entrypoint, policy, effectGrant, guardedResultDataflow } = validatePlan(artifact, bound);
     const cel = prepareExpressions(contexts, bound);
     ok(cel.totalNodes <= LIMITS.totalAstNodes, '/artifact/expressions', 'BUDGET_EXCEEDED');
     const hostFields = Object.create(null);
@@ -29,7 +29,7 @@ export function prepareProgram(artifactBytes, boundModel) {
     }
     const prepared = Object.freeze(Object.create(null));
     handles.set(prepared, { artifact: freeze(artifact), dcm: bound.dcm, entrypoint, grants: freeze(policy), cel,
-      adapters: bound.adapters, hostFields, effectGrant });
+      adapters: bound.adapters, hostFields, effectGrant, guardedResultDataflow });
     return Object.freeze({ prepared, diagnostic: null });
   } catch (error) {
     const fault = error instanceof Fault;
@@ -220,7 +220,7 @@ export async function invokeProgram(prepared, businessInput, trustedInvocation) 
           shape(response, ['kind', 'value', ...(write ? ['effect'] : [])], path);
           if (write) ok(response.effect === 'CONFIRMED', path, 'ADAPTER_INVALID');
           const value = validateValue(dcm, cap.result, response.value, path, 'ADAPTER_INVALID');
-          if (!Object.hasOwn(step, 'when')) state[step.id] = value;
+          if (!Object.hasOwn(step, 'when') || plan.guardedResultDataflow) state[step.id] = value;
         } else if (response?.kind === 'BUSINESS_REJECTION') {
           shape(response, ['kind', 'code', ...(write ? ['effect'] : [])], path);
           if (write) ok(response.effect === 'NONE', path, 'ADAPTER_INVALID');

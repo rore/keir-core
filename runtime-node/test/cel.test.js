@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { fromBinary, toBinary } from '@bufbuild/protobuf';
+import { fromBinary, fromJson, toBinary } from '@bufbuild/protobuf';
+import { celEnv, CelScalar, isCelError, objectType, plan } from '@bufbuild/cel';
 import { CheckedExprSchema } from '@bufbuild/cel-spec/cel/expr/checked_pb.js';
 import { evaluateBinding, prepareExpressions, prepareModelTypes } from '../src/cel.js';
 
@@ -39,6 +40,46 @@ test('accepts declared variables that are available, including an unused scalar'
   const selected = new Map([['status', { ...contexts.get('status'), variables: { task: 'Task', unused: 'Boolean' } }]]);
   const prepared = prepare(selected);
   assert.equal(evaluateBinding({ expr: 'status', type: 'Boolean' }, { task: tasks.open, unused: true }, dcm, prepared, '/test'), false);
+});
+
+test('pinned engine lazily resolves an omitted declared record and optional presence', () => {
+  const sparseModel = { types: { Result: { kind: 'record', fields: { note: { type: 'String', optional: true } } } } };
+  const { registry } = prepareModelTypes(sparseModel), schema = registry.getMessage('keir.read.Result');
+  const ident = (id, name) => ({ id: String(id), identExpr: { name } });
+  const literal = (id, stringValue) => ({ id: String(id), constExpr: { stringValue } });
+  const select = (id, operand, testOnly = false) => ({ id: String(id), selectExpr: { operand, field: 'note', testOnly } });
+  const conditional = (id, ...args) => ({ id: String(id), callExpr: { function: '_?_:_', args } });
+  const checked = fromJson(CheckedExprSchema, {
+    expr: conditional(1, ident(2, 'guard'), conditional(3, select(4, ident(5, 'result'), true),
+      select(6, ident(7, 'result')), literal(8, 'absent')), literal(9, 'skipped')),
+    typeMap: Object.fromEntries(Array.from({ length: 9 }, (_, index) => {
+      const id = index + 1;
+      return [String(id), [2, 4].includes(id) ? { primitive: 'BOOL' } : [5, 7].includes(id)
+        ? { messageType: 'keir.read.Result' } : { primitive: 'STRING' }];
+    })),
+    referenceMap: { 1: { overloadId: ['conditional'] }, 2: { name: 'guard' },
+      3: { overloadId: ['conditional'] }, 5: { name: 'result' }, 7: { name: 'result' } },
+    sourceInfo: { location: '<input>' },
+  });
+  const evaluate = plan(celEnv({ registry, variables: { guard: CelScalar.BOOL,
+    result: objectType(schema), unused: objectType(schema) } }), checked);
+  assert.equal(evaluate({ guard: false }), 'skipped');
+  // The raw engine treats has(missingRecord.note) as false. Keir must validate
+  // true-guard result existence before reaching this optional-field operation.
+  assert.equal(evaluate({ guard: true }), 'absent');
+  assert.equal(evaluate({ guard: true, result: fromJson(schema, {}) }), 'absent');
+  for (const note of ['', 'actual']) assert.equal(evaluate({ guard: true, result: fromJson(schema, { note }) }), note);
+  assert.equal(evaluate({ guard: false }), 'skipped');
+  const required = fromJson(CheckedExprSchema, {
+    expr: conditional(1, ident(2, 'guard'), select(3, ident(4, 'result')), literal(5, 'skipped')),
+    typeMap: { 1: { primitive: 'STRING' }, 2: { primitive: 'BOOL' }, 3: { primitive: 'STRING' },
+      4: { messageType: 'keir.read.Result' }, 5: { primitive: 'STRING' } },
+    referenceMap: { 1: { overloadId: ['conditional'] }, 2: { name: 'guard' }, 4: { name: 'result' } },
+    sourceInfo: { location: '<input>' },
+  });
+  const evaluateRequired = plan(celEnv({ registry, variables: { guard: CelScalar.BOOL, result: objectType(schema) } }), required);
+  assert.equal(evaluateRequired({ guard: false }), 'skipped');
+  assert.equal(isCelError(evaluateRequired({ guard: true })), true);
 });
 
 test('rejects forged overload metadata even when the function itself is allowed', () => {

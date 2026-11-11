@@ -22,9 +22,10 @@ function binding(row, key, calls) {
   }])));
 }
 
-test('original 0.3.0 and compiler-produced 0.3.1 event and decision artifacts execute unchanged', async () => {
+test('retained 0.3.0/0.3.1 and separately compiled 0.4.0 event and decision artifacts preserve outcomes', async () => {
   for (const row of cases) for (const [producer, path] of [
     ['0.3.0', 'compatibility/0.3.0/' + row.old], ['0.3.1', row.current],
+    ['0.4.0', 'producers/0.4.0/' + row.current],
   ]) {
     const bytes = read(path); assert.equal(JSON.parse(bytes).compiler, 'keir-compiler-java/' + producer);
     const key = Object.freeze({}), calls = [], bound = binding(row, key, calls);
@@ -42,7 +43,7 @@ test('original 0.3.0 and compiler-produced 0.3.1 event and decision artifacts ex
 test('unknown and cross-format producers fail before any dispatch', () => {
   for (const row of cases) {
     const calls = [], bound = binding(row, Object.freeze({}), calls), original = JSON.parse(read(row.current));
-    for (const compiler of ['0.3.2', '0.3.1-preview', '0.2.0', '0.3.01']) {
+    for (const compiler of ['0.3.2', '0.3.1-preview', '0.4.1', '0.4.0-preview', '0.2.0', '0.3.01']) {
       const result = prepareProgram(canonicalBytes({ ...original, compiler: 'keir-compiler-java/' + compiler }), bound.boundModel);
       assert.equal(result.prepared, null); assert.equal(result.diagnostic.code, 'PIN_MISMATCH');
       assert.equal(result.diagnostic.path, '/artifact/compiler');

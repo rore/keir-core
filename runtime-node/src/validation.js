@@ -210,7 +210,7 @@ export function validateEnvelope(artifact, bound) {
   requireThat(Object.keys(ENVIRONMENT).every(k => artifact.environment[k] === ENVIRONMENT[k]), '/artifact/environment', 'PIN_MISMATCH');
   requireThat(['keir-artifact/2', 'keir-artifact/3'].includes(artifact.format), '/artifact/format');
   const legacy = artifact.format === 'keir-artifact/2';
-  requireThat((legacy ? artifact.compiler === 'keir-compiler-java/0.2.0' : ['keir-compiler-java/0.3.0', 'keir-compiler-java/0.3.1'].includes(artifact.compiler)), '/artifact/compiler', 'PIN_MISMATCH');
+  requireThat((legacy ? artifact.compiler === 'keir-compiler-java/0.2.0' : ['keir-compiler-java/0.3.0', 'keir-compiler-java/0.3.1', 'keir-compiler-java/0.4.0'].includes(artifact.compiler)), '/artifact/compiler', 'PIN_MISMATCH');
   requireThat(bound.dcm.format === (legacy ? 'keir-dcm/2' : 'keir-dcm/3'), '/artifact/modelRef', 'PIN_MISMATCH');
   requireThat(canonicalBytes(artifact.modelRef).equals(canonicalBytes(bound.modelRef)), '/artifact/modelRef');
   requireThat(typeof artifact.sourceDigest === 'string' && /^sha256:[0-9a-f]{64}$/.test(artifact.sourceDigest), '/artifact/sourceDigest');
@@ -224,6 +224,8 @@ export function validatePlan(artifact, { dcm, model }) {
   requireThat(Array.isArray(artifact.steps) && artifact.steps.length > 0 && artifact.steps.length <= LIMITS.steps, '/artifact/steps', 'BUDGET_EXCEEDED');
   const expressionNames = keys(artifact.expressions, '/artifact/expressions', LIMITS.totalAstNodes);
   const variables = Object.fromEntries([['input', entrypoint.input]]);
+  const guardedResultDataflow = artifact.compiler === 'keir-compiler-java/0.4.0';
+  const guardedResults = Object.create(null);
   const contexts = new Map();
   let nextExpression = 0, callCount = 0, writeCount = 0;
   const calls = Object.create(null);
@@ -240,7 +242,8 @@ export function validatePlan(artifact, { dcm, model }) {
       const expr = artifact.expressions[value.expr]; shape(expr, ['checked', 'variables', 'resultType'], path);
       shape(expr.variables, Object.keys(variables), path);
       requireThat(Object.keys(variables).every(k => expr.variables[k] === variables[k]) && expr.resultType === type, path);
-      contexts.set(value.expr, { ...expr, variables: { ...variables } });
+      contexts.set(value.expr, { ...expr, variables: { ...variables },
+        ...(guardedResultDataflow ? { guardedResults: { ...guardedResults } } : {}) });
     }
   }
   function returned(value, path) {
@@ -287,9 +290,10 @@ export function validatePlan(artifact, { dcm, model }) {
       binding(step.value, step.resultType, p + '/value');
       if (step.resultType === 'Boolean') booleanBinds.add(step.id);
     } else throw new Fault('ARTIFACT_INVALID', p);
-    if (!Object.hasOwn(step, 'when')) variables[step.id] = step.resultType;
+    if (!Object.hasOwn(step, 'when') || guardedResultDataflow) variables[step.id] = step.resultType;
+    if (guardedResultDataflow && Object.hasOwn(step, 'when')) guardedResults[step.id] = step.when;
   });
   returned(artifact.return, '/artifact/return');
   requireThat(nextExpression === expressionNames.length, '/artifact/expressions');
-  return { entrypoint, contexts, calls, policy, effectGrant };
+  return { entrypoint, contexts, calls, policy, effectGrant, guardedResultDataflow };
 }

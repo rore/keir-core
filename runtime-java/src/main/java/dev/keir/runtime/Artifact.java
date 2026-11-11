@@ -18,6 +18,10 @@ final class Artifact {
 
     private Artifact() {}
 
+    static boolean guardedResultDataflow(Map<String,Object> artifact) {
+        return "keir-compiler-java/0.4.0".equals(artifact.get("compiler"));
+    }
+
     record Plan(Map<String,Object> document, Map<String,Object> dcm, Map<String,Object> entrypoint,
                 Map<String,Map<String,Object>> contexts, Map<String,Integer> calls) {
         Plan {
@@ -248,7 +252,7 @@ final class Artifact {
         require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment","PIN_MISMATCH");
         require(Set.of("keir-artifact/2","keir-artifact/3").contains(artifact.get("format")),"/artifact/format");
         boolean current="keir-artifact/3".equals(artifact.get("format"));
-        require((current ? Set.of("keir-compiler-java/0.3.0", "keir-compiler-java/0.3.1").contains(artifact.get("compiler")) : "keir-compiler-java/0.2.0".equals(artifact.get("compiler"))),"/artifact/compiler","PIN_MISMATCH");
+        require((current ? Set.of("keir-compiler-java/0.3.0", "keir-compiler-java/0.3.1", "keir-compiler-java/0.4.0").contains(artifact.get("compiler")) : "keir-compiler-java/0.2.0".equals(artifact.get("compiler"))),"/artifact/compiler","PIN_MISMATCH");
         require((current?"keir-dcm/3":"keir-dcm/2").equals(dcm.get("format")),"/artifact/modelRef","PIN_MISMATCH");
         require(modelRef(dcm).equals(artifact.get("modelRef")),"/artifact/modelRef");
         require(artifact.get("sourceDigest") instanceof String text && text.matches("sha256:[0-9a-f]{64}"),"/artifact/sourceDigest");
@@ -262,6 +266,7 @@ final class Artifact {
         List<Object> steps = list(artifact.get("steps"),"/artifact/steps");
         Map<String,Object> expressions = bounded(artifact.get("expressions"),"/artifact/expressions",Profile.TOTAL_AST_NODES);
         Map<String,Object> variables = new LinkedHashMap<>(); variables.put("input",entry.get("input"));
+        Map<String,Object> guardedResults = guardedResultDataflow(artifact) ? new LinkedHashMap<>() : null;
         LinkedHashMap<String,Map<String,Object>> contexts = new LinkedHashMap<>();
         Map<String,Integer> calls = new LinkedHashMap<>(); int callCount = 0, writeCount = 0;
         Set<String> ids = new HashSet<>(), booleanBinds = new HashSet<>();
@@ -290,7 +295,7 @@ final class Artifact {
                 }
                 require(CapabilityPolicy.permits(policy,capability,calls.get(capability)),p,"ENTRY_GRANT_DENIED");
                 for (String arg : agent.keySet()) if (args.containsKey(arg))
-                    binding(dcm,expressions,variables,contexts,args.get(arg),fieldType(agent.get(arg)),p+"/args/"+arg);
+                    binding(dcm,expressions,variables,guardedResults,contexts,args.get(arg),fieldType(agent.get(arg)),p+"/args/"+arg);
                 if (step.containsKey("onError")) {
                     Map<String,Object> handlers = map(step.get("onError"),p+"/onError");
                     require(!handlers.isEmpty(),p+"/onError");
@@ -298,34 +303,37 @@ final class Artifact {
                     for (String code : new TreeSet<>(handlers.keySet())) {
                         String path = pointer(p+"/onError",code);
                         require(list(cap.get("errors"),path).contains(code),path);
-                        output(dcm,entry,expressions,variables,contexts,handlers.get(code),path);
+                        output(dcm,entry,expressions,variables,guardedResults,contexts,handlers.get(code),path);
                     }
                 }
             } else if ("BIND".equals(step.get("op"))) {
                 exact(step,p,"op","id","value","resultType");
-                binding(dcm,expressions,variables,contexts,step.get("value"),step.get("resultType"),p+"/value");
+                binding(dcm,expressions,variables,guardedResults,contexts,step.get("value"),step.get("resultType"),p+"/value");
                 if ("Boolean".equals(step.get("resultType"))) booleanBinds.add(id);
             } else throw new RuntimeFault("ARTIFACT_INVALID",p);
-            if (!step.containsKey("when")) variables.put(id,step.get("resultType"));
+            if (!step.containsKey("when") || guardedResults != null) variables.put(id,step.get("resultType"));
+            if (guardedResults != null && step.containsKey("when")) guardedResults.put(id,step.get("when"));
         }
-        output(dcm,entry,expressions,variables,contexts,artifact.get("return"),"/artifact/return");
+        output(dcm,entry,expressions,variables,guardedResults,contexts,artifact.get("return"),"/artifact/return");
         require(contexts.size() == expressions.size(),"/artifact/expressions");
         return new Plan(artifact,dcm,entry,contexts,calls);
     }
 
     private static void output(Map<String,Object> dcm,Map<String,Object> entry,Map<String,Object> expressions,
-                               Map<String,Object> variables,LinkedHashMap<String,Map<String,Object>> contexts,Object value,String path) {
+                               Map<String,Object> variables,Map<String,Object> guardedResults,
+                               LinkedHashMap<String,Map<String,Object>> contexts,Object value,String path) {
         Map<String,Object> returned = map(value,path); exact(returned,path,"type","fields");
         require(Objects.equals(returned.get("type"),entry.get("output")),path);
         Map<String,Object> fields = map(definition(dcm,(String)entry.get("output")).get("fields"),MODEL);
         Map<String,Object> supplied = map(returned.get("fields"),path+"/fields");
         validateMembers(supplied,fields,path+"/fields");
         for (String field : new TreeSet<>(supplied.keySet()))
-            binding(dcm,expressions,variables,contexts,supplied.get(field),fieldType(fields.get(field)),pointer(path+"/fields",field));
+            binding(dcm,expressions,variables,guardedResults,contexts,supplied.get(field),fieldType(fields.get(field)),pointer(path+"/fields",field));
     }
 
     private static void binding(Map<String,Object> dcm, Map<String,Object> expressions, Map<String,Object> variables,
-                                LinkedHashMap<String,Map<String,Object>> contexts, Object value, Object type, String path) {
+                                Map<String,Object> guardedResults, LinkedHashMap<String,Map<String,Object>> contexts,
+                                Object value, Object type, String path) {
         Map<String,Object> binding = map(value,path); boolean literal = binding.containsKey("literal");
         exact(binding,path,literal ? "literal" : "expr","type");
         require(Objects.equals(binding.get("type"),type) && valueType(dcm,type,false),path);
@@ -337,7 +345,10 @@ final class Artifact {
             Map<String,Object> expression = map(expressions.get(id),path); exact(expression,path,"checked","variables","resultType");
             shape(expression.get("variables"),variables.keySet(),path);
             require(variables.equals(expression.get("variables")) && Objects.equals(type,expression.get("resultType")),path);
-            Map<String,Object> context = new LinkedHashMap<>(expression); context.put("variables",new LinkedHashMap<>(variables)); contexts.put(id,context);
+            Map<String,Object> context = new LinkedHashMap<>(expression);
+            context.put("variables",new LinkedHashMap<>(variables));
+            if (guardedResults != null) context.put("guardedResults",new LinkedHashMap<>(guardedResults));
+            contexts.put(id,context);
         }
     }
 }

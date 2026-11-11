@@ -40,7 +40,8 @@ final class CheckedCel {
 
     private CheckedCel() {}
     private record Value(String type, List<String> literals) { Value(String type) { this(type, null); } }
-    private record Prepared(CelRuntime.Program program, Map<String,Object> variables, String resultType) {}
+    private record Prepared(CelRuntime.Program program, Map<String,Object> variables, String resultType,
+                            Map<String,Object> guardedResults) {}
     private static final class TimestampOverflow extends RuntimeException {}
 
     private static boolean timestampInRange(Instant instant) {
@@ -106,6 +107,15 @@ final class CheckedCel {
             if (expression == null) throw new RuntimeFault("EXPRESSION_FAILED", path);
             Map<String,Object> variables = new HashMap<>();
             for (var variable : expression.variables().entrySet()) {
+                if (expression.guardedResults() != null) {
+                    Object guardId = expression.guardedResults().get(variable.getKey());
+                    if (guardId != null) {
+                        Object guard = state.get(guardId);
+                        if (!(guard instanceof Boolean)) throw new RuntimeFault("EXPRESSION_FAILED", path);
+                        if (Boolean.FALSE.equals(guard)) continue;
+                    }
+                    if (!state.containsKey(variable.getKey())) throw new RuntimeFault("EXPRESSION_FAILED", path);
+                }
                 String type = (String)variable.getValue();
                 Object value = Artifact.value(dcm, type, state.get(variable.getKey()), path, "EXPRESSION_FAILED");
                 if (Artifact.record(dcm, type)) {
@@ -170,8 +180,10 @@ final class CheckedCel {
                 require(source.getLineOffsetsList().stream().allMatch(n -> n >= 0 && n <= 513)
                         && source.getPositionsMap().values().stream().allMatch(n -> n >= 0 && n <= 512), EXPRESSIONS);
                 Map<String,Object> variables = map(context.get("variables"), EXPRESSIONS);
-                var gate = new Gate(dcm, checked, variables);
-                Value result = gate.visit(checked.getExpr(), 1, Set.of());
+                Map<String,Object> guardedResults = context.containsKey("guardedResults")
+                        ? map(context.get("guardedResults"), EXPRESSIONS) : null;
+                var gate = new Gate(dcm, checked, variables, guardedResults == null ? Map.of() : guardedResults);
+                Value result = gate.visit(checked.getExpr(), 1, Set.of(), Set.of(), false);
                 String resultType = (String)context.get("resultType");
                 require((Artifact.scalar(dcm, resultType) || Artifact.listType(dcm, resultType))
                         && gate.assignable(result, resultType), EXPRESSIONS);
@@ -180,7 +192,9 @@ final class CheckedCel {
                 totalNodes += gate.ids.size();
                 budget(totalNodes <= 512);
                 var program = model.runtime.createProgram(CelProtoAbstractSyntaxTree.fromCheckedExpr(checked).getAst());
-                prepared.put(item.getKey(), new Prepared(program, Map.copyOf(gate.usedVariables), resultType));
+                prepared.put(item.getKey(), new Prepared(program,
+                        Map.copyOf(guardedResults == null ? gate.usedVariables : variables), resultType,
+                        guardedResults == null ? null : Map.copyOf(guardedResults)));
             }
             return new Bundle(dcm, model.descriptor, prepared, totalNodes);
         } catch (RuntimeFault failure) { throw failure; }
@@ -235,16 +249,16 @@ final class CheckedCel {
 
     private static final class Gate {
         private record Presence(String variable, String field) {}
-        private final Map<String,Object> dcm, variables;
+        private final Map<String,Object> dcm, variables, guardedResults;
         private final Map<String,Object> usedVariables = new HashMap<>();
         private final CheckedExpr checked;
         private final Set<Long> ids = new HashSet<>(), references = new HashSet<>();
 
-        Gate(Map<String,Object> dcm, CheckedExpr checked, Map<String,Object> variables) {
-            this.dcm = dcm; this.checked = checked; this.variables = variables;
+        Gate(Map<String,Object> dcm, CheckedExpr checked, Map<String,Object> variables, Map<String,Object> guardedResults) {
+            this.dcm = dcm; this.checked = checked; this.variables = variables; this.guardedResults = guardedResults;
         }
 
-        Value visit(Expr expression, int depth, Set<Presence> proofs) {
+        Value visit(Expr expression, int depth, Set<Presence> proofs, Set<String> guards, boolean selectionOperand) {
             budget(depth <= 16 && ids.size() < 64);
             long id = expression.getId();
             require(id > 0 && id <= MAX_ID && ids.add(id), EXPRESSIONS);
@@ -264,16 +278,20 @@ final class CheckedCel {
                 require(reference != null && reference.getName().equals(name) && !reference.hasValue()
                         && reference.getOverloadIdCount() == 0, EXPRESSIONS);
                 references.add(id);
+                if (guardedResults.containsKey(name))
+                    require(selectionOperand && guards.contains(guardedResults.get(name)), EXPRESSIONS);
                 usedVariables.put(name, variables.get(name));
                 value = new Value((String)variables.get(name));
             } else if (expression.hasSelectExpr()) {
                 var select = expression.getSelectExpr();
                 require(select.hasOperand(), EXPRESSIONS);
-                Value operand = visit(select.getOperand(), depth + 1, proofs);
+                Value operand = visit(select.getOperand(), depth + 1, proofs, guards, true);
                 require(Artifact.record(dcm, operand.type()), EXPRESSIONS);
                 Map<String,Object> fields = map(Artifact.definition(dcm, operand.type()).get("fields"), EXPRESSIONS);
                 require(fields.containsKey(select.getField()), EXPRESSIONS);
                 Object field = fields.get(select.getField());
+                if (select.getOperand().hasIdentExpr() && guardedResults.containsKey(select.getOperand().getIdentExpr().getName()))
+                    require(Artifact.scalar(dcm, Artifact.fieldType(field)), EXPRESSIONS);
                 boolean optional = Artifact.optionalField(field);
                 Presence presence = presence(select);
                 if (select.getTestOnly()) {
@@ -292,7 +310,8 @@ final class CheckedCel {
                 require((addition || OVERLOADS.containsKey(function)) && !call.hasTarget()
                         && call.getArgsCount() == arity, EXPRESSIONS);
                 List<Value> args = new ArrayList<>();
-                for (int i = 0; i < arity; i++) args.add(visit(call.getArgs(i), depth + 1, branchProofs(call, i, proofs)));
+                for (int i = 0; i < arity; i++) args.add(visit(call.getArgs(i), depth + 1,
+                        branchProofs(call, i, proofs), branchGuards(call, i, guards), false));
                 boolean temporalAdd = addition && pair(args, "Timestamp", "Duration");
                 String overload = addition ? (temporalAdd ? "add_timestamp_duration" : "add_string") : OVERLOADS.get(function);
                 var reference = checked.getReferenceMapMap().get(id);
@@ -374,6 +393,15 @@ final class CheckedCel {
             if (proof == null || incoming.contains(proof)) return incoming;
             var extended = new HashSet<>(incoming);
             extended.add(proof);
+            return extended;
+        }
+
+        private Set<String> branchGuards(Expr.Call call, int index, Set<String> incoming) {
+            if (index != 1 || !call.getFunction().equals("_?_:_") || !call.getArgs(0).hasIdentExpr()) return incoming;
+            String guard = call.getArgs(0).getIdentExpr().getName();
+            if (!guardedResults.containsValue(guard) || incoming.contains(guard)) return incoming;
+            var extended = new HashSet<>(incoming);
+            extended.add(guard);
             return extended;
         }
 

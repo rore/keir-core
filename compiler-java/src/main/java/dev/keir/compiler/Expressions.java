@@ -66,7 +66,7 @@ final class Expressions {
     }
 
     static Compiled compile(CelAbstractSyntaxTree parsed, String expected, Map<String, String> variables,
-                            Dcm dcm, String path) {
+                            Map<String, String> guardedResults, Dcm dcm, String path) {
         var builder = CelCompilerFactory.standardCelCompilerBuilder().setOptions(OPTIONS)
                 .setStandardMacros(Set.of(CelStandardMacro.HAS)).addFileTypes(dcm.fileDescriptor());
         variables.forEach((name, type) -> builder.addVar(name, celType(type, dcm)));
@@ -80,8 +80,8 @@ final class Expressions {
         } catch (StackOverflowError exhausted) {
             throw new CompileFailure("BUDGET_EXCEEDED", path);
         }
-        var walker = new Walker(dcm, variables, checked, path);
-        Value value = walker.visit(checked.getExpr(), 1, Set.of());
+        var walker = new Walker(dcm, variables, guardedResults, checked, path);
+        Value value = walker.visit(checked.getExpr(), 1, Set.of(), Set.of(), false);
         if (dcm.type(value.type()) == null || dcm.record(value.type()) != null) fail("CEL_POLICY_DENIED", path);
         String type = expected == null ? value.type() : assign(value, expected, dcm, path);
         byte[] bytes = deterministic(checked);
@@ -163,15 +163,17 @@ final class Expressions {
         private record Presence(String variable, String field) {}
         private final Dcm dcm;
         private final Map<String, String> variables;
+        private final Map<String, String> guardedResults;
         private final CheckedExpr checked;
         private final String path;
         private int nodes;
 
-        Walker(Dcm dcm, Map<String, String> variables, CheckedExpr checked, String path) {
-            this.dcm = dcm; this.variables = variables; this.checked = checked; this.path = path;
+        Walker(Dcm dcm, Map<String, String> variables, Map<String, String> guardedResults, CheckedExpr checked, String path) {
+            this.dcm = dcm; this.variables = variables; this.guardedResults = guardedResults;
+            this.checked = checked; this.path = path;
         }
 
-        Value visit(Expr expr, int depth, Set<Presence> proofs) {
+        Value visit(Expr expr, int depth, Set<Presence> proofs, Set<String> guards, boolean selectionOperand) {
             if (++nodes > 64 || depth > 16) fail("BUDGET_EXCEEDED", path);
             Type wireType = checked.getTypeMapMap().get(expr.getId());
             if (wireType == null || !(wireType.getPrimitive() == Type.PrimitiveType.BOOL
@@ -196,14 +198,21 @@ final class Expressions {
                 if (type == null) fail("DATAFLOW_UNAVAILABLE", path);
                 if (reference == null || !reference.getName().equals(name)
                         || reference.getOverloadIdCount() != 0) fail("CEL_POLICY_DENIED", path);
+                if (guardedResults.containsKey(name)) {
+                    if (!selectionOperand) fail("CEL_POLICY_DENIED", path);
+                    if (!guards.contains(guardedResults.get(name))) fail("DATAFLOW_UNAVAILABLE", path);
+                }
                 return new Value(type);
             }
             if (expr.hasSelectExpr()) {
                 var select = expr.getSelectExpr();
-                Value operand = visit(select.getOperand(), depth + 1, proofs);
+                Value operand = visit(select.getOperand(), depth + 1, proofs, guards, true);
                 var record = dcm.record(operand.type());
                 String fieldType = record == null ? null : record.fields().get(select.getField());
                 if (fieldType == null) fail("CEL_POLICY_DENIED", path);
+                if (select.getOperand().hasIdentExpr()
+                        && guardedResults.containsKey(select.getOperand().getIdentExpr().getName())
+                        && !dcm.type(fieldType).scalar()) fail("CEL_POLICY_DENIED", path);
                 boolean optional = record.optionalFields().contains(select.getField());
                 Presence presence = presence(expr);
                 if (select.getTestOnly()) {
@@ -225,7 +234,8 @@ final class Expressions {
                     || reference == null)
                 fail("CEL_POLICY_DENIED", path);
             var args = new ArrayList<Value>();
-            for (int i = 0; i < arity; i++) args.add(visit(call.getArgs(i), depth + 1, branchProofs(call, i, proofs)));
+            for (int i = 0; i < arity; i++) args.add(visit(call.getArgs(i), depth + 1,
+                    branchProofs(call, i, proofs), branchGuards(call, i, guards), false));
             boolean temporalAdd = addition && pair(args, "Timestamp", "Duration");
             String overload = addition ? temporalAdd ? "add_timestamp_duration" : "add_string" : OVERLOADS.get(function);
             if (!reference.getOverloadIdList().equals(List.of(overload))) fail("CEL_POLICY_DENIED", path);
@@ -326,6 +336,16 @@ final class Expressions {
             if (proof == null || incoming.contains(proof)) return incoming;
             var extended = new HashSet<>(incoming);
             extended.add(proof);
+            return extended;
+        }
+
+        private Set<String> branchGuards(Expr.Call call, int index, Set<String> incoming) {
+            if (index != 1 || !call.getFunction().equals("_?_:_") || !call.getArgs(0).hasIdentExpr()) return incoming;
+            String guard = call.getArgs(0).getIdentExpr().getName();
+            // Every map value was validated as an earlier Boolean BIND before CALL lowering.
+            if (!guardedResults.containsValue(guard) || incoming.contains(guard)) return incoming;
+            var extended = new HashSet<>(incoming);
+            extended.add(guard);
             return extended;
         }
     }

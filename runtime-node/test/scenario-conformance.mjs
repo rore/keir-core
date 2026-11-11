@@ -34,11 +34,15 @@ if (revision === '3') {
   groups.set('guard-input', ['artifact-guard-input', 'dcm-guard']);
   groups.set('guard-handler', ['artifact-guard-handler', 'dcm-guard']);
   groups.set('guard-reversed', ['artifact-guard-reversed', 'dcm-guard-reversed']);
+  groups.set('guarded-result', ['artifact-guarded-result', 'dcm-guarded-result']);
+  groups.set('guarded-result-read', ['artifact-guarded-result-read', 'dcm-guarded-result-read']);
+  groups.set('guarded-result-handler', ['artifact-guarded-result-handler', 'dcm-guarded-result']);
+  groups.set('guarded-result-unused', ['artifact-guarded-result-unused', 'dcm-guarded-result']);
   fixtures.add('read-expired');
   fixtures.add('read-malformed');
   withoutBindings.add('guard-input');
 }
-assert.equal(groups.size, revision === '2' ? 11 : 15);
+assert.equal(groups.size, revision === '2' ? 11 : 15 + 4);
 
 function vectorBytes(vector) {
   if (Object.hasOwn(vector, 'utf8')) return Buffer.from(vector.utf8);
@@ -103,7 +107,7 @@ function pinned(name) {
 }
 
 const fixtureNames = new Set([...groups.values()].flat());
-assert.equal(fixtureNames.size, revision === '2' ? 15 : 21);
+assert.equal(fixtureNames.size, revision === '2' ? 15 : 21 + 6);
 const pinnedBytes = new Map([...fixtureNames].map(name => [name, pinned(name)]));
 
 function withFormat(bytes, format) {
@@ -202,7 +206,7 @@ async function run(entry) {
     const inventory = entry.group.startsWith('inventory');
     const guard = dcm.entrypoints[artifact.entrypoint]?.consumer.kind === 'DECISION';
     const event = Object.freeze(guard ? { id: 'attempt1', source: 'scope1' } : { id: 'event1', source: inventory ? 'item1' : 'task1' });
-    const report = guard ? consumeDecision : inventory ? reportInventory : consumeEffect;
+    const report = guard ? consumeDecision : inventory || entry.group.startsWith('guarded-result') ? reportInventory : consumeEffect;
     const expiresAtMs = 10_000;
     let now = 0;
     let fixture;
@@ -296,7 +300,7 @@ const vectors = JSON.parse(read('scenario-vectors.json')).vectors.map(vector => 
   if (vector.model) assert.ok(pinnedBytes.has(vector.model), 'Missing vector model pin');
   return { vector, group, bytes: vectorBytes(vector), label: vector.id, expected: vector.expect };
 });
-assert.equal(scenarios.length, revision === '2' ? 28 : 39);
+assert.equal(scenarios.length, revision === '2' ? 28 : 39 + 15);
 assert.equal(vectors.length, 51);
 const forged = JSON.parse(read('scenarios/main/open.json'));
 const receipt = { ...target(forged.expect.calls[0]), state: 'CONFIRMED' };

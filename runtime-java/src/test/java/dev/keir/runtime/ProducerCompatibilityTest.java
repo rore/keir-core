@@ -34,8 +34,9 @@ class ProducerCompatibilityTest {
         return binding.boundModel();
     }
     @Test void originalAndCurrentProducersExecuteEventAndDecisionBytes() throws Exception {
-        for (Case row : CASES) for (String producer : List.of("0.3.0", "0.3.1")) {
-            byte[] artifact = read(producer.equals("0.3.0") ? "compatibility/0.3.0/" + row.old() : row.current());
+        for (Case row : CASES) for (String producer : List.of("0.3.0", "0.3.1", "0.4.0")) {
+            byte[] artifact = read(producer.equals("0.3.0") ? "compatibility/0.3.0/" + row.old()
+                    : producer.equals("0.4.0") ? "producers/0.4.0/" + row.current() : row.current());
             assertEquals("keir-compiler-java/" + producer, map(parseCanonical(artifact), "").get("compiler"));
             Object key = new Object(); var calls = new ArrayList<String>(); var bound = bind(row, key, calls);
             var preparation = KeirRuntime.prepareProgram(artifact, bound);
@@ -51,7 +52,7 @@ class ProducerCompatibilityTest {
     @Test void unknownAndCrossFormatProducersFailBeforeDispatch() throws Exception {
         for (Case row : CASES) {
             var calls = new ArrayList<String>(); var bound = bind(row, new Object(), calls);
-            for (String version : List.of("0.3.2", "0.3.1-preview", "0.2.0", "0.3.01", "cross-format")) {
+            for (String version : List.of("0.3.2", "0.3.1-preview", "0.4.1", "0.4.0-preview", "0.2.0", "0.3.01", "cross-format")) {
                 var artifact = map(parseCanonical(read(row.current())), "");
                 artifact.put("compiler", "keir-compiler-java/" + (version.equals("cross-format") ? "0.3.1" : version));
                 if (version.equals("cross-format")) artifact.put("format", "keir-artifact/2");

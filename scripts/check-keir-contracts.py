@@ -75,9 +75,10 @@ def check_scenario_rejections(validator, fixtures):
 def check_fixtures(schemas, revision):
     fixtures = ROOT / "conformance" / f"keir-{revision}"
     if revision == 3:
-        for group in ("guard", "guard-input", "guard-handler", "guard-reversed"):
+        for group in ("guard", "guard-input", "guard-handler", "guard-reversed", "guarded-result",
+                      "guarded-result-read", "guarded-result-handler", "guarded-result-unused"):
             if not any((fixtures / "scenarios" / group).glob("*.json")):
-                raise ValueError(f"No decision scenarios matched {group}")
+                raise ValueError(f"No scenarios matched {group}")
     patterns = {
         "source": "source-handler.json" if revision == 1 else "source*.json",
         "dcm": "dcm*.json",
@@ -88,6 +89,11 @@ def check_fixtures(schemas, revision):
     count = 0
     for name, pattern in patterns.items():
         paths = sorted(fixtures.glob(pattern))
+        if name == "artifact" and revision == 3:
+            current = sorted((fixtures / "producers" / "0.4.0").glob("artifact*.json"))
+            if not current:
+                raise ValueError("No separately pinned current-producer artifacts")
+            paths.extend(current)
         if not paths:
             raise ValueError(f"No {name} fixtures matched {pattern}")
         for path in paths:

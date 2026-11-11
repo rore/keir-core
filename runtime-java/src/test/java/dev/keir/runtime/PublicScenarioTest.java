@@ -20,8 +20,10 @@ class PublicScenarioTest {
         Path root = Files.isDirectory(Path.of("conformance/keir-3")) ? Path.of("conformance/keir-3") : Path.of("../conformance/keir-3");
         var report = new PublicScenarioDriver(root).runCorpus();
         var scenarios = list(report.get("scenarios"), "");
-        assertEquals(39, scenarios.size());
-        assertEquals(11, scenarios.stream().map(row -> map(row, "")).filter(row -> ((String)row.get("group")).startsWith("guard")).count());
+        assertEquals(39 + 15, scenarios.size());
+        assertEquals(11, scenarios.stream().map(row -> map(row, "")).filter(row -> ((String)row.get("group")).startsWith("guard")
+                && !((String)row.get("group")).startsWith("guarded-result")).count());
+        assertEquals(15, scenarios.stream().map(row -> map(row, "")).filter(row -> ((String)row.get("group")).startsWith("guarded-result")).count());
         assertEquals(51, list(report.get("vectors"), "").size());
     }
 

@@ -47,7 +47,8 @@ public final class PublicScenarioDriver {
     PublicScenarioDriver(Path corpus) throws IOException {
         this.corpus = corpus;
         if (corpus != null) {
-            for (String group : List.of("guard", "guard-input", "guard-handler", "guard-reversed")) {
+            for (String group : List.of("guard", "guard-input", "guard-handler", "guard-reversed",
+                    "guarded-result", "guarded-result-read", "guarded-result-handler", "guarded-result-unused")) {
                 try (var entries = Files.list(corpus.resolve("scenarios").resolve(group))) {
                     groups.put(group, entries.filter(file -> file.getFileName().toString().endsWith(".json"))
                             .sorted().map(file -> file.getFileName().toString().replaceFirst("\\.json$", "")).toList());
@@ -130,7 +131,8 @@ public final class PublicScenarioDriver {
             throws Exception {
         String phase = "lexical";
         var callbacks = new Callbacks(group != null && group.startsWith("inventory")
-                ? Map.of("id", "event1", "source", "item1") : group != null && group.startsWith("guard")
+                ? Map.of("id", "event1", "source", "item1") : group != null
+                && (group.startsWith("guard") && !group.startsWith("guarded-result") || group.equals("guarded-result-read"))
                 ? Map.of("id", "attempt1", "source", "scope1") : EVENT);
         try {
             Object document = bytes == null ? decoded : parseScenario(bytes);
@@ -570,6 +572,8 @@ public final class PublicScenarioDriver {
     private static String group(String label) { return label.substring(0, label.indexOf('/')); }
     private static String artifactName(String group) { return group.equals("main") ? "artifact" : "artifact-" + group; }
     private static String modelName(String group) {
+        if (group.equals("guarded-result-read")) return "dcm-guarded-result-read";
+        if (group.startsWith("guarded-result")) return "dcm-guarded-result";
         if (group.equals("guard-reversed")) return "dcm-guard-reversed";
         if (group.startsWith("guard")) return "dcm-guard";
         if (group.equals("inventory-enum")) return "dcm-inventory-enum";

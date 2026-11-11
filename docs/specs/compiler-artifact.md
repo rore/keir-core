@@ -9,28 +9,31 @@ The compiler checks a [Keir source document](language.md) against a trusted [dom
 
 Compiler identity, document formats and runtime compatibility version independently. The matrix below identifies the supported combinations; use the [installation guide](../installation.md) to select packages.
 
-| Field | Current authoring value (Core 0.3.1) |
+| Field | Development authoring value (Core 0.4.0, unreleased) |
 | --- | --- |
 | Source `language` | `keir/2` |
 | DCM `format` | `keir-dcm/3` |
 | Artifact `format` | `keir-artifact/3` |
 | Verification scenario `format` | `keir-scenario/3` |
-| Compiler identity | `keir-compiler-java/0.3.1` |
+| Compiler identity | `keir-compiler-java/0.4.0` |
 | Descriptor recipe | `keir-record-descriptors/2` |
 
 Structural schemas: [source](../../schemas/source-2/source.schema.json), [model](../../schemas/dcm-3/dcm.schema.json), [artifact](../../schemas/artifact-3/artifact.schema.json) and [scenario](../../schemas/scenario-3/scenario.schema.json). Semantic and cross-document checks remain required.
 
 The compiler identified above accepts source `/2` with DCM `/3` only and produces artifact `/3` with its declared compiler identity. It rejects DCM `/2` and never stamps the old producer identity. The exact Core 0.2.0 contracts remain documented in the [workflow version matrix](workflow-expressions.md#version-matrix) for execution and history.
 
-Runtime 0.3.1 admits exactly the three tuples below with the same environment pins. Runtime 0.3.0 admits only the first two:
+Development runtime 0.4.0 admits the four exact tuples below with the same environment pins. Runtime 0.3.1 admits only the first three, and runtime 0.3.0 only the first two. The development allocation is not a release or package-qualification claim.
 
 | Artifact | Bound model | Producer | Descriptor recipe |
 | --- | --- | --- | --- |
 | `keir-artifact/2` | `keir-dcm/2` | `keir-compiler-java/0.2.0` | `keir-record-descriptors/2` |
 | `keir-artifact/3` | `keir-dcm/3` | `keir-compiler-java/0.3.0` | `keir-record-descriptors/2` |
 | `keir-artifact/3` | `keir-dcm/3` | `keir-compiler-java/0.3.1` | `keir-record-descriptors/2` |
+| `keir-artifact/3` | `keir-dcm/3` | `keir-compiler-java/0.4.0` | `keir-record-descriptors/2` |
 
 Mixed tuples, `/1` contracts and decision semantics inside `/2` are rejected by both runtimes. Producers absent from this matrix are also rejected. Existing approved event artifacts keep their exact old model and approval identities; upgrading the runtime does not recompile or deactivate them. New or edited source uses the current `/3` catalog, including unchanged EVENT entrypoints, and requires normal approval of the new bytes. Historical source can seed a draft, but its prior approval never transfers to the recompiled artifact.
+
+Only the exact 0.4.0 tuple admits guarded-result scalar dataflow. Earlier producers retain their original declaration and execution semantics. A new-semantics artifact relabeled with any retained producer fails independent preparation, even with a matching old format/model pair. Old runtimes reject the new producer. Schema acceptance or changing a producer string never grants approval. The new compiler always emits 0.4.0, including programs that do not use the added capability; separately pinned outputs preserve all original golden bytes.
 
 ### Compile source
 
@@ -82,9 +85,11 @@ The [artifact `/3` schema](../../schemas/artifact-3/artifact.schema.json) define
 | Binding step | `{op:"BIND",id,value,resultType}`, where `value` is the lowered binding. |
 | Call step | `{op:"CALL",id,capability,version,args,resultType,when?,onError?}`. Arguments contain only source-supplied parameters. `when` names the earlier Boolean BIND. `onError` maps declared codes to lowered return records. |
 | Return record | `{type,fields}`, where `type` is the entrypoint's output type and `fields` maps required and supplied optional output fields to lowered bindings. Omitted optional fields remain absent. This shape is used for both the root return and each handler. |
-| Checked expression | `{checked,variables,resultType}`. `checked` contains standard base64 of the protobuf `CheckedExpr`. `variables` maps every definitely available name, including unused names, to its type. A guarded call never adds a variable. |
+| Checked expression | `{checked,variables,resultType}`. `checked` contains standard base64 of the protobuf `CheckedExpr`. For producer 0.4.0, `variables` is the complete prior declaration/type environment, including unused guarded CALL results. Retained producers include only definitely available names and omit guarded results. A declaration is not permission to read its value. |
 
 Assign expression IDs `e0`, `e1` and so on while visiting steps in source order. Visit call arguments by name, handler codes by code and handler fields by name, all in ASCII order. Visit root return fields last, also in ASCII order. A literal consumes no expression ID. Omitted optional arguments remain absent from `args`. The runtimes recompute availability and check the expression IDs and metadata during [preparation](host-model-binding.md#prepare-an-artifact), including same-expression optional presence proofs, exact list element types and timestamp operations. See the [Keir 2 checked forms](workflow-expressions.md#checked-expressions-and-descriptor-identity).
+
+For 0.4.0, compiler and preparation independently reconstruct prior Boolean BINDs and guarded-result provenance from validated ordered steps. Arguments and handlers use pre-CALL snapshots. Preparation requires the exact declaration map and independently validates every checked AST node, reference/type map, overload and semantic overlay. In a scalar conditional, only its exact Boolean guard identifier adds result-existence proof to the true arm; false arms and later expressions gain none. Optional-field proof remains separate. No new serialized proof, descriptor, opcode or format field carries this authority. At most nine names are declared: input plus eight preceding steps. [Sparse activation](runtime.md#guarded-result-activation) controls which of those declarations have invocation values.
 
 The artifact carries no special decision opcode or native-commit callback. Its selected `/3` model entrypoint determines REQUEST/BEFORE_COMMIT/DECISION semantics and the zero-write ceiling. Preparation independently rejects every possible WRITE, including a false-guarded call, before adapter dispatch. A valid decision result does not establish a native commit; the host applies the [consumption and consistency contract](pre-operation-decisions.md#consumption-and-failure-policy).
 

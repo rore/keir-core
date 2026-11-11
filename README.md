@@ -38,6 +38,8 @@ An allow decision lets the application continue its own permission and business-
 
 An event extension may include at most one call that can change data, even if conditional. Pre-operation checks are read-only. Steps, calls and data size are bounded. See the [language reference](docs/specs/language.md) for supported expressions and limits.
 
+The unreleased Core 0.4.0 source includes [guarded-result scalar dataflow](examples/README.md#guarded-result-scalar-dataflow): use a conditional call's actual result when the expression proves its exact guard. Released-package qualification and host adoption are separate; Daymark's pinned Core 0.3.1 does not support this capability.
+
 ## Start here
 
 Start with [Getting started](docs/quickstart.md) to run and change one extension.

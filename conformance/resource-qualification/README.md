@@ -71,6 +71,22 @@ Contract CI runs the default resource and concurrent phases in its existing job 
 
 This is a bounded component correctness and resource screen. It does not measure sustainable HTTP throughput, queue growth, service dependency latency or the capacity of a consumer application. A host capacity qualification needs a stated CPU/memory allocation, workload and latency/error target, sustained arrivals, host admission and representative dependencies. No universal concurrency ceiling or SLA follows from passing at 128.
 
+## Guarded-result retention and sparse activation
+
+Run the opt-in development 0.4.0 phase after the same isolated package preparation:
+
+```sh
+node conformance/resource-qualification/qualify.mjs --guarded-results > build/resource-guarded.json
+```
+
+The actual compiler generates one artifact for both pinned engines. The probe checks its eight steps, four guarded calls (three READs and one WRITE), nine declarations, 512 aggregate checked nodes, 64-node per-expression maximum and depth 16. Two independent Boolean guards produce all-false, all-true and both mixed paths. Nested true arms retain exact guard proofs while repeating later BIND and return evaluations; optional scalar selection still requires presence proof. Every successful result is a full 8,192-byte record with two bounded scalar lists, even though guarded expressions cannot read those lists.
+
+Each runtime prepares once, checks 16 warmups and then three blocks of 64 invocations against independent complete outcomes/calls/context/traces/receipts, and changes the actual returned reference on each invocation. The all-true path requires all four result declarations during full activation validation; mixed/skipped paths leave the other declarations absent. Complete-outcome digests must agree across runtimes. A separate 8,193-byte result, with every individual string/list still within its cap, must fail before later dispatch. Deliberately wrong expected outcomes must fail in both workers. The report distinguishes these boundary and negative checks from the measured loop.
+
+The existing supervisor limits direct children to one at a time, 45 seconds each, 1 MiB combined capture and a 135-second total phase. Both engines use a 256 MiB heap setting. Reports include per-block elapsed/CPU and post-GC heap observations, plus Node process peak RSS; this Java probe explicitly does not collect process working set. Generated inputs, byte pins, classes and progress checkpoints remain in the ignored directory named by the report after child closure. Full activation validation and successful dispatch establish the logical four-result retention case; there is no instrumented private-state allocation counter.
+
+This is a short bounded correctness/resource screen, not leak-freedom, throughput, production containment or synchronous CPU-preemption evidence. Existing default boundary and concurrent qualification remain required. They compare current compiler output with `keir-3/producers/0.4.0` pins without changing historical golden bytes.
+
 ## Serial embedded workload on Windows
 
 ```powershell

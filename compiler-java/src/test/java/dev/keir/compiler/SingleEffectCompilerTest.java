@@ -65,7 +65,7 @@ class SingleEffectCompilerTest {
         sourceDenied(s->steps(s).get(2).put("let",Map.of("literal","true")),"TYPE_MISMATCH");
         sourceDenied(s->steps(s).get(3).put("when",true),"SYNTAX_INVALID");
         sourceDenied(s->steps(s).get(2).put("when","eligible"),"PROFILE_UNSUPPORTED");
-        sourceDenied(s->map(map(s.get("return")).get("record")).put("status",Map.of("cel","eligible ? created.id : \"NO_OP\"")),"DATAFLOW_UNAVAILABLE");
+        sourceDenied(s->map(map(s.get("return")).get("record")).put("status",Map.of("cel","eligible ? created.id : \"NO_OP\"")),"NOMINAL_MISMATCH");
         sourceDenied(s->steps(s).add(Map.of("id","unused","let",Map.of("cel","created.id"))),"DATAFLOW_UNAVAILABLE");
         sourceDenied(s->handler(s,1,"TASK_NOT_FOUND").put("status",Map.of("cel","source.id")),"DATAFLOW_UNAVAILABLE");
         sourceDenied(s->handler(s,1,"TASK_NOT_FOUND").put("status",Map.of("cel","eligible ? \"NO_OP\" : \"CREATED\"")),"DATAFLOW_UNAVAILABLE");

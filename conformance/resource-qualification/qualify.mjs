@@ -16,9 +16,11 @@ const MB = 1_048_576;
 const DOC = 65_536;
 const start = performance.now();
 const args = process.argv.slice(2);
-assert.ok(args.length === 0 || args.length === 1 && ['--soak', '--dense', '--concurrent'].includes(args[0]), 'Use --soak, --dense or --concurrent');
+assert.ok(args.length === 0 || args.length === 1 && ['--soak', '--dense', '--concurrent', '--guarded-results'].includes(args[0]),
+  'Use --soak, --dense, --concurrent or --guarded-results');
 const dense = args.includes('--dense');
 const concurrent = args.includes('--concurrent');
+const guarded = args.includes('--guarded-results');
 const soak = args.includes('--soak') || dense ? {
   warmups: 100, blocks: 5, perBlock: dense ? 1000 : 200, heapMiB: 256, peakWorkingSetBytes: 512 * MB, sampleIntervalMs: 100,
 } : null;
@@ -118,7 +120,12 @@ assert.equal(resolvedBuild, join(realpathSync(root), 'build'), 'Use an in-checko
 const temporary = mkdtempSync(join(resolvedBuild, 'resource-'));
 const output = { limits, platform: process.platform, arch: process.arch, compiler: {}, runtimes: {}, children: {} };
 try {
-  if (concurrent) {
+  if (guarded) {
+    const { runGuardedResultQualification } = await import('./guarded-results.mjs');
+    output.guardedResults = {};
+    await runGuardedResultQualification({ here, fixture, compiler, host, jdk, temporary, limits,
+      child, requireExit, metrics, output: output.guardedResults });
+  } else if (concurrent) {
     const { runConcurrentQualification } = await import('./concurrent.mjs');
     output.concurrent = {};
     await runConcurrentQualification({ here, fixture, compiler, host, jdk, temporary, limits,
@@ -131,8 +138,9 @@ try {
   } else {
   const write = (name, bytes) => { writeFileSync(join(temporary, name), bytes); return name; };
   const pinned = name => {
-    const bytes = readFileSync(join(fixture, name + '.json'));
-    assert.equal(digest(bytes), readFileSync(join(fixture, name + '.sha256'), 'ascii').trim(), name);
+    const directory = name.startsWith('artifact') ? join(fixture, 'producers/0.4.0') : fixture;
+    const bytes = readFileSync(join(directory, name + '.json'));
+    assert.equal(digest(bytes), readFileSync(join(directory, name + '.sha256'), 'ascii').trim(), name);
     return bytes;
   };
   const source = readFileSync(join(fixture, 'source-no-call.yaml'));
@@ -308,21 +316,21 @@ try {
   }
   }
 } catch (error) {
-  if (!dense && !concurrent) throw error;
+  if (!dense && !concurrent && !guarded) throw error;
   output.status = 'failed';
   output.error = String(error.message).slice(0, 2000);
   output.lastCheckpoints = Object.fromEntries(['java', 'node'].map(engine => {
-    const path = join(temporary, (dense ? 'dense' : 'concurrent') + '-' + engine + '-progress.json');
+    const path = join(temporary, (dense ? 'dense' : guarded ? 'guarded' : 'concurrent') + '-' + engine + '-progress.json');
     return [engine, existsSync(path) ? JSON.parse(readFileSync(path)) : null];
   }));
   process.exitCode = 1;
 } finally {
   assert.equal(dirname(realpathSync(temporary)), resolvedBuild);
-  if (!dense && !concurrent) {
+  if (!dense && !concurrent && !guarded) {
     rmSync(temporary, { recursive: true });
     assert.ok(!existsSync(temporary));
   }
 }
 console.log(JSON.stringify({ ...output, elapsedMs: performance.now() - start,
-  cleanup: { directChildrenClosed: true, temporaryDirectoryRemoved: !dense && !concurrent },
-  ...(dense || concurrent ? { evidenceDirectory: relative(root, temporary).replaceAll('\\', '/') } : {}) }, null, 2));
+  cleanup: { directChildrenClosed: true, temporaryDirectoryRemoved: !dense && !concurrent && !guarded },
+  ...(dense || concurrent || guarded ? { evidenceDirectory: relative(root, temporary).replaceAll('\\', '/') } : {}) }, null, 2));
