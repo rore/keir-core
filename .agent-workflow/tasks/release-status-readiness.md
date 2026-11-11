@@ -37,4 +37,12 @@ Updated nine Core documentation files and five demo documentation files. The rel
 
 All 14 inspected original file blobs matched current remote main before editing. The complete local change allowlist contains only those documents and this record. No guide, compatibility JSON, vendor file, manifest, lockfile, schema, fixture, code or runtime setting changed. Both full diffs pass git diff --check. All 154 checked relative links and anchors resolve, including the edition 7 anchor. The existing verifier passes for the downloaded published edition 7 archive at SHA-256 8a4101a64fbbf4d09b59f936083a48df39256fcba8386cee66bd5f7bcad2c4a7, without --core-assets.
 
-Fresh Redline reports identify only the two expected conformance documentation paths as gray, all other documentation as blue and this record as excluded. No boundary violation or API/schema/security/runtime-configuration change is detected. Demo's report is blue. Runtime tests were not rerun for prose-only changes; original source/run test totals and measurement limits remain unchanged. Exact-diff technical result review and PR delivery are pending.
+Fresh Redline reports identify only the two expected conformance documentation paths as gray, all other documentation as blue and this record as excluded. No boundary violation or API/schema/security/runtime-configuration change is detected. Demo's report is blue. Runtime tests were not rerun for prose-only changes; original source/run test totals and measurement limits remain unchanged.
+
+## Result review
+
+Agent technical review: release_docs_review.
+
+Reviewed revision: Core 3c208dbc3ed798d97ba47f8bf96d1640b42c7c5f; demo aaff7fec1e28cf48005d0565a9ba750a338958ed.
+
+Verification adequacy: Approved both exact implementation revisions for the text-only scope after checking full diffs, protected inputs, release pins and focused evidence. The reviewer found one stale current-baseline claim in the testing guide; it was corrected to identify published 0.3.1 and attach the original 0.3.0 source, CI run and 39/51 counts explicitly to historical qualification. Focused follow-up review approved that correction with no remaining findings. The added link resolves, and no runtime, package, vendor, guide or compatibility bytes changed. Only this review/delivery record changes after the reviewed implementation revisions.
