@@ -7,6 +7,7 @@ The companion gives an authoring assistant a versioned guide, structural schemas
 
 | Host contract | Companion | Status |
 | --- | --- | --- |
+| Core 0.3.1 candidate; source `/2`, model/artifact/scenario `/3` | [Edition 7 guide](customer-authoring-guide-v7.md) | Unpublished [candidate](authoring-companion-v7-compatibility.json); includes the full Apache license and exact 0.3.1 examples. |
 | Core 0.3.0 contracts; licensed packaging | [Edition 6 guide](customer-authoring-guide-v6.md) | Unpublished [candidate](authoring-companion-v6-compatibility.json); includes the full Apache license. Not a replacement for published edition 5. |
 | Core 0.3.0; source `/2`, model/artifact/scenario `/3` | [Edition 5 guide](customer-authoring-guide-v5.md) | [Released with Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). [Exact package record](authoring-companion-v5-compatibility.json). |
 | Core 0.2.0; source/model/artifact/scenario `/2` | [Edition 4 guide](customer-authoring-guide-v4.md) | Released. [Exact package record](authoring-companion-v4-compatibility.json). |
@@ -15,6 +16,19 @@ The companion gives an authoring assistant a versioned guide, structural schemas
 Editions 1 and 2 use earlier preview contracts. Their original archives remain reproducible with the matching version and trusted pin. Do not use a historical guide for current authoring.
 
 Published editions 1–5 retain their original bytes and source IDs. Their ZIPs omit the root project license; include [LICENSE](../../LICENSE) alongside a legacy ZIP when redistributing it. The [source provenance note](../releases/source-provenance.md) explains reachable equivalent revisions after the history cleanup.
+
+## Licensed candidate edition 7
+
+Edition 7 targets the distinct 0.3.1 compiler and includes the complete Apache 2.0 license. Its models, formats and environment pins are unchanged from edition 6, while its compiled examples are produced by compiler 0.3.1. Existing editions keep their original producer and source identities.
+
+From a committed revision containing the edition 7 inputs:
+
+```sh
+REVISION=$(git rev-parse HEAD)
+python scripts/authoring-companion.py build keir-authoring-v7-candidate.zip --version 7 --revision "$REVISION"
+```
+
+Use the printed SHA-256 pin with `verify --version 7 --sha256 sha256:<hex>`. Offline verification checks the exact inventory, full license, source/model/artifact digests and 0.3.1 producer. The [compatibility record](authoring-companion-v7-compatibility.json) deliberately remains `candidate` with an empty package map; the [preparation record](../releases/core-0.3.1-candidate.md) records separately qualified package bytes. Neither record claims publication.
 
 ## Licensed candidate edition 6
 
