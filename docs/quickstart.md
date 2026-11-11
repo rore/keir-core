@@ -101,31 +101,7 @@ The [current shared fixtures](../conformance/keir-3/) record exact artifacts and
 
 ## Try a pre-operation decision
 
-The second example decides whether the application may continue an operation. It reads the host's policy and returns ALLOW or DENY. A failed read blocks continuation. Open the [source](../examples/node-host/pre-operation/source.yaml), [model](../examples/node-host/pre-operation/dcm.json), [Node host](../examples/node-host/pre-operation/run.mjs) or [Java host](../examples/node-host/pre-operation/BeforeOperation.java).
-
-After the Node setup above, run:
-
-```sh
-node examples/node-host/pre-operation/run.mjs
-```
-
-Or use the Java runtime and dependencies built above:
-
-```sh
-java -cp 'runtime-java/target/keir-runtime-java-0.1.0-SNAPSHOT.jar:runtime-java/target/dependency/*' examples/node-host/pre-operation/BeforeOperation.java
-```
-
-In PowerShell, use `;` between the JAR and dependency directory in that classpath.
-
-Both hosts print:
-
-```text
-allow ALLOWED | native attempts=1
-deny DENIED | native attempts=0 | Operation restricted.
-unavailable BLOCKED | native attempts=0
-```
-
-This simulation counts native continuation separately from the decision. A real application rechecks permissions and consistency before using its own commit path. To edit and compile this extension, use its `source.yaml` and `dcm.json` in the compiler command above, then pass the resulting artifact path to either host. [Decision walkthrough](decision-walkthrough.md)
+The [decision walkthrough](decision-walkthrough.md#run-the-example) runs a second example in Node and Java, with ALLOWED, DENIED and BLOCKED outcomes and separate native-attempt counts.
 
 <a id="embed-the-same-flow"></a>
 [Embed Keir in an application](embedding.md) · [Keir 2 workflow expressions](specs/workflow-expressions.md) · [Examples index](../examples/README.md)

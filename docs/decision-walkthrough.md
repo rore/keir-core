@@ -4,7 +4,7 @@ A pre-operation extension returns a decision before the application performs a n
 
 See the [version matrix](specs/compiler-artifact.md#source-and-artifact-identity) for package compatibility and the [decision specification](specs/pre-operation-decisions.md) for the complete host obligations.
 
-[Run the standalone Java or Node example](quickstart.md#try-a-pre-operation-decision) to see ALLOWED, DENIED and BLOCKED with separate simulated native-attempt counts.
+[Run the standalone Java or Node example](#run-the-example) to see ALLOWED, DENIED and BLOCKED with separate simulated native-attempt counts.
 
 ## Discover the hook
 
@@ -76,3 +76,31 @@ Reserve time for the native checks and commit. If the enclosing expiry is `D` an
 READ callbacks must be actual reads. The host owns their permissions and consistency with the native write. Recheck local predicates inside the native atomic transition. A remote fact requires a real host consistency protocol; a successful earlier read alone is insufficient. Do not hold a long-lived write transaction open while evaluating a remote extension.
 
 [Embedding guide](embedding.md) · [Decision contract](specs/pre-operation-decisions.md) · [Authoring assistants](agents/extension-assistant.md)
+
+## Run the example
+
+This example decides whether the application may continue an operation. It reads the host's policy and returns ALLOW or DENY. A failed read blocks continuation. Open the [source](../examples/node-host/pre-operation/source.yaml), [model](../examples/node-host/pre-operation/dcm.json), [Node host](../examples/node-host/pre-operation/run.mjs) or [Java host](../examples/node-host/pre-operation/BeforeOperation.java).
+
+From the repository root, after [Node setup](quickstart.md#run-the-precompiled-example), run:
+
+```sh
+node examples/node-host/pre-operation/run.mjs
+```
+
+For Java, [build the runtime and dependencies](quickstart.md#run-in-java), then run from the repository root:
+
+```sh
+java -cp 'runtime-java/target/keir-runtime-java-0.1.0-SNAPSHOT.jar:runtime-java/target/dependency/*' examples/node-host/pre-operation/BeforeOperation.java
+```
+
+In PowerShell, use `;` between the JAR and dependency directory in that classpath.
+
+Both hosts print:
+
+```text
+allow ALLOWED | native attempts=1
+deny DENIED | native attempts=0 | Operation restricted.
+unavailable BLOCKED | native attempts=0
+```
+
+This simulation counts native continuation separately from the decision. A real application rechecks permissions and consistency before using its own commit path. To edit and compile this extension, use its `source.yaml` and `dcm.json` in the [quickstart compiler command](quickstart.md#change-the-extension-and-compile-it), then pass the resulting artifact path to either host.
