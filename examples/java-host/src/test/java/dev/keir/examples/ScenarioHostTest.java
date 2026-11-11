@@ -79,12 +79,14 @@ class ScenarioHostTest {
             var documents = List.of(Files.readAllBytes(scenario));
             same(current.verify(group, documents, selected), current.verify(group, documents,
                     new ScenarioHost.Selection(group, selected.model(), oldArtifact)), "Producer changed scenario behavior");
-            var unknown = object(EffectJson.parse(selected.artifact()));
-            unknown.put("compiler", "keir-compiler-java/0.3.2");
-            var failure = assertThrows(IllegalArgumentException.class, () -> current.verify(group, documents,
-                    new ScenarioHost.Selection(group, selected.model(), EffectJson.encode(unknown))));
-            assertEquals("Incompatible scenario contract", failure.getMessage());
-            assertEquals(0, current.dispatchCount);
+            for (String producer : List.of("keir-compiler-java/0.3.2", "missing")) {
+                var unknown = object(EffectJson.parse(selected.artifact()));
+                if (producer.equals("missing")) unknown.remove("compiler"); else unknown.put("compiler", producer);
+                var failure = assertThrows(IllegalArgumentException.class, () -> current.verify(group, documents,
+                        new ScenarioHost.Selection(group, selected.model(), EffectJson.encode(unknown))));
+                assertEquals("Incompatible scenario contract", failure.getMessage());
+                assertEquals(0, current.dispatchCount);
+            }
         }
     }
 

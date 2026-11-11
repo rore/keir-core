@@ -25,7 +25,7 @@ Task identity: `agent-workflow:core-hardening-release`. Core branch `feat/core-h
 **Plan review:** Agent technical review: core_hardening_review. Stage A/B plan approved after the recorded compatibility refinements; Stage C detailed implementation review remains required.
 **Approvals:** User approved the specific preparation and adoption proposal with “Yes do it” and has authorized validated merges. Publication, visibility changes and live rollout are explicitly excluded.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Plan review
@@ -41,3 +41,6 @@ Independent reviewer core_hardening_review approved exact additional 0.3.1 admis
 The new Node compatibility regression failed before the identity/fixture update because the current artifact still reported 0.3.0. Both runtime regressions now execute retained original 0.3.0 and genuinely regenerated 0.3.1 event/decision bytes, comparing complete outcomes and rejecting unknown/cross-format producers without dispatch. The real CLI regenerated 17 current artifacts; comparison confirms only producer identity differs semantically from their originals. Full source, installed-package and consumer evidence remain separate. Historical companion payload tests now read pinned old sources while retaining strict old producer checks.
 
 The full Java host suite exposed a second explicit producer check in its scenario harness. It now admits only the same two known /3 producers as the runtimes, with a retained original event/decision comparison and unknown-producer pre-dispatch rejection. This is release wiring in the existing teaching host, not a new runtime contract.
+
+## Stage A verification
+Source Java reactor coverage passed 77 compiler, 85 runtime and 28 teaching-host tests; the final null-safe harness regression rerun also passed all 190 tests. Node coverage passed 65 tests (99.16% lines, 95.78% branches, 100% functions); setup tooling passed 18 tests and installed teaching host passed 58 tests. The structural checker validated 31 /1, 47 /2 and 73 /3 public fixtures with their rejection vectors. Seventeen historical companion checks and four Core verifier unit tests passed. Real compiler output equals the checked current artifact; normalized complete Java/Node reports match all 39 current scenarios and 51 vectors, and eight retained /2 scenario groups match. Existing bounded source qualification passed in 11.04 seconds and concurrency qualification in 11.19 seconds, including intended failure probes. These are checkout results, not installed candidate package qualification or a scale guarantee.

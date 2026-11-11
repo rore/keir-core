@@ -100,7 +100,7 @@ public final class ScenarioHost {
         boolean old = "keir-dcm/2".equals(model.get("format")) && "keir-artifact/2".equals(artifact.get("format")) &&
                 "keir-compiler-java/0.2.0".equals(artifact.get("compiler"));
         boolean current = "keir-dcm/3".equals(model.get("format")) && "keir-artifact/3".equals(artifact.get("format")) &&
-                Set.of("keir-compiler-java/0.3.0", "keir-compiler-java/0.3.1").contains(artifact.get("compiler"));
+                ("keir-compiler-java/0.3.0".equals(artifact.get("compiler")) || "keir-compiler-java/0.3.1".equals(artifact.get("compiler")));
         check(old || current,
                 "Incompatible scenario contract");
         check(rows.stream().allMatch(row -> (old ? "keir-scenario/2" : "keir-scenario/3").equals(row.get("format"))),
