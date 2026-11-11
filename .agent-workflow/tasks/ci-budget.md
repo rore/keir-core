@@ -1,0 +1,54 @@
+# Bounded CI cost reduction
+
+Task identity: `agent-workflow:ci-budget`. Manager owns any roadmap reconciliation; this task preserves the bounded resource qualification and release-package checks without claiming broader completion.
+
+<!-- agent-workflow:start -->
+**Outcome:** Reduce duplicate and documentation-only Actions work while retaining full substantive CI coverage.
+**Target:** Keir Core advisory and packaging workflows; Daymark Native app workflow.
+**Scope:** Limit Daymark pushes to main while retaining PR verification; add superseded-PR cancellation and a narrow docs-only path in its existing verify job; combine Core advisory work into one job and add packaging cancellation. Prepare and validate locally, independently review, then deliver the two changes without redundant branch runs.
+**Constraints:** Preserve all existing substantive test commands, time limits, contract/spec and packaging path coverage, manual triggers and advisory policy. Keep verify and agent-workflow status names; do not remove any live required status. Use read-only permissions, no secrets or target-PR execution, and fail to full verification for unknown changes. Keep main integration checks independent so a later docs push cannot cancel untested code. Do not alter repository visibility, protection, billing or deployment. No broad benchmark or paid-resource runs.
+**Completion criteria:** Local event/diff fixtures and structural checks validate eligibility, trigger, concurrency and failure behavior; existing tests remain intact; independent plan/result review approves the exact changes. Only necessary PR and main verification runs occur, delivery is verified where permitted, and observed time savings and billing limits are reported honestly.
+**Requirement baseline:** {"source":"work-record-initial","outcome":"Reduce duplicate and documentation-only Actions work while retaining full substantive CI coverage.","scope":"Limit Daymark pushes to main while retaining PR verification; add superseded-PR cancellation and a narrow docs-only path in its existing verify job; combine Core advisory work into one job and add packaging cancellation. Prepare and validate locally, independently review, then deliver the two changes without redundant branch runs.","constraints":"Preserve all existing substantive test commands, time limits, contract/spec and packaging path coverage, manual triggers and advisory policy. Keep verify and agent-workflow status names; do not remove any live required status. Use read-only permissions, no secrets or target-PR execution, and fail to full verification for unknown changes. Keep main integration checks independent so a later docs push cannot cancel untested code. Do not alter repository visibility, protection, billing or deployment. No broad benchmark or paid-resource runs.","completion_criteria":"Local event/diff fixtures and structural checks validate eligibility, trigger, concurrency and failure behavior; existing tests remain intact; independent plan/result review approves the exact changes. Only necessary PR and main verification runs occur, delivery is verified where permitted, and observed time savings and billing limits are reported honestly."}
+**Relationships:** {"schema_version":1,"sources":null,"pull_requests":[]}
+**Risk:** Elevated
+**Complexity:** Large
+**Reason:** Workflow paths are gray under the unchanged policy. This changes when CI runs across two repositories and combines advisory jobs; mistaken classification or cancellation could omit substantive coverage.
+**Discovery:** Daymark runs its full Node/browser suite on all pushes and PRs. Core already uses main pushes plus PRs, contract paths include specs/examples and packaging paths include companion guides. Core governance duplicates checkout/setup across two short jobs. Both main branches initially report protection disabled and no required statuses; detailed protection read returned HTTP 403. No open PRs at inspection. Visibility is owner-managed and must be rechecked before delivery.
+**Material assumptions:** The narrow Daymark prose/raster-image paths are not runtime inputs; any executable/prototype/unknown path requires full verification. Whole git diffs avoid hosted path-filter truncation. PR updates may supersede prior PR work because each diff is cumulative; main commits must not cancel each other, as a following docs diff could otherwise suppress preceding code validation. If protection/status requirements change, preserve them and revise the plan before delivery.
+**Plan:** Keep one Daymark verify job and classify the complete checkout diff before dependency installation. Allow only README.md, CONTRIBUTING.md, docs/**/*.md and supported raster files under docs/images; leave code, configuration, vendor packages, models, tests, prototypes and uncertainty on the full path. Docs run diff whitespace validation and an explicit summary. Use main push plus PR triggers, contents:read, credential-free checkout and a PR-number concurrency group with unique main-commit groups. Combine Core redline and workflow reporting sequentially in agent-workflow with existing policy validation, artifacts, failure handling and summaries, eliminating duplicate runner setup/download. Retain contract workflow unchanged; add packaging supersession cancellation. Stop on required-status drift, access denial or test/review failure; do not bypass controls.
+**Verification plan:** Trigger/coverage -> parse workflows, compare every prior substantive command and contract/packaging path; verify full execution for mixed, executable, dependency, model, rename and unknown diffs. Classification -> run the actual extracted Bash against isolated repositories for docs, image, empty, missing base, multi-commit and large/newline-path diffs. Concurrency -> evaluate PR update and separate PR/main group identities, proving later main docs cannot cancel earlier code. Advisory -> validate both policies and run unchanged reporters/checker with fresh complete evidence, preserving nonzero report handling. Delivery/cost -> independent plan/result review, current protection/status and native thread checks, one PR plus main run per repo where applicable; record jobs elapsed rather than assume invoice totals.
+**Plan review:** Agent technical review: ci_budget_review; approved planning commit 0f92c82 with no blocking findings. See Plan review below.
+**Approvals:** User authorized the described CI reduction, appropriate PRs and merges after validation. Visibility changes are exclusively owner-managed.
+**Exceptions:** —
+**State:** Ready for review
+<!-- agent-workflow:end -->
+
+## Discovery and recovery
+
+The initial planning checkpoint was committed before implementation and then independently approved. Source bases are Core `7cbadad6c8707274719cd200b261b0e35be6beb0` and Daymark `41decd5e68b5bb4a1662436bdb613bdc0d509666`; both use `chore/ci-budget`. Relay discovery is unavailable; no named role is assumed. Keep measurement details in ignored evidence and publish only a concise summary.
+
+## Plan review
+
+Agent technical review: ci_budget_review. Reviewed Core `0f92c82155888b200e58720a43d98a01d8c6edc3` and Daymark `41decd5e68b5bb4a1662436bdb613bdc0d509666`; approved before implementation with no blocking findings. Verification is adequate for Elevated workflow risk. Review specifically requires complete NUL-safe no-renames diffs, full verification on invalid bases, executable/symlink changes and unknown paths, cumulative PR classification against the test merge checkout, and isolated main integration groups.
+
+Both repositories are now public by the owner’s action. Fresh branch summaries still report no required statuses and rulesets are empty. No visibility or protection mutation is part of this task. Future commits use the owner-authorized verified personal Git identity; the preexisting local planning commit is preserved without history rewriting.
+
+## Implementation and local verification
+
+Combined Core advisory reporting in one agent-workflow job, preserving both scripts, policy validation, complete evidence, summaries, advisory nonzero handling and both artifacts; only repeated checkout/setup/install/download was removed. Packaging gained workflow-scoped cancellation; the contract workflow is byte-for-byte unchanged. Daymark keeps the default PR merge checkout and verify status, uses main pushes plus PRs, read-only permissions and credential-free checkout, and limits the docs path to ordinary non-executable Markdown or supported raster files under the declared paths. Main commit groups are independent; same-PR updates supersede earlier PR work.
+
+The actual extracted Bash passed 27 isolated Git fixtures: prose/image changes; code, mixed and integration-boundary changes; missing/invalid/zero bases and empty diffs; executable and symlink Markdown; renamed source paths, deleted prose, more than 300 files, newline paths, cumulative multi-commit PR diffs, test-merge checkout and diff-command failure. Docs whitespace errors fail the job. Structural comparison preserved every prior substantive command, timeout, contract/packaging path, manual trigger and failure handler. YAML parsed; actionlint v1.7.12 passed on all three changed workflows; both existing policy schemas validate. No local broad application/benchmark suite or remote workflow dispatch was run. Native PR/main validation remains required after final result review.
+
+## Result review
+
+Agent technical review: ci_budget_review.
+
+Reviewed revision: Core `601b3dc0b5a361a780b4b2d0816a453937f01049` and Daymark `7c43308f14f740b29b163c643dc39b16e4e4e165`.
+
+Verification adequacy: approved with no blocking findings. The reviewer independently reran all 27 extracted-Bash fixtures, structural/concurrency checks, actionlint and policy-schema validation; all passed. Exact workflow hashes matched. Subsequent recording of this result changes no reviewed workflow bytes. Native PR/main checks and current protection/review-state checks remain the delivery gate; record their authoritative results in the PR and task handoff rather than adding another public tracker.
+
+Recover on chore/ci-budget with this result record and the unchanged reviewed Daymark head. Publish each final head once; ordinary PR and main runs provide the remaining validation. No application implementation or benchmark was changed.
+
+## Delivery
+
+An earlier automatic review denied public PR creation; no PR or CI run resulted. The owner subsequently explicitly authorized opening the two reviewed public PRs with ordinary descriptions and merging after checks pass. Resume ordinary PR/main verification using the unchanged reviewed workflow bytes. Keep the owner-managed public visibility, protection and billing settings unchanged.
