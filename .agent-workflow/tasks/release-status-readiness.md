@@ -21,7 +21,7 @@ Task identity: `agent-workflow:release-status-readiness`. Owning roadmap: `roadm
 **Plan review:** Agent technical review: release_docs_review. Approved both phase plans. Broader review requires semantic-preservation coverage and usable relocated commands. Retaining historical URLs closes the cross-repository link dependency without new stubs or roadmap edits.
 **Approvals:** Existing user authorization covers fixing and merging readiness issues. No additional approval is required at this risk level.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Blocked
 <!-- agent-workflow:end -->
 
 ## Discovery and recovery
@@ -73,3 +73,7 @@ Agent technical review: release_docs_review.
 Reviewed revision: Core c47983db331f0f0bafef1af10626c81ea9ed8b85; demo 3608190c84add7eaf1cb8b824ae588cd16dbdf82.
 
 Verification adequacy: Approved both full diffs with no blocking findings. Provider setup, spending/privacy, exact evidence fields, approved-proof independence, owner/revision authority, unknown-effect readback, same-request recovery, cancellation and deleted-item replay are preserved. Compatibility and historical/prototype boundaries remain exact. The reviewer checked protected paths and Redline evidence; 320 links/assets and command/table/coverage checks pass. Node follow-up and decision commands produce the expected output after documented setup in scratch. Java and Windows were not executed; their unchanged command bodies and guidance were compared. Only review/delivery metadata changes after these implementation revisions.
+
+## Delivery checkpoint
+
+The public-guide cleanup is reviewed and validated. Remote branch docs/version-neutral-guides is prepared at Core e69e62a37269e07868c66f004ebfdff3bf72026a and demo 3608190c84add7eaf1cb8b824ae588cd16dbdf82. PR creation was denied by execution approval for lack of explicit user authorization to open PRs; neither PR was created. The Core retry after confirming private visibility was also denied. No main update or merge was attempted. Resume with explicit authorization, refresh remote heads/Studio overlap and create the corrected reviewed PRs before guarded delivery. This local checkpoint changes only Work Record state; the remote prepared document heads remain as listed.
