@@ -9,7 +9,7 @@ The compiler checks a [Keir source document](language.md) against a trusted [dom
 
 Compiler identity, document formats and runtime compatibility version independently. The matrix below identifies the supported combinations; use the [installation guide](../installation.md) to select packages.
 
-| Field | Development authoring value (Core 0.4.0, unreleased) |
+| Field | Authoring value |
 | --- | --- |
 | Source `language` | `keir/2` |
 | DCM `format` | `keir-dcm/3` |
@@ -22,7 +22,7 @@ Structural schemas: [source](../../schemas/source-2/source.schema.json), [model]
 
 The compiler identified above accepts source `/2` with DCM `/3` only and produces artifact `/3` with its declared compiler identity. It rejects DCM `/2` and never stamps the old producer identity. The exact Core 0.2.0 contracts remain documented in the [workflow version matrix](workflow-expressions.md#version-matrix) for execution and history.
 
-Development runtime 0.4.0 admits the four exact tuples below with the same environment pins. Runtime 0.3.1 admits only the first three, and runtime 0.3.0 only the first two. The development allocation is not a release or package-qualification claim.
+Runtime 0.4.0 admits the four exact tuples below with the same environment pins. Runtime 0.3.1 admits only the first three, and runtime 0.3.0 only the first two.
 
 | Artifact | Bound model | Producer | Descriptor recipe |
 | --- | --- | --- | --- |

@@ -2,7 +2,7 @@
 
 This is the single roadmap for `keir-core` and `keir-demo-app`: delivered features, planned deliveries and visible uncommitted proposals. The manager owns sequence and combined acceptance; each card identifies the repository that owns implementation.
 
-Core 0.3.1 is released through GitHub Releases. Daymark consumes its independently packaged compiler and runtimes. The supported contract allows **at most one mutation per run**; a released package does not establish unmeasured production containment or authorize further publication or visibility changes.
+Core packages are distributed through [GitHub Releases](https://github.com/rore/keir-core/releases). Daymark retains its own [verified package pins](https://github.com/rore/keir-demo-app/blob/main/docs/package-provenance.md). The supported contract allows **at most one mutation per run**; a released package does not establish unmeasured production containment or authorize further publication or visibility changes.
 
 - **Core delivered.** The current compiler, Java and Node runtimes, structural schemas, compatibility matrix, installed-consumer checks and versioned authoring guidance are available. Current authoring uses source `keir/2`, model `keir-dcm/3`, artifact `keir-artifact/3` and scenario `keir-scenario/3`. Broader resource containment, scale evidence and the remaining reusable host-conformance work are separate obligations; multi-mutation composition remains a proposal.
 - **Daymark delivered.** Native task organization and all three triggers work: checks before task creation and single-action workflows after creation or completion. Studio provides a continuing conversation, checked-artifact Summary, Simulation, explicit approval and separate activation, with saved work, history and recovery. The [customization walkthrough](https://github.com/rore/keir-demo-app/blob/main/docs/customization-walkthrough.md) demonstrates real compilation, simulation and native writes using explicitly scripted authoring transport.
@@ -10,7 +10,7 @@ Core 0.3.1 is released through GitHub Releases. Daymark consumes its independent
 
 ## Latest qualified Core increment
 
-[Guarded-result scalar dataflow](features/guarded-result-dataflow.md) is complete as a qualified `0.4.0` candidate. Implementation, independent source reviews, shared compiler/Java/Node checks, actual installed-package execution and the matching edition-8 companion all passed. Hosted qualification also verified the bounded cold-cache release-builder correction. The feature card records immutable inputs, actual outcomes and combined documentation acceptance. This is not a `0.4.0` registry release or Daymark adoption. The slice improves composition of existing typed operations while retaining the single-write ceiling; numeric types, collection operations and multiple effects are not included.
+[Guarded-result scalar dataflow](features/guarded-result-dataflow.md) is delivered in the [published Core packages](https://github.com/rore/keir-core/releases). Implementation, independent source reviews, shared compiler/Java/Node checks, actual installed-package execution and the matching companion all passed. The feature card records immutable inputs, measured outcomes and combined documentation acceptance. The slice improves composition of existing typed operations while retaining the single-write ceiling; numeric types, collection operations and multiple effects are not included.
 
 ## Other remaining work, not current assignments
 

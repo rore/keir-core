@@ -37,7 +37,7 @@ Agree on ALLOW, DENY, failed read, timeout and changed-fact cases before simulat
 
 ## Guarded results require matching host support
 
-Use guarded-result scalar access only when the host explicitly supports producer `keir-compiler-java/0.4.0` and matching runtimes. The development allocation is not a published release. Older installed consumers and companion editions retain their original limits; do not suggest an automatic upgrade or recompile an approved artifact in place.
+Use guarded-result scalar access only when the host explicitly supports a compatible [compiler/runtime tuple](../specs/compiler-artifact.md#source-and-artifact-identity). Older installed consumers and companion editions retain their original limits; do not suggest an automatic upgrade or recompile an approved artifact in place.
 
 For an earlier CALL `r` with `when: g`, use `g ? r.reference : input.existingReference`. For an optional scalar, keep both proofs: `g ? (has(r.note) ? r.note : "") : ""`. Use the exact Boolean BIND identifier named by the CALL's `when`, not an equivalent expression or an alias of a different guard. If the CALL itself names an alias as its guard, use that exact identifier. Do not read the record or its lists, infer proof from a later CALL's guard, or refer to a CALL's own result in its arguments/handler. Preserve exact nominal/enum/timestamp types and the one-possible-WRITE ceiling (zero for decisions).
 

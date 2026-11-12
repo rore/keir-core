@@ -23,13 +23,14 @@ Each follow-up host prints three outcomes. A matching completion creates a follo
 Read the [model](node-host/follow-up/dcm.json) and [extension source](node-host/follow-up/source.yaml), then [change the follow-up title and compile](../docs/quickstart.md#change-the-extension-and-compile-it).
 
 <a id="guarded-result-scalar-dataflow"></a>
-## Guarded-result scalar dataflow (development preview)
+<a id="guarded-result-scalar-dataflow-development-preview"></a>
+## Guarded-result scalar dataflow
 
-The unreleased Core 0.4.0 [source](../conformance/keir-3/source-guarded-result.json), [model](../conformance/keir-3/dcm-guarded-result.json) and [compiled artifact](../conformance/keir-3/artifact-guarded-result.json) show a conditional create returning the adapter's actual validated reference, or the input reference when skipped. The expression must prove the call's exact Boolean BIND guard; optional scalar fields need a separate presence proof. Failed or uncertain calls never select a successful fallback.
+The [source](../conformance/keir-3/source-guarded-result.json), [model](../conformance/keir-3/dcm-guarded-result.json) and [compiled artifact](../conformance/keir-3/artifact-guarded-result.json) show a conditional create returning the adapter's actual validated reference, or the input reference when skipped. The expression must prove the call's exact Boolean BIND guard; optional scalar fields need a separate presence proof. Failed or uncertain calls never select a successful fallback.
 
 The [shared corpus guide](../conformance/keir-3/README.md) describes the matching guarded READ decision, later-handler and unused-result examples, their independent scenarios, and existing Java/Node execution commands. These domain-neutral fixtures do not run in the task-specific follow-up host. Use the [release checklist](../docs/releasing.md) for the separate shipped-package checks; source and local-package checks do not establish released-package qualification or Daymark adoption.
 
-The matching [edition-8 source guide](../docs/agents/customer-authoring-guide-v8.md) and [companion recipe](../docs/agents/authoring-companion.md#development-edition-8) require explicit host support for producer `keir-compiler-java/0.4.0`. The [companion index](../docs/agents/authoring-companion.md#development-edition-8) records the qualified candidate archive and its distinction from a published release. Earlier installed consumers keep their supported versions and companion editions.
+The matching [edition-8 source guide](../docs/agents/customer-authoring-guide-v8.md) and [companion recipe](../docs/agents/authoring-companion.md#edition-8) require explicit host support for producer `keir-compiler-java/0.4.0`. The [companion index](../docs/agents/authoring-companion.md#edition-8) records the published archive and its unchanged preparation-time metadata. Earlier installed consumers keep their supported versions and companion editions.
 
 ## Read the host code
 

@@ -4,7 +4,7 @@ An extension is a custom rule in an application. Keir's language lets it combine
 
 These are **logic sketches, not Keir syntax**. Booking, support and expense apps below are illustrative hosts, not implemented integrations. Daymark is an implemented **task-management demo app**; its tasks belong to Daymark.
 
-Examples 1–3 use capabilities available in published Keir Core 0.3.1, the compiler and runtime packages. Example 4 needs the tested but unreleased 0.4.0 candidate.
+These capabilities are available in [released Keir packages](installation.md). Choose compiler and runtime packages that support the capabilities your host exposes.
 
 ## 1. Choose an answer from input
 
@@ -77,7 +77,7 @@ Decision:
 
 When `needsCheck` is false, no lookup happens and no result is read. If the lookup runs but fails, execution fails and the app blocks continuation; it does not take the skipped-lookup ALLOW path.
 
-**Candidate feature:** this use of a conditional lookup result is tested in Core 0.4.0, not supported by published 0.3.1 packages or Daymark's current integration. The expense integration is illustrative. See [version details and qualification evidence](agents/authoring-companion.md#development-edition-8).
+**Host support:** using a conditional lookup's result requires a compatible compiler and runtime; see the [compatibility matrix](specs/compiler-artifact.md#source-and-artifact-identity). The expense integration is illustrative. [Daymark's package record](https://github.com/rore/keir-demo-app/blob/main/docs/package-provenance.md) identifies its separately pinned integration.
 
 ## From a sketch to a running extension
 

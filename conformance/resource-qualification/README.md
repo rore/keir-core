@@ -73,7 +73,7 @@ This is a bounded component correctness and resource screen. It does not measure
 
 ## Guarded-result retention and sparse activation
 
-Run the opt-in development 0.4.0 phase after the same isolated package preparation:
+Run the opt-in guarded-result phase after the same isolated package preparation:
 
 ```sh
 node conformance/resource-qualification/qualify.mjs --guarded-results > build/resource-guarded.json

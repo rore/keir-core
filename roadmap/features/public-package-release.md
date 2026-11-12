@@ -14,7 +14,7 @@ Let an external developer install and embed a documented, explicitly supported K
 
 The first public milestone supports at most one mutation per run with the existing host-owned key, authorization and outcome contract. Multi-mutation composition follows later. The documentation track begins with a source-checkout binding and runtime guide for Java and Node while release qualification proceeds. Opening the repositories and publishing registry packages are separate release actions.
 
-Core 0.3.1 is the current release in the private repository, with the [supported format and producer matrix](../../docs/specs/compiler-artifact.md). Daymark consumes the exact published compiler/runtime bytes and the licensed companion edition 7 guide. That companion archive is available on the release, but its immutable candidate wording and empty package compatibility map remain unchanged; archive availability is not a new released-package qualification row. Package versions are independent of document formats. The [public onboarding follow-up](public-onboarding-readiness.md) is delivered.
+Packages are available through [GitHub Releases](https://github.com/rore/keir-core/releases), with the [supported format and producer matrix](../../docs/specs/compiler-artifact.md). Daymark retains its own [verified package and companion pins](https://github.com/rore/keir-demo-app/blob/main/docs/package-provenance.md). Published companion archives may retain preparation-time candidate metadata; the [companion catalog](../../docs/agents/authoring-companion.md) records each edition's status. Package versions are independent of document formats. The [public onboarding follow-up](public-onboarding-readiness.md) is delivered.
 
 ## In Scope
 

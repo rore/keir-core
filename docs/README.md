@@ -21,7 +21,7 @@ Then [run and change one extension](quickstart.md), or follow the [screenshot wa
 - The [contract matrix](specs/compiler-artifact.md#source-and-artifact-identity) identifies the matching source, model, artifact and scenario schemas. Use the semantic references to understand what a structurally valid document means.
 - [Java compiler](../compiler-java/README.md), [Java runtime](../runtime-java/README.md) and [Node.js integration](../examples/node-host/README.md) cover component-specific interfaces.
 - [Conformance fixtures](../conformance/README.md) give both runtimes the same inputs and independent expected outcomes. [Run the Java and Node.js conformance examples](../examples/README.md).
-- [Guarded-result examples (development Core 0.4.0)](../examples/README.md#guarded-result-scalar-dataflow) show actual scalar results from conditional calls. The [qualified candidate](../roadmap/features/guarded-result-dataflow.md#notes) is separate from a published release and Daymark adoption.
+- [Guarded-result examples](../examples/README.md#guarded-result-scalar-dataflow) show actual scalar results from conditional calls. Check host support in the [compatibility matrix](specs/compiler-artifact.md#source-and-artifact-identity).
 - [Verification and testing](testing.md) records tested scope and links to resource qualification.
 
 The [compiler reference](specs/compiler-artifact.md) documents the current formats and compiler invocation.
