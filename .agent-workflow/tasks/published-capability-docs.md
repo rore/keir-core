@@ -20,7 +20,7 @@ Task identity: `agent-workflow:published-capability-docs`. Shared documentation 
 **Plan review:** Agent technical review: published_docs_review; approved b824111 with agreed Elevated/Large classification and the two current conformance README additions before source edits.
 **Approvals:** Owner requests correcting documentation after publication and standing completion/merge instruction applies; honor every action-specific approval decision.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Discovery and delivery boundaries
@@ -30,3 +30,11 @@ The published archive is named candidate and preserves its original candidate me
 ## Plan review
 
 Agent technical review: published_docs_review. Reviewed plan b824111 and agreed additions before source edits. Approved scope and verification with no remaining blocker after the Large complexity correction. The reviewer independently rehashed all seven downloaded assets against the verification report and confirmed actual Daymark0.3.1/edition7 pins. Current conformance introduction and resource-phase label are included; historical broader-types Notes stay unchanged. No runtime, fixture, package or network execution was used in review.
+
+## Implementation and verification
+
+Corrected current release-status labels and reduced duplicated version references in the existing guides, specification indexes, examples, conformance introductions and roadmap summaries. General reader paths now use installation, compatibility and companion catalogs. Exact semantic producer gates, tested command examples, package/edition rows, source commits and archive pins remain. The companion catalog distinguishes published archive availability from its immutable preparation-time candidate metadata. Daymark's only edit clarifies that newer publication does not upgrade its pins and makes the old private-publication statement historical.
+
+The release is normal and published, with tag/source `fc0601ae410e06c0be76d6f3b769abbd049b5999`. All seven downloaded standard published assets match API digests; Core SHA256SUMS and the independent companion pin pass. Compiler/Node/Java package identities match0.4.0. No workflow-storage request, install or runtime execution was made. Independent plan review separately rehashed all seven downloads.
+
+Complete changed-page checks passed400 Core and4 Daymark links/assets with no missing paths or anchors. All prior anchors and fenced commands/logic sketches are preserved. Exact path inventory, unchanged immutable guides/metadata, historical feature Notes, fixtures, code, schemas, vendor files and actual Daymark0.3.1 archive/JAR digests pass. First-reader and technical result reviews remain pending.

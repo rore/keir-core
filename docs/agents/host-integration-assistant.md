@@ -40,7 +40,7 @@ After ALLOW, recheck selection, approval, permissions, business invariants and m
 
 ## Adopting guarded-result scalar dataflow
 
-The development 0.4.0 producer changes conditional-result availability, not the host API or native guarantees. Admit its exact [producer tuple](../specs/compiler-artifact.md#source-and-artifact-identity) only with matching compiler/runtime packages and qualification. Do not teach an older installed host this capability, silently migrate approved bytes, or rewrite old companion editions.
+Guarded-result scalar dataflow changes conditional-result availability, not the host API or native guarantees. Admit its exact [producer tuple](../specs/compiler-artifact.md#source-and-artifact-identity) only with matching compiler/runtime packages and qualification. Do not teach an older installed host this capability, silently migrate approved bytes, or rewrite old companion editions.
 
 Keep the complete native result contract and validate it normally. An earlier successful guarded result is retained per invocation; a skipped result is genuinely absent. Source must prove existence with its exact Boolean BIND guard in a conditional true arm and prove optional-field presence separately. Supply no sentinel/default result and add no projection callback, consumer field or operation solely to hide this distinction.
 
