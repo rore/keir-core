@@ -75,7 +75,7 @@ Complete local Node: 587 passed, 12 opt-in multi-process/crash skips (599 total,
 
 ## Delivery
 
-Demo PR: https://github.com/rore/keir-demo-app/pull/8 at `574fb60ff60394f39d2026b3d0fa1caaabd0b117`. Hosted check: https://github.com/rore/keir-demo-app/actions/runs/43258837565. Build/Node passed; pinned-browser execution is running. Integration is pending its result and review-thread check. This record is the only Core change; roadmap status remains manager-owned.
+Demo PR: https://github.com/rore/keir-demo-app/pull/8 at `574fb60ff60394f39d2026b3d0fa1caaabd0b117`. Merged as `77feb10032d3b63475057564ca56099b1e498faa`; exact remote main verified and its tree equals the reviewed PR head. Hosted check https://github.com/rore/keir-demo-app/actions/runs/43258837565 passed: build, 588 Node tests (600 total; 12 opt-in process/crash skips) and all 260 pinned-browser cases. The job took 11 minutes 30 seconds against the existing 25-minute ceiling. Review submissions and inline threads were empty at merge. This record is the only Core change; roadmap status remains manager-owned.
 
 ## Evidence
 
@@ -85,4 +85,4 @@ Local ignored demo evidence under `build/core-040/`: pre-edit Redline report (GR
 
 Agent technical review: independent clean-context reviewer `review_040_result`; final adequacy readback confirms no technical blockers.
 Reviewed revision: `574fb60ff60394f39d2026b3d0fa1caaabd0b117`; broad review `a4ecb6d12ed82214afe4836be186d0193bced73e` and narrow wording delta `9fbe078988e9043467df29b558be6e82d5eefab8`.
-Verification adequacy: complete local Node run 587 passed with 12 explicitly unqualified opt-in process/crash skips; final build and 260 browser cases passed; 13 summary checks and two repeated native conditional checks cover subsequent deltas. Actual installed release payloads, immutable retained approvals, failure/skipped semantics, privacy and documentation checks support PR and merge subject to hosted checks and repository policy. No live-provider or pinned-local-browser qualification is claimed.
+Verification adequacy: complete local Node run 587 passed with 12 explicitly unqualified opt-in process/crash skips; final build and 260 browser cases passed; 13 summary checks and two repeated native conditional checks cover subsequent deltas. Actual installed release payloads, immutable retained approvals, failure/skipped semantics, privacy and documentation checks support PR and merge subject to hosted checks and repository policy. The hosted pinned-browser suite subsequently passed. No live-provider or skipped process/crash qualification is claimed.
