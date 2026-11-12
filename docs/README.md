@@ -3,10 +3,11 @@
 <a id="learn-and-run-keir"></a>
 ## Get started
 
-Start with [Getting started](quickstart.md): run one follow-up extension, change it and compile your version.
+Start with [Keir rules by example](customizations.md): one language capability at a time, shown as simple logic rather than source syntax.
+
+Then [run and change one extension](quickstart.md), or follow the [screenshot walkthrough](guided-tour.md).
 
 - [Install released packages](installation.md) sets up the compiler and both runtimes outside this repository.
-- [How Keir works](guided-tour.md) follows the user flow with screenshots, then explains the source and application model.
 
 ## Integrate with an application
 
@@ -20,7 +21,7 @@ Start with [Getting started](quickstart.md): run one follow-up extension, change
 - The [contract matrix](specs/compiler-artifact.md#source-and-artifact-identity) identifies the matching source, model, artifact and scenario schemas. Use the semantic references to understand what a structurally valid document means.
 - [Java compiler](../compiler-java/README.md), [Java runtime](../runtime-java/README.md) and [Node.js integration](../examples/node-host/README.md) cover component-specific interfaces.
 - [Conformance fixtures](../conformance/README.md) give both runtimes the same inputs and independent expected outcomes. [Run the Java and Node.js conformance examples](../examples/README.md).
-- [Guarded-result examples (development Core 0.4.0)](../examples/README.md#guarded-result-scalar-dataflow) show actual scalar results from conditional calls. This is unreleased source functionality, not released-package qualification.
+- [Guarded-result examples (development Core 0.4.0)](../examples/README.md#guarded-result-scalar-dataflow) show actual scalar results from conditional calls. The [qualified candidate](../roadmap/features/guarded-result-dataflow.md#notes) is separate from a published release and Daymark adoption.
 - [Verification and testing](testing.md) records tested scope and links to resource qualification.
 
 The [compiler reference](specs/compiler-artifact.md) documents the current formats and compiler invocation.

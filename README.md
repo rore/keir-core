@@ -1,22 +1,21 @@
 # Keir
 
-Keir lets developers add AI-assisted customization to their applications. Business users describe the behavior they want in plain language, and an AI assistant turns their requests into extensions using the capabilities the application exposes.
+Keir is a language, compiler and runtime for AI-assisted application customization. Business users describe the behavior they want, and an AI assistant turns their requests into extensions using the data and operations the application exposes.
 
 <a id="customizing-an-application"></a>
-Keir provides a constrained extension language, a compiler that checks extensions against the application's model, and a runtime that executes them through the application's services. The application stays in control of data access, permissions and effects. Once activated, extensions run without further AI requests.
+The compiler checks each extension against the application's declared capabilities. At runtime, the application still controls permissions and carries out operations through its own services. Activated extensions run without further AI requests.
+
+<a id="supported-contract"></a>
+<a id="current-scope"></a>
+<a id="what-you-can-build-today"></a>
+Start with [Keir rules by example](docs/customizations.md): compact logic sketches showing input checks, returned values, conditional actions and conditional lookup results.
 
 ![An AI assistant drafts a Keir extension from a customer request and the app’s model. Keir compiles it. At execution, the app checks permissions and performs the operation.](docs/images/extension-flow.svg)
 
 <a id="from-a-request-to-a-running-extension"></a>
-## From a request to a running extension
+## See it in an application
 
-A user asks: “When a task in this project is completed, create a follow-up.”
-
-The application exposes a completion event and operations for reading and creating tasks. The assistant combines those capabilities into a Keir extension, which the compiler checks against the application's model.
-
-The application shows simulated outcomes for the user to review before activation. After a task completion is saved, Keir's runtime executes the compiled extension through the application's own services and permission checks.
-
-See the [walkthrough](docs/guided-tour.md) for the complete example.
+The [Daymark task-management demo walkthrough](docs/guided-tour.md) follows a request to create a follow-up task through simulated checks, approval, activation and a saved result. Its tasks and task services are part of the demo application, not built-in Keir features.
 
 <a id="how-it-fits-your-application"></a>
 ## What you embed
@@ -25,22 +24,8 @@ Embed the Java or Node.js runtime in your application. Both run the same compile
 
 The application model defines where extensions can run, what input data they receive, and which operations they can call. Your application implements those operations through its own services. It also provides the authoring assistant, simulation, review and activation flow, and storage.
 
-[Daymark](https://github.com/rore/keir-demo-app) demonstrates these pieces in a task application, from a user's request through review and activation to execution.
-
-<a id="supported-contract"></a>
-<a id="current-scope"></a>
-## What you can build today
-
-- After a change is saved: react to an event, such as a task completion, by reading application data and conditionally requesting a change.
-- Before a change is saved: check a proposed operation. For example, require a due date for a task tagged `client` before allowing the application to continue with task creation.
-
-An allow decision lets the application continue its own permission and business-rule checks. It does not grant permission or mean the task has been saved. If the check denies the request or cannot complete, the application blocks the attempt.
-
-An event extension may include at most one call that can change data, even if conditional. Pre-operation checks are read-only. Steps, calls and data size are bounded. See the [language reference](docs/specs/language.md) for supported expressions and limits.
-
-The unreleased Core 0.4.0 source includes [guarded-result scalar dataflow](examples/README.md#guarded-result-scalar-dataflow): use a conditional call's actual result when the expression proves its exact guard. Released-package qualification and host adoption are separate; Daymark's pinned Core 0.3.1 does not support this capability.
-
-## Start here
+<a id="start-here"></a>
+## Build with Keir
 
 Start with [Getting started](docs/quickstart.md) to run and change one extension.
 

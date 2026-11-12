@@ -29,7 +29,7 @@ The unreleased Core 0.4.0 [source](../conformance/keir-3/source-guarded-result.j
 
 The [shared corpus guide](../conformance/keir-3/README.md) describes the matching guarded READ decision, later-handler and unused-result examples, their independent scenarios, and existing Java/Node execution commands. These domain-neutral fixtures do not run in the task-specific follow-up host. Use the [release checklist](../docs/releasing.md) for the separate shipped-package checks; source and local-package checks do not establish released-package qualification or Daymark adoption.
 
-The matching [edition-8 source guide](../docs/agents/customer-authoring-guide-v8.md) and [companion recipe](../docs/agents/authoring-companion.md#development-edition-8) require explicit host support for producer `keir-compiler-java/0.4.0`. There is no qualified edition-8 archive or package record yet. Earlier installed consumers keep their supported versions and companion editions.
+The matching [edition-8 source guide](../docs/agents/customer-authoring-guide-v8.md) and [companion recipe](../docs/agents/authoring-companion.md#development-edition-8) require explicit host support for producer `keir-compiler-java/0.4.0`. The [companion index](../docs/agents/authoring-companion.md#development-edition-8) records the qualified candidate archive and its distinction from a published release. Earlier installed consumers keep their supported versions and companion editions.
 
 ## Read the host code
 
