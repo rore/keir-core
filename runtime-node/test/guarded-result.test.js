@@ -60,6 +60,105 @@ test('retains the actual guarded result with fresh sparse activations', async ()
   assert.deepEqual(f.calls, ['records.create', 'records.create']);
 });
 
+test('overlapping guarded results keep values, receipts and contexts invocation-local', { timeout: 5000 }, async () => {
+  const gates = [0, 1].map(() => ({ entered: Promise.withResolvers(), response: Promise.withResolvers() }));
+  const calls = [], running = [], settled = new Set();
+  const cases = ['slow', 'fast', 'skipped'].map((name, index) => ({
+    name,
+    input: { ...input(name !== 'skipped'), label: name, existingReference: 'existing-' + name,
+      enabled: index !== 0, at: `2026-01-0${index + 1}T00:00:00.000Z` },
+    invocation: { bindings: { actorId: 'actor-' + name }, requestKey: Object.freeze({}),
+      event: { id: 'event-' + name, source: 'source-' + name },
+      deadline: { clock: { nowMs: () => index * 10 }, expiresAtMs: 1000 + index * 10 } },
+  }));
+  const adapters = Object.fromEntries(['records.create', 'records.lookup'].map(capability => [capability, {
+    version: '1', mode: 'simulation', keyType: 'sample.RecordKey/1',
+    invoke(args, protectedArgs, remainingMs, context) {
+      const gate = gates[calls.length];
+      const call = { capability, args, protectedArgs, remainingMs, context };
+      calls.push(call);
+      if (!gate) return Promise.reject(Error('Unexpected additional dispatch'));
+      gate.entered.resolve(call);
+      return gate.response.promise;
+    },
+  }]));
+  const bound = bindModel(read('dcm-guarded-result.json'), adapters);
+  assert.equal(bound.diagnostic, null);
+  const prepared = prepareProgram(read('artifact-guarded-result.json'), bound.boundModel);
+  assert.equal(prepared.diagnostic, null);
+  const begin = item => {
+    const pending = invokeProgram(prepared.prepared, item.input, item.invocation);
+    running.push(pending);
+    pending.then(() => settled.add(item.name), () => settled.add(item.name));
+    return pending;
+  };
+  const within = async (pending, phase) => {
+    let timer;
+    try {
+      return await Promise.race([pending, new Promise((_, reject) => {
+        timer = setTimeout(() => reject(Error('Timed out waiting for ' + phase)), 1000);
+      })]);
+    } finally { clearTimeout(timer); }
+  };
+  const assertCall = (call, item) => {
+    assert.equal(call.capability, 'records.create');
+    assert.deepEqual({ ...call.args }, { label: item.name });
+    assert.deepEqual({ ...call.protectedArgs }, item.invocation.bindings);
+    assert.strictEqual(call.context.requestKey, item.invocation.requestKey);
+    assert.deepEqual({ ...call.context.event }, item.invocation.event);
+    assert.equal(call.context.deadline.expiresAtMs, item.invocation.deadline.expiresAtMs);
+    assert.equal(call.context.deadline.clock.nowMs(), item.invocation.deadline.clock.nowMs());
+    assert.ok(call.remainingMs > 0 && call.remainingMs <= 1000);
+  };
+  const returnedSlow = { ...value('returned-slow'), flag: true, enabled: true, note: 'slow-note', at: '2026-01-04T00:00:00.000Z' };
+  const returnedFast = { ...value('returned-fast'), note: 'fast-note', at: '2026-01-05T00:00:00.000Z' };
+  delete returnedFast.enabled;
+  const replies = [returnedSlow, returnedFast].map(value => ({ kind: 'SUCCESS', effect: 'CONFIRMED', value }));
+  const receipt = [{ step: 'created', capability: 'records.create', state: 'CONFIRMED' }];
+  const expectedSlow = { reference: 'returned-slow', message: 'slow-note', enabled: true, flag: true,
+    state: 'CREATED', at: '2026-01-04T00:00:00.000Z' };
+  const expectedFast = { reference: 'returned-fast', message: 'fast-note', enabled: false, flag: false,
+    state: 'CREATED', at: '2026-01-05T00:00:00.000Z' };
+  const expectedSkipped = { reference: 'existing-skipped', message: 'unchanged', enabled: true, flag: true,
+    state: 'EXISTING', at: '2026-01-03T00:00:00.000Z' };
+  try {
+    const slow = begin(cases[0]);
+    assertCall(await within(gates[0].entered.promise, 'first dispatch'), cases[0]);
+    const fast = begin(cases[1]);
+    assertCall(await within(gates[1].entered.promise, 'second dispatch'), cases[1]);
+    const skipped = await within(begin(cases[2]), 'skipped invocation');
+    assert.equal(skipped.classification, 'COMPLETED', JSON.stringify(skipped));
+    assert.deepEqual(skipped.result, expectedSkipped);
+    assert.deepEqual(skipped.effects, []);
+    assert.deepEqual(skipped.trace.filter(row => row.event === 'STEP_SKIPPED').map(row => row.step), ['created']);
+    assert.equal(calls.length, 2);
+    assert.equal(settled.has('slow'), false);
+    assert.equal(settled.has('fast'), false);
+
+    gates[1].response.resolve(replies[1]);
+    const fastOutcome = await within(fast, 'second response');
+    assert.equal(fastOutcome.classification, 'COMPLETED', JSON.stringify(fastOutcome));
+    assert.deepEqual(fastOutcome.result, expectedFast);
+    assert.deepEqual(fastOutcome.effects, receipt);
+    assert.equal(settled.has('slow'), false);
+
+    gates[0].response.resolve(replies[0]);
+    const slowOutcome = await within(slow, 'first response');
+    assert.equal(slowOutcome.classification, 'COMPLETED', JSON.stringify(slowOutcome));
+    assert.deepEqual(slowOutcome.result, expectedSlow);
+    assert.deepEqual(slowOutcome.effects, receipt);
+    assert.deepEqual(fastOutcome.result, expectedFast);
+    assert.deepEqual(fastOutcome.effects, receipt);
+    assert.deepEqual(skipped.result, expectedSkipped);
+    assert.deepEqual(skipped.effects, []);
+    assert.equal(calls.length, 2);
+    calls.forEach((call, index) => assertCall(call, cases[index]));
+  } finally {
+    gates.forEach((gate, index) => gate.response.resolve(replies[index]));
+    await within(Promise.allSettled(running), 'cleanup');
+  }
+});
+
 test('retains unused successful results but never requires or converts skipped declarations', async () => {
   const f = host('guarded-result-unused');
   for (const guard of [true, false, true, false]) {

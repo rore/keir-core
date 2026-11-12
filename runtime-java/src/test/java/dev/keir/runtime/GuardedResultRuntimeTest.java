@@ -13,8 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static dev.keir.runtime.RuntimeData.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -86,6 +89,104 @@ class GuardedResultRuntimeTest {
             assertEquals(guard ? List.of(Map.of("step", "created", "capability", "records.create", "state", "CONFIRMED")) : List.of(), outcome.effects());
         }
         assertEquals(List.of("records.create", "records.create"), host.calls);
+    }
+
+    @Test @Timeout(5)
+    void overlappingGuardedResultsKeepValuesReceiptsAndContextsInvocationLocal() throws Exception {
+        record Call(String capability, Map<String,Object> args, Map<String,Object> protectedArgs,
+                    long remainingMs, KeirRuntime.BoundEffectContext context) {}
+        record Gate(CompletableFuture<Call> entered, CompletableFuture<Object> response) {}
+        var gates = List.of(new Gate(new CompletableFuture<>(), new CompletableFuture<>()),
+                new Gate(new CompletableFuture<>(), new CompletableFuture<>()));
+        var calls = new AtomicInteger();
+        var running = new ArrayList<CompletableFuture<KeirRuntime.Outcome>>();
+        var names = List.of("slow", "fast", "skipped");
+        var inputs = new LinkedHashMap<String,Map<String,Object>>();
+        var invocations = new LinkedHashMap<String,KeirRuntime.BoundEffectInvocation>();
+        for (int index = 0; index < names.size(); index++) {
+            String name = names.get(index);
+            var fields = new LinkedHashMap<>(input(!name.equals("skipped")));
+            fields.put("label", name); fields.put("existingReference", "existing-" + name);
+            fields.put("enabled", index != 0); fields.put("at", "2026-01-0" + (index + 1) + "T00:00:00.000Z");
+            inputs.put(name, fields);
+            long now = index * 10L;
+            invocations.put(name, new KeirRuntime.BoundEffectInvocation(Map.of("actorId", "actor-" + name),
+                    new KeirRuntime.Deadline(() -> now, 1000 + now), new Object(),
+                    Map.of("id", "event-" + name, "source", "source-" + name)));
+        }
+        var adapters = new LinkedHashMap<String,KeirRuntime.BoundEffectAdapter>();
+        for (String capability : List.of("records.create", "records.lookup")) adapters.put(capability,
+                new KeirRuntime.BoundEffectAdapter("1", "simulation", "sample.RecordKey/1", (args, protectedArgs, remainingMs, context) -> {
+                    int index = calls.getAndIncrement();
+                    if (index >= gates.size()) return CompletableFuture.failedFuture(new AssertionError("Unexpected additional dispatch"));
+                    var gate = gates.get(index);
+                    gate.entered().complete(new Call(capability, args, protectedArgs, remainingMs, context));
+                    return gate.response();
+                }));
+        var bound = KeirRuntime.bindModel(read("dcm-guarded-result.json"), adapters);
+        assertTrue(bound.succeeded(), () -> String.valueOf(bound.diagnostic()));
+        var prepared = KeirRuntime.prepareProgram(read("artifact-guarded-result.json"), bound.boundModel());
+        assertTrue(prepared.succeeded(), () -> String.valueOf(prepared.diagnostic()));
+        BiConsumer<Call,String> assertCall = (call, name) -> {
+            var expected = invocations.get(name);
+            assertEquals("records.create", call.capability());
+            assertEquals(Map.of("label", name), call.args());
+            assertEquals(expected.bindings(), call.protectedArgs());
+            assertSame(expected.requestKey(), call.context().requestKey());
+            assertEquals(expected.event(), call.context().event());
+            assertEquals(expected.deadline().expiresAtMs(), call.context().deadline().expiresAtMs());
+            assertSame(expected.deadline().clock(), call.context().deadline().clock());
+            assertEquals(expected.deadline().clock().getAsLong(), call.context().deadline().clock().getAsLong());
+            assertTrue(call.remainingMs() > 0 && call.remainingMs() <= 1000);
+        };
+        var returnedSlow = new LinkedHashMap<>(value("returned-slow"));
+        returnedSlow.put("flag", true); returnedSlow.put("enabled", true); returnedSlow.put("note", "slow-note");
+        returnedSlow.put("at", "2026-01-04T00:00:00.000Z");
+        var returnedFast = new LinkedHashMap<>(value("returned-fast"));
+        returnedFast.remove("enabled"); returnedFast.put("note", "fast-note"); returnedFast.put("at", "2026-01-05T00:00:00.000Z");
+        var replies = List.of(Map.of("kind", "SUCCESS", "effect", "CONFIRMED", "value", returnedSlow),
+                Map.of("kind", "SUCCESS", "effect", "CONFIRMED", "value", returnedFast));
+        var receipt = List.of(Map.of("step", "created", "capability", "records.create", "state", "CONFIRMED"));
+        var expectedSlow = Map.of("reference", "returned-slow", "message", "slow-note", "enabled", true, "flag", true,
+                "state", "CREATED", "at", "2026-01-04T00:00:00.000Z");
+        var expectedFast = Map.of("reference", "returned-fast", "message", "fast-note", "enabled", false, "flag", false,
+                "state", "CREATED", "at", "2026-01-05T00:00:00.000Z");
+        var expectedSkipped = Map.of("reference", "existing-skipped", "message", "unchanged", "enabled", true, "flag", true,
+                "state", "EXISTING", "at", "2026-01-03T00:00:00.000Z");
+        try {
+            var slow = KeirRuntime.invokeBoundEffectProgram(prepared.prepared(), inputs.get("slow"), invocations.get("slow")).toCompletableFuture();
+            running.add(slow);
+            assertCall.accept(gates.get(0).entered().get(3, TimeUnit.SECONDS), "slow");
+            var fast = KeirRuntime.invokeBoundEffectProgram(prepared.prepared(), inputs.get("fast"), invocations.get("fast")).toCompletableFuture();
+            running.add(fast);
+            assertCall.accept(gates.get(1).entered().get(3, TimeUnit.SECONDS), "fast");
+            var skippedFuture = KeirRuntime.invokeBoundEffectProgram(prepared.prepared(), inputs.get("skipped"), invocations.get("skipped")).toCompletableFuture();
+            running.add(skippedFuture);
+            var skipped = skippedFuture.get(3, TimeUnit.SECONDS);
+            assertEquals("COMPLETED", skipped.classification(), skipped.toMap().toString());
+            assertEquals(expectedSkipped, skipped.toMap().get("result"));
+            assertEquals(List.of(), skipped.effects());
+            assertEquals(List.of("created"), skipped.trace().stream().filter(row -> row.get("event").equals("STEP_SKIPPED")).map(row -> row.get("step")).toList());
+            assertEquals(2, calls.get()); assertFalse(slow.isDone()); assertFalse(fast.isDone());
+
+            gates.get(1).response().complete(replies.get(1));
+            var fastOutcome = fast.get(3, TimeUnit.SECONDS);
+            assertEquals("COMPLETED", fastOutcome.classification(), fastOutcome.toMap().toString());
+            assertEquals(expectedFast, fastOutcome.toMap().get("result")); assertEquals(receipt, fastOutcome.effects());
+            assertFalse(slow.isDone());
+            gates.get(0).response().complete(replies.get(0));
+            var slowOutcome = slow.get(3, TimeUnit.SECONDS);
+            assertEquals("COMPLETED", slowOutcome.classification(), slowOutcome.toMap().toString());
+            assertEquals(expectedSlow, slowOutcome.toMap().get("result")); assertEquals(receipt, slowOutcome.effects());
+            assertEquals(expectedFast, fastOutcome.toMap().get("result")); assertEquals(receipt, fastOutcome.effects());
+            assertEquals(expectedSkipped, skipped.toMap().get("result")); assertEquals(List.of(), skipped.effects());
+            assertEquals(2, calls.get());
+            assertCall.accept(gates.get(0).entered().get(3, TimeUnit.SECONDS), "slow");
+            assertCall.accept(gates.get(1).entered().get(3, TimeUnit.SECONDS), "fast");
+        } finally {
+            for (int index = 0; index < gates.size(); index++) gates.get(index).response().complete(replies.get(index));
+            CompletableFuture.allOf(running.toArray(new CompletableFuture<?>[0])).get(3, TimeUnit.SECONDS);
+        }
     }
 
     private static CheckedCel.Bundle bundle(String program) throws Exception {
