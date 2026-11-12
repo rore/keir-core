@@ -1,48 +1,88 @@
-# What can you customize with Keir?
+# Keir rules by example
 
-Developers add Keir to an application so its users can configure custom rules, called extensions. The app can be about expenses, bookings, customer support or another domain. Its developers choose when rules run and which information and actions they may use.
+An extension is a custom rule in an application. Keir's language lets it combine inputs, conditions and calls to operations the app exposes. The app supplies its business data and actions, plus any AI assistant and review screens.
 
-The app supplies the authoring and review experience, including any AI assistant. Keir compiles the rules and runs the checked version through the app's services.
+These are **logic sketches, not Keir syntax**. Booking, support and expense apps below are illustrative hosts, not implemented integrations. Daymark is an implemented **task-management demo app**; its tasks belong to Daymark.
 
-The expense, booking and support examples below are **illustrations, not implemented integrations**. **Daymark is a working task-management demo app** used to demonstrate Keir; its task features belong to Daymark.
+Examples 1–3 use capabilities available in published Keir Core 0.3.1, the compiler and runtime packages. Example 4 needs the tested but unreleased 0.4.0 candidate.
 
-## Expense app: check a submission
+## 1. Choose an answer from input
 
-> For client expenses, require a receipt before submission.
+A booking app supplies whether a room permits guest bookings.
 
-An expense app could supply the expense category and whether a receipt is attached. The rule could stop submission when the receipt is missing, so the user can correct it. Passing the rule lets the app continue its normal permission, validation and save checks; it does not confirm that the expense was saved.
+```text
+Before a guest booking is saved:
 
-## Booking app: check a room's guest policy
+  allowed ← room permits guest bookings
 
-> Before a guest books a room, check that the room permits guest bookings.
+  IF allowed:
+    ALLOW continuation
+  ELSE:
+    DENY with "Choose a room that allows guests"
+```
 
-A booking app could expose a way to read the room's guest policy. The rule could use that answer to allow or stop the request. If the required lookup fails, the check blocks continuation. The app still handles availability, permissions and the actual reservation.
+**Shows:** name a yes/no value and use it to choose a decision and message. No service call is needed here. ALLOW lets the app continue its own checks; the app still handles permissions, availability and saving the reservation.
 
-## Daymark demo: respond to a completed task
+## 2. Use an operation's returned value
 
-> When I complete a task in this project, create a follow-up task.
+A support app could expose its customer-plan lookup before accepting a priority request.
 
-This is an implemented example in Daymark, the task-management demo. Daymark exposes task completion and its own task-reading and creation services. The rule checks the completed task's project and requests a follow-up only when it matches. The completion has already been saved; a problem creating the follow-up does not undo it.
+```text
+plan ← READ the customer's plan from the app
 
-The [screenshot walkthrough](guided-tour.md) shows this request through review and execution.
+IF plan includes priority support:
+  ALLOW the priority request
+ELSE:
+  DENY with "Priority support is not included"
+```
 
-## Support app: use a newly assigned reference
+**Shows:** an earlier operation's result can supply a value for a later condition. This read always runs, so its successful result is available afterward. A failed required lookup blocks continuation instead of producing an ALLOW.
 
-> If I choose “Create a new case,” create it and give me its reference. Otherwise, keep the existing case reference.
+## 3. Call an operation only when needed
 
-The app would pass the user's choice and existing reference to the rule and expose its own case-creation service. The rule could return the reference that service actually assigned, or keep the existing reference when creation was intentionally skipped. A failed or uncertain creation is reported as such. If the response is lost, the app must check whether the case was created before retrying.
+Daymark exposes task completion and its task-reading and creation services.
 
-**The support app is hypothetical.** The underlying returned-reference feature has been tested in the **Keir Core 0.4.0 candidate**, the compiler and runtime packages. This candidate is unreleased; published Core 0.3.1 packages and Daymark do not support the feature. [Technical version details and evidence](agents/authoring-companion.md#development-edition-8) describe the tested generic-record examples.
+```text
+After Daymark saves a task completion:
 
-## From a request to a running rule
+  task ← READ the triggering task from Daymark
+  makeFollowup ← task is completed in the selected project
 
-In an application with an authoring assistant, the flow is:
+  CREATE a follow-up task ONLY WHEN makeFollowup
+```
 
-1. **Describe it.** An AI assistant helps draft the rule using the app's exposed building blocks. It can ask about missing business choices.
-2. **Compile it.** Keir checks that the draft fits the app's declared operations, data types and execution limits.
-3. **Check and review it.** The app supplies example inputs and simulated service responses. Keir runs the rule against them; the user reviews expected and observed behavior, including cases that should do nothing or fail, and approves that version. These checks cover the selected cases. The app controls activation separately.
-4. **Run it.** When the app invokes the approved rule, Keir executes the compiled version through the app's services, without another AI request.
+**Shows:** save a condition, then use it to control whether an operation runs. A false condition skips creation. This sketch does not use the creation's returned value. The original completion is already saved; failure to create the follow-up does not undo it. The [Daymark walkthrough](guided-tour.md) shows this implemented demo flow.
 
-Rules that respond after an event, like the Daymark example, may include at most one call to an app operation that can change data. Before-save rules, like the expense check, are read-only. The app defines each operation and owns its permissions, saving and outcome reporting.
+## 4. Use the result of a conditional lookup
 
-Continue with the [Daymark demo walkthrough](guided-tour.md), [run and change an example](quickstart.md), or read the [embedding guide](embedding.md) to add Keir to an application.
+An expense app could supply a yes/no fact saying whether a claim needs an approval check, plus a lookup returning the employee's approval status.
+
+```text
+needsCheck ← claim needs an approval check
+
+approval ← LOOK UP employee approval
+           ONLY WHEN needsCheck
+
+Decision:
+  IF needsCheck:
+    IF approval.status is "not approved":
+      DENY with "Manager approval is required"
+    ELSE:
+      ALLOW continuation
+  ELSE:
+    ALLOW continuation without reading approval
+```
+
+**Shows:** use the actual returned status in a condition even though the lookup is conditional. The same saved condition, `needsCheck`, controls both the lookup and the outer decision branch. The status is read only inside that branch's true side; a different or combined test is not a replacement for that exact condition.
+
+When `needsCheck` is false, no lookup happens and no result is read. If the lookup runs but fails, execution fails and the app blocks continuation; it does not take the skipped-lookup ALLOW path.
+
+**Candidate feature:** this guarded-result use is tested in Core 0.4.0, not supported by published 0.3.1 packages or Daymark's current integration. The expense integration is illustrative. See [version details and qualification evidence](agents/authoring-companion.md#development-edition-8).
+
+## From a sketch to a running extension
+
+The app's assistant can help draft the extension. Keir compiles it against the app's declared capabilities. The app supplies example inputs and simulated service responses for review, records approval and controls activation. Keir then runs the compiled version through the app's services without another AI request. Selected examples check those cases, not every possible situation.
+
+Before-save decisions are read-only. An extension responding after an event may contain at most one call that can change data. The app still enforces permissions and current business facts when saving, and checks uncertain outcomes before retrying.
+
+Next: [see the Daymark demo](guided-tour.md), [run and change an example](quickstart.md), or [embed Keir in an application](embedding.md).

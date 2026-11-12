@@ -3,7 +3,7 @@
 <a id="learn-and-run-keir"></a>
 ## Get started
 
-Start with [What can you customize with Keir?](customizations.md) for plain-language examples and the path from a request to a running rule.
+Start with [Keir rules by example](customizations.md): one language capability at a time, shown as simple logic rather than source syntax.
 
 Then [run and change one extension](quickstart.md), or follow the [screenshot walkthrough](guided-tour.md).
 

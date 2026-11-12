@@ -6,7 +6,7 @@ Keir lets developers add user-configurable checks and actions to applications in
 <a id="supported-contract"></a>
 <a id="current-scope"></a>
 <a id="what-you-can-build-today"></a>
-Start with [What can you customize with Keir?](docs/customizations.md) for concrete requests, what happens when they run, and the roles of the application, AI and user.
+Start with [Keir rules by example](docs/customizations.md): compact logic sketches showing input checks, returned values, conditional actions and conditional lookup results.
 
 ![An AI assistant drafts a Keir extension from a customer request and the app’s model. Keir compiles it. At execution, the app checks permissions and performs the operation.](docs/images/extension-flow.svg)
 
