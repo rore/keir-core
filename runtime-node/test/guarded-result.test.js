@@ -92,6 +92,14 @@ test('overlapping guarded results keep values, receipts and contexts invocation-
     pending.then(() => settled.add(item.name), () => settled.add(item.name));
     return pending;
   };
+  const within = async (pending, phase) => {
+    let timer;
+    try {
+      return await Promise.race([pending, new Promise((_, reject) => {
+        timer = setTimeout(() => reject(Error('Timed out waiting for ' + phase)), 1000);
+      })]);
+    } finally { clearTimeout(timer); }
+  };
   const assertCall = (call, item) => {
     assert.equal(call.capability, 'records.create');
     assert.deepEqual({ ...call.args }, { label: item.name });
@@ -115,10 +123,10 @@ test('overlapping guarded results keep values, receipts and contexts invocation-
     state: 'EXISTING', at: '2026-01-03T00:00:00.000Z' };
   try {
     const slow = begin(cases[0]);
-    assertCall(await gates[0].entered.promise, cases[0]);
+    assertCall(await within(gates[0].entered.promise, 'first dispatch'), cases[0]);
     const fast = begin(cases[1]);
-    assertCall(await gates[1].entered.promise, cases[1]);
-    const skipped = await begin(cases[2]);
+    assertCall(await within(gates[1].entered.promise, 'second dispatch'), cases[1]);
+    const skipped = await within(begin(cases[2]), 'skipped invocation');
     assert.equal(skipped.classification, 'COMPLETED', JSON.stringify(skipped));
     assert.deepEqual(skipped.result, expectedSkipped);
     assert.deepEqual(skipped.effects, []);
@@ -128,14 +136,14 @@ test('overlapping guarded results keep values, receipts and contexts invocation-
     assert.equal(settled.has('fast'), false);
 
     gates[1].response.resolve(replies[1]);
-    const fastOutcome = await fast;
+    const fastOutcome = await within(fast, 'second response');
     assert.equal(fastOutcome.classification, 'COMPLETED', JSON.stringify(fastOutcome));
     assert.deepEqual(fastOutcome.result, expectedFast);
     assert.deepEqual(fastOutcome.effects, receipt);
     assert.equal(settled.has('slow'), false);
 
     gates[0].response.resolve(replies[0]);
-    const slowOutcome = await slow;
+    const slowOutcome = await within(slow, 'first response');
     assert.equal(slowOutcome.classification, 'COMPLETED', JSON.stringify(slowOutcome));
     assert.deepEqual(slowOutcome.result, expectedSlow);
     assert.deepEqual(slowOutcome.effects, receipt);
@@ -147,7 +155,7 @@ test('overlapping guarded results keep values, receipts and contexts invocation-
     calls.forEach((call, index) => assertCall(call, cases[index]));
   } finally {
     gates.forEach((gate, index) => gate.response.resolve(replies[index]));
-    await Promise.allSettled(running);
+    await within(Promise.allSettled(running), 'cleanup');
   }
 });
 

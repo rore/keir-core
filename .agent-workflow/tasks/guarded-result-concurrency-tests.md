@@ -29,4 +29,10 @@ Task identity: `agent-workflow:guarded-result-concurrency-tests`. Owning feature
 
 ## Coordination
 
-Independent plan review is approved; implementation may proceed. Only the two runtime test files and this task record are reserved; concurrent documentation and owner-managed roadmap files remain separate. Relay exact-self discovery is unavailable; no mapped role is assumed.
+Independent plan review is approved; implementation may proceed. Only the two runtime test files and this task record are reserved; concurrent documentation and owner-managed roadmap files remain separate.
+
+## Verification so far
+
+The existing guarded-result suites passed seven tests each before the change and eight each afterward. Full Maven verification passed 200 Java tests; six teaching-host scenario tests were skipped because the explicit Python selector was unset and are being checked separately. The complete Node suite passed all 74 tests after the bounded-wait refinement. Static public contracts passed for the retained and current fixture generations. No production source, fixture, package or dependency changed.
+
+Independent implementation review approved the concurrency coverage but found that the initial Node entry waits and drain relied on the outer test timeout to unwind. Those phases now have cleared test-owned liveness timers; they do not schedule response ordering or assert elapsed performance. An isolated negative probe deliberately withheld the first entry signal: it failed at the bounded phase wait, ran finally and drained the one started invocation, with zero test cancellations. The unchanged happy-path focused and full Node suites pass. Final independent review and exact-head CI remain required.
