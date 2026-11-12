@@ -7,7 +7,7 @@ The companion gives an authoring assistant a versioned guide, structural schemas
 
 | Host contract | Companion | Status |
 | --- | --- | --- |
-| Development Core 0.4.0; exact producer 0.4.0 and unchanged `/2` source, `/3` model/artifact/scenario | [Edition 8 guide](customer-authoring-guide-v8.md) | Unreleased source recipe. No qualified archive or package record yet; requires reviewed committed inputs. |
+| Development Core 0.4.0; exact producer 0.4.0 and unchanged `/2` source, `/3` model/artifact/scenario | [Edition 8 guide](customer-authoring-guide-v8.md) | Qualified candidate archive and installed Core packages; see [qualification evidence](../../roadmap/features/guarded-result-dataflow.md#notes). Not a published release; [metadata](authoring-companion-v8-compatibility.json) remains `candidate` with an empty release-package map. |
 | Core 0.3.1; source `/2`, model/artifact/scenario `/3` | [Edition 7 guide](customer-authoring-guide-v7.md) | Candidate archive available on the [Core 0.3.1 release](https://github.com/rore/keir-core/releases/tag/v0.3.1); [compatibility metadata](authoring-companion-v7-compatibility.json) remains `candidate` with an empty package map. Includes the full Apache license and exact 0.3.1 examples. |
 | Core 0.3.0 contracts; licensed packaging | [Edition 6 guide](customer-authoring-guide-v6.md) | Unpublished [candidate](authoring-companion-v6-compatibility.json); includes the full Apache license. Not a replacement for published edition 5. |
 | Core 0.3.0; source `/2`, model/artifact/scenario `/3` | [Edition 5 guide](customer-authoring-guide-v5.md) | [Released with Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). [Exact package record](authoring-companion-v5-compatibility.json). |
@@ -18,23 +18,24 @@ Editions 1 and 2 use earlier preview contracts. Their original archives remain r
 
 Published editions 1–5 retain their original bytes and source IDs. Their ZIPs omit the root project license; include [LICENSE](../../LICENSE) alongside a legacy ZIP when redistributing it. The [source provenance note](../releases/source-provenance.md) explains reachable equivalent revisions after the history cleanup.
 
-## Development edition 8
+<a id="development-edition-8"></a>
+## Qualified candidate edition 8
 
-Edition 8 adds the exact guarded-result scalar proof rules and bundles the matching language/artifact/runtime/workflow references, model/decision references, schemas, four compiler-produced neutral examples and their independent scenarios. It keeps the full license and all earlier editions unchanged. Its recipe checks producer 0.4.0, exact model/source/artifact digests, environment pins and scenario formats. An in-memory recipe test is not a distributable or installed-package qualification.
+Edition 8 adds guarded-result scalar dataflow and bundles the matching references, schemas, four compiler-produced examples and independent scenarios. [Hosted qualification](https://github.com/rore/keir-core/actions/runs/43204167845) verified the candidate archive and actual installed Java/Node consumers from committed input `dca92178dad7a9a4f65312128afec15abf88ce67`. The [qualification record](../../roadmap/features/guarded-result-dataflow.md#notes) records the checks and independently verified payload bytes. This is a qualified Core 0.4.0 candidate, not a published release or Daymark upgrade.
 
-The existing committed-input rule still applies. After a reviewed Core commit contains the non-guide payload, create `docs/agents/authoring-companion-v8-compatibility.json` with `status: candidate`, that exact full commit as `coreRevision`, and `packages: {}`. Do not substitute the pre-feature base, null, a made-up revision or package pins. Commit the companion inputs separately under the normal authorized workflow; the builder verifies their non-guide bytes against the recorded Core commit. Until those commits exist, edition 8 packaging is intentionally blocked rather than labeled reproducible.
-
-Once the actual reviewed companion input commit is available:
+Reproduce the qualified archive from its exact companion input commit:
 
 ```sh
-python scripts/authoring-companion.py build keir-authoring-v8-candidate.zip --version 8 --revision "$COMPANION_REVISION"
+REVISION=dca92178dad7a9a4f65312128afec15abf88ce67
+python scripts/authoring-companion.py build keir-authoring-v8-candidate.zip --version 8 --revision "$REVISION"
+python scripts/authoring-companion.py verify keir-authoring-v8-candidate.zip --version 8 --sha256 sha256:4433908295095612c495b11447170fe542758db06acc4b1ce253359a10ac2676
 ```
 
-Use its actual returned pin with `verify --version 8 --sha256 sha256:<hex>`. Keep the record candidate and omit `--core-assets` until a separately qualified release record exists. Match the host's installed support explicitly; neither this guide nor a candidate grants permission to upgrade a host or activate an artifact.
+The [compatibility record](authoring-companion-v8-compatibility.json) remains `status: candidate` with `packages: {}` and Core input `fc0601ae410e06c0be76d6f3b769abbd049b5999`; omit `--core-assets`. Qualification does not change that record into a released-package map. The bundled guide retains its preparation-time wording and exact bytes. Use edition 8 only with explicit host support for producer `keir-compiler-java/0.4.0`; existing consumers keep their matching editions.
 
 ## Licensed candidate edition 7
 
-Edition 7 targets the distinct 0.3.1 compiler and includes the complete Apache 2.0 license. Its models, formats and environment pins are unchanged from edition 6, while its compiled examples are produced by compiler 0.3.1. Existing editions keep their original producer and source identities. The unchanged `keir-authoring-v7-candidate.zip` and its separate `keir-authoring-v7-candidate.SHA256SUMS` are available on the published Core 0.3.1 release in the private repository. The archive retains its original candidate filename, guide wording and compatibility metadata; archive availability does not change its empty package map into a released-package qualification record.
+Edition 7 targets the distinct 0.3.1 compiler and includes the complete Apache 2.0 license. Its models, formats and environment pins are unchanged from edition 6, while its compiled examples are produced by compiler 0.3.1. Existing editions keep their original producer and source identities. The unchanged `keir-authoring-v7-candidate.zip` and its separate `keir-authoring-v7-candidate.SHA256SUMS` are available on the published Core 0.3.1 release. The archive retains its original candidate filename, guide wording and compatibility metadata; archive availability does not change its empty package map into a released-package qualification record.
 
 To reproduce the published archive, use its exact companion input commit:
 

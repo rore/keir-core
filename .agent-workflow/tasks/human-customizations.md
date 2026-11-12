@@ -17,12 +17,26 @@ Task identity: `agent-workflow:human-customizations`. Documentation contribution
 **Material assumptions:** The general examples need only existing exposed input/READ/one-WRITE/decision capabilities; the returned-reference example is illustrative adaptation of the checked record fixture and must remain candidate-only. Source scenarios and published release metadata are adequate for prose accuracy; do not rerun the held local qualification route. Reconcile any main advance and re-review materially changed documentation.
 **Plan:** Create docs/customizations.md with four business requests and outcomes, concise host/AI/compiler/review/execution roles and useful next links. Add an early README link, reduce repeated event-story/technical-preview prose and put the new guide first in docs navigation. Retain the screenshot tour and advanced references. Update only stale mutable qualification statements in docs/agents/authoring-companion.md, docs/agents/README.md and examples/README.md; retain old anchors and exact committed reproduction inputs/pin. Inspect changed paths and link targets, run fresh Redline/Workflow and documentation checks, obtain independent result review, reconcile main, then create one draft PR and merge on green under existing authorization.
 **Verification plan:** Reader/semantic accuracy -> independent review and claim-to-source map against follow-up and decision sources, Daymark contract, guarded-result true/skipped/rejected/unknown scenarios, runtime/language contracts, qualification record and actual release/run API state. Links -> relative paths, Markdown anchors and canonical external targets in complete changed pages. Preservation -> exact diff allowlist plus unchanged immutable guides, metadata, schemas, code and other work. Delivery -> draft PR, native reviews, expected-head/current-main guards, applicable CI and merged-tree verification; no manual package or benchmark jobs.
-**Plan review:** Pending independent technical review.
+**Plan review:** Agent technical review: human_docs_review; approved planning commit32b2978 with no blocking concerns. See Plan review below.
 **Approvals:** User explicitly requested this guide, verified status correction, draft PR and merge after checks pass. No additional behavior change is proposed.
 **Exceptions:** —
-**State:** Blocked
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Discovery
 
 Planning recorded before edits. Existing screenshot tour, executable examples and definitive specs stay in place. The existing companion qualification record is the source of archive availability, not permission to publish a release or adopt it in Daymark. Independent plan review is pending.
+
+## Plan review
+
+Agent technical review: human_docs_review. Reviewed revision: `32b2978b9bdaca69196594934724142c9d90254a`. The six documentation paths plus shared record were approved before edits. Claim-to-source, complete-page links, immutable-byte preservation, fresh harness checks and native delivery validation were assessed adequate. The reviewer requires explicit illustration/candidate labels and preservation of exact guard failure/effect semantics, anchors, source revisions and pins.
+
+## Implementation and verification
+
+Added one human-facing page with four plain-language requests, illustrative-host labels, explicit candidate availability and concise authoring/execution roles. README now links it before technical material and removes the repeated event story and guarded-result explanation; old anchors are retained. The docs index leads with the guide. Three mutable indexes now reflect the verified edition-8 candidate without changing bundled guide bytes or empty release-package metadata; the reproduction revision and trusted archive pin are copied from accepted qualification evidence. The screenshot tour, specs, schemas, code, concurrent work, payloads and all historical guide/metadata files are unchanged.
+
+Complete changed-page link/path/anchor validation passed107 links/assets; all prior heading/explicit anchors remain. Diff whitespace and exact seven-path inventory checks passed. GitHub API independently confirms published0.3.1, no0.4 release, and successful hosted run43204167845 at the recorded qualification input; no manual job, local package/cache/fixture execution or qualification rerun was performed. Claim sources are the actual follow-up/decision programs, Daymark before-save contract and guarded-result success/skipped/rejected/unknown scenarios plus language/runtime constraints.
+
+## Result review
+
+Independent result review is pending; final Workflow validation must include its recorded assessment before publication. Recover on docs/human-customizations; main reconciliation and ordinary draft-PR checks remain.

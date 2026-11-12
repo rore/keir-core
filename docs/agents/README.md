@@ -13,7 +13,7 @@ Keir’s compiler and runtime work independently of an assistant. Start with the
 
 Choose the guide matching the host's packages and model using the [companion compatibility table](authoring-companion.md#choose-an-edition). Earlier guides serve their named contracts; do not use a historical guide for current authoring.
 
-For a host explicitly supporting development producer `keir-compiler-java/0.4.0`, see the [edition-8 source guide](customer-authoring-guide-v8.md), [companion recipe](authoring-companion.md#development-edition-8) and [guarded-result examples](../../examples/README.md#guarded-result-scalar-dataflow). Edition 8 is unreleased source guidance without a qualified archive or package record. A Core 0.3.1 host, including the current Daymark consumer, still uses its matching edition 7 and does not gain guarded-result support.
+For a host explicitly supporting development producer `keir-compiler-java/0.4.0`, see the [edition-8 source guide](customer-authoring-guide-v8.md), [companion recipe](authoring-companion.md#development-edition-8) and [guarded-result examples](../../examples/README.md#guarded-result-scalar-dataflow). Edition 8 has a [qualified candidate archive](authoring-companion.md#development-edition-8); it is not a published release, and its release-package map remains empty. A Core 0.3.1 host, including the current Daymark consumer, still uses its matching edition 7 and does not gain guarded-result support.
 
 The [authoring companion](authoring-companion.md) packages the guide, schemas and example scenarios as a versioned ZIP. Supply your application's exact published domain capability model (DCM), policy and scoped tool definitions separately.
 
