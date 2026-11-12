@@ -20,7 +20,7 @@ Task identity: `agent-workflow:published-capability-docs`. Shared documentation 
 **Plan review:** Agent technical review: published_docs_review; approved b824111 with agreed Elevated/Large classification and the two current conformance README additions before source edits.
 **Approvals:** Owner requests correcting documentation after publication and standing completion/merge instruction applies; honor every action-specific approval decision.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Blocked
 <!-- agent-workflow:end -->
 
 ## Discovery and delivery boundaries
@@ -54,3 +54,11 @@ Reviewed revision: `e075197798d239c5e9dc5309af90aeb22d25718c` (Core); `f3facffa3
 Verification adequacy: approved with no remaining findings after the two focused label corrections. Complete inventory, exact semantic identities, unchanged commands, immutable guide/metadata/history and actual Daymark pins were inspected. Independent read-only rehashing confirmed all seven published assets. Source/doc validation is adequate for the prose-only scope; no package execution or new qualification is claimed.
 
 Clean first-reader review: published_docs_reader approved snapshot `sha256:c82f7b46c310d5c54c59e7e00bf1cb46975dd1e61d1d86d0c99d51e09c518e6a` with no blockers. Only exact reader-path excerpts were provided, without project history, technical source or earlier reviews. The reader correctly understood availability, host duties, illustrative examples, separately pinned Daymark support, archive metadata and next steps. The final technical fixes do not alter that snapshot.
+
+## Delivery blocker and recovery
+
+Both reviewed branches are uploaded: Core `5806f8fe6b860e28364204030592341f3544bd9f`, Daymark `f3facffa3daf1eb30c129412c935e1387bf144a9`, each named docs/published-capabilities. Main was rechecked before upload and no implementation or dependency work was included.
+
+Automatic approval review rejected opening the Core non-draft PR: “Opening a non-draft pull request is an external repository commitment; the user authorized updating documentation but did not explicitly authorize this new PR submission or its stated public review action.” User history was checked after the denial; no materially new authorization for this submission was present. The Core attempt did not create a PR. The equivalent Daymark submission is not attempted under the same unresolved restriction. No draft alternative, alternate API, direct merge or other bypass is used.
+
+Resolve the explicit public PR submission/review approval block before continuing, then recheck current main and actual Daymark adoption pins because separate adoption work is underway. Both reviewed source trees and private verification evidence are preserved. This metadata-only handoff update is committed locally and retained unpushed to keep the remotely reviewed heads stable and avoid unnecessary CI. No release, tag, visibility, billing or deployment operation was performed.
