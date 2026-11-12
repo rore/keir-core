@@ -1,6 +1,6 @@
 # Keir
 
-Keir lets developers add AI-assisted customization to their applications. Business users describe the behavior they want in plain language, and an AI assistant turns their requests into extensions using the capabilities the application exposes.
+Keir lets developers add user-configurable checks and actions to applications in different domains. These rules are called extensions. Each application supplies its own data, actions and authoring experience; an AI assistant can help users describe the rules.
 
 <a id="customizing-an-application"></a>
 <a id="supported-contract"></a>
@@ -13,7 +13,7 @@ Start with [What can you customize with Keir?](docs/customizations.md) for concr
 <a id="from-a-request-to-a-running-extension"></a>
 ## See it in an application
 
-The [Daymark walkthrough](docs/guided-tour.md) follows a request to create a follow-up task through simulated checks, approval, activation and a saved result.
+The [Daymark task-management demo walkthrough](docs/guided-tour.md) follows a request to create a follow-up task through simulated checks, approval, activation and a saved result. Its tasks and task services are part of the demo application, not built-in Keir features.
 
 <a id="how-it-fits-your-application"></a>
 ## What you embed
@@ -21,8 +21,6 @@ The [Daymark walkthrough](docs/guided-tour.md) follows a request to create a fol
 Embed the Java or Node.js runtime in your application. Both run the same compiled extension format. Use the compiler when creating or changing an extension.
 
 The application model defines where extensions can run, what input data they receive, and which operations they can call. Your application implements those operations through its own services. It also provides the authoring assistant, simulation, review and activation flow, and storage.
-
-[Daymark](https://github.com/rore/keir-demo-app) demonstrates these pieces in a task application, from a user's request through review and activation to execution.
 
 <a id="start-here"></a>
 ## Build with Keir
