@@ -129,7 +129,7 @@ SHA-256 of the exact source-ready files:
 
 | Path | SHA-256 |
 | --- | --- |
-| `.github/workflows/numeric-seam-qualification.yml` | `c71376cee2aed0823adfcb1a11ac64ea962c6b1933a96301180b80daf93fba56` |
+| `.github/workflows/numeric-seam-qualification.yml` | `e20d3db8f18f6d17ceb4b36037604c99f1da9c67a462f7e2937829e78c6f45ef` |
 | `conformance/cel-profile/numeric-fixtures.json` | `d900f19fdfc66cb441f71b0968aec64d616117591e7005697e3af6a3ad50df56` |
 | `conformance/cel-profile/numeric-profile.mjs` | `b0a95677e04bc224c296e47a01719489bded17ae3e6cf2f18bde27a4546ee224` |
 | `conformance/cel-profile/numeric.mjs` | `f68b56c25dbfac12d9a8b7892b0a17ee231f0375aae6321244ee0bf3cb4c1c51` |
@@ -173,3 +173,5 @@ Actual targeted static checks, 2026-11-12:
 Source corrections are ready for focused independent R1/R2 delta review. No static-tool blocker remains. Independent result GO, manager integration and the one approved hosted job remain pending. Reuse the accepted remainder of the original source review. No compilation, numeric/helper/oracle/benchmark execution, staging, commit, push or dispatch occurred. The isolated task checkout remains retained for that review/run; the manager owns delivery and broader roadmap updates.
 
 Focused closure complete: R1 directly reuses the validated engine object/payload; R2 evaluates a successful fixture and isolates the deliberate oracle mismatch from evaluation failure. Independent SOURCE GO has no remaining correction. Five source hashes and the reviewed record matched before/after. Manager accepted closure and proceeds with the already-approved exact six-path commit/push and single hosted dispatch. Compilation, numeric behavior and performance remain unrun; this is not runtime GO.
+
+Delivery: reviewed source commit `7c8823578c4dbf43a6c89e39ec3a349d26e4a109` was pushed to main with `[skip ci]` and verified remotely. GitHub initially had not registered the new workflow, then rejected dispatch with HTTP 422: `runner.temp` is unavailable in job-level `env`. The workflow's run listing was empty: no hosted job or numeric attempt occurred. Corrected only environment placement to the first step, persisting the same isolated values through `GITHUB_ENV`; GitHub's official context-availability table permits `runner` in step env, not job env. Commands, dependencies, numeric source, workload/safety limits and single-run authority remain unchanged. This is a pre-execution wiring correction, not a retry of a failed job. Reuse the reviewed isolation/supervision design; verify exact context placement before the first admitted run.

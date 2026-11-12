@@ -8,19 +8,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      NUMERIC_ROOT: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}
-      MAVEN_USER_HOME: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/maven
-      NPM_CONFIG_CACHE: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/npm-cache
-      TMPDIR: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/tmp
       MAVEN_OPTS: -Xmx256m
     steps:
       - name: Create new runner-temporary roots
         shell: bash
         timeout-minutes: 1
+        env:
+          NUMERIC_ROOT: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}
+          MAVEN_USER_HOME: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/maven
+          NPM_CONFIG_CACHE: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/npm-cache
+          TMPDIR: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/tmp
         run: |
           set -euo pipefail
           test ! -e "$NUMERIC_ROOT"
           mkdir -p "$NUMERIC_ROOT"/{maven,npm-cache,tmp,logs,output,evidence}
+          printf '%s\n' "NUMERIC_ROOT=$NUMERIC_ROOT" "MAVEN_USER_HOME=$MAVEN_USER_HOME" \
+            "NPM_CONFIG_CACHE=$NPM_CONFIG_CACHE" "TMPDIR=$TMPDIR" >> "$GITHUB_ENV"
       - uses: actions/checkout@v7
         timeout-minutes: 2
         with:
