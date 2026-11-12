@@ -21,12 +21,12 @@ Task identity: `agent-workflow:guarded-result-concurrency-tests`. Owning feature
 - Context and receipt isolation -> exact actor/event/key/deadline captures and confirmed/empty receipt assertions, rechecked after delayed settlement.
 - Regression integration -> focused Java and Node guarded-result suites, complete Maven/Node default suites and shared contract CI; measure added test duration without throughput claims.
 - Delivery and scope -> independent plan/result review, fresh complete-path Redline/Workflow evidence, draft PR, exact-head CI, guarded merge and remote-tree verification.
-**Plan review:** Pending independent non-implementer technical review; test implementation has not begun.
+**Plan review:** Agent technical review: core_hardening_review approved the exact record plan at beb3ee4828b4113b18f534dd3235d52a4b533044. Existing shared fixtures suffice. Accepted refinements: protect entry waits with finally cleanup, bound waits and drain released invocations; prove exactly two dispatches and fast completion while slow is pending; assert all six scalar fields, receipts and captured contexts after settlement; compare opaque keys by identity and wrapped deadlines by documented behavior; assert captured adapter observations outside callbacks so runtime error conversion cannot obscure test assertions. Fresh planned-path Redline is GRAY without boundary, API, schema, security or configuration changes.
 **Approvals:** The user authorized the focused tests, draft PR and merge after validation. No behavior, release or environment changes are authorized.
 **Exceptions:** —
-**State:** Blocked
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Coordination
 
-Implementation is gated on independent plan review. Only the two runtime test files and this task record are reserved; concurrent documentation and owner-managed roadmap files remain separate. Relay exact-self discovery is unavailable; no mapped role is assumed.
+Independent plan review is approved; implementation may proceed. Only the two runtime test files and this task record are reserved; concurrent documentation and owner-managed roadmap files remain separate. Relay exact-self discovery is unavailable; no mapped role is assumed.
