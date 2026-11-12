@@ -44,3 +44,13 @@ Complete changed-page checks passed400 Core and4 Daymark links/assets with no mi
 The clean first-reader reviewer read only the exact proposed reader-path snapshot, without project history or source context, and approved with no blockers. The reader correctly separated released Keir capability, illustrative hosts, Daymark's pins and the immutable candidate-label history. Optional minimum-version repetition was not added to general guidance because the owner explicitly prefers durable canonical links; the technical catalog retains exact compatibility identities.
 
 Technical review approved Daymark f3facff and the overall prose/preservation approach, but found two remaining current-status labels in Core b13fa34. Corrected the examples heading's development-preview label, preserving its generated anchor, and changed the feature summary's released-contract exclusion to retained-producer contracts. No semantic rule or historical Notes changed. Final focused result review remains pending.
+
+## Result review
+
+Agent technical review: published_docs_review.
+
+Reviewed revisions: Core `e075197798d239c5e9dc5309af90aeb22d25718c`; Daymark `f3facffa3daf1eb30c129412c935e1387bf144a9`.
+
+Verification adequacy: approved with no remaining findings after the two focused label corrections. Complete inventory, exact semantic identities, unchanged commands, immutable guide/metadata/history and actual Daymark pins were inspected. Independent read-only rehashing confirmed all seven published assets. Source/doc validation is adequate for the prose-only scope; no package execution or new qualification is claimed.
+
+Clean first-reader review: published_docs_reader approved snapshot `sha256:c82f7b46c310d5c54c59e7e00bf1cb46975dd1e61d1d86d0c99d51e09c518e6a` with no blockers. Only exact reader-path excerpts were provided, without project history, technical source or earlier reviews. The reader correctly understood availability, host duties, illustrative examples, separately pinned Daymark support, archive metadata and next steps. The final technical fixes do not alter that snapshot.
