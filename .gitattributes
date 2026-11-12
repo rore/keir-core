@@ -1,0 +1,11 @@
+# Imported tooling is not Keir implementation. Keep authored tooling visible.
+# Language metadata only: do not change text normalization or package bytes.
+/.agents/skills/agent-workflow/** linguist-vendored
+/.claude/skills/agent-workflow/** linguist-vendored
+/.agents/skills/minimap-roadmap/** linguist-vendored
+/.claude/skills/minimap-roadmap/** linguist-vendored
+/scripts/agent-workflow-check.py linguist-vendored
+/scripts/agent-redline-report.py linguist-vendored
+/scripts/agent-workflow-runtime.py linguist-vendored
+/scripts/agent-workflow-runtime.sh linguist-vendored
+/scripts/agent-workflow-runtime.ps1 linguist-vendored
