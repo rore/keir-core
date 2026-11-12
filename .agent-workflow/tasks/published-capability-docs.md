@@ -21,7 +21,7 @@ Task identity: `agent-workflow:published-capability-docs`. Shared documentation 
 **Plan review:** Agent technical review: published_docs_review; approved original b824111 plan and focused de72429 resumption/reconciliation plan before edits, including dropping superseded Daymark work and synchronizing current record fields.
 **Approvals:** The owner replied “i approve” to the explicit question authorizing the two public documentation PRs and merging after checks pass. The current instruction also permits updating or discarding the demo correction after its adoption merge. Honor every action-specific approval decision.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Discovery and delivery boundaries
@@ -69,3 +69,15 @@ Resolve the explicit public PR submission/review approval block before continuin
 The owner explicitly approved opening and merging the two documentation PRs after checks pass. The newly merged Daymark PR8 now supplies accurate0.4.0 provenance, archive/guide identities, original adoption history and rollout boundaries. Both earlier Daymark corrections are superseded by that rewrite; discard that redundant documentation delivery rather than open an empty or stale PR. Preserve its branch for traceability.
 
 Core main advanced to `0d174c3c1ca3e486ce0d6f46958086a2b22dfead` only by the separate Daymark adoption Work Record. Reconcile that main without altering its record. Remove the three current Core summary clauses saying Daymark adoption remains separate; the existing links to Daymark's own package record now describe actual adoption. All reviewed language/specification/index changes otherwise remain unchanged. Validate against the new Core and Daymark mains and obtain focused technical review before the single newly authorized PR-submission retry. Do not use the old0.3.1 snapshot as current evidence.
+
+## Reconciled result review
+
+Agent technical review: published_docs_review.
+
+Reviewed revision: `6a5cb5ff8967134fcac9459c92d6b90215f47a82`.
+
+Verification adequacy: approved without findings. The delta contains exactly the three approved summary-clause removals, the merged adoption record is byte-identical, all intended file/hash inventories match, and whitespace passes. Demo is unchanged at main `77feb10032d3b63475057564ca56099b1e498faa`; its0.4.0 package identities and archive/JAR hashes match current evidence. Prior technical reviews stand for unchanged documentation.
+
+The original clean first-reader independently checked refreshed snapshot `sha256:1cdf2201a445394df5e0f49a1748114a090d65b3007906880d4b67d4332d9f44`, with only the updated Daymark excerpt added to the previously approved reader path. Approved without blockers: actual adoption, retained approvals, historical metadata and rollout boundaries are clear and do not turn the illustrative expense host into an implemented integration. Optional wording nits in the already-merged Demo page do not justify a duplicate correction PR.
+
+All400 Core and4 read-only Demo provenance links/assets and old anchors pass against the current bases. Commands, language sketches, immutable guides, metadata, historical feature Notes, source, fixtures and adopted vendor bytes remain unchanged by this documentation contribution. Submit only the needed Core PR under the new explicit approval; the proposed Demo PR is superseded by merged PR8.
