@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
     paths:
+      - scripts/release-core.py
+      - scripts/test-release-core.py
       - scripts/authoring-companion.py
       - scripts/test-authoring-companion.py
       - scripts/release-source-revisions.json
@@ -14,6 +16,8 @@ on:
       - .github/workflows/release-packaging.yml
   pull_request:
     paths:
+      - scripts/release-core.py
+      - scripts/test-release-core.py
       - scripts/authoring-companion.py
       - scripts/test-authoring-companion.py
       - scripts/release-source-revisions.json
@@ -46,6 +50,8 @@ jobs:
         run: python -B scripts/test-authoring-companion.py
       - name: Check Core release asset verification
         run: python -B scripts/test-verify-core-release.py
+      - name: Check cold-cache Core build orchestration without external tools
+        run: python -B scripts/test-release-core.py
 
   qualify-candidate:
     if: ${{ github.event_name == 'workflow_dispatch' }}

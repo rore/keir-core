@@ -197,7 +197,8 @@ def build(args, scratch, output):
     maven_command_line, maven_env = maven_command(source, args.maven_repo, args.offline)
     tree = source / "compiler-java/dependency-tree.txt"
     tree.unlink(missing_ok=True)  # Always read the resolved tree, never the tracked reference.
-    run([*maven_command_line, "-pl", "compiler-java", "dependency:tree", "-DoutputFile=dependency-tree.txt"],
+    # A dependency tree can contain only metadata in a cold repository; resolve JARs before hashing.
+    run([*maven_command_line, "-pl", "compiler-java", "dependency:resolve", "dependency:tree", "-DoutputFile=dependency-tree.txt"],
         source, env=maven_env)
     dependencies = verified_dependencies(tree, args.maven_repo, lock["dependencies"])
     run([*maven_command_line, "-pl", "compiler-java,runtime-java", "-am", "-Dmaven.test.skip=true", "package"],
