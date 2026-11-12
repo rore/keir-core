@@ -55,7 +55,7 @@ After Daymark saves a task completion:
 
 ## 4. Use the result of a conditional lookup
 
-An expense app could supply a yes/no fact saying whether a claim needs an approval check, plus a lookup returning the employee's approval status.
+An expense app could supply a yes/no fact saying whether a claim needs an approval check, plus a lookup returning one of two approval statuses: "approved" or "not approved".
 
 ```text
 needsCheck ← claim needs an approval check
@@ -73,15 +73,15 @@ Decision:
     ALLOW continuation without reading approval
 ```
 
-**Shows:** use the actual returned status in a condition even though the lookup is conditional. The same saved condition, `needsCheck`, controls both the lookup and the outer decision branch. The status is read only inside that branch's true side; a different or combined test is not a replacement for that exact condition.
+**Shows:** use the actual returned status in a condition even though the lookup is conditional. The same saved condition, `needsCheck`, controls both the lookup and the outer decision branch. The status is read only inside that branch's true side; Keir uses that exact match to check that a result is available before it is read. A different or combined test is not a replacement.
 
 When `needsCheck` is false, no lookup happens and no result is read. If the lookup runs but fails, execution fails and the app blocks continuation; it does not take the skipped-lookup ALLOW path.
 
-**Candidate feature:** this guarded-result use is tested in Core 0.4.0, not supported by published 0.3.1 packages or Daymark's current integration. The expense integration is illustrative. See [version details and qualification evidence](agents/authoring-companion.md#development-edition-8).
+**Candidate feature:** this use of a conditional lookup result is tested in Core 0.4.0, not supported by published 0.3.1 packages or Daymark's current integration. The expense integration is illustrative. See [version details and qualification evidence](agents/authoring-companion.md#development-edition-8).
 
 ## From a sketch to a running extension
 
-The app's assistant can help draft the extension. Keir compiles it against the app's declared capabilities. The app supplies example inputs and simulated service responses for review, records approval and controls activation. Keir then runs the compiled version through the app's services without another AI request. Selected examples check those cases, not every possible situation.
+The app's assistant can help draft the extension. Keir compiles it against the app's declared capabilities. The app supplies example inputs and simulated service responses for review, records approval and controls activation. Keir then runs the compiled version through the app's services without another AI request. Those review cases check the selected situations, not every possible situation.
 
 Before-save decisions are read-only. An extension responding after an event may contain at most one call that can change data. The app still enforces permissions and current business facts when saving, and checks uncertain outcomes before retrying.
 
