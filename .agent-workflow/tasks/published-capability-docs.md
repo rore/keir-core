@@ -38,3 +38,9 @@ Corrected current release-status labels and reduced duplicated version reference
 The release is normal and published, with tag/source `fc0601ae410e06c0be76d6f3b769abbd049b5999`. All seven downloaded standard published assets match API digests; Core SHA256SUMS and the independent companion pin pass. Compiler/Node/Java package identities match0.4.0. No workflow-storage request, install or runtime execution was made. Independent plan review separately rehashed all seven downloads.
 
 Complete changed-page checks passed400 Core and4 Daymark links/assets with no missing paths or anchors. All prior anchors and fenced commands/logic sketches are preserved. Exact path inventory, unchanged immutable guides/metadata, historical feature Notes, fixtures, code, schemas, vendor files and actual Daymark0.3.1 archive/JAR digests pass. First-reader and technical result reviews remain pending.
+
+## First-reader review and technical findings
+
+The clean first-reader reviewer read only the exact proposed reader-path snapshot, without project history or source context, and approved with no blockers. The reader correctly separated released Keir capability, illustrative hosts, Daymark's pins and the immutable candidate-label history. Optional minimum-version repetition was not added to general guidance because the owner explicitly prefers durable canonical links; the technical catalog retains exact compatibility identities.
+
+Technical review approved Daymark f3facff and the overall prose/preservation approach, but found two remaining current-status labels in Core b13fa34. Corrected the examples heading's development-preview label, preserving its generated anchor, and changed the feature summary's released-contract exclusion to retained-producer contracts. No semantic rule or historical Notes changed. Final focused result review remains pending.

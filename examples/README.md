@@ -23,7 +23,8 @@ Each follow-up host prints three outcomes. A matching completion creates a follo
 Read the [model](node-host/follow-up/dcm.json) and [extension source](node-host/follow-up/source.yaml), then [change the follow-up title and compile](../docs/quickstart.md#change-the-extension-and-compile-it).
 
 <a id="guarded-result-scalar-dataflow"></a>
-## Guarded-result scalar dataflow (development preview)
+<a id="guarded-result-scalar-dataflow-development-preview"></a>
+## Guarded-result scalar dataflow
 
 The [source](../conformance/keir-3/source-guarded-result.json), [model](../conformance/keir-3/dcm-guarded-result.json) and [compiled artifact](../conformance/keir-3/artifact-guarded-result.json) show a conditional create returning the adapter's actual validated reference, or the input reference when skipped. The expression must prove the call's exact Boolean BIND guard; optional scalar fields need a separate presence proof. Failed or uncertain calls never select a successful fallback.
 
