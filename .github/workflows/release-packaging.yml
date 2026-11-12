@@ -23,13 +23,15 @@ on:
       - docs/agents/**
       - LICENSE
       - .github/workflows/release-packaging.yml
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: release-packaging-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-packaging-${{ github.ref }}${{ github.event_name == 'workflow_dispatch' && '-qualification' || '' }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 jobs:
   packaging:
+    if: ${{ github.event_name != 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -44,3 +46,255 @@ jobs:
         run: python -B scripts/test-authoring-companion.py
       - name: Check Core release asset verification
         run: python -B scripts/test-verify-core-release.py
+
+  qualify-candidate:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CORE_REVISION: 2e16100da417ec370e005827d12376e1c5e23f6b
+    steps:
+      - uses: actions/checkout@v7
+        timeout-minutes: 5
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        timeout-minutes: 5
+        with:
+          python-version: '3.12'
+      - name: Validate committed A/C inputs before dependency work
+        id: preflight
+        timeout-minutes: 5
+        shell: bash
+        env:
+          QUALIFICATION_ROOT: ${{ runner.temp }}/keir-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          mkdir "$QUALIFICATION_ROOT"
+          mkdir "$QUALIFICATION_ROOT"/{logs,tmp,maven,npm-cache}
+          python -B - <<'PY' 2>&1 | tee "$QUALIFICATION_ROOT/logs/preflight.log"
+          import json
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          def require(condition, message):
+              if not condition:
+                  raise ValueError(message)
+
+          def git(*args):
+              return subprocess.check_output(["git", "--no-replace-objects", *args])
+
+          def unique_object(pairs):
+              result = {}
+              for key, value in pairs:
+                  require(key not in result, "Duplicate candidate metadata key")
+                  result[key] = value
+              return result
+
+          a, c = os.environ["GITHUB_SHA"], os.environ["CORE_REVISION"]
+          require(re.fullmatch(r"[0-9a-f]{40}", a), "A must be a full commit")
+          require(c == "2e16100da417ec370e005827d12376e1c5e23f6b", "Unexpected Core input")
+          require(git("rev-parse", "HEAD").decode().strip() == a, "Checkout differs from A")
+          for revision in (a, c):
+              require(git("cat-file", "-t", revision).strip() == b"commit", "Input is not a commit")
+          subprocess.run(["git", "--no-replace-objects", "merge-base", "--is-ancestor", c, a], check=True)
+          subprocess.run(["git", "--no-replace-objects", "diff", "--quiet", "HEAD"], check=True)
+          metadata_path = "docs/agents/authoring-companion-v8-compatibility.json"
+          metadata = json.loads(git("show", f"{a}:{metadata_path}"), object_pairs_hook=unique_object)
+          require(metadata == {"status": "candidate", "coreRevision": c, "packages": {}},
+                  "Edition 8 must remain the exact candidate row with empty packages")
+          allowed = {".github/workflows/release-packaging.yml", metadata_path,
+                     ".agent-workflow/tasks/guarded-result-dataflow.md"}
+          changed = set(git("diff", "--name-only", "--no-renames", "-z", c, a).decode().split("\0")) - {""}
+          require(changed == allowed, "C-to-A delta differs from the three reviewed paths")
+          root = Path(os.environ["QUALIFICATION_ROOT"])
+          require(root.resolve().parent == Path(os.environ["RUNNER_TEMP"]).resolve(),
+                  "Qualification root must be a new runner-temporary child")
+          subprocess.run(["git", "--no-replace-objects", "worktree", "add", "--detach",
+                          str(root / "core-source"), c], check=True)
+          (root / "inputs.json").write_text(json.dumps({"A": a, "C": c, "candidate": metadata}), encoding="utf-8")
+          with Path(os.environ["GITHUB_ENV"]).open("a", encoding="utf-8") as stream:
+              for name, value in {"QUALIFICATION_ROOT": root, "TMPDIR": root / "tmp", "MAVEN_USER_HOME": root / "maven",
+                                  "NPM_CONFIG_CACHE": root / "npm-cache"}.items():
+                  stream.write(f"{name}={value}\n")
+          print(f"Validated committed A={a}, Core C={c}, exact candidate metadata and three-path delta.")
+          PY
+      - uses: actions/setup-java@v5
+        timeout-minutes: 5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v7
+        timeout-minutes: 5
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Build existing Core 0.4.0 packages from C
+        id: build
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$QUALIFICATION_ROOT/core-source"
+          python -B scripts/release-core.py --revision "$CORE_REVISION" --version 0.4.0 \
+            --output "$QUALIFICATION_ROOT/assets" --maven-repo "$QUALIFICATION_ROOT/maven/repository" \
+            --npm-cache "$QUALIFICATION_ROOT/npm-cache" 2>&1 | tee "$QUALIFICATION_ROOT/logs/build.log"
+          cp "$QUALIFICATION_ROOT/assets/SHA256SUMS" "$QUALIFICATION_ROOT/staged-SHA256SUMS"
+      - name: Verify installed packages and complete Java/Node outcomes from C
+        id: installed
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$QUALIFICATION_ROOT/core-source"
+          python -B scripts/verify-core-release.py --version 0.4.0 --assets "$QUALIFICATION_ROOT/assets" \
+            --checksums "$QUALIFICATION_ROOT/staged-SHA256SUMS" --smoke-revision "$CORE_REVISION" \
+            --maven-repo "$QUALIFICATION_ROOT/maven/repository" --npm-cache "$QUALIFICATION_ROOT/npm-cache" \
+            2>&1 | tee "$QUALIFICATION_ROOT/logs/installed.log"
+      - name: Build and verify the candidate edition-8 companion from A
+        id: companion
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$QUALIFICATION_ROOT/keir-authoring-v8-candidate.zip"
+          python -B scripts/authoring-companion.py build "$archive" --version 8 --revision "$GITHUB_SHA" \
+            2>&1 | tee "$QUALIFICATION_ROOT/logs/companion-build.log"
+          pin="$(cat "$QUALIFICATION_ROOT/logs/companion-build.log")"
+          [[ "$pin" =~ ^sha256:[0-9a-f]{64}$ ]]
+          printf '%s\n' "$pin" > "$QUALIFICATION_ROOT/keir-authoring-v8-candidate.sha256"
+          python -B scripts/authoring-companion.py verify "$archive" --version 8 --sha256 "$pin" \
+            2>&1 | tee "$QUALIFICATION_ROOT/logs/companion-verify.log"
+      - name: Prepare allowlisted evidence without truncation
+        id: evidence
+        if: ${{ always() }}
+        timeout-minutes: 2
+        shell: bash
+        env:
+          QUALIFICATION_ROOT: ${{ runner.temp }}/keir-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          PREFLIGHT_OUTCOME: ${{ steps.preflight.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          INSTALLED_OUTCOME: ${{ steps.installed.outcome }}
+          COMPANION_OUTCOME: ${{ steps.companion.outcome }}
+        run: |
+          set -euo pipefail
+          python -B - <<'PY'
+          import hashlib
+          import json
+          import os
+          import re
+          import stat
+          from pathlib import Path
+
+          root = Path(os.environ["QUALIFICATION_ROOT"])
+          evidence = root / "evidence"
+          evidence.mkdir(parents=True, exist_ok=False)
+          limit = 100 * 1024 * 1024
+          outcomes = {name: os.environ[f"{name.upper()}_OUTCOME"]
+                      for name in ("preflight", "build", "installed", "companion")}
+          passed = all(value == "success" for value in outcomes.values())
+          receipt = {"A": os.environ["GITHUB_SHA"], "C": os.environ["CORE_REVISION"],
+                     "stageOutcomes": outcomes, "aggregatePayloadLimitBytes": limit, "retentionDays": 7}
+          payload = []
+
+          def regular(path):
+              if path.is_symlink() or path.parent.is_symlink() or not stat.S_ISREG(path.stat().st_mode):
+                  raise ValueError("Evidence must contain regular allowlisted files only")
+              if path.stat().st_size > limit:
+                  raise ValueError("Evidence file exceeds 100 MiB; refusing upload without truncation")
+              return path
+
+          def sha256(path):
+              with regular(path).open("rb") as stream:
+                  return hashlib.file_digest(stream, "sha256").hexdigest()
+
+          if passed:
+              try:
+                  assets = root / "assets"
+                  names = {"LICENSE", "SHA256SUMS", "keir-compiler-cli-0.4.0.zip",
+                           "keir-java-runtime-maven-0.4.0.zip", "keir-runtime-node-0.4.0.tgz"}
+                  if {path.name for path in assets.iterdir()} != names:
+                      raise ValueError("Missing or unexpected Core asset")
+                  sums = regular(assets / "SHA256SUMS").read_bytes()
+                  if sums != regular(root / "staged-SHA256SUMS").read_bytes():
+                      raise ValueError("Core checksums changed after the build")
+                  checksums = {}
+                  for line in sums.decode("ascii").splitlines():
+                      match = re.fullmatch(r"([0-9a-f]{64})  ([A-Za-z0-9.-]+)", line)
+                      if not match or match[2] in checksums:
+                          raise ValueError("Invalid or duplicate Core checksum")
+                      checksums[match[2]] = match[1]
+                  if set(checksums) != names - {"SHA256SUMS"}:
+                      raise ValueError("Core checksum inventory differs")
+                  for name, expected in checksums.items():
+                      if sha256(assets / name) != expected:
+                          raise ValueError("Core asset digest differs")
+                  installed = regular(root / "logs/installed.log").read_text(encoding="utf-8")
+                  marker = "Packaged guarded-result and historical smoke matched 20 complete outcomes per runtime."
+                  if marker not in installed or "Packaged compiler, Java and Node passed the host example smoke tests." not in installed:
+                      raise ValueError("Missing actual installed-consumer success receipt")
+                  archive = regular(root / "keir-authoring-v8-candidate.zip")
+                  pin_path = regular(root / "keir-authoring-v8-candidate.sha256")
+                  pin = pin_path.read_text(encoding="ascii").strip()
+                  if pin != "sha256:" + sha256(archive):
+                      raise ValueError("Candidate archive differs from its emitted pin")
+                  if "Verified Keir authoring companion v8." not in regular(root / "logs/companion-verify.log").read_text(encoding="utf-8"):
+                      raise ValueError("Missing actual companion verification receipt")
+                  receipt.update({"coreChecksums": checksums, "candidatePin": pin,
+                                  "guardedHistoricalOutcomesPerRuntime": 20, "teachingSmoke": "passed"})
+                  payload = [(assets / name, name) for name in sorted(names)]
+                  payload += [(archive, archive.name), (pin_path, pin_path.name)]
+              except (OSError, ValueError) as error:
+                  passed = False
+                  receipt["error"] = str(error) if isinstance(error, ValueError) else "Required qualification payload could not be read"
+
+          # No source checkouts, caches, node_modules, credentials or partial packages.
+          if not passed:
+              payload = []
+          for name in ("preflight.log", "build.log", "installed.log", "companion-build.log", "companion-verify.log"):
+              path = root / "logs" / name
+              if path.exists():
+                  payload.append((regular(path), "logs/" + name))
+          if sum(regular(path).stat().st_size for path, _ in payload) > limit:
+              raise ValueError("Evidence exceeds 100 MiB; refusing upload without truncation")
+          replacements = sorted(((os.environ[key].encode(), replacement) for key, replacement in
+                                 (("QUALIFICATION_ROOT", b"<qualification-root>"),
+                                  ("GITHUB_WORKSPACE", b"<source-checkout>"),
+                                  ("RUNNER_TEMP", b"<runner-temp>"), ("HOME", b"<runner-home>"))),
+                                key=lambda pair: len(pair[0]), reverse=True)
+          for source, name in payload:
+              data = source.read_bytes()
+              if name.startswith("logs/"):
+                  for prefix, replacement in replacements:
+                      data = data.replace(prefix, replacement)
+              target = evidence / name
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_bytes(data)
+          receipt["status"] = "passed" if passed else "failed"
+          (evidence / "receipt.json").write_text(json.dumps(receipt, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+          total = sum(path.stat().st_size for path in evidence.rglob("*") if path.is_file())
+          if total > limit:
+              raise ValueError("Evidence plus receipt exceeds 100 MiB; refusing upload without truncation")
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as stream:
+              stream.write("ready=true\n")
+          print(f"Prepared {total} evidence bytes; qualification status: {receipt['status']}.")
+          if not passed:
+              raise SystemExit(1)
+          PY
+      - name: Upload only bounded qualification evidence
+        if: ${{ always() && steps.evidence.outputs.ready == 'true' }}
+        timeout-minutes: 2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: keir-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/keir-candidate-${{ github.run_id }}-${{ github.run_attempt }}/evidence
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+          overwrite: false
+          include-hidden-files: false
+          archive: true
