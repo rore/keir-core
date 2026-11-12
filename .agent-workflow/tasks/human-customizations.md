@@ -21,7 +21,7 @@ Task identity: `agent-workflow:human-customizations`. Documentation contribution
 **Plan review:** Agent technical review: human_docs_review; approved visual-language plan a587544 before edits. Prior direction reviews remain historical; exact revised text needs result and first-reader review.
 **Approvals:** Owner explicitly authorized opening the revised public PR and required clearer domain framing plus a clean first-reader review. Current delivery instruction is draft-only; no merge in this pass.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Blocked
 <!-- agent-workflow:end -->
 
 ## Discovery
@@ -90,4 +90,16 @@ Prepared a source-level plausibility map for all four sketches, including requir
 
 ## Result review
 
-Visual-language exact-text reviews are pending. The current delivery remains draft-only and subject to the existing publication rejection; never mark ready or merge.
+Agent technical review: human_docs_review.
+
+Reviewed revision: `07c340454248b4399c639782dbc7942e8733ff24`; integrated head: `ac88547e96be8669f85a03c4df825265090b2a68`.
+
+Verification adequacy: approved with no findings. Each sketch has a plausible translation using declared required scalar types, supported calls and limits. Examples1–3 use released0.3.1 capabilities; the conditional lookup's result is used only within the exact matching named condition's true branch and requires candidate0.4.0. The explicit two-status contract makes the expense decision exhaustive. This is source-level plausibility, not a claim that the illustrative integrations were compiled or tested.
+
+Clean first-reader review: logic_first_reader received only the exact README entry and guide, without project history or technical references. Snapshot `sha256:f9191ee55be11f3f2730890fab3a1f03bc0c99efdbc99361adfeff246a3df16b`; guide `sha256:9ccf4966aa0d707ac47aaef417f9339539eb717d332b256773f32db489afad1b`. The reader accurately traced all four capabilities, identified the app/Keir boundary, available versus candidate features, skip/failure distinction and next steps. Clarified the two possible approval statuses and review-case wording in response to the first pass; the final pass found no blockers.
+
+Reconciled main `42adff0079002778cfdf5e2cdbcc2ba5a90cf035` by an ordinary merge, preserving both runtimes' concurrency tests and their separate Work Record byte for byte. Against that main, only the seven authorized documentation/record paths differ. All105 links/assets and old anchors pass; immutable guides, metadata, specs, fixtures and code are unchanged. No local package, build, cache, fixture or qualification route was executed.
+
+## Delivery status
+
+The page is prepared for owner review on the existing branch. Public draft creation remains blocked by the existing automatic approval rejection: “Creating a public draft pull request is an external repository commitment; the transcript contains no trusted user-authored authorization for this specific action.” The latest owner message approves the revised example direction and adds no new publication authorization beyond the already-verified permission considered in that denial. No repeated creation attempt, alternate route or merge is used. Resolve the approval-review block before draft creation; leave any eventual PR draft and unmerged for owner review.
