@@ -49,7 +49,7 @@ Technical review approved Daymark f3facff and the overall prose/preservation app
 
 Agent technical review: published_docs_review.
 
-Reviewed revisions: Core `e075197798d239c5e9dc5309af90aeb22d25718c`; Daymark `f3facffa3daf1eb30c129412c935e1387bf144a9`.
+Reviewed revision: `e075197798d239c5e9dc5309af90aeb22d25718c` (Core); `f3facffa3daf1eb30c129412c935e1387bf144a9` (Daymark).
 
 Verification adequacy: approved with no remaining findings after the two focused label corrections. Complete inventory, exact semantic identities, unchanged commands, immutable guide/metadata/history and actual Daymark pins were inspected. Independent read-only rehashing confirmed all seven published assets. Source/doc validation is adequate for the prose-only scope; no package execution or new qualification is claimed.
 
