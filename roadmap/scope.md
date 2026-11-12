@@ -10,7 +10,7 @@ Core packages are distributed through [GitHub Releases](https://github.com/rore/
 
 ## Latest qualified Core increment
 
-[Guarded-result scalar dataflow](features/guarded-result-dataflow.md) is delivered in the [published Core packages](https://github.com/rore/keir-core/releases). Implementation, independent source reviews, shared compiler/Java/Node checks, actual installed-package execution and the matching companion all passed. The feature card records immutable inputs, measured outcomes and combined documentation acceptance. Daymark adoption remains separate. The slice improves composition of existing typed operations while retaining the single-write ceiling; numeric types, collection operations and multiple effects are not included.
+[Guarded-result scalar dataflow](features/guarded-result-dataflow.md) is delivered in the [published Core packages](https://github.com/rore/keir-core/releases). Implementation, independent source reviews, shared compiler/Java/Node checks, actual installed-package execution and the matching companion all passed. The feature card records immutable inputs, measured outcomes and combined documentation acceptance. The slice improves composition of existing typed operations while retaining the single-write ceiling; numeric types, collection operations and multiple effects are not included.
 
 ## Other remaining work, not current assignments
 
