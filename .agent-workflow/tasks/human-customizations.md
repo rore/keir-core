@@ -20,7 +20,7 @@ Task identity: `agent-workflow:human-customizations`. Documentation contribution
 **Plan review:** Agent technical review: human_docs_review; approved planning commit32b2978 with no blocking concerns. See Plan review below.
 **Approvals:** User explicitly requested this guide, verified status correction, draft PR and merge after checks pass. No additional behavior change is proposed.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Blocked
 <!-- agent-workflow:end -->
 
 ## Discovery
@@ -46,3 +46,7 @@ Reviewed revision: `a8912676336bd60ae1a9eb4e65049117bf9e1a3a`.
 Verification adequacy: approved with no blocking findings. The reviewer independently inspected the complete diff, source contracts/scenarios, Daymark contract, exact path scope, guide hash and whitespace; the107 link/asset and anchor checks are adequate for this documentation-only change. Business examples are relatable, illustrative/candidate labels are explicit, and host/AI/approval/effect semantics remain accurate. Corrected the stale planning-review note in this record; reviewed documentation bytes are unchanged.
 
 Final harness validation, main reconciliation and ordinary draft-PR checks remain; no package/build/fixture or manual qualification route is needed. Recover on docs/human-customizations, preserving concurrent source work.
+
+## Delivery blocker
+
+Automatic external-action review rejected creation of the requested public draft PR as an external repository commitment, stating that trusted user-authored PR authorization was missing. Owner history was checked after denial; the documentation request is confirmed, but no new publication instruction resolving the rejection was found. No retry, alternate publication route or merge was attempted. The reviewed branch is preserved; no task CI runs were queued. Resume after the publication blocker is resolved, recheck main for concurrent work, then use normal PR/native checks and guarded merge.
