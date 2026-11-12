@@ -24,7 +24,7 @@ Task identity: `agent-workflow:guarded-result-concurrency-tests`. Owning feature
 **Plan review:** Agent technical review: core_hardening_review approved the exact record plan at beb3ee4828b4113b18f534dd3235d52a4b533044. Existing shared fixtures suffice. Accepted refinements: protect entry waits with finally cleanup, bound waits and drain released invocations; prove exactly two dispatches and fast completion while slow is pending; assert all six scalar fields, receipts and captured contexts after settlement; compare opaque keys by identity and wrapped deadlines by documented behavior; assert captured adapter observations outside callbacks so runtime error conversion cannot obscure test assertions. Fresh planned-path Redline is GRAY without boundary, API, schema, security or configuration changes.
 **Approvals:** The user authorized the focused tests, draft PR and merge after validation. No behavior, release or environment changes are authorized.
 **Exceptions:** —
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Coordination
@@ -33,6 +33,14 @@ Independent plan review is approved; implementation may proceed. Only the two ru
 
 ## Verification so far
 
-The existing guarded-result suites passed seven tests each before the change and eight each afterward. Full Maven verification passed 200 Java tests; six teaching-host scenario tests were skipped because the explicit Python selector was unset and are being checked separately. The complete Node suite passed all 74 tests after the bounded-wait refinement. Static public contracts passed for the retained and current fixture generations. No production source, fixture, package or dependency changed.
+The existing guarded-result suites passed seven tests each before the change and eight each afterward. Full Maven verification passed 200 Java tests; the six teaching-host scenario tests initially skipped with the unset Python selector then all passed in an explicit ScenarioHostTest run. All 206 Java tests were exercised without failures. The complete Node suite passed all 74 tests after the bounded-wait refinement. Static public contracts passed for the retained and current fixture generations. No production source, fixture, package or dependency changed.
 
-Independent implementation review approved the concurrency coverage but found that the initial Node entry waits and drain relied on the outer test timeout to unwind. Those phases now have cleared test-owned liveness timers; they do not schedule response ordering or assert elapsed performance. An isolated negative probe deliberately withheld the first entry signal: it failed at the bounded phase wait, ran finally and drained the one started invocation, with zero test cancellations. The unchanged happy-path focused and full Node suites pass. Final independent review and exact-head CI remain required.
+Independent implementation review approved the concurrency coverage but found that the initial Node entry waits and drain relied on the outer test timeout to unwind. Those phases now have cleared test-owned liveness timers; they do not schedule response ordering or assert elapsed performance. An isolated negative probe deliberately withheld the first entry signal: it failed at the bounded phase wait, ran finally and drained the one started invocation, with zero test cancellations. The unchanged happy-path focused and full Node suites pass. Final independent review approved implementation d981cbd6460f1255cb4b2710292d795110a2a50a with the cleanup finding resolved. Exact-head CI remains a delivery gate.
+
+## Result review
+
+Agent technical review: core_hardening_review.
+
+Reviewed revision: d981cbd6460f1255cb4b2710292d795110a2a50a.
+
+Verification adequacy: Approved the existing-fixture approach and the explicit intersection of shared preparation, overlapping true/false calls and out-of-order completion. All six result fields, exact receipts and original host contexts are asserted, including after delayed settlement. The Node phase/drain finding was corrected and the negative probe verified cleanup rather than outer-timeout cancellation. Java cleanup was already bounded. Full default source checks and the separately selected host checks pass. No production defect was demonstrated and no runtime behavior was changed; these deterministic regressions do not qualify native persistence, authorization or load capacity. Later record updates contain verification/delivery metadata only.
