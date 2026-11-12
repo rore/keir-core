@@ -21,7 +21,7 @@ Task identity: `agent-workflow:human-customizations`. Documentation contribution
 **Plan review:** Agent technical review: human_docs_review; approved the focused delta at5cdc27f before edits. Prior plan/result reviews remain historical; the revised exact text requires fresh result review.
 **Approvals:** Owner explicitly authorized opening the revised public PR and required clearer domain framing plus a clean first-reader review. Current delivery instruction is draft-only; no merge in this pass.
 **Exceptions:** —
-**State:** Ready for review
+**State:** Blocked
 <!-- agent-workflow:end -->
 
 ## Discovery
@@ -71,3 +71,7 @@ Verification adequacy: approved with no blocking source findings. The reviewer i
 Clean first-reader review: guide_fresh_final saw only the exact README-entry/guide snapshot `sha256:b69cd722e63558ede89e009191a0c3b8b78476209f77089e9ceb372a7ea8eeff`, without project history, technical references or earlier reviews. The reader correctly explained domain-independent Keir, application-owned business features, optional AI, all example statuses and the next step; no misleading implication or missing concept prevented understanding. Optional source-representation detail was left to the linked quickstart to keep this introduction nontechnical. Guide bytes are `sha256:13be99468ffe183906ee06fcc3392e79fd09072f345a260c606ef9f253b6742a`; README-entry bytes are `sha256:83cfa48bb438f7d7b82cbba9c3aafe8d40f29f1eb0934e79797ccd50c8701928`.
 
 Regenerate final Redline/Workflow evidence and reconcile main before public draft creation. Leave the PR draft and unmerged for owner review, regardless of CI status.
+
+## Draft publication blocker
+
+The owner explicitly authorized opening the revised PR, and that instruction was verified before the attempted action. Automatic external-action review nevertheless rejected public draft creation, stating that specific trusted user-authored authorization was missing. The denied operation was checked and no PR was created. No retry or alternate route was used under the same evidence, and no merge was attempted. The exact revised text remains technically approved and clean-first-reader approved; resolve the publication blocker before another attempt, then leave the resulting PR draft and unmerged for owner review.
