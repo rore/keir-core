@@ -7,13 +7,13 @@
 
 The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-Compiler identity, document formats and runtime compatibility version independently. Published Core 0.4.0 and the development 0.5 profiles are distinct. The latter have [source, teaching and independently installed candidate-package evidence](README.md#numeric-qualification-status), not public release, matching companion or full-feature acceptance. Use the [installation guide](../installation.md) for released packages; a source profile or candidate is not permission to upgrade an installed host.
+Compiler identity, document formats and runtime compatibility version independently. Published Core 0.4.0 and the qualified unpublished 0.5 profiles are distinct. The latter have [accepted compiler/runtime, installed-package, corrected-companion and tested Daymark evidence](README.md#numeric-qualification-status). Acceptance is not public release or permission to upgrade an installed host. Use the [installation guide](../installation.md) for released packages and the [companion catalog](../agents/authoring-companion.md#qualified-candidate-edition-9) for exact candidate selection.
 
 | Compiler | Source | DCM | Artifact | Scenario | Descriptor recipe | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | `keir-compiler-java/0.4.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/3` | `keir-scenario/3` | `keir-record-descriptors/2` | Published; no numeric types or size |
-| `keir-compiler-java/0.5.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/2` | Development retained authoring; no numeric types or size |
-| `keir-compiler-java/0.5.0` | `keir/3` | `keir-dcm/4` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/3` | Development numeric authoring |
+| `keir-compiler-java/0.5.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/2` | Qualified unpublished candidate; retained authoring, no numeric types or size |
+| `keir-compiler-java/0.5.0` | `keir/3` | `keir-dcm/4` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/3` | Qualified unpublished candidate; numeric authoring |
 
 Structural schemas: retained [source `/2`](../../schemas/source-2/source.schema.json), [model `/3`](../../schemas/dcm-3/dcm.schema.json), [artifact `/3`](../../schemas/artifact-3/artifact.schema.json) and [scenario `/3`](../../schemas/scenario-3/scenario.schema.json); new [source `/3`](../../schemas/source-3/source.schema.json), [model `/4`](../../schemas/dcm-4/dcm.schema.json), [artifact `/4`](../../schemas/artifact-4/artifact.schema.json) and [scenario `/4`](../../schemas/scenario-4/scenario.schema.json). Semantic and cross-document checks remain required. Scenario `/4` covers both new artifact tuples without rewriting old scenarios or their identities. Its consumers require matching support; schemas alone do not qualify a runner.
 

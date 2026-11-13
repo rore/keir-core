@@ -7,6 +7,7 @@ The companion gives an authoring assistant a versioned guide, structural schemas
 
 | Host contract | Companion | Status |
 | --- | --- | --- |
+| Core 0.5.0; producer 0.5.0, numeric source `/3` + model `/4` or retained source `/2` + model `/3`, both artifact/scenario `/4` | [Edition 9 guide](customer-authoring-guide-v9.md) | [Qualified unpublished candidate](#qualified-candidate-edition-9); corrected archive and exact packages accepted and adopted by the tested Daymark candidate. Not a public release. |
 | Core 0.4.0; exact producer 0.4.0 and unchanged `/2` source, `/3` model/artifact/scenario | [Edition 8 guide](customer-authoring-guide-v8.md) | Archive published on [Core 0.4.0](https://github.com/rore/keir-core/releases/tag/v0.4.0); immutable [metadata](authoring-companion-v8-compatibility.json) remains `candidate` with an empty release-package map. |
 | Core 0.3.1; source `/2`, model/artifact/scenario `/3` | [Edition 7 guide](customer-authoring-guide-v7.md) | Candidate archive available on the [Core 0.3.1 release](https://github.com/rore/keir-core/releases/tag/v0.3.1); [compatibility metadata](authoring-companion-v7-compatibility.json) remains `candidate` with an empty package map. Includes the full Apache license and exact 0.3.1 examples. |
 | Core 0.3.0 contracts; licensed packaging | [Edition 6 guide](customer-authoring-guide-v6.md) | Unpublished [candidate](authoring-companion-v6-compatibility.json); includes the full Apache license. Not a replacement for published edition 5. |
@@ -17,6 +18,14 @@ The companion gives an authoring assistant a versioned guide, structural schemas
 Editions 1 and 2 use earlier preview contracts. Their original archives remain reproducible with the matching version and trusted pin. Do not use a historical guide for current authoring.
 
 Published editions 1–5 retain their original bytes and source IDs. Their ZIPs omit the root project license; include [LICENSE](../../LICENSE) alongside a legacy ZIP when redistributing it. The [source provenance note](../releases/source-provenance.md) explains reachable equivalent revisions after the history cleanup.
+
+## Qualified candidate edition 9
+
+Edition 9 adds Integer/Decimal authoring, supplied bounded-list size and retained nonnumeric authoring under producer `keir-compiler-java/0.5.0`. The [corrected companion qualification](https://github.com/rore/keir-core/actions/runs/43451868303) verified all 35 payloads, local guide links and exact package pins. The [accepted feature record](../../roadmap/features/numeric-values-and-rules.md#manager-accepted-core-contribution) records its archive, manifest, source revisions and separately completed runtime/package checks. [Daymark's tested candidate](https://github.com/rore/keir-demo-app/blob/9eaddae0ed262f06727f440651204e746974979e/docs/package-provenance.md) adopts these exact inputs.
+
+The accepted archive is `keir-authoring-companion-v9.zip`, 246443 bytes, SHA-256 `c1ca8b6f2f3c5089afca5e134d0b21ed2477a570141c36fcc1ea55a2f6c41867`. It remains an unpublished Actions candidate, not a Core 0.5 release asset. The immutable [compatibility record](authoring-companion-v9-compatibility.json) uses `status: release` to identify exact package compatibility at Core source `3a383c2d0c6227eedc9c03927c2dd1910360d5b9`; that field does not mean public publication. Use those exact package pins and a host that explicitly supports the selected tuple.
+
+The bundled guide and specifications retain their qualification-time wording and hashes. The corrected archive subsequently passed verification; their original pending-status prose is not the live catalog status. This page does not revise the frozen guide, archive, manifest or earlier editions. Reproducing the accepted archive requires its recorded companion input revision, not the latest documentation commit. No host upgrade, recompilation or approval transfer is automatic.
 
 <a id="development-edition-8"></a>
 <a id="qualified-candidate-edition-8"></a>

@@ -4,7 +4,7 @@ An extension is a custom rule in an application. Keir's language lets it combine
 
 These are **logic sketches, not Keir syntax**. Booking, support and expense apps below are illustrative hosts, not implemented integrations. Daymark is an implemented **task-management demo app**; its tasks belong to Daymark.
 
-These capabilities are available in [released Keir packages](installation.md). Choose compiler and runtime packages that support the capabilities your host exposes.
+Examples 1–4 are available in [released Keir packages](installation.md). The numeric example is a qualified unpublished Core 0.5 candidate capability. Choose compiler and runtime packages that support the capabilities your host exposes.
 
 ## 1. Choose an answer from input
 
@@ -78,6 +78,20 @@ Decision:
 When `needsCheck` is false, no lookup happens and no result is read. If the lookup runs but fails, execution fails and the app blocks continuation; it does not take the skipped-lookup ALLOW path.
 
 **Host support:** using a conditional lookup's result requires a compatible compiler and runtime; see the [compatibility matrix](specs/compiler-artifact.md#source-and-artifact-identity). The expense integration is illustrative. [Daymark's package record](https://github.com/rore/keir-demo-app/blob/main/docs/package-provenance.md) identifies its separately pinned integration.
+
+## 5. Apply a percentage with explicit rounding — candidate
+
+An illustrative quoting app supplies an amount and a discount rate. With the qualified Core 0.5 numeric profile:
+
+```text
+subtotal ← 199.95
+discountRate ← 0.075 (7.5%)
+amount ← subtotal × (1 − discountRate)
+amount ← round to two decimal places, ties to even
+Result: 184.95
+```
+
+**Shows:** exact Decimal arithmetic and a chosen rounding rule, not binary floating-point or silent rounding. Integer quantities can also drive thresholds, such as requesting 3 items when stock is 7 and the target is 10. The [runnable stock and quote examples](../examples/numeric/README.md) include complete models, source, scenarios and Java/Node commands. Core does not enforce currencies, units or accounting policy; those belong to the host. These numeric capabilities are [qualified but unpublished](specs/README.md#numeric-qualification-status), not available in released Core 0.4.0.
 
 ## From a sketch to a running extension
 

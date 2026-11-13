@@ -5,7 +5,7 @@
 
 Keir source defines how one host entrypoint combines typed data and approved operations. The compiler checks source structure, the trusted [domain capability model](domain-model.md), expression types, availability and call limits.
 
-Published Core 0.4.0 uses `keir/2` with DCM `/3`, including bounded lists, optional values, timestamps and exact-guard scalar results. Development Core 0.5 adds numeric `keir/3` with DCM `/4` and retains the old authoring pair. Numeric source, teaching commands and independently installed candidate packages have [passing evidence](README.md#numeric-qualification-status); public release, companion and full-feature acceptance remain separate. Use only a host-supported [exact tuple](compiler-artifact.md#source-and-artifact-identity). The [workflow reference](workflow-expressions.md) defines the operations below; old packages do not gain them by reading this page.
+Published Core 0.4.0 uses `keir/2` with DCM `/3`, including bounded lists, optional values, timestamps and exact-guard scalar results. The qualified unpublished Core 0.5 candidate adds numeric `keir/3` with DCM `/4` and retains the old authoring pair. [Compiler/runtime checks, installed packages, the corrected companion and tested Daymark adoption are accepted](README.md#numeric-qualification-status); public release and live upgrades remain separate. Use only a host-supported [exact tuple](compiler-artifact.md#source-and-artifact-identity). The [workflow reference](workflow-expressions.md) defines the operations below; old packages do not gain them by reading this page.
 
 ## Source document
 

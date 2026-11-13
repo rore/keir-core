@@ -3,7 +3,7 @@
 
 Select the [authoring companion](authoring-companion.md#choose-an-edition) matching the host's packages and model. Its compatibility record identifies the exact package and document combination.
 
-Development numeric authoring has [draft edition 9](customer-authoring-guide-v9.md). [Independently installed candidate packages have passed](../specs/README.md#numeric-qualification-status), but the matching companion and final source/asset freeze remain pending. Published Core 0.4.0 remains nonnumeric; do not teach an installed host a feature solely because development source or a candidate supports it.
+Qualified unpublished numeric authoring uses [companion edition 9](authoring-companion.md#qualified-candidate-edition-9). [Runtime/package checks, the corrected companion and tested Daymark adoption are accepted](../specs/README.md#numeric-qualification-status). Published Core 0.4.0 remains nonnumeric; candidate acceptance does not upgrade an installed host. The live catalog distinguishes current qualification from the frozen guide's preparation-time status.
 
 ## Task and inputs
 
