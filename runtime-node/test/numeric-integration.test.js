@@ -257,7 +257,7 @@ test('numeric protected/agent/guarded boundaries preserve complete independent o
   assert.equal(prepared.diagnostic, null);
   const handlerSuccess = { id: 'handler-success', args: { integer: '9007199254740993', decimal: '1.25' }, calls: 2,
     write: { kind: 'BUSINESS_REJECTION', code: 'DENIED', effect: 'NONE' }, trace: 'handler-failed',
-    expect: { classification: 'COMPLETED', result: { integer: '-7', decimal: '0.5' }, effects: [{ step: 'written', capability: 'numbers.write', state: 'NONE' }] } };
+    expect: { classification: 'BUSINESS_REJECTION', error: { code: 'DENIED', path: '/steps/4' }, result: { integer: '-7', decimal: '0.5' }, effects: [{ step: 'written', capability: 'numbers.write', state: 'NONE' }] } };
   for (const spec of [...fixture.cases, handlerSuccess]) {
     current = { spec, calls: 0, key: Object.freeze({}) };
     const selected = spec.id === 'handler-success' ? prepareProgram(canonicalBytes(acceptanceBatch.handlerArtifact), binding.boundModel) : prepared;
@@ -268,7 +268,7 @@ test('numeric protected/agent/guarded boundaries preserve complete independent o
     });
     const trace = fixture.traces[spec.trace].map((row, sequence) => ({ sequence, ...row }));
     if (spec.id === 'handler-success') {
-      trace.pop(); trace.push({ sequence: trace.length, event: 'RETURNED' }); trace.push({ sequence: trace.length, event: 'TERMINATED' });
+      trace.pop(); trace.push({ sequence: trace.length, event: 'RETURNED' }); trace.push({ sequence: trace.length, event: 'TERMINATED', code: 'DENIED' });
     }
     assert.deepEqual(outcome, { ...spec.expect, trace }, spec.id);
     assert.equal(current.calls, spec.calls, spec.id);

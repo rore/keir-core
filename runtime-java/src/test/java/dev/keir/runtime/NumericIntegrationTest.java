@@ -54,7 +54,7 @@ class NumericIntegrationTest {
         var scenarios=new ArrayList<>(list(fixture.get("cases"),""));
         scenarios.add(Map.of("id","handler-success","args",Map.of("integer","9007199254740993","decimal","1.25"),"calls",2L,
                 "write",Map.of("kind","BUSINESS_REJECTION","code","DENIED","effect","NONE"),"trace","handler-failed",
-                "expect",Map.of("classification","COMPLETED","result",Map.of("integer","-7","decimal","0.5"),"effects",
+                "expect",Map.of("classification","BUSINESS_REJECTION","error",Map.of("code","DENIED","path","/steps/4"),"result",Map.of("integer","-7","decimal","0.5"),"effects",
                         List.of(Map.of("step","written","capability","numbers.write","state","NONE")))));
         for (Object value:scenarios) {
             var spec=map(value,""); current[0]=new Request(spec,new Object(),new ArrayList<>());
@@ -73,7 +73,7 @@ class NumericIntegrationTest {
                 var row=new LinkedHashMap<>(map(event,"")); row.put("sequence",(long)trace.size()); trace.add(row);
             }
             if (spec.get("id").equals("handler-success")) {
-                trace.removeLast(); event(trace,"RETURNED",Map.of()); event(trace,"TERMINATED",Map.of());
+                trace.removeLast(); event(trace,"RETURNED",Map.of()); event(trace,"TERMINATED",Map.of("code","DENIED"));
             }
             expected.put("trace",trace);
             assertArrayEquals(canonical(expected),actual.toJson(),(String)spec.get("id"));
