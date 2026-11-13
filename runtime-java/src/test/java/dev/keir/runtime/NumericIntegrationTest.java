@@ -2,6 +2,10 @@ package dev.keir.runtime;
 
 import com.google.protobuf.Message;
 import dev.cel.expr.CheckedExpr;
+import dev.cel.expr.Constant;
+import dev.cel.expr.Expr;
+import dev.cel.expr.Reference;
+import dev.cel.expr.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -47,16 +51,29 @@ class NumericIntegrationTest {
         assertTrue(bound.succeeded(),String.valueOf(bound.diagnostic()));
         var prepared=KeirRuntime.prepareProgram(Files.readAllBytes(Path.of("..","conformance","keir-4","host-boundaries-artifact.json")),bound.boundModel());
         assertTrue(prepared.succeeded(),String.valueOf(prepared.diagnostic()));
-        for (Object value:list(fixture.get("cases"),"")) {
+        var scenarios=new ArrayList<>(list(fixture.get("cases"),""));
+        scenarios.add(Map.of("id","handler-success","args",Map.of("integer","9007199254740993","decimal","1.25"),"calls",2L,
+                "write",Map.of("kind","BUSINESS_REJECTION","code","DENIED","effect","NONE"),"trace","handler-failed",
+                "expect",Map.of("classification","COMPLETED","result",Map.of("integer","-7","decimal","0.5"),"effects",
+                        List.of(Map.of("step","written","capability","numbers.write","state","NONE")))));
+        for (Object value:scenarios) {
             var spec=map(value,""); current[0]=new Request(spec,new Object(),new ArrayList<>());
+            var selected=prepared;
+            if (spec.get("id").equals("handler-success")) {
+                var batch=map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-acceptance.json")),1_048_576),"");
+                selected=KeirRuntime.prepareProgram(canonical(batch.get("handlerArtifact")),bound.boundModel()); assertTrue(selected.succeeded());
+            }
             var context=new KeirRuntime.BoundEffectInvocation(map(spec.getOrDefault("bindings",fixture.get("bindings")),""),
                     new KeirRuntime.Deadline(() -> 0L,10_000L),current[0].key(),Map.of("id","event1","source","owner1"));
-            var actual=KeirRuntime.invokeBoundEffectProgram(prepared.prepared(),spec.getOrDefault("input",fixture.get("input")),context)
+            var actual=KeirRuntime.invokeBoundEffectProgram(selected.prepared(),spec.getOrDefault("input",fixture.get("input")),context)
                     .toCompletableFuture().get(3,TimeUnit.SECONDS);
             var expected=new LinkedHashMap<>(map(spec.get("expect"),""));
             var trace=new ArrayList<Object>();
             for (Object event:list(map(fixture.get("traces"),"").get(spec.get("trace")),"")) {
                 var row=new LinkedHashMap<>(map(event,"")); row.put("sequence",(long)trace.size()); trace.add(row);
+            }
+            if (spec.get("id").equals("handler-success")) {
+                trace.removeLast(); event(trace,"RETURNED",Map.of()); event(trace,"TERMINATED",Map.of());
             }
             expected.put("trace",trace);
             assertArrayEquals(canonical(expected),actual.toJson(),(String)spec.get("id"));
@@ -184,16 +201,18 @@ class NumericIntegrationTest {
         trace.add(Map.of("sequence",0L,"event","INVOCATION_START"));
         var ids=new ArrayList<>(List.of("a","b","i","j","flag","text"));
         if (Set.of("bind","expression-only-size").contains(row.get("id"))) ids.add("d");
+        if (row.containsKey("binds")) { ids.clear(); for (Object id:list(row.get("binds"),"")) ids.add((String)id); }
         for (String id:ids) {
             trace.add(Map.of("sequence",(long)trace.size(),"event","STEP_START","step",id));
             trace.add(Map.of("sequence",(long)trace.size(),"event","VALUE_BOUND","step",id));
         }
         Object value=row.get("expected");
         if (Set.of("ERROR","TIME_ERROR").contains(value)) {
-            String code=value.equals("TIME_ERROR") ? "BUDGET_EXCEEDED" : "EXPRESSION_FAILED";
+            var error=row.containsKey("error") ? map(row.get("error"),"") : Map.of("code",value.equals("TIME_ERROR") ? "BUDGET_EXCEEDED" : "EXPRESSION_FAILED","path","/return");
+            String code=(String)error.get("code");
             trace.add(Map.of("sequence",(long)trace.size(),"event","TERMINATED","code",code));
-            return Map.of("classification",value.equals("TIME_ERROR") ? "LIMIT_EXCEEDED" : "FAILED",
-                    "error",Map.of("code",code,"path","/return"),"effects",List.of(),"trace",trace);
+            return Map.of("classification",code.equals("BUDGET_EXCEEDED") ? "LIMIT_EXCEEDED" : "FAILED",
+                    "error",error,"effects",List.of(),"trace",trace);
         }
         trace.add(Map.of("sequence",(long)trace.size(),"event","RETURNED"));
         trace.add(Map.of("sequence",(long)trace.size(),"event","TERMINATED"));
@@ -201,13 +220,28 @@ class NumericIntegrationTest {
     }
     @Test void sameCompilerArtifactsMatchCompleteIndependentOutcomes() throws Exception {
         var cases=cases(); assertEquals(97,cases.size());
-        for (Object raw:cases) {
+        var all=new ArrayList<>(cases);
+        all.addAll(list(map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-acceptance.json")),1_048_576),"").get("cases"),""));
+        for (Object raw:all) {
             var row=map(raw,""); var prepared=prepare(row);
             assertTrue(prepared.succeeded(),row.get("id")+": "+prepared.diagnostic());
             var invocation=new KeirRuntime.BoundEffectInvocation(Map.of(),new KeirRuntime.Deadline(() -> 0L,10_000L),
                     "original-key",Map.of("id","event1","source","owner1"));
-            var outcome=KeirRuntime.invokeBoundEffectProgram(prepared.prepared(),row.get("input"),invocation).toCompletableFuture().get();
+            var input=new LinkedHashMap<>(map(row.get("input"),""));
+            if (row.containsKey("nullField")) input.put((String)row.get("nullField"),null);
+            var outcome=KeirRuntime.invokeBoundEffectProgram(prepared.prepared(),input,invocation).toCompletableFuture().get();
             assertArrayEquals(canonical(expected(row)),outcome.toJson(),(String)row.get("id"));
+        }
+        for (String id:List.of("integer-negative-multiply","decimal-negative-product")) {
+            var row=all.stream().map(value -> map(value,"")).filter(value -> value.get("id").equals(id)).findFirst().orElseThrow();
+            var prepared=prepare(row); assertTrue(prepared.succeeded());
+            var rejected=new HashMap<>(row); rejected.putAll(Map.of("expected","ERROR","binds",List.of(),"error",Map.of("code","INPUT_INVALID","path","/input")));
+            for (Object nativeNumber:List.of(1L,1.0,new java.math.BigDecimal("1"),java.math.BigInteger.ONE)) {
+                var outcome=KeirRuntime.invokeBoundEffectProgram(prepared.prepared(),Map.of("value",nativeNumber),new KeirRuntime.BoundEffectInvocation(
+                        Map.of(),new KeirRuntime.Deadline(() -> 0L,10_000L),new Object(),Map.of("id","event1","source","owner1")))
+                        .toCompletableFuture().get();
+                assertArrayEquals(canonical(expected(rejected)),outcome.toJson(),id+"/"+nativeNumber.getClass().getSimpleName());
+            }
         }
     }
     @Test void forgedNumericOverloadAndRelabeledOldProducerFailBeforeInvocation() throws Exception {
@@ -224,6 +258,52 @@ class NumericIntegrationTest {
         expression.put("checked",Base64.getEncoder().encodeToString(checked.toBuilder().putReferenceMap(id,reference.build()).build().toByteArray()));
         expressions.put("e0",expression); changed=new LinkedHashMap<>(artifact); changed.put("expressions",expressions); candidate.put("artifact",changed);
         assertEquals("ARTIFACT_INVALID",prepare(candidate).diagnostic().code());
+    }
+    @Test void selectedNumericHostRejectsForgedMapsConstantsAndMetadataBeforeCallbacks() throws Exception {
+        var fixture=map(parseJson(Files.readAllBytes(Path.of("..","conformance","keir-4","host-boundaries.json")),65_536),"");
+        var original=map(parseJson(Files.readAllBytes(Path.of("..","conformance","keir-4","host-boundaries-artifact.json")),65_536),"");
+        var adapters=new HashMap<String,KeirRuntime.BoundEffectAdapter>(); int[] calls={0};
+        for (String name:map(map(fixture.get("dcm"),"").get("capabilities"),"").keySet())
+            adapters.put(name,new KeirRuntime.BoundEffectAdapter("1","simulation","numeric.Key",(a,p,r,c) -> {
+                calls[0]++; throw new AssertionError("Forged admission dispatched a callback"); }));
+        var bound=KeirRuntime.bindModel(canonical(fixture.get("dcm")),adapters); assertTrue(bound.succeeded());
+        for (String mutation:List.of("type-missing","type-extra","ref-missing","ref-extra","overload","uint","double","internal-select",
+                "internal-construct","descriptor-extra","environment","model-format","recipe","producer")) {
+            var artifact=map(parseJson(canonical(original),65_536),"");
+            if (mutation.equals("descriptor-extra")) artifact.put("descriptors",List.of("untrusted.proto"));
+            else if (mutation.equals("environment")) map(artifact.get("environment"),"").put("celJava","0.15.0");
+            else if (mutation.equals("model-format")) map(artifact.get("modelRef"),"").put("format","keir-dcm/3");
+            else if (mutation.equals("recipe")) map(artifact.get("modelRef"),"").put("descriptorRecipe","keir-record-descriptors/2");
+            else if (mutation.equals("producer")) artifact.put("compiler","keir-compiler-java/0.4.0");
+            else {
+                var expression=map(map(artifact.get("expressions"),"").get("e1"),"");
+                var checked=CheckedExpr.parseFrom(Base64.getDecoder().decode((String)expression.get("checked"))).toBuilder();
+                long id=checked.getExpr().getId();
+                switch (mutation) {
+                    case "type-missing" -> checked.removeTypeMap(id);
+                    case "type-extra" -> checked.putTypeMap(999,Type.newBuilder().setPrimitive(Type.PrimitiveType.INT64).build());
+                    case "ref-missing" -> checked.removeReferenceMap(checked.getReferenceMapMap().keySet().iterator().next());
+                    case "ref-extra" -> checked.putReferenceMap(999,Reference.newBuilder().setName("input").build());
+                    case "overload" -> checked.putReferenceMap(id,Reference.newBuilder().addOverloadId("add_string").build());
+                    case "uint", "double" -> checked.setExpr(Expr.newBuilder().setId(id).setConstExpr(mutation.equals("uint")
+                            ? Constant.newBuilder().setUint64Value(1).build() : Constant.newBuilder().setDoubleValue(1.0).build()));
+                    case "internal-select" -> {
+                        checked.putTypeMap(999,checked.getTypeMapOrThrow(id));
+                        checked.setExpr(Expr.newBuilder().setId(999).setSelectExpr(Expr.Select.newBuilder().setOperand(checked.getExpr()).setField("value")));
+                    }
+                    case "internal-construct" -> {
+                        Type type=checked.getTypeMapOrThrow(id); checked.clearTypeMap().clearReferenceMap().putTypeMap(id,type);
+                        checked.setExpr(Expr.newBuilder().setId(id).setStructExpr(Expr.CreateStruct.newBuilder().setMessageName("keir.numeric.Decimal")));
+                    }
+                    default -> throw new AssertionError(mutation);
+                }
+                expression.put("checked",Base64.getEncoder().encodeToString(checked.build().toByteArray()));
+            }
+            var denied=KeirRuntime.prepareProgram(canonical(artifact),bound.boundModel());
+            assertFalse(denied.succeeded(),mutation); assertNull(denied.prepared(),mutation);
+            assertTrue(Set.of("ARTIFACT_INVALID","PIN_MISMATCH").contains(denied.diagnostic().code()),mutation+": "+denied.diagnostic());
+        }
+        assertEquals(0,calls[0]);
     }
     @Test void projectionSlotsAreInvocationOwnedAndNumericBindRetainsActualMessage() throws Exception {
         var row=row("decimal-add"); var dcm=map(row.get("dcm"),""); var artifact=map(row.get("artifact"),"");

@@ -1,0 +1,40 @@
+{
+  "description": "Independent supplemental design-section-11 expectations. Tables are literal oracles, not runtime-generated answers. ERROR means escaping expression failure.",
+  "rounding": [
+    {"mode":"HALF_EVEN","positive":["2.34","2.34","2.35"],"negative":["-2.34","-2.34","-2.35"],"wholePositive":["2","2","3"],"wholeNegative":["-2","-2","-3"],"tinyPositive":"0","tinyNegative":"0"},
+    {"mode":"HALF_UP","positive":["2.34","2.35","2.35"],"negative":["-2.34","-2.35","-2.35"],"wholePositive":["2","3","3"],"wholeNegative":["-2","-3","-3"],"tinyPositive":"0","tinyNegative":"0"},
+    {"mode":"DOWN","positive":["2.34","2.34","2.34"],"negative":["-2.34","-2.34","-2.34"],"wholePositive":["2","2","2"],"wholeNegative":["-2","-2","-2"],"tinyPositive":"0","tinyNegative":"0"},
+    {"mode":"FLOOR","positive":["2.34","2.34","2.34"],"negative":["-2.35","-2.35","-2.35"],"wholePositive":["2","2","2"],"wholeNegative":["-3","-3","-3"],"tinyPositive":"0","tinyNegative":"-0.000000000000000001"},
+    {"mode":"CEILING","positive":["2.35","2.35","2.35"],"negative":["-2.34","-2.34","-2.34"],"wholePositive":["3","3","3"],"wholeNegative":["-2","-2","-2"],"tinyPositive":"0.000000000000000001","tinyNegative":"0"},
+    {"mode":"UNNECESSARY","positive":["ERROR","ERROR","ERROR"],"negative":["ERROR","ERROR","ERROR"],"wholePositive":["ERROR","ERROR","ERROR"],"wholeNegative":["ERROR","ERROR","ERROR"],"tinyPositive":"ERROR","tinyNegative":"ERROR"}
+  ],
+  "expressions": [
+    {"id":"multiply-rounded-output-overflow","type":"Decimal","source":"multiplyRounded(decimal(\"99999999999999999999999999999999999999\"),decimal(\"2\"),0,\"DOWN\")","expected":"ERROR"},
+    {"id":"divide-rounded-output-overflow","type":"Decimal","source":"divideRounded(decimal(\"99999999999999999999999999999999999999\"),decimal(\"0.1\"),18,\"DOWN\")","expected":"ERROR"},
+    {"id":"intermediate-overflow-not-cancelled","type":"Integer","source":"(input.value + 1) - 1","fieldType":"Integer","input":{"value":"9223372036854775807"},"expected":"ERROR"},
+    {"id":"decimal-intermediate-not-cancelled","type":"Decimal","source":"(input.value * decimal(\"10\")) / decimal(\"10\")","fieldType":"Decimal","input":{"value":"10000000000000000000000000000000000000"},"expected":"ERROR"},
+    {"id":"integer-negative-multiply","type":"Integer","source":"input.value * -2","fieldType":"Integer","input":{"value":"-6"},"expected":"12"},
+    {"id":"integer-zero-multiply","type":"Integer","source":"input.value * 0","fieldType":"Integer","input":{"value":"-9223372036854775808"},"expected":"0"},
+    {"id":"integer-zero-dividend","type":"Integer","source":"input.value / -2","fieldType":"Integer","input":{"value":"0"},"expected":"0"},
+    {"id":"integer-negative-subtraction","type":"Integer","source":"input.value - -2","fieldType":"Integer","input":{"value":"-6"},"expected":"-4"},
+    {"id":"integer-negative-addition","type":"Integer","source":"input.value + -2","fieldType":"Integer","input":{"value":"-6"},"expected":"-8"},
+    {"id":"decimal-zero-dividend","type":"Decimal","source":"input.value / decimal(\"-2\")","fieldType":"Decimal","input":{"value":"0"},"expected":"0"},
+    {"id":"decimal-negative-product","type":"Decimal","source":"input.value * decimal(\"-2\")","fieldType":"Decimal","input":{"value":"-1.25"},"expected":"2.5"},
+    {"id":"decimal-boundary-addition","type":"Decimal","source":"input.value + decimal(\"1\")","fieldType":"Decimal","input":{"value":"99999999999999999999999999999999999999"},"expected":"ERROR"},
+    {"id":"decimal-negative-quantum","type":"Decimal","source":"input.value","fieldType":"Decimal","input":{"value":"-0.000000000000000001"},"expected":"-0.000000000000000001"},
+    {"id":"decimal-thirty-digit-input","type":"Decimal","source":"input.value","fieldType":"Decimal","input":{"value":"123456789012345678901234567890"},"expected":"123456789012345678901234567890"},
+    {"id":"decimal-fractional-precision-overflow","type":"Decimal","source":"input.value","fieldType":"Decimal","input":{"value":"12345678901234567890123456789012345678.1"},"expected":"ERROR","error":{"code":"INPUT_INVALID","path":"/input"}},
+    {"id":"integer-roundtrip-min","type":"Boolean","source":"toInteger(toDecimal(input.value)) == input.value","fieldType":"Integer","input":{"value":"-9223372036854775808"},"expected":true},
+    {"id":"decimal-roundtrip-max","type":"Boolean","source":"toDecimal(toInteger(input.value)) == input.value","fieldType":"Decimal","input":{"value":"9223372036854775807"},"expected":true},
+    {"id":"optional-integer-null","type":"Integer","optional":true,"source":"has(input.zero) ? input.zero : 0","input":{},"nullField":"zero","expected":"ERROR","error":{"code":"INPUT_INVALID","path":"/input"}},
+    {"id":"optional-decimal-null","type":"Decimal","optional":true,"source":"has(input.maybe) ? input.maybe : decimal(\"0\")","input":{},"nullField":"maybe","expected":"ERROR","error":{"code":"INPUT_INVALID","path":"/input"}},
+    {"id":"required-numeric-omitted","type":"Integer","fieldType":"Integer","source":"false ? input.value : 0","input":{},"expected":"ERROR","error":{"code":"INPUT_INVALID","path":"/input"}},
+    {"id":"numeric-validation-not-masked","type":"Integer","fieldType":"Integer","source":"false ? input.value : 0","input":{"value":1},"expected":"ERROR","error":{"code":"INPUT_INVALID","path":"/input"}},
+    {"id":"size-empty","type":"Integer","source":"size(input.tags)","tags":[],"expected":"0"},
+    {"id":"size-duplicates","type":"Integer","source":"size(input.tags)","tags":["x","x"],"expected":"2"},
+    {"id":"size-cap-sixteen","type":"Integer","source":"size(input.tags)","tagCount":16,"expected":"16"},
+    {"id":"size-cap-plus-one","type":"Integer","source":"size(input.tags)","tagCount":17,"expected":"ERROR","error":{"code":"BUDGET_EXCEEDED","path":"/input/tags"}},
+    {"id":"size-zero-cap","type":"Integer","source":"size(input.tags)","maxItems":0,"tags":[],"expected":"0"},
+    {"id":"size-zero-cap-plus-one","type":"Integer","source":"size(input.tags)","maxItems":0,"tags":["x"],"expected":"ERROR","error":{"code":"BUDGET_EXCEEDED","path":"/input/tags"}}
+  ]
+}

@@ -267,6 +267,7 @@ jobs:
           paths.append(Path('compiler-java/target/numeric-stock.json'))
           paths.append(Path('compiler-java/target/numeric-quote.json'))
           paths.append(Path('compiler-java/target/numeric-descriptors.json'))
+          paths.append(Path('compiler-java/target/numeric-acceptance.json'))
           paths.append(Path('compiler-java/target/numeric-runtime-rules.json'))
           paths.append(root / 'logs/node-host.log')
           paths.extend(root / 'logs' / name for name in ('packages.log', 'packages.json'))

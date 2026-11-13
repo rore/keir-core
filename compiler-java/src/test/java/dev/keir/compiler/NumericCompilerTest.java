@@ -146,7 +146,11 @@ class NumericCompilerTest {
                 "round(decimal(\"1\"),19,\"DOWN\") == decimal(\"1\")",
                 "round(decimal(\"1\"),1,\"UP\") == decimal(\"1\")",
                 "round(decimal(\"1\"),size(input.tags),\"DOWN\") == decimal(\"1\")",
-                "decimal(\"1\").value == \"1\"")) {
+                "decimal(\"1\").value == \"1\"", "round(decimal(\"1\"),-1,\"DOWN\") == decimal(\"1\")",
+                "round(decimal(\"1\"),2,input.text) == decimal(\"1\")", "size(input) == 0",
+                "decimal(\"1\") + 1 == decimal(\"2\")", "decimal(\"1\") == input.text",
+                "toDecimal(input.text) == decimal(\"1\")", "OwnerId(1) == OwnerId(1)",
+                "keir.numeric.Decimal{value: \"1\"} == decimal(\"1\")")) {
             var source=source(model,List.of(Map.of("id","marker","let",Map.of("literal",true))),Map.of("cel",expression));
             var result=compile(source,model);
             assertFalse(result.succeeded(),expression);
@@ -156,6 +160,70 @@ class NumericCompilerTest {
                 "\"0x10 1u 1e2\" == \"0x10 1u 1e2\"","\"😀\" == \"😀\" && 16 == 16")) {
             assertTrue(compile(source(model,List.of(Map.of("id","marker","let",Map.of("literal",true))),Map.of("cel",expression)),model).succeeded(),expression);
         }
+    }
+
+    private void acceptanceRow(List<Object> rows,String id,String expression,String type,Object wanted,Map<String,Object> spec) {
+        var model=model(type,Boolean.TRUE.equals(spec.get("optional"))); var types=map(model.get("types"));
+        if (spec.containsKey("fieldType")) types.put("Input",Map.of("kind","record","fields",Map.of("value",spec.get("fieldType"))));
+        if (spec.containsKey("maxItems")) types.put("Tags",Map.of("kind","list","element","String","maxItems",spec.get("maxItems")));
+        Object input=spec.getOrDefault("input",Map.of("flag",false,"text","","tags",spec.getOrDefault("tags",
+                Collections.nCopies(((Number)spec.getOrDefault("tagCount",0)).intValue(),"x"))));
+        var source=source(model,List.of(Map.of("id","marker","let",Map.of("literal",true))),Map.of("cel",expression));
+        var compiled=compile(source,model); assertTrue(compiled.succeeded(),id+": "+compiled.diagnostics());
+        // Numeric source values and literal expression text must survive JSON/YAML identically.
+        var yaml=new org.yaml.snakeyaml.Yaml();
+        assertArrayEquals(compiled.artifact(),compiler.compile(yaml.dump(source).getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                yaml.dump(model).getBytes(java.nio.charset.StandardCharsets.UTF_8),KeirCompiler.Environment.supported()).artifact(),id);
+        var row=new TreeMap<String,Object>(Map.of("id",id,"dcm",model,"artifact",parse(compiled.artifact()),"input",input,
+                "expected",wanted,"binds",spec.containsKey("error") ? List.of() : List.of("marker")));
+        if (spec.containsKey("error")) row.put("error",spec.get("error"));
+        if (spec.containsKey("nullField")) row.put("nullField",spec.get("nullField"));
+        rows.add(row);
+    }
+
+    @Test void compileMissingSectionElevenCasesWithIndependentLiteralOracles() throws Exception {
+        var fixture=parse(Files.readAllBytes(Path.of("..","conformance","keir-4","acceptance.json")));
+        var rows=new ArrayList<Object>();
+        for (Object raw:(List<?>)fixture.get("rounding")) {
+            var table=map(raw); String mode=(String)table.get("mode");
+            for (String sign:List.of("positive","negative")) for (int i=0;i<3;i++) {
+                String value=(sign.equals("negative") ? "-" : "")+List.of("2.344","2.345","2.346").get(i);
+                Object wanted=((List<?>)table.get(sign)).get(i);
+                for (String operation:List.of("round","multiplyRounded","divideRounded")) {
+                    String args="decimal(\""+value+"\")"+(operation.equals("round") ? "" : ",decimal(\"1\")");
+                    acceptanceRow(rows,mode+"-"+sign+"-"+i+"-"+operation,operation+"("+args+",2,\""+mode+"\")","Decimal",wanted,Map.of());
+                }
+                String whole=(sign.equals("negative") ? "-" : "")+List.of("2.4","2.5","2.6").get(i);
+                acceptanceRow(rows,mode+"-"+sign+"-"+i+"-whole","round(decimal(\""+whole+"\"),0,\""+mode+"\")","Decimal",
+                        ((List<?>)table.get(sign.equals("positive") ? "wholePositive" : "wholeNegative")).get(i),Map.of());
+            }
+            for (int scale:List.of(0,18)) for (String value:List.of("0","2"))
+                acceptanceRow(rows,mode+"-exact-"+scale+"-"+value,"round(decimal(\""+value+"\"),"+scale+",\""+mode+"\")","Decimal",value,Map.of());
+            for (String sign:List.of("tinyPositive","tinyNegative")) for (String operation:List.of("multiplyRounded","divideRounded")) {
+                String value=sign.equals("tinyNegative") ? "-0.000000000000000001" : "0.000000000000000001";
+                acceptanceRow(rows,mode+"-"+sign+"-"+operation,operation+"(decimal(\""+value+"\"),decimal(\""+
+                        (operation.equals("multiplyRounded") ? "0.1" : "10")+"\"),18,\""+mode+"\")","Decimal",table.get(sign),Map.of());
+            }
+        }
+        for (Object raw:(List<?>)fixture.get("expressions")) {
+            var spec=map(raw); acceptanceRow(rows,(String)spec.get("id"),(String)spec.get("source"),(String)spec.get("type"),spec.get("expected"),spec);
+        }
+        String time="timestamp(\"9999-12-31T23:59:59.999Z\") + duration(\"1s\") == timestamp(\"9999-12-31T23:59:59.999Z\")";
+        String number="decimal(\"1\") / decimal(\"0\") == decimal(\"0\")";
+        for (String op:List.of("&&","||")) for (boolean timeFirst:List.of(true,false)) {
+            String joined="("+(timeFirst ? time : number)+") "+op+" ("+(timeFirst ? number : time)+")";
+            acceptanceRow(rows,"mixed-"+op+"-"+timeFirst,joined,"Boolean",timeFirst ? "TIME_ERROR" : "ERROR",Map.of());
+            String mask=op.equals("&&") ? "false" : "true";
+            for (boolean maskFirst:List.of(true,false)) acceptanceRow(rows,"masked-"+op+"-"+timeFirst+"-"+maskFirst,
+                    maskFirst ? mask+" "+op+" ("+joined+")" : "("+joined+") "+op+" "+mask,"Boolean",op.equals("||"),Map.of());
+        }
+        var boundaries=parse(Files.readAllBytes(Path.of("..","conformance","keir-4","host-boundaries.json")));
+        var handlerSource=map(boundaries.get("source"));
+        map(map(map(((List<?>)handlerSource.get("steps")).get(4)).get("onError")).get("DENIED")).put("record",Map.of(
+                "integer",Map.of("literal","-7","type","Integer"),"decimal",Map.of("literal","0.5","type","Decimal")));
+        var handler=compile(handlerSource,boundaries.get("dcm")); assertTrue(handler.succeeded(),handler.diagnostics().toString());
+        byte[] batch=bytes(Map.of("cases",rows,"handlerArtifact",parse(handler.artifact()))); assertTrue(batch.length<1_048_576);
+        Files.write(Path.of("target","numeric-acceptance.json"),batch);
     }
 
     @Test void compileCompleteStockAndQuoteProgramsOnceForBothRuntimes() throws Exception {
@@ -183,10 +251,20 @@ class NumericCompilerTest {
         Files.write(Path.of("target","numeric-host-boundaries.json"),compiled.artifact());
         // Unguarded access, mixed numeric branches and unguarded presence tests fail closed.
         for (String forbidden:List.of("read.integer","g ? read.integer : decimal(\"0\")",
-                "has(read.optionalInteger) ? read.optionalInteger : 0")) {
+                "has(read.optionalInteger) ? read.optionalInteger : 0", "!g ? read.integer : 0")) {
             var changed=parse(bytes(source));
             map(((List<?>)changed.get("steps")).get(2)).put("let",Map.of("cel",forbidden));
             assertFalse(compile(changed,model).succeeded(),forbidden);
+        }
+        var listModel=parse(bytes(model));
+        map(listModel.get("types")).put("Tags",Map.of("kind","list","element","String","maxItems",16L));
+        map(map(map(listModel.get("types")).get("Data")).get("fields")).put("tags","Tags");
+        var changed=parse(bytes(source)); map(changed.get("domain")).put("fingerprint",StrictData.digest(listModel));
+        map(((List<?>)changed.get("steps")).get(2)).put("let",Map.of("cel","g ? size(read.tags) : 0"));
+        assertFalse(compile(changed,listModel).succeeded());
+        for (String element:List.of("Integer","Decimal")) {
+            var invalid=parse(bytes(listModel)); map(map(invalid.get("types")).get("Tags")).put("element",element);
+            assertThrows(RuntimeException.class,() -> Dcm.parse(invalid));
         }
     }
 
