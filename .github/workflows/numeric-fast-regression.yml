@@ -8,20 +8,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      QUALIFICATION_ROOT: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}
-      MAVEN_USER_HOME: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/maven
-      NPM_CONFIG_CACHE: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/npm-cache
-      TMPDIR: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/tmp
       MAVEN_OPTS: -Xmx256m
       NODE_OPTIONS: --max-old-space-size=256
       KEIR_SCENARIO_PYTHON: python
     steps:
       - name: Create isolated temporary roots
         shell: bash
+        timeout-minutes: 1
+        env:
+          QUALIFICATION_ROOT: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}
+          MAVEN_USER_HOME: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/maven
+          NPM_CONFIG_CACHE: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/npm-cache
+          TMPDIR: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/tmp
         run: |
           set -euo pipefail
           test ! -e "$QUALIFICATION_ROOT"
           mkdir -p "$QUALIFICATION_ROOT"/{maven,npm-cache,tmp,logs,evidence}
+          printf '%s\n' "QUALIFICATION_ROOT=$QUALIFICATION_ROOT" "MAVEN_USER_HOME=$MAVEN_USER_HOME" \
+            "NPM_CONFIG_CACHE=$NPM_CONFIG_CACHE" "TMPDIR=$TMPDIR" >> "$GITHUB_ENV"
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
