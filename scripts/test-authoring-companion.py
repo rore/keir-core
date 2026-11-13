@@ -611,7 +611,7 @@ class AuthoringCompanionV9Test(unittest.TestCase):
 
     def test_exact_candidate_asset_pins_are_required(self):
         module, _, compatibility = self.payload()
-        self.assertEqual(compatibility["coreRevision"], "b9782d1cb7dd7106d44878f7199cbd4774e91510")
+        self.assertEqual(compatibility["coreRevision"], "3a383c2d0c6227eedc9c03927c2dd1910360d5b9")
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             for package in compatibility["packages"].values():

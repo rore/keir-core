@@ -162,15 +162,31 @@ jobs:
         run: |
           set -euo pipefail
           {
-            timeout --kill-after=5s 15s gh run view 43431976777 --repo "$GITHUB_REPOSITORY" --json headSha,conclusion > "$QUALIFICATION_ROOT/logs/companion-source.json"
-            timeout --kill-after=5s 45s gh run download 43431976777 --repo "$GITHUB_REPOSITORY" --name numeric-candidate-43431976777-1 --dir "$QUALIFICATION_ROOT/candidate"
+            timeout --kill-after=5s 15s gh run view 43438170269 --repo "$GITHUB_REPOSITORY" --json headSha,conclusion,status > "$QUALIFICATION_ROOT/logs/companion-source.json"
+            timeout --kill-after=5s 30s gh run download 43438170269 --repo "$GITHUB_REPOSITORY" --name numeric-candidate-43438170269-1 --dir "$QUALIFICATION_ROOT/candidate"
+            timeout --kill-after=5s 30s gh run download 43438170269 --repo "$GITHUB_REPOSITORY" --name numeric-fast-43438170269-1 --dir "$QUALIFICATION_ROOT/candidate-evidence"
             python -B - <<'PY'
           import hashlib, json, os
           from pathlib import Path
           root = Path(os.environ['QUALIFICATION_ROOT'])
           row = json.loads(Path('docs/agents/authoring-companion-v9-compatibility.json').read_bytes())
           source = json.loads((root / 'logs/companion-source.json').read_bytes())
-          assert source == {'headSha': row['coreRevision'], 'conclusion': 'success'}
+          assert source == {'headSha': 'bfeaae33549b1fc7ce34afbc24f8dc48edb29cea', 'conclusion': 'success', 'status': 'completed'}
+          evidence = root / 'candidate-evidence'
+          receipt_bytes = (evidence / 'receipt.json').read_bytes()
+          assert hashlib.sha256(receipt_bytes).hexdigest() == '88f2722a0e1fdc709b708af6ea3524c8c26bf579664cb716c5e0ec5ee01103cc'
+          receipt = json.loads(receipt_bytes)
+          assert receipt['status'] == 'passed' and receipt['qualificationMode'] == 'packages' and receipt['revision'] == source['headSha']
+          assert {p.name for p in evidence.iterdir()} == {'receipt.json'} | {item['name'] for item in receipt['evidence']}
+          for item in receipt['evidence']:
+              data = (evidence / item['name']).read_bytes()
+              assert len(data) == item['bytes'] and hashlib.sha256(data).hexdigest() == item['sha256']
+          reports = list(evidence.glob('*-packages.json'))
+          assert len(reports) == 1
+          package_report = json.loads(reports[0].read_bytes())
+          assert package_report['revision'] == row['coreRevision'] and package_report['workflowRevision'] == source['headSha']
+          (root / 'logs/companion-package-report.json').write_bytes(reports[0].read_bytes())
+          (root / 'logs/companion-package-receipt.json').write_bytes(receipt_bytes)
           assets = root / 'candidate'
           assert {p.name for p in assets.iterdir()} == {'LICENSE', 'SHA256SUMS', 'keir-compiler-cli-0.5.0.zip', 'keir-java-runtime-maven-0.5.0.zip', 'keir-runtime-node-0.5.0.tgz'}
           assert all(p.is_file() and not p.is_symlink() for p in assets.iterdir())
@@ -257,7 +273,7 @@ jobs:
           paths.extend(root / 'output' / name for name in ('runtime-manifest.json', 'java-runtime-report.json', 'node-runtime-report.json',
                                                         'runtime-workload.json', 'java-runtime-process.json', 'node-runtime-process.json', 'runtime.json'))
           paths.extend(root / 'logs' / name for name in ('runtime-measurements.log', 'java-runtime.log', 'node-runtime.log'))
-          paths.extend(root / 'logs' / name for name in ('companion-source.json', 'companion-inputs.log', 'companion.log', 'companion.json'))
+          paths.extend(root / 'logs' / name for name in ('companion-source.json', 'companion-package-report.json', 'companion-package-receipt.json', 'companion-inputs.log', 'companion.log', 'companion.json'))
           for engine in ('java', 'node'):
               for example in ('stock', 'quote'):
                   paths.append(root / 'logs' / f'{engine}-{example}.json')
