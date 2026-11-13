@@ -5,6 +5,8 @@ This page defines how the runtime executes a prepared program. See [Host model b
 
 Implementation evidence belongs in [testing](../testing.md); pending resource qualification belongs in the [resource roadmap](../../roadmap/features/runtime-resource-qualification.md). Neither changes the limits or guarantees specified here.
 
+Numeric behavior below is the development 0.5 source contract, with compiler/Java/Node regressions and [complete stock/quote program cases](language.md#numeric-programs). Standalone teaching consumers, installed packages, broader invocation paths and full-feature qualification remain separate. Published Core 0.4.0 retains its nonnumeric contract; use the [exact tuple matrix](compiler-artifact.md#source-and-artifact-identity).
+
 <a id="corrected-effect4-invocation-boundary"></a>
 <a id="effect4-execution"></a>
 <a id="single-write-execution"></a>
@@ -12,20 +14,37 @@ Implementation evidence belongs in [testing](../testing.md); pending resource qu
 
 1. Validate the [fresh invocation context](host-model-binding.md#invocation-inputs-and-adapter-context), including deadline, input, protected bindings, event and presence of the original key. Start with only the validated business record in the source environment as `input`.
 2. Visit steps in source order. A BIND evaluates and saves its value. A CALL with a false guard skips argument evaluation and dispatch, binds no result and consumes no dynamic call or write budget. It still counts as a reached step. Static validation counts every possible call and write regardless of its guard.
-3. For a reached call, check limits and the DCM's restrictions, validate arguments and dispatch once. The implementation receives business and protected arguments separately. Validate a successful response's result against the declared type. Retained producers make it available only for unguarded calls. The exact 0.4.0 producer also retains successful guarded results under the scalar proof rules below.
+3. For a reached call, check limits and the DCM's restrictions, validate arguments and dispatch once. The implementation receives business and protected arguments separately. Validate a successful response's result against the declared type. Producers before 0.4.0 make it available only for unguarded calls. The exact 0.4.0 tuple and both development 0.5 tuples also retain successful guarded results under the scalar proof rules below.
 4. A declared business rejection ends step execution. Evaluate its matching handler, if present, in the environment immediately before the call and validate the handler's output. A handler does not catch malformed responses, runtime failures, limits or uncertain effects. On the normal path, evaluate and validate the root return after all steps. A failure stops further steps and dispatch.
 
 The same artifact and exact model can run against separately bound real or simulated implementations. Simulation reports what its own implementations did. It supplies no evidence of a native commit.
 
 ### Guarded-result activation
 
-For producer `keir-compiler-java/0.4.0`, retain each complete validated successful result at most once in invocation state, after existing response/value/deadline checks. A skipped CALL leaves its result absent. Do not fabricate null, empty/default protobuf messages or placeholder records. Availability follows the exact [conditional guard proof](language.md#steps-and-data-flow), not mere declaration.
+For guard-capable tuples, retain each complete validated successful result at most once in invocation state, after existing response/value/deadline checks. A skipped CALL leaves its result absent. Do not fabricate null, empty/default protobuf messages or placeholder records. Availability follows the exact [conditional guard proof](language.md#steps-and-data-flow), not mere declaration. Numeric scalars follow those same rules; optional zero still needs presence proof.
 
 Build each CEL activation from actually bound values. For a conditional result whose known guard is false, omit the name without reading or converting any supplied value for it. For a true guard on a continuing path, require a validated result, including unused declarations. Required ordinary values and Boolean guard values must also be present and valid. Missing required state fails with `EXPRESSION_FAILED` at the expression binding before CEL presence tests; it is not optional-field absence or a reason to select fallback. Convert only present validated record values. The pinned engines evaluate only the selected conditional arm; static validation still checks every arm.
 
 Fresh invocation state prevents a prepared artifact from leaking a prior result into later true/false or mixed-guard invocations. At most four complete result records are retained, each within the existing 8,192-byte cap, including validation of bounded list fields that guarded expressions cannot select. The existing declaration, AST, value and deadline ceilings remain unchanged. Measured conversion and retention costs are engineering evidence, not an enforced process-memory or CPU-preemption guarantee.
 
 Rejection, transient failure, invalid/oversized response, exception, expiry and unknown commit terminate normal continuation; none becomes an absent result or successful fallback. Preserve receipt settlement before later value/deadline failure. An own-call rejection handler never sees its rejecting result; a later handler can use earlier successful results only with an explicit valid proof, and still terminates as BUSINESS_REJECTION. Result retention adds no trace event or native authority. Older tuples retain their original behavior.
+
+### Numeric validation and evaluation
+
+Only the model `/4` tuple admits numeric semantics. Validate strict [canonical strings and exact bounds](domain-model.md#numeric-values) at every external numeric boundary before conversion. Do not normalize or round during admission. Hosts may explicitly call the [String helpers](host-model-binding.md#exact-numeric-text-helpers). Internal Integer is long/bigint; Decimal is an opaque message. Keep canonical public values separate from invocation-owned projections. Reuse validated projections and successful Decimal BIND messages without sharing values between requests. Operand/result coefficient parsing remains part of the initial bridge; projection reuse is not a parse-once performance claim.
+
+| Numeric failure | Required result |
+| --- | --- |
+| Invalid literal/type/operator | Compiler `TYPE_MISMATCH` or `CEL_POLICY_DENIED`; no artifact. |
+| Forged checked metadata, Decimal internals or wrong overload | Preparation `ARTIFACT_INVALID`; incompatible tuple uses `PIN_MISMATCH`; no callback. |
+| Noncanonical/out-of-range business input | `INPUT_INVALID` before steps. |
+| Invalid protected numeric binding | `HOST_BINDING_INVALID` before steps, including false-guarded calls. |
+| Invalid numeric adapter result | `ADAPTER_INVALID`; no successful continuation or handler. |
+| Escaping overflow, inexact product/division, zero division or conversion failure | `EXPRESSION_FAILED` at the consuming binding; normally `FAILED`. |
+
+Numeric representability is a value-domain failure, not a resource limit. Overall byte/structural/deadline failures retain `BUDGET_EXCEEDED`/`LIMIT_EXCEEDED`. Existing Timestamp-overflow classification is unchanged. Pure numeric errors are typed CEL errors: `?:` evaluates only its selected arm, false masks an arithmetic error in `&&`, and true masks it in `||`, in either operand order. Both arms still pass static checks. This cannot mask invalid host data, authorization, adapter failures or deadlines outside expression evaluation.
+
+Each [numeric operator](workflow-expressions.md#numeric-arithmetic-and-rounding) checks its own result; a later subtraction or round cannot repair an already-failed intermediate. False CALL guards skip argument arithmetic and handlers without reducing static budgets. A confirmed WRITE followed by invalid numeric output or later arithmetic failure retains CONFIRMED. UNKNOWN keeps UNCERTAIN precedence. A numeric error in a rejection handler retains the original rejection as `error.cause`. No retries, raw-value trace fields or new effect authority are added.
 
 <a id="effect-evidence-and-outcomes"></a>
 ## Adapter responses
@@ -114,8 +133,13 @@ The compiler and runtime enforce these ceilings at the applicable boundaries. Th
 | Decoded descriptors / each CheckedExpr bytes | 65,536 / 16,384 |
 | Serialized business input or adapter result bytes | 8,192 |
 | Trace events | 64 |
+| Canonical Integer / Decimal ASCII characters | 20 / 40 |
+| Explicit numeric helper input ASCII characters | 256 |
+| Normalized Decimal coefficient digits / scale | 38 / 18 |
 
 Identifier and metadata strings also obey their schema bounds; artifact base64 and CEL strings use their dedicated bounds. All declared caps are enforced inclusively, with boundary+1 rejection. Limit collection sizes before materializing their contents; bound YAML parsing and protobuf decoding as well as invocation input. No attacker-controlled descriptor recursion or external resolver is allowed. Reject missing required fields and unknown fields; never truncate.
+
+Numeric lexical caps are checked before parsing. Helper normalization scans bounded text and removes representational zeros before constructing a coefficient. Decimal alignment uses at most 56 digits per operand and 57 for an add/subtract temporary; products use at most 76 digits, provisional scale 36. Exact/rounded division numerators use at most 74 digits, rounded denominators 56; rounding can add one carry digit before normalization and final rejection. Wider values exist only inside one trusted operation, never as another AST operand. No arbitrary precision configuration, exponentiation or retry-rescaling is admitted. Numeric constructors/conversions/round calls and their literal arguments count toward the existing AST ceilings. These bounds do not establish process-memory isolation, CPU preemption or whole-application performance.
 
 ## Deadlines
 

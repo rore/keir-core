@@ -1,6 +1,7 @@
-# Keir 2 workflow expressions
+<a id="keir-2-workflow-expressions"></a>
+# Workflow expressions
 
-This reference defines the Keir 2 workflow expressions introduced in Core 0.2.0. Source remains `keir/2`; the [current version matrix](compiler-artifact.md#source-and-artifact-identity) identifies the model, artifact and package pair.
+This reference preserves the Keir 2 expressions introduced in Core 0.2.0 and defines the development numeric profile. Published Core 0.4.0 uses source `keir/2`; development numeric authoring uses `keir/3` with DCM `/4`. The [exact matrix](compiler-artifact.md#source-and-artifact-identity) separates those profiles and package evidence. Numeric source-regression results are not package or complete-feature qualification.
 
 Keir 2 adds bounded list membership, optional values and elapsed-time expressions. The host defines input data, operations and lifecycle. It binds a model and prepares the compiled artifact. Event extensions run after commit; read-only [decisions](pre-operation-decisions.md) run before a native operation under the `/3` model contract.
 
@@ -19,11 +20,13 @@ For example, if `input.labels` has element type `Label`, bind the fixed label wi
   let: {cel: 'reviewLabel in input.labels'}
 ```
 
+Only the numeric profile adds global `size(list)`, returning Integer `0..maxItems` for an existing named bounded list. Empty lists count as zero; duplicates count separately. No String/map size, receiver syntax, constructed lists, indexing, aggregates or numeric list elements are admitted. A supplied page's length is not its total remote match count. `g ? size(r.items) : 0` remains invalid for a guarded result: scalar proof does not grant list access.
+
 ## Optional fields and arguments
 
 A required record field keeps its type reference, for example `"occurredAt": "Timestamp"`. Declare an optional scalar field as `"expiresAt": {"type":"Timestamp","optional":true}`. A capability parameter can add `"optional":true` to its usual `type` and `binding` declaration. The flag, when present, is exactly `true`. Lists and records are required values in this contract.
 
-An omitted field or argument is absent. `null` is invalid. A supplied `false` or empty string is present. A source can omit an optional call argument or return field by leaving out its key. The compiler preserves the omission in the artifact's `args` or `fields` map. Protected parameters still come from the host.
+An omitted field or argument is absent. `null` is invalid. A supplied zero, `false` or empty string is present. A source can omit an optional call argument or return field by leaving out its key. The compiler preserves the omission in the artifact's `args` or `fields` map. Protected parameters still come from the host.
 
 Use `has(record.field)` on a direct selection of a declared optional field. A read of that field requires a presence proof in the same expression. The proof holds in the true arm of `has(x.f) ? ... : ...`, the right operand of `has(x.f) && ...`, and the false arm of `!has(x.f) ? ... : ...`. An unproven read reports `DATAFLOW_UNAVAILABLE`. A presence test in a separate step does not carry that proof into a later expression.
 
@@ -31,9 +34,46 @@ Runtimes validate raw input and adapter values before conversion. Records reject
 
 ### Conditional result existence is a separate proof
 
-Producer `keir-compiler-java/0.4.0` adds [guarded-result scalar access](language.md#steps-and-data-flow) without changing Keir 2 syntax or scalar conditional types. If an earlier CALL `r` has `when: g`, use `g ? r.reference : input.existingReference`. Only that exact immutable Boolean BIND identifier proves existence in its true arm. A list or record from a guarded result is still unavailable as an expression value, even if membership would return a Boolean. Earlier producers do not admit this capability.
+Producer `keir-compiler-java/0.4.0` adds [guarded-result scalar access](language.md#steps-and-data-flow); both development 0.5 profiles retain it. If an earlier CALL `r` has `when: g`, use `g ? r.reference : input.existingReference`. Only that exact immutable Boolean BIND identifier proves existence in its true arm. A list or record from a guarded result is still unavailable as an expression value, even if membership or size would return a scalar. Earlier producers do not admit this capability.
 
 For an optional scalar, use both proofs in one expression: `g ? (has(r.note) ? r.note : "") : ""`. A presence test does not prove that its record exists. Existing optional-field proof forms remain valid inside the guard-proved arm, but neither `g && r.flag` nor a later CALL's `when: g` supplies a result-existence proof. Proofs do not escape to siblings or later bindings. A scalar BIND produced by a valid conditional retains its exact nominal/enum/timestamp type normally. See [independent preparation](compiler-artifact.md#lowered-steps-and-expressions) and [sparse activation](runtime.md#guarded-result-activation); no nullable value, list conditional or additional effect is introduced.
+
+## Numeric arithmetic and rounding
+
+Only the numeric source/model pair admits these operations. [Value bounds and canonical spelling](domain-model.md#numeric-values) apply to each operand and each normalized result. Integer and Decimal never mix implicitly; use `toDecimal(Integer)` or exact whole/range-checked `toInteger(Decimal)`. Decimal strings are not String operands.
+
+| Operation | Integer | Decimal |
+| --- | --- | --- |
+| `==`, `!=`, `<`, `<=`, `>`, `>=` | Same-type mathematical comparison | Same-type mathematical comparison, not lexical ordering |
+| `+`, `-`, `*`, unary `-` | Exact, checked int64 result | Exact, normalized precision ≤38 and scale ≤18 |
+| `/` | Exact whole quotient; remainder fails | Exact representable quotient; excess nonzero scale/precision fails |
+
+Zero division fails, including `0/0`. Minimum int64 negation and division by `-1` overflow. `5/2` fails rather than truncating; `decimal("1")/decimal("8")` returns `"0.125"`, while division by `decimal("3")` is inexact and fails. No intermediate may escape its bounds because a later operator would cancel the overflow. The exact product `0.00001 × 0.00001` is representable as `0.0000000001`.
+
+Explicit rounding functions return Decimal:
+
+| Function | Behavior |
+| --- | --- |
+| `round(d, scale, mode)` | Round an admitted Decimal. |
+| `multiplyRounded(a, b, scale, mode)` | Multiply two Decimals in a bounded wider temporary, then round once. |
+| `divideRounded(a, b, scale, mode)` | Divide two Decimals and round once; zero divisor fails. |
+
+`scale` must be an Integer literal `0..18`; `mode` must be an exact String literal from this table. Dynamic parameters, unknown modes and out-of-range scales fail compilation and independent preparation. There is no default mode. Validate parameters even for a no-op round.
+
+| Mode | Rule for discarded nonzero digits |
+| --- | --- |
+| `UNNECESSARY` | Fail unless the answer is already exact. |
+| `DOWN` | Toward zero. |
+| `FLOOR` | Toward negative infinity. |
+| `CEILING` | Toward positive infinity. |
+| `HALF_UP` | Nearest, ties away from zero. |
+| `HALF_EVEN` | Nearest, ties to an even retained coefficient at the requested scale. |
+
+For example, `round(decimal("2.345"), 2, "HALF_EVEN")` returns wire `"2.34"`; `2.355` rounds to `"2.36"`. A 7.5% discount on `199.95` is `multiplyRounded(decimal("199.95"), decimal("0.925"), 2, "HALF_EVEN")`, yielding `"184.95"`. These are semantic examples, not claims of installed-package execution. The host owns the amount unit and accounting policy.
+
+Normalize after rounding, before the final bound check. Rounding `99999999999999999999.999999999999999999` at scale 2 can carry to `100000000000000000000`, which fits. Exact lower-scale values are not padded: rounding `12` to scale 2 still emits `"12"`. Formatting two display places is a host concern. Rounding cannot rescue final overflow. `round(a*b, ...)` also cannot rescue an exact multiplication that already failed; use `multiplyRounded` for that purpose. For `10^-18 × 10^-18`, exact multiplication fails but rounded multiplication at scale 18 HALF_EVEN returns zero; UNNECESSARY fails.
+
+An escaping numeric arithmetic/conversion error yields `FAILED`/`EXPRESSION_FAILED` at its binding, unless unknown write evidence takes `UNCERTAIN` precedence. Numeric representability failures are not `BUDGET_EXCEEDED`. Existing Timestamp overflow remains a resource-classified error. Conditional laziness and Boolean error masking below remain unchanged; malformed host/adapter data cannot be masked. See [runtime numeric boundaries](runtime.md#numeric-validation-and-evaluation).
 
 ## Timestamps and elapsed durations
 
@@ -96,9 +136,11 @@ Include the standard `google/protobuf/timestamp.proto` descriptor only for model
 
 Serialize descriptors deterministically. Validation rejects unknown fields and any additional imports, options, extensions or source information.
 
+Development recipe `/3` adds Integer and the mandatory opaque Decimal dependency while preserving this recipe `/2` unchanged. The [descriptor/type bridge](compiler-artifact.md#descriptortype-bridge) gives the numeric checked overloads and dependency order.
+
 ## Version matrix
 
-This table preserves the exact released Core 0.2.0 pair. New authoring uses the [current version matrix](compiler-artifact.md#source-and-artifact-identity). Its source and descriptor recipe retain `/2`; model, artifact and scenario use `/3`.
+This table preserves the exact released Core 0.2.0 pair. New authoring uses the [current version matrix](compiler-artifact.md#source-and-artifact-identity), not this historical pair.
 
 | Component | Core 0.2.0 |
 | --- | --- |

@@ -3,6 +3,8 @@
 
 Bind a trusted [DCM](domain-model.md) and its host implementations, prepare an approved [artifact](compiler-artifact.md), and reuse the prepared handle with fresh invocation context. Event extensions and pre-operation decisions use the same APIs. The [contract matrix](compiler-artifact.md#source-and-artifact-identity) identifies supported exact pairs.
 
+Development Core 0.5 adds numeric DCM `/4` and exact String helpers without changing bind/prepare/invoke signatures. Source regression evidence is not installed-package qualification. Published 0.4 packages do not support the numeric profile or helpers. Select packages and host definitions deliberately; never relabel an approved artifact.
+
 <a id="corrected-host-bound-4-binding"></a>
 <a id="effect4-binding-and-preparation"></a>
 <a id="binding-a-host-dcm-and-preparing-keir-ir"></a>
@@ -55,6 +57,26 @@ public static CompletionStage<Outcome> invokeBoundEffectProgram(Prepared prepare
 
 Java `ModelBinding` and `Preparation` expose `boundModel()` and `prepared()`, respectively, with `diagnostic()` and `succeeded()` on both. In either runtime, a successful result contains a handle and a null diagnostic. A failure contains a null handle and `{code,path,message}`. Binding rejects invalid input with `ADMISSION_INVALID` under `/binding`, or `BUDGET_EXCEEDED` for a size or resource limit. Preparation diagnoses invalid binding or artifact data, incompatible compiler and environment pins, policy violations and limits. Check diagnostics before invoking. Java's `Outcome` exposes the [runtime outcome](runtime.md#outcome) through `toMap()` and `toJson()` as well as accessors for its individual fields.
 
+### Exact numeric text helpers
+
+In the numeric profile, inputs, protected/agent arguments, adapter values and outcomes carry [Integer/Decimal as canonical strings](domain-model.md#numeric-values). Reject Java Long/BigDecimal and Node number/bigint instead of silently coercing them. Use explicit helpers when the host accepts ergonomic text:
+
+```java
+String quantity = KeirRuntime.normalizeInteger("100.00"); // "100"
+String amount = KeirRuntime.normalizeDecimal("+00100.00"); // "100"
+Map<String,Object> input = Map.of("subtotal", amount); // when the selected DCM declares Decimal
+```
+
+```javascript
+import { normalizeInteger, normalizeDecimal } from '@keir/runtime-node';
+const quantity = normalizeInteger('100.00'); // '100'
+const input = { subtotal: normalizeDecimal('+00100.00') }; // { subtotal: '100' }
+```
+
+Java exposes public static `String normalizeInteger(String)` and `normalizeDecimal(String)` on `dev.keir.runtime.KeirRuntime`. Node exposes these two functions at the package root. They accept only exact text matching `[+-]?[0-9]+(\.[0-9]+)?`, with a 256-ASCII-character cap checked before parsing. Remove representational leading and fractional trailing zeros, normalize signed zero, then enforce int64 or normalized precision ≤38/scale ≤18. No rounding occurs: Integer accepts `"100.00"`, not `"100.01"`; Decimal accepts redundant fractional zeros beyond scale 18 only when removing them gives an exact in-range value.
+
+Reject null/non-string values, whitespace, exponents, separators, non-ASCII digits, `.5`, `1.` and overflow. Java throws `IllegalArgumentException`; Node throws `TypeError`, without echoing raw input. These are host helpers, not CEL functions or permissive runtime admission. `"100.00"` still fails strict numeric input if passed without normalization. Helpers do not enforce business units, currencies, authorization or domain ranges.
+
 ## Invocation inputs and adapter context
 
 | Input | Contract |
@@ -66,6 +88,8 @@ Java `ModelBinding` and `Preparation` expose `boundModel()` and `prepared()`, re
 | `deadline` | Absolute expiry and a clock in the same time base. See [Deadlines](runtime.md#deadlines). |
 
 The current invocation accepts only these host context fields. The runtime passes separate immutable business and protected arguments to each implementation. It supplies the remaining milliseconds and the context holding the original key, copied event and deadline. Node captures the expiry and the original `nowMs` callable with its receiver in a wrapper. Java constructs a `Deadline` using the original clock supplier and expiry. Neither resets the deadline.
+
+Numeric internal projections belong to one invocation. Reuse immutable bound/prepared handles, not caller values or mutable engine messages. Callbacks and outcomes receive canonical strings, never Decimal protobuf internals. Validate complete adapter records even when later expressions do not use every numeric field. Numeric errors do not change receipt settlement or native authority.
 
 ### Protected bindings
 

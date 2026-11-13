@@ -7,22 +7,19 @@
 
 The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-Compiler identity, document formats and runtime compatibility version independently. The matrix below identifies the supported combinations; use the [installation guide](../installation.md) to select packages.
+Compiler identity, document formats and runtime compatibility version independently. Published Core 0.4.0 and the development 0.5 source profiles are distinct. The latter have compiler/Java/Node fast-regression evidence, not yet matching-package or complete-feature qualification. Use the [installation guide](../installation.md) for released packages; a source profile is not permission to upgrade an installed host.
 
-| Field | Authoring value |
-| --- | --- |
-| Source `language` | `keir/2` |
-| DCM `format` | `keir-dcm/3` |
-| Artifact `format` | `keir-artifact/3` |
-| Verification scenario `format` | `keir-scenario/3` |
-| Compiler identity | `keir-compiler-java/0.4.0` |
-| Descriptor recipe | `keir-record-descriptors/2` |
+| Compiler | Source | DCM | Artifact | Scenario | Descriptor recipe | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `keir-compiler-java/0.4.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/3` | `keir-scenario/3` | `keir-record-descriptors/2` | Published; no numeric types or size |
+| `keir-compiler-java/0.5.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/2` | Development retained authoring; no numeric types or size |
+| `keir-compiler-java/0.5.0` | `keir/3` | `keir-dcm/4` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/3` | Development numeric authoring |
 
-Structural schemas: [source](../../schemas/source-2/source.schema.json), [model](../../schemas/dcm-3/dcm.schema.json), [artifact](../../schemas/artifact-3/artifact.schema.json) and [scenario](../../schemas/scenario-3/scenario.schema.json). Semantic and cross-document checks remain required.
+Structural schemas: retained [source `/2`](../../schemas/source-2/source.schema.json), [model `/3`](../../schemas/dcm-3/dcm.schema.json), [artifact `/3`](../../schemas/artifact-3/artifact.schema.json) and [scenario `/3`](../../schemas/scenario-3/scenario.schema.json); new [source `/3`](../../schemas/source-3/source.schema.json), [model `/4`](../../schemas/dcm-4/dcm.schema.json), [artifact `/4`](../../schemas/artifact-4/artifact.schema.json) and [scenario `/4`](../../schemas/scenario-4/scenario.schema.json). Semantic and cross-document checks remain required. Scenario `/4` covers both new artifact tuples without rewriting old scenarios or their identities. Its consumers require matching support; schemas alone do not qualify a runner.
 
-The compiler identified above accepts source `/2` with DCM `/3` only and produces artifact `/3` with its declared compiler identity. It rejects DCM `/2` and never stamps the old producer identity. The exact Core 0.2.0 contracts remain documented in the [workflow version matrix](workflow-expressions.md#version-matrix) for execution and history.
+The new compiler accepts exactly its two source/DCM pairs and always emits producer 0.5.0/artifact `/4`, even for nonnumeric programs. It rejects cross-pairs and DCM `/2` authoring. Retained `/2` source with DCM `/3` preserves model digest, recipe `/2` bytes, enum/nominal rules, default grants and 0.4 guard semantics, but the new artifact needs fresh pins and approval. Nominal String types named Integer/Decimal keep that meaning in `/3`. Original compiler packages remain the way to reproduce historical authoring behavior. Core 0.2.0's pair remains in the [historical matrix](workflow-expressions.md#version-matrix).
 
-Runtime 0.4.0 admits the four exact tuples below with the same environment pins. Runtime 0.3.1 admits only the first three, and runtime 0.3.0 only the first two.
+Runtime 0.4.0 admits the first four exact tuples below with the same environment pins. Runtime 0.3.1 admits only the first three, and runtime 0.3.0 only the first two. Development 0.5 runtimes add the last two; older runtimes reject artifact `/4`.
 
 | Artifact | Bound model | Producer | Descriptor recipe |
 | --- | --- | --- | --- |
@@ -30,10 +27,12 @@ Runtime 0.4.0 admits the four exact tuples below with the same environment pins.
 | `keir-artifact/3` | `keir-dcm/3` | `keir-compiler-java/0.3.0` | `keir-record-descriptors/2` |
 | `keir-artifact/3` | `keir-dcm/3` | `keir-compiler-java/0.3.1` | `keir-record-descriptors/2` |
 | `keir-artifact/3` | `keir-dcm/3` | `keir-compiler-java/0.4.0` | `keir-record-descriptors/2` |
+| `keir-artifact/4` | `keir-dcm/3` | `keir-compiler-java/0.5.0` | `keir-record-descriptors/2` |
+| `keir-artifact/4` | `keir-dcm/4` | `keir-compiler-java/0.5.0` | `keir-record-descriptors/3` |
 
-Mixed tuples, `/1` contracts and decision semantics inside `/2` are rejected by both runtimes. Producers absent from this matrix are also rejected. Existing approved event artifacts keep their exact old model and approval identities; upgrading the runtime does not recompile or deactivate them. New or edited source uses the current `/3` catalog, including unchanged EVENT entrypoints, and requires normal approval of the new bytes. Historical source can seed a draft, but its prior approval never transfers to the recompiled artifact.
+Mixed tuples, `/1` contracts and decision semantics inside `/2` are rejected by both runtimes. Producers absent from this matrix are also rejected. Existing approved artifacts keep their exact model, bytes and approval identities; upgrading the runtime does not recompile or deactivate them. New or edited source uses the host-selected authoring pair and requires normal approval of the new bytes. Historical source can seed a draft, but prior approval never transfers to a recompiled artifact. Match full identities, never semver ordering.
 
-Only the exact 0.4.0 tuple admits guarded-result scalar dataflow. Earlier producers retain their original declaration and execution semantics. A new-semantics artifact relabeled with any retained producer fails independent preparation, even with a matching old format/model pair. Old runtimes reject the new producer. Schema acceptance or changing a producer string never grants approval. The new compiler always emits 0.4.0, including programs that do not use the added capability; separately pinned outputs preserve all original golden bytes.
+The exact 0.4.0 tuple and both 0.5 tuples admit guarded-result scalar dataflow. Earlier producers retain their original declaration/execution semantics. Only 0.5 with model `/4` admits numeric constructs. Relabeling bytes with an older producer, crossing model/recipe pairs or changing a schema never grants semantics or approval. Original golden artifacts and digests stay unchanged.
 
 ### Compile source
 
@@ -71,7 +70,7 @@ See [source diagnostics](language.md#diagnostics-and-conformance) for examples o
 
 ## Artifact representation
 
-The [artifact `/3` schema](../../schemas/artifact-3/artifact.schema.json) defines the envelope `{format,compiler,environment,sourceDigest,modelRef,entrypoint,expressions,steps,return}`. Its lowered steps retain the `/2` representation; the new format, producer and model-reference identities admit the decision lifecycle. The selected entrypoint names the DCM entrypoint and `sourceDigest` identifies the canonical decoded source. The `environment` object contains exactly `celJava`, `celNode`, `protobufJava` and `protobufNode` with the values in [Descriptor/type bridge](#descriptortype-bridge).
+Artifact `/3` and development `/4` keep the envelope `{format,compiler,environment,sourceDigest,modelRef,entrypoint,expressions,steps,return}` and the lowered step shapes below. Their exact producer/model/recipe tuple selects semantics. The selected entrypoint names the DCM entrypoint and `sourceDigest` identifies the canonical decoded source. The `environment` object contains exactly `celJava`, `celNode`, `protobufJava` and `protobufNode` with the values in [Descriptor/type bridge](#descriptortype-bridge).
 
 ### Model reference
 
@@ -81,17 +80,17 @@ The [artifact `/3` schema](../../schemas/artifact-3/artifact.schema.json) define
 
 | Item | Representation |
 | --- | --- |
-| Literal or expression binding | Exactly `{literal,type}` or `{expr,type}`. The type retains the resolved scalar, nominal, enum or named bounded-list identity. Literal payloads remain Boolean or String; lists and timestamps use expression bindings. |
+| Literal or expression binding | Exactly `{literal,type}` or `{expr,type}`. The type retains scalar, nominal, enum or named bounded-list identity. Literal payloads remain Boolean or String, including canonical numeric strings with their explicit numeric type; lists and timestamps use expression bindings. |
 | Binding step | `{op:"BIND",id,value,resultType}`, where `value` is the lowered binding. |
 | Call step | `{op:"CALL",id,capability,version,args,resultType,when?,onError?}`. Arguments contain only source-supplied parameters. `when` names the earlier Boolean BIND. `onError` maps declared codes to lowered return records. |
 | Return record | `{type,fields}`, where `type` is the entrypoint's output type and `fields` maps required and supplied optional output fields to lowered bindings. Omitted optional fields remain absent. This shape is used for both the root return and each handler. |
-| Checked expression | `{checked,variables,resultType}`. `checked` contains standard base64 of the protobuf `CheckedExpr`. For producer 0.4.0, `variables` is the complete prior declaration/type environment, including unused guarded CALL results. Retained producers include only definitely available names and omit guarded results. A declaration is not permission to read its value. |
+| Checked expression | `{checked,variables,resultType}`. `checked` contains standard base64 of the protobuf `CheckedExpr`. For producers 0.4.0 and 0.5.0, `variables` is the complete prior declaration/type environment, including unused guarded CALL results. Earlier producers include only definitely available names and omit guarded results. A declaration is not permission to read its value. |
 
 Assign expression IDs `e0`, `e1` and so on while visiting steps in source order. Visit call arguments by name, handler codes by code and handler fields by name, all in ASCII order. Visit root return fields last, also in ASCII order. A literal consumes no expression ID. Omitted optional arguments remain absent from `args`. The runtimes recompute availability and check the expression IDs and metadata during [preparation](host-model-binding.md#prepare-an-artifact), including same-expression optional presence proofs, exact list element types and timestamp operations. See the [Keir 2 checked forms](workflow-expressions.md#checked-expressions-and-descriptor-identity).
 
-For 0.4.0, compiler and preparation independently reconstruct prior Boolean BINDs and guarded-result provenance from validated ordered steps. Arguments and handlers use pre-CALL snapshots. Preparation requires the exact declaration map and independently validates every checked AST node, reference/type map, overload and semantic overlay. In a scalar conditional, only its exact Boolean guard identifier adds result-existence proof to the true arm; false arms and later expressions gain none. Optional-field proof remains separate. No new serialized proof, descriptor, opcode or format field carries this authority. At most nine names are declared: input plus eight preceding steps. [Sparse activation](runtime.md#guarded-result-activation) controls which of those declarations have invocation values.
+For guard-capable tuples, compiler and preparation independently reconstruct prior Boolean BINDs and guarded-result provenance from validated ordered steps. Arguments and handlers use pre-CALL snapshots. Preparation requires the exact declaration map and independently validates every checked AST node, reference/type map, overload and semantic overlay. In a scalar conditional, only its exact Boolean guard identifier adds result-existence proof to the true arm; false arms and later expressions gain none. Optional-field proof remains separate. No serialized proof, opcode or field grants this authority. At most nine names are declared: input plus eight preceding steps. [Sparse activation](runtime.md#guarded-result-activation) controls which declarations have invocation values.
 
-The artifact carries no special decision opcode or native-commit callback. Its selected `/3` model entrypoint determines REQUEST/BEFORE_COMMIT/DECISION semantics and the zero-write ceiling. Preparation independently rejects every possible WRITE, including a false-guarded call, before adapter dispatch. A valid decision result does not establish a native commit; the host applies the [consumption and consistency contract](pre-operation-decisions.md#consumption-and-failure-policy).
+The artifact carries no special decision opcode or native-commit callback. Its selected `/3` or `/4` model entrypoint determines REQUEST/BEFORE_COMMIT/DECISION semantics and the zero-write ceiling. Preparation independently rejects every possible WRITE, including a false-guarded call, before adapter dispatch. A valid decision result does not establish a native commit; the host applies the [consumption and consistency contract](pre-operation-decisions.md#consumption-and-failure-policy).
 
 The host selects approved artifact bytes and verifies their stored-byte integrity before preparation. The compiler-produced digest identifies the bytes. It does not establish who approved them or authenticate them on its own. Execution uses the prepared artifact and bound model without a compiler or source parser.
 
@@ -120,11 +119,33 @@ Optional Boolean and String-based scalar fields use `proto3_optional` with a syn
 
 Include `google/protobuf/timestamp.proto` only when the model uses Timestamp. It precedes `keir_read.proto` and is its named dependency. The standard descriptor is 255 bytes with SHA-256 `422a163a2d7051465e0a516584b4d96d18c270ec4e7ad3c21ad33e5c440ebecc`. Timestamp seconds use the standard epoch; nanos range from 0 through 999,999,999 and are divisible by 1,000,000. Duration literals have nonnegative seconds and zero nanos. Deterministic validation rejects unknown fields, extra imports, options, extensions and source information. See the [workflow descriptor reference](workflow-expressions.md#checked-expressions-and-descriptor-identity) for checked operation identities.
 
-Validate complete closed values before constructing a message and after extracting any result. In particular `false` and empty String are present values, not missing fields; omitted optional fields stay absent and `null` is invalid. Proto3's default behavior is not validation. Nominal/enum identity and list element identity are maintained by the compiler overlay and bound DCM, not invented protobuf scalar types.
+Recipe `/3`, used only with DCM `/4`, retains that ordering and adds `int64` for Integer. Optional Integer fields use the same deterministic synthetic-oneof recipe; required fields omit it. Decimal is logically scalar but uses `.keir.numeric.Decimal` with natural presence. Always include `keir_numeric.proto` for `/4`, even if no model field or parameter uses Decimal: expression-only constructors and BINDs need the type at model binding.
+
+The fixed numeric dependency is proto3, package `keir.numeric`, message `Decimal` with exactly `string value = 1` and `json_name = "value"`. It has no imports/options/extensions/source information. FileDescriptorSet order is optional Timestamp dependency, mandatory numeric dependency, then `keir_read.proto`; the record file imports dependencies in that order. Recipe `/2` bytes never gain the numeric dependency. Compiler and both runtimes independently reconstruct descriptors; an arbitrary message declaration is not a Decimal bridge.
+
+Validate complete closed values before constructing a message and after extracting a result. Zero, `false` and empty String are present; omitted optional fields stay absent and `null` is invalid. Proto3 defaults do not validate requiredness. Numeric host strings map internally to long/bigint or the opaque Decimal message. Decimal internals, general protobuf constructors and `has(d.value)` are unavailable to source. Exact numeric/nominal/enum/list identity comes from the semantic overlay and DCM, not String storage.
 
 Node and Java prepare the same checked expressions in environments derived from these descriptors and variables. Runners independently validate the checked AST, overloads, type/reference maps and nominal/enum overlays; evaluator acceptance alone is not validation. Missing checked metadata must be rejected before execution.
 
-Supported artifact environment pins are `celJava: "0.14.0"`, `celNode: "0.6.1"`, `protobufJava: "4.35.1"`, `protobufNode: "2.6.2"`. The corresponding supporting packages are `dev.cel:protobuf:0.14.0` and `@bufbuild/cel-spec:0.6.1`. The latter matches the CEL package version. Java's planner enables heterogeneous numeric comparisons as an engine option; all numeric business AST/types remain rejected. This option adds no numeric language support. See [testing](../testing.md) for descriptor and engine verification evidence.
+Supported artifact environment pins are `celJava: "0.14.0"`, `celNode: "0.6.1"`, `protobufJava: "4.35.1"`, `protobufNode: "2.6.2"`. Supporting packages are `dev.cel:protobuf:0.14.0` and `@bufbuild/cel-spec:0.6.1`. Java's heterogeneous-comparison option grants no mixed numeric comparisons or numeric support to retained profiles. See [testing](../testing.md) for verification evidence.
+
+### Numeric checked operations
+
+Only the numeric profile admits the following additional checked forms. `I`, `D`, `S` and `B` mean Integer, Decimal, String and Boolean. Every call is global, without a receiver. [Source literal restrictions](language.md#numeric-syntax-and-types) and exact semantic typing apply in addition to these signatures.
+
+| Function | Arguments → result | Overload |
+| --- | --- | --- |
+| `decimal` | S → D | `keir_decimal_from_string` |
+| `toDecimal` | I → D | `keir_decimal_from_integer` |
+| `toInteger` | D → I | `keir_integer_from_decimal` |
+| `_+_`, `_-_`, `_*_`, `_/_` | D,D → D | `keir_decimal_add`, `keir_decimal_subtract`, `keir_decimal_multiply`, `keir_decimal_divide` |
+| `-_` | D → D | `keir_decimal_negate` |
+| `_<_`, `_<=_`, `_>_`, `_>=_` | D,D → B | `keir_decimal_less`, `keir_decimal_less_equal`, `keir_decimal_greater`, `keir_decimal_greater_equal` |
+| `round` | D,I,S → D | `keir_decimal_round` |
+| `multiplyRounded`, `divideRounded` | D,D,I,S → D | `keir_decimal_multiply_rounded`, `keir_decimal_divide_rounded` |
+| `size` | Named bounded list → I | `size_list` |
+
+Integer arithmetic uses `add_int64`, `subtract_int64`, `multiply_int64`, `divide_int64`, `negate_int64`; ordering uses `less_int64`, `less_equals_int64`, `greater_int64`, `greater_equals_int64`. Equality/inequality use `equals`/`not_equals` only after exact scalar-type checks, including canonical Decimal equality. The trusted Integer division binding rejects a nonzero remainder; native truncating division is not this contract. Numeric functions are fixed runtime bindings, not user extension points. Reject double/uint/dyn, wrong or extra overloads, hidden metadata and internal Decimal access before execution. Node's planner must resolve its own matching trusted bindings; metadata strings alone do not select execution.
 
 <a id="admission-and-trust"></a>
 

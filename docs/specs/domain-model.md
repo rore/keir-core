@@ -1,9 +1,9 @@
 <a id="read-and-decide-dcm-contract"></a>
 # Domain capability model
 
-The domain capability model (DCM) is the host's contract for an extension. It describes which entrypoints the host exposes, the data they pass, and the operations an extension may call. Current authoring targets `keir-dcm/3`, with the bounded values of [Keir 2](workflow-expressions.md) and the [pre-operation decision lifecycle](pre-operation-decisions.md). The compiler and runtimes check decoded structure, references, UTF-8 byte limits and the relationships between fields.
+The domain capability model (DCM) is the host's contract for an extension. It describes hooks, data and approved operations. Published Core 0.4.0 authors against `keir-dcm/3`. Development Core 0.5 retains that authoring pair and adds numeric `keir-dcm/4` with source `keir/3`. Numeric source regressions are not installed-package qualification. The compiler and runtimes check decoded structure, references, byte limits and field relationships.
 
-The [`keir-dcm/3` schema](../../schemas/dcm-3/dcm.schema.json) checks current structure. Use the [version rules](compiler-artifact.md#source-and-artifact-identity) to distinguish current authoring from retained execution of old approved artifacts.
+The [`keir-dcm/3` schema](../../schemas/dcm-3/dcm.schema.json) stays unchanged; development `/4` uses a separate schema. Use the [version rules](compiler-artifact.md#source-and-artifact-identity) to select the exact schema and distinguish authoring, retained execution and package support.
 
 ## Model fields and identity
 
@@ -11,9 +11,9 @@ Every top-level field below is required. Objects are closed, with unique keys an
 
 | Field | Meaning |
 | --- | --- |
-| `format` | The literal `keir-dcm/3` for current authoring. |
+| `format` | `keir-dcm/3`, or development numeric `keir-dcm/4`. |
 | `domain` | Exactly `{id, version}`. Both are nonempty strings. Together with the model's canonical digest they identify the snapshot used to compile and run an extension. |
-| `types` | One to 16 named business types, in addition to built-in `String`, `Boolean` and `Timestamp`. |
+| `types` | One to 16 named business types, plus built-in `String`, `Boolean`, `Timestamp` and, only in `/4`, `Integer` and `Decimal`. |
 | `capabilities` | Zero to eight named host operations. An empty catalog supports extensions that use only their input and local bindings. |
 | `entrypoints` | One to four named hooks that can run an extension. |
 | `hostKey` | Exactly `{source, type}`. The source is `requestKey`. The type is a nonempty label for the host's native key contract. |
@@ -43,16 +43,34 @@ These are the required `bindModel` results with matching host registrations and 
 | Nominal String | `{kind: "nominal", base: "String"}`. Distinguishes identifiers such as `TaskId` and `ProjectId` even though both are carried as strings. |
 | Enum | `{kind: "enum", values: [...]}`. One to 16 unique nonempty string values. Each has a 256 UTF-8 byte limit. |
 | Timestamp | Built-in scalar with exact UTC wire form `YYYY-MM-DDTHH:mm:ss.SSSZ`, valid Gregorian dates in years 0001 through 9999, and seconds 00 through 59. |
+| Integer and Decimal | Built-in scalars only in `/4`. Both use strict canonical String business values; see [numeric values](#numeric-values). |
 | Bounded list | `{kind: "list", element: TypeName, maxItems: N}`. `N` is an integer from 0 through 16. Elements are Boolean, String, nominal String or enum; no Timestamp, records or nested lists. Ordered JSON arrays preserve duplicates. |
 | Record | `{kind: "record", fields: {fieldName: TypeName, ...}}`. One to 16 fields, each a scalar or named bounded list. An optional scalar field uses `{type: TypeName, optional: true}` instead of the type name. |
 
 Records are closed and cannot contain nested records. They are used for entrypoint input and output and capability results. Capability parameters accept scalars or named bounded lists. Lists are required values; only scalar fields and agent parameters can be optional. Omission means absence, `null` is invalid, and supplied `false` or empty String values remain present. A complete business value is bounded to 8,192 bytes, in addition to each String's 256-byte ceiling and each list's declared cap. `Duration` is an expression-only type, not a model value. See [language types and expressions](language.md#types-and-cel-bridge) for presence proofs, assignment, membership, timestamps and nominal literal rules.
+
+### Numeric values
+
+These rules apply only to DCM `/4`. Numeric scalars work in inputs, host/agent parameters, capability results, BINDs and handler/root output fields, including decision outputs. Required and optional numeric fields follow the existing declaration forms. Zero is present, never absent. Numeric list elements and nominal numeric bases are not supported.
+
+| Type | Exact value and canonical String |
+| --- | --- |
+| `Integer` | Signed int64, `-9223372036854775808` through `9223372036854775807`. Grammar `0` or `-?[1-9][0-9]*`, at most 20 ASCII characters, then range-check. |
+| `Decimal` | Normalized `C × 10^-s`, `abs(C) <= 10^38-1`, scale `0..18`. Remove coefficient trailing zeros only while scale is positive; zero is `(0,0)`. Wire grammar `-?(0\|[1-9][0-9]*)(\.[0-9]*[1-9])?`, at most 40 ASCII characters, then precision/scale checks; reject `-0`. |
+
+Decimal has up to 38 coefficient digits, **not** 38 integral plus 18 fractional digits. Ignore leading zeros when counting the coefficient; integral trailing zeros still count. Maximum magnitude is `99999999999999999999999999999999999999`; minimum positive value is `0.000000000000000001`. `10^37 + 0.1` would need 39 coefficient digits and is not representable. Arithmetic normalizes its result before checking each operation's bounds.
+
+Both types reject whitespace, a leading plus, redundant leading zeros, exponents, separators and non-ASCII digits at strict boundaries. Decimal also rejects fractional trailing zeros (`"100.00"`), `.5`, `1.`, NaN and infinities. Host values must be strings, not Java Long/BigDecimal or Node number/bigint. The runtime does not silently normalize or round. Hosts can explicitly use the [exact String normalization helpers](host-model-binding.md#exact-numeric-text-helpers) before invocation or adapter return; `"100.00"` then becomes `"100"` without loss.
+
+The DCM supplies numeric meaning, not the JSON spelling. String `"10"`, Integer `"10"` and Decimal `"10"` remain different semantic types. Core enforces no units, currency consistency, nonnegative quantity or percentage range. Those are host constraints or explicit customer predicates; Decimal alone is not a money model.
 
 ## Identifiers
 
 Type names, record field names and parameter names match `[A-Za-z][A-Za-z0-9]{0,63}`. Capability, entrypoint and consumer IDs match `[A-Za-z][A-Za-z0-9.]{0,99}`.
 
 These identifiers exclude the reserved words `as`, `break`, `const`, `continue`, `else`, `false`, `for`, `function`, `if`, `import`, `in`, `let`, `loop`, `namespace`, `null`, `package`, `return`, `true`, `var`, `void` and `while`. Type names also exclude `Boolean`, `String`, `Timestamp`, `Duration`, `bool`, `bytes`, `double`, `dyn`, `int`, `list`, `map`, `null_type`, `string`, `type`, `uint` and `input`.
+
+Only `/4` also reserves `Integer` and `Decimal`. Retained `/3` types with those names keep their declared nominal String meaning and descriptor encoding. Adopting `/4` requires a deliberately changed model and new artifact approval, not an in-place relabeling.
 
 Names are case-sensitive and unique within their defining maps. A capability and an entrypoint can use the same ID, and different capabilities can reuse a parameter name. When an extension uses the same protected parameter name in multiple calls, the host supplies one value under that name. The runtime validates it against every required declaration, including those on guarded calls.
 

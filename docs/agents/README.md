@@ -15,6 +15,8 @@ Choose the guide matching the host's packages and model using the [companion com
 
 For conditional call results, see the [guarded-result examples](../../examples/README.md#guarded-result-scalar-dataflow) and select a [companion matching the installed host](authoring-companion.md#choose-an-edition). Package publication does not upgrade a host's supported capabilities.
 
+For development Core 0.5 numeric authoring, use [draft edition 9](customer-authoring-guide-v9.md) with the [exact profile matrix](../specs/compiler-artifact.md#source-and-artifact-identity). It covers canonical Integer/Decimal strings, exact arithmetic and explicit rounding. Compiler/Java/Node source regressions have passed, but matching packages and the edition-9 companion remain unqualified. This is not a new compatibility row or permission to use numerics on Core 0.4.0. Earlier guide editions and archive bytes remain unchanged; select them by their actual host contracts.
+
 The [authoring companion](authoring-companion.md) packages the guide, schemas and example scenarios as a versioned ZIP. Supply your application's exact published domain capability model (DCM), policy and scoped tool definitions separately.
 
 The [embedding guide](../embedding.md) shows how an application calls the compiler and runtime. The application implements its authoring tools and owns tool access, approval and activation.

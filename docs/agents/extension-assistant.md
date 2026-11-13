@@ -3,6 +3,8 @@
 
 Select the [authoring companion](authoring-companion.md#choose-an-edition) matching the host's packages and model. Its compatibility record identifies the exact package and document combination.
 
+Development numeric authoring has [draft edition 9](customer-authoring-guide-v9.md). It is not yet a qualified package/companion combination. Published Core 0.4.0 remains nonnumeric; do not teach an installed host a feature solely because development source supports it.
+
 ## Task and inputs
 
 Give the assistant the exact model approved for the customer, including hooks, capabilities, result contracts, types and limits. Give it separate access to the authoring tools you want it to use. For example, the follow-up extension chooses a project and title and calls the app’s existing `tasks.create` operation. The project choice belongs in source. Resource permissions belong to the application.
@@ -39,9 +41,19 @@ Agree on ALLOW, DENY, failed read, timeout and changed-fact cases before simulat
 
 Use guarded-result scalar access only when the host explicitly supports a compatible [compiler/runtime tuple](../specs/compiler-artifact.md#source-and-artifact-identity). Older installed consumers and companion editions retain their original limits; do not suggest an automatic upgrade or recompile an approved artifact in place.
 
-For an earlier CALL `r` with `when: g`, use `g ? r.reference : input.existingReference`. For an optional scalar, keep both proofs: `g ? (has(r.note) ? r.note : "") : ""`. Use the exact Boolean BIND identifier named by the CALL's `when`, not an equivalent expression or an alias of a different guard. If the CALL itself names an alias as its guard, use that exact identifier. Do not read the record or its lists, infer proof from a later CALL's guard, or refer to a CALL's own result in its arguments/handler. Preserve exact nominal/enum/timestamp types and the one-possible-WRITE ceiling (zero for decisions).
+For an earlier CALL `r` with `when: g`, use `g ? r.reference : input.existingReference`. For an optional scalar, keep both proofs: `g ? (has(r.note) ? r.note : "") : ""`. Use the exact Boolean BIND identifier named by the CALL's `when`, not an equivalent expression or an alias of a different guard. If the CALL itself names an alias as its guard, use that exact identifier. Do not read the record or its lists, infer proof from a later CALL's guard, or refer to a CALL's own result in its arguments/handler. Preserve exact scalar types and the one-possible-WRITE ceiling (zero for decisions).
 
 Agree on true, skipped, optional absent/empty/false, rejected and uncertain cases before simulation. Return the adapter's actual validated reference on success. Failure is not absence: never replace rejection, expiry, invalid data or UNKNOWN effect with the skipped fallback. Show receipts separately, including CONFIRMED beside a later failure. The [complete neutral examples](../../conformance/keir-3/README.md) and [language rules](../specs/language.md#steps-and-data-flow) define the bounded capability.
+
+## Numeric authoring requires the numeric profile
+
+Discover the exact producer, source/model pair and guide supported by the host. Only development `keir/3` + DCM `/4` adds Integer, Decimal and supplied-list size. The same 0.5 compiler can retain nonnumeric `keir/2` + DCM `/3` authoring, including nominal String types named Integer/Decimal. Both emit new 0.5 artifact identities requiring fresh approval; no old approval transfers.
+
+Use [canonical numeric strings](../specs/domain-model.md#numeric-values), typed literals such as `{literal: "0.075", type: Decimal}` and literal-only `decimal("1")`. Ordinary decimal Integer CEL constants are allowed; floating-point/hex/uint/exponent forms are not. Same-type comparisons/arithmetic, exact conversions and [explicit rounding](../specs/workflow-expressions.md#numeric-arithmetic-and-rounding) are the whole numeric surface, not full CEL. Never silently round, parse an arbitrary String or promote Integer to Decimal. Ask for a business rounding scale/mode when the request needs rounding. A rate of `0.075` means 7.5% only because the host/customer defines it that way.
+
+For a host declaring Decimal `subtotal` and `discountRate`, a draft amount expression can use `multiplyRounded(input.subtotal, decimal("1") - input.discountRate, 2, "HALF_EVEN")`. Optional fields still require presence proof; guarded numeric results still require their exact guard. Include absent versus present zero, overflow/inexact division, rejected calls and receipt-preserving failures in independent expectations. A failed call never supplies numeric zero as fallback.
+
+`size(input.tags)` counts the actual bounded list, not remote matching rows. The host owns normalization and distinctness. Core enforces no money/units and supplies no domain services. Do not invent Decimal fields in Daymark or another host. Normalization helpers are host APIs, not authoring expressions. Keep source checks, packaged-consumer evidence, simulated outcomes and actual native execution distinct; approval and activation remain separate.
 
 ## Authority and tools
 
