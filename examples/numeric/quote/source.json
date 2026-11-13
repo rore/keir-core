@@ -1,0 +1,16 @@
+{
+  "language": "keir/3",
+  "domain": {"id": "example.quotes", "version": "1", "fingerprint": "sha256:d9dcba833e52c54a02fec08758e3f2912fc693143f900d0b979b92af8cd17034"},
+  "entrypoint": "QuoteBeforeAccept", "name": "quote-under-limit",
+  "steps": [
+    {"id": "rate", "let": {"cel": "has(input.discountRate) ? input.discountRate : decimal(\"0\")"}},
+    {"id": "valid", "let": {"cel": "input.subtotal >= decimal(\"0\") && rate >= decimal(\"0\") && rate <= decimal(\"1\")"}},
+    {"id": "amount", "let": {"cel": "valid ? multiplyRounded(input.subtotal, decimal(\"1\") - rate, 2, \"HALF_EVEN\") : decimal(\"0\")"}},
+    {"id": "allowed", "let": {"cel": "valid && amount <= decimal(\"1000\")"}}
+  ],
+  "return": {"record": {
+    "decision": {"cel": "allowed ? \"ALLOW\" : \"DENY\""},
+    "message": {"cel": "allowed ? \"\" : \"Check the amount, discount and approval limit.\""},
+    "amount": {"cel": "amount"}
+  }}
+}

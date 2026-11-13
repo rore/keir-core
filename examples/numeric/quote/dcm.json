@@ -1,0 +1,18 @@
+{
+  "format": "keir-dcm/4",
+  "domain": {"id": "example.quotes", "version": "1"},
+  "hostKey": {"source": "requestKey", "type": "example.QuoteAttemptKey"},
+  "types": {
+    "AttemptId": {"kind": "nominal", "base": "String"},
+    "QuoteId": {"kind": "nominal", "base": "String"},
+    "QuoteInput": {"kind": "record", "fields": {"subtotal": "Decimal", "discountRate": {"type": "Decimal", "optional": true}}},
+    "Decision": {"kind": "enum", "values": ["ALLOW", "DENY"]},
+    "QuoteDecision": {"kind": "record", "fields": {"decision": "Decision", "message": "String", "amount": "Decimal"}}
+  },
+  "capabilities": {},
+  "entrypoints": {"QuoteBeforeAccept": {
+    "input": "QuoteInput", "output": "QuoteDecision", "trigger": "REQUEST", "placement": "BEFORE_COMMIT",
+    "consumer": {"id": "example.quote.decision", "version": "1", "kind": "DECISION"},
+    "event": {"idType": "AttemptId", "sourceType": "QuoteId"}, "effectGrant": 0
+  }}
+}

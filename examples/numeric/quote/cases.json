@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {"id": "discount", "input": {"subtotal": "100", "discountRate": "0.075"}, "decision": "ALLOW", "amount": "92.5"},
+    {"id": "absent-rate", "input": {"subtotal": "1000"}, "decision": "ALLOW", "amount": "1000"},
+    {"id": "present-zero", "input": {"subtotal": "1000.01", "discountRate": "0"}, "decision": "DENY", "amount": "1000.01"},
+    {"id": "even-down", "input": {"subtotal": "2.345"}, "decision": "ALLOW", "amount": "2.34"},
+    {"id": "even-up", "input": {"subtotal": "2.355"}, "decision": "ALLOW", "amount": "2.36"},
+    {"id": "full-discount", "input": {"subtotal": "100", "discountRate": "1"}, "decision": "ALLOW", "amount": "0"},
+    {"id": "negative", "input": {"subtotal": "-1"}, "decision": "DENY", "amount": "0"},
+    {"id": "rate-too-high", "input": {"subtotal": "100", "discountRate": "1.01"}, "decision": "DENY", "amount": "0"},
+    {"id": "negative-rate", "input": {"subtotal": "100", "discountRate": "-0.01"}, "decision": "DENY", "amount": "0"},
+    {"id": "maximum", "input": {"subtotal": "99999999999999999999999999999999999999"}, "decision": "DENY", "amount": "99999999999999999999999999999999999999"},
+    {"id": "normalized-carry", "input": {"subtotal": "99999999999999999999.999999999999999999"}, "decision": "DENY", "amount": "100000000000000000000"},
+    {"id": "null-rate", "input": {"subtotal": "100", "discountRate": null}, "error": "INPUT_INVALID"},
+    {"id": "native-number", "input": {"subtotal": 100}, "error": "INPUT_INVALID"},
+    {"id": "noncanonical", "input": {"subtotal": "100.00"}, "error": "INPUT_INVALID"},
+    {"id": "precision", "input": {"subtotal": "100000000000000000000000000000000000000"}, "error": "INPUT_INVALID"},
+    {"id": "unused-invalid-rate", "input": {"subtotal": "-1", "discountRate": "01"}, "error": "INPUT_INVALID"}
+  ]
+}

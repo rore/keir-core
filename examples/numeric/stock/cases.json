@@ -1,0 +1,15 @@
+{
+  "cases": [
+    {"id": "request", "available": "7", "quantity": "3", "response": {"kind": "SUCCESS", "value": {"accepted": "3"}, "effect": "CONFIRMED"}, "classification": "COMPLETED", "result": {"status": "REQUESTED", "ordered": "3"}},
+    {"id": "enough", "available": "10", "classification": "COMPLETED", "result": {"status": "NO_OP", "ordered": "0"}},
+    {"id": "above-safe-integer", "available": "9007199254740993", "classification": "COMPLETED", "result": {"status": "NO_OP", "ordered": "0"}},
+    {"id": "zero", "available": "0", "quantity": "10", "response": {"kind": "SUCCESS", "value": {"accepted": "10"}, "effect": "CONFIRMED"}, "classification": "COMPLETED", "result": {"status": "REQUESTED", "ordered": "10"}},
+    {"id": "backlog", "available": "-2", "quantity": "12", "response": {"kind": "SUCCESS", "value": {"accepted": "12"}, "effect": "CONFIRMED"}, "classification": "COMPLETED", "result": {"status": "REQUESTED", "ordered": "12"}},
+    {"id": "overflow", "available": "-9223372036854775808", "classification": "FAILED", "error": {"code": "EXPRESSION_FAILED", "path": "/steps/2"}},
+    {"id": "read-number", "available": 7, "classification": "FAILED", "error": {"code": "ADAPTER_INVALID", "path": "/steps/0"}},
+    {"id": "read-noncanonical", "available": "07", "classification": "FAILED", "error": {"code": "ADAPTER_INVALID", "path": "/steps/0"}},
+    {"id": "rejected", "available": "7", "quantity": "3", "response": {"kind": "BUSINESS_REJECTION", "code": "STOCK_CHANGED", "effect": "NONE"}, "classification": "BUSINESS_REJECTION", "error": {"code": "STOCK_CHANGED", "path": "/steps/3"}, "result": {"status": "REJECTED", "ordered": "0"}},
+    {"id": "invalid-confirmed", "available": "7", "quantity": "3", "response": {"kind": "SUCCESS", "value": {"accepted": "9223372036854775808"}, "effect": "CONFIRMED"}, "classification": "FAILED", "error": {"code": "ADAPTER_INVALID", "path": "/steps/3"}},
+    {"id": "unknown", "available": "7", "quantity": "3", "response": {"kind": "UNKNOWN_COMMIT", "effect": "UNKNOWN"}, "classification": "UNCERTAIN", "error": {"code": "UNKNOWN_COMMIT", "path": "/steps/3"}}
+  ]
+}

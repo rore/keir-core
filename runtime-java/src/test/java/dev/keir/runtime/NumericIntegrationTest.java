@@ -5,11 +5,115 @@ import dev.cel.expr.CheckedExpr;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static dev.keir.runtime.RuntimeData.*;
 
 class NumericIntegrationTest {
+    @Test void retainedNominalNamesStillExecuteAsStringsUnderNewProducer() throws Exception {
+        var row=map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-retained.json")),65_536),"");
+        var prepared=prepare(row); assertTrue(prepared.succeeded(),String.valueOf(prepared.diagnostic()));
+        var context=new KeirRuntime.BoundEffectInvocation(Map.of(),new KeirRuntime.Deadline(() -> 0L,10_000L),
+                "retained-key",Map.of("id","event1","source","owner1"));
+        var outcome=KeirRuntime.invokeBoundEffectProgram(prepared.prepared(),row.get("input"),context).toCompletableFuture().get();
+        var trace=new ArrayList<Object>(); event(trace,"INVOCATION_START",Map.of());
+        event(trace,"STEP_START",Map.of("step","value")); event(trace,"VALUE_BOUND",Map.of("step","value"));
+        event(trace,"RETURNED",Map.of()); event(trace,"TERMINATED",Map.of());
+        assertArrayEquals(canonical(Map.of("classification","COMPLETED","result",Map.of("value",true),"effects",List.of(),"trace",trace)),outcome.toJson());
+    }
+    private static void event(List<Object> trace,String event,Map<String,Object> fields) {
+        var row=new LinkedHashMap<>(fields); row.put("sequence",(long)trace.size()); row.put("event",event); trace.add(row);
+    }
+    private static Map<String,Object> programExpected(String program,Map<String,Object> spec) {
+        var trace=new ArrayList<Object>(); var effects=new ArrayList<Object>();
+        event(trace,"INVOCATION_START",Map.of());
+        var result=new LinkedHashMap<String,Object>();
+        String classification=(String)spec.getOrDefault("classification","COMPLETED");
+        Map<String,Object> error=spec.containsKey("error") && spec.get("error") instanceof String
+                ? Map.of("code",spec.get("error"),"path","/input") : spec.containsKey("error") ? map(spec.get("error"),"") : null;
+        if (program.equals("quote")) {
+            if (error==null) {
+                for (String step:List.of("rate","valid","amount","allowed")) {
+                    event(trace,"STEP_START",Map.of("step",step)); event(trace,"VALUE_BOUND",Map.of("step",step));
+                }
+                result.putAll(Map.of("decision",spec.get("decision"),"amount",spec.get("amount"),"message",
+                        spec.get("decision").equals("ALLOW") ? "" : "Check the amount, discount and approval limit."));
+                event(trace,"RETURNED",Map.of());
+            } else classification="FAILED";
+        } else {
+            event(trace,"STEP_START",Map.of("step","stock"));
+            event(trace,"CALL_DISPATCHED",Map.of("step","stock","capability","stock.get"));
+            if (!Set.of("read-number","read-noncanonical").contains(spec.get("id"))) {
+                event(trace,"CALL_SUCCEEDED",Map.of("step","stock","capability","stock.get"));
+                event(trace,"STEP_START",Map.of("step","low")); event(trace,"VALUE_BOUND",Map.of("step","low"));
+                event(trace,"STEP_START",Map.of("step","quantity"));
+                if (!spec.get("id").equals("overflow")) {
+                    event(trace,"VALUE_BOUND",Map.of("step","quantity"));
+                    event(trace,"STEP_START",Map.of("step","order"));
+                    boolean taken=spec.containsKey("quantity"); event(trace,"GUARD_EVALUATED",Map.of("step","order","taken",taken));
+                    if (!taken) event(trace,"STEP_SKIPPED",Map.of("step","order"));
+                    else {
+                        var target=Map.<String,Object>of("step","order","capability","stock.request");
+                        event(trace,"EFFECT_INTENT",target); event(trace,"CALL_DISPATCHED",target);
+                        var receipt=new LinkedHashMap<>(target); receipt.put("state",map(spec.get("response"),"").get("effect"));
+                        effects.add(receipt); event(trace,"EFFECT_RECORDED",receipt);
+                        if (spec.get("classification").equals("COMPLETED")) event(trace,"CALL_SUCCEEDED",target);
+                    }
+                    if (spec.containsKey("result")) event(trace,"RETURNED",Map.of());
+                }
+            }
+            if (spec.containsKey("result")) result.putAll(map(spec.get("result"),""));
+        }
+        event(trace,"TERMINATED",error==null ? Map.of() : Map.of("code",error.get("code")));
+        var outcome=new LinkedHashMap<String,Object>(Map.of("classification",classification,"effects",effects,"trace",trace));
+        if (error!=null) outcome.put("error",error);
+        if (!result.isEmpty()) outcome.put("result",result);
+        return outcome;
+    }
+
+    @Test void completeNumericProgramsPreserveCallsReceiptsAndInvocationIsolation() throws Exception {
+        var batch=map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-programs.json")),1_048_576),"");
+        for (Object raw:list(batch.get("programs"),"")) {
+            var program=map(raw,""); String name=(String)program.get("name");
+            record Request(Map<String,Object> spec,List<Object> calls) {}
+            var implementations=new HashMap<String,KeirRuntime.BoundEffectAdapter>();
+            for (String capability:List.of("stock.get","stock.request")) if (name.equals("stock")) {
+                implementations.put(capability,new KeirRuntime.BoundEffectAdapter("1","simulation","example.StockRequestKey",
+                        (args,protectedArgs,remaining,context) -> {
+                            Request key=(Request)context.requestKey(); var spec=key.spec();
+                            assertEquals(Map.of("actorId","user1"),protectedArgs);
+                            assertEquals(10_000L,remaining);
+                            assertEquals(Map.of("id","event1","source","item1"),context.event());
+                            var wanted=new LinkedHashMap<String,Object>(Map.of("itemId","item1"));
+                            if (capability.equals("stock.request")) wanted.put("quantity",spec.get("quantity"));
+                            assertEquals(wanted,args);
+                            key.calls().add(Map.of("capability",capability,"args",immutable(args),"protectedArgs",immutable(protectedArgs)));
+                            return CompletableFuture.completedFuture(capability.equals("stock.get")
+                                    ? Map.of("kind","SUCCESS","value",Map.of("available",spec.get("available"))) : spec.get("response"));
+                        }));
+            }
+            var bound=KeirRuntime.bindModel(canonical(program.get("dcm")),implementations);
+            assertTrue(bound.succeeded(),String.valueOf(bound.diagnostic()));
+            var prepared=KeirRuntime.prepareProgram(canonical(program.get("artifact")),bound.boundModel());
+            assertTrue(prepared.succeeded(),String.valueOf(prepared.diagnostic()));
+            // Four request threads share one immutable prepared plan. No request-owned values are shared.
+            try (var pool=Executors.newFixedThreadPool(4)) {
+                var jobs=new ArrayList<Future<?>>();
+                var scenarios=map(parseJson(Files.readAllBytes(Path.of("..","examples","numeric",name,"cases.json")),65_536),"");
+                for (Object value:list(scenarios.get("cases"),"")) jobs.add(pool.submit(() -> {
+                    var spec=map(value,""); var request=new Request(spec,new ArrayList<>());
+                    var input=name.equals("stock") ? Map.of("itemId","item1") : spec.get("input");
+                    var context=new KeirRuntime.BoundEffectInvocation(name.equals("stock") ? Map.of("actorId","user1") : Map.of(),
+                            new KeirRuntime.Deadline(() -> 0L,10_000L),request,Map.of("id","event1","source",name.equals("stock") ? "item1" : "quote1"));
+                    var outcome=KeirRuntime.invokeBoundEffectProgram(prepared.prepared(),input,context).toCompletableFuture().join();
+                    assertArrayEquals(canonical(programExpected(name,spec)),outcome.toJson(),name+"/"+spec.get("id"));
+                    assertEquals(name.equals("quote") ? 0 : spec.containsKey("quantity") ? 2 : 1,request.calls().size());
+                }));
+                for (var job:jobs) job.get(3,TimeUnit.SECONDS);
+            }
+        }
+    }
     private static List<Object> cases() throws Exception {
         Path path=Path.of("..","conformance","keir-4","engine-matrix.json");
         if (!Files.exists(path)) path=Path.of("..","compiler-java","target","numeric-integration.json");

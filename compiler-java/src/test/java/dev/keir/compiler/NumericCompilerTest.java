@@ -94,7 +94,21 @@ class NumericCompilerTest {
         }
     }
 
-    @Test void retainedNominalNamesAndDescriptorBytesDoNotAcquireNumericMeaning() {
+    @Test void compileCompleteStockAndQuoteProgramsOnceForBothRuntimes() throws Exception {
+        var programs=new ArrayList<Object>();
+        for (String name:List.of("stock","quote")) {
+            var root=Path.of("..","examples","numeric",name);
+            byte[] model=Files.readAllBytes(root.resolve("dcm.json"));
+            byte[] source=Files.readAllBytes(root.resolve("source.json"));
+            var compiled=compiler.compile(source,model,KeirCompiler.Environment.supported());
+            assertTrue(compiled.succeeded(),name+": "+compiled.diagnostics());
+            assertArrayEquals(compiled.artifact(),compiler.compile(source,model,KeirCompiler.Environment.supported()).artifact());
+            programs.add(Map.of("name",name,"dcm",parse(model),"artifact",parse(compiled.artifact())));
+        }
+        Files.write(Path.of("target","numeric-programs.json"),bytes(Map.of("programs",programs)));
+    }
+
+    @Test void retainedNominalNamesAndDescriptorBytesDoNotAcquireNumericMeaning() throws Exception {
         var retained=model("Boolean",false); retained.put("format","keir-dcm/3");
         var types=map(retained.get("types"));
         types.put("Integer",Map.of("kind","nominal","base","String"));
@@ -110,6 +124,8 @@ class NumericCompilerTest {
         assertEquals(1,dcm.descriptors().getFileCount());
         assertEquals(com.google.protobuf.Descriptors.FieldDescriptor.Type.STRING,
                 dcm.fileDescriptor().findMessageTypeByName("Input").findFieldByName("integer").getType());
+        Files.write(Path.of("target","numeric-retained.json"),bytes(Map.of("dcm",retained,"artifact",parse(compiled.artifact()),
+                "input",Map.of("integer","not-a-number","decimal","also-not-a-number"))));
         source.put("return",Map.of("record",Map.of("value",Map.of("cel","1 == 1"))));
         assertFalse(compile(source,retained).succeeded());
         source.put("language","keir/3");

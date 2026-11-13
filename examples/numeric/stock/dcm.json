@@ -1,0 +1,31 @@
+{
+  "format": "keir-dcm/4",
+  "domain": {"id": "example.stock", "version": "1"},
+  "hostKey": {"source": "requestKey", "type": "example.StockRequestKey"},
+  "types": {
+    "ItemId": {"kind": "nominal", "base": "String"},
+    "EventId": {"kind": "nominal", "base": "String"},
+    "ActorId": {"kind": "nominal", "base": "String"},
+    "StockInput": {"kind": "record", "fields": {"itemId": "ItemId"}},
+    "Stock": {"kind": "record", "fields": {"available": "Integer"}},
+    "Order": {"kind": "record", "fields": {"accepted": "Integer"}},
+    "StockStatus": {"kind": "enum", "values": ["REQUESTED", "NO_OP", "REJECTED"]},
+    "StockReport": {"kind": "record", "fields": {"status": "StockStatus", "ordered": "Integer"}}
+  },
+  "capabilities": {
+    "stock.get": {"version": "1", "effect": "READ", "parameters": {
+      "itemId": {"type": "ItemId", "binding": "agent"},
+      "actorId": {"type": "ActorId", "binding": "host"}
+    }, "result": "Stock", "errors": ["NOT_FOUND", "ACCESS_DENIED"]},
+    "stock.request": {"version": "1", "effect": "WRITE", "parameters": {
+      "itemId": {"type": "ItemId", "binding": "agent"},
+      "quantity": {"type": "Integer", "binding": "agent"},
+      "actorId": {"type": "ActorId", "binding": "host"}
+    }, "result": "Order", "errors": ["ACCESS_DENIED", "STOCK_CHANGED"]}
+  },
+  "entrypoints": {"StockChanged": {
+    "input": "StockInput", "output": "StockReport", "trigger": "EVENT", "placement": "AFTER_COMMIT",
+    "consumer": {"id": "example.stock.report", "version": "1", "kind": "EVENT_REPORT"},
+    "event": {"idType": "EventId", "sourceType": "ItemId"}
+  }}
+}

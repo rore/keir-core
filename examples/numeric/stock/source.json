@@ -1,0 +1,19 @@
+{
+  "language": "keir/3",
+  "domain": {"id": "example.stock", "version": "1", "fingerprint": "sha256:db7fdafa221f5f9c1e9ff9f0008f5aa2cc4636bca5ab099606b60df1a2ac2906"},
+  "entrypoint": "StockChanged", "name": "replenish-below-ten",
+  "steps": [
+    {"id": "stock", "call": "stock.get", "args": {"itemId": {"cel": "input.itemId"}}},
+    {"id": "low", "let": {"cel": "stock.available < 10"}},
+    {"id": "quantity", "let": {"cel": "low ? 10 - stock.available : 0"}},
+    {"id": "order", "call": "stock.request", "when": "low", "args": {
+      "itemId": {"cel": "input.itemId"}, "quantity": {"cel": "quantity"}
+    }, "onError": {"STOCK_CHANGED": {"record": {
+      "status": {"literal": "REJECTED"}, "ordered": {"literal": "0", "type": "Integer"}
+    }}}}
+  ],
+  "return": {"record": {
+    "status": {"cel": "low ? \"REQUESTED\" : \"NO_OP\""},
+    "ordered": {"cel": "low ? order.accepted : 0"}
+  }}
+}
