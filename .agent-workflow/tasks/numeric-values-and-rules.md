@@ -358,7 +358,7 @@ The 14 literal zero/negative/boundary rows received independent literal-oracle G
 
 ### Design §11 evidence map
 
-These are test references, not a count-based blanket verdict. Supplemental runtime evidence is run 43445160342; final run 43449029316 also passes old-package rejection, 14 codec rows and pin consumption. Final revised-guide archive remains a separate gate.
+These are test references, not a count-based blanket verdict. Supplemental runtime evidence is run 43445160342; final run 43449029316 also passes old-package rejection, 14 codec rows and pin consumption. Final revised-guide archive passes run 43449720611 below. Daymark acceptance remains separate.
 
 | Obligation | Concrete evidence / remaining dependency |
 | --- | --- |
@@ -392,3 +392,24 @@ Manager integrated the two documentation-index corrections as `678453f`, adopted
 Repaired checkpoint `3bcba648252803b7ac19a9a971f1e1891feaaf0a` was pushed non-force after attribution and two exact remote blobs were verified; sole full [run 43449029316](https://github.com/rore/keir-core/actions/runs/43449029316) passed in 94 seconds. All 229 Java tests/31 suites and 528 Node tests pass with zero failures/errors/skips; existing 19 setup/72 packed-host tests, 130 installed outcomes per current runtime, exact helpers and real-rule measurements also pass. Actual installed published 0.4 Java and Node runtimes each reject both new profiles with the correct historical ADMISSION_INVALID/ARTIFACT_INVALID errors and zero callbacks; that stage took two seconds. Pin consumption, all 114 codec operation vectors and 231 supplemental complete outcomes pass. All 62 evidence payload hashes/lengths verify (1160332 bytes), receipt SHA-256 `248319ef820c42372eaf9e5453ee892a276b143a999603bb1cf43a1617ff537d`. All five actual downloaded package files remain byte-identical to frozen qualified Core `3a383c2`. This closes the executable Core §11 map, not Daymark or final companion acceptance.
 
 Next action: deliver this capture-only record, then one bounded companion-only run for the exact revised guide and current source manifest. Do not reuse draft archive/manifest hashes. Preserve the eight schemas, both profile descriptions, actual Core package revision and three package pins. No runtime, source, package or performance suite needs repeating for this record-only delivery. Final technical/documentation reviews remain reused with all known findings resolved; manager owns combined result acceptance and canonical feature status. Keep the checkout active until that result handoff is accepted or a concrete correction is assigned.
+
+## Final Core result delivery
+
+Record-only `47a37f8e39079f9661a338e947287397e2b9dccf` was pushed non-force after attribution and exact remote readback. Its sole companion-only [run 43449720611](https://github.com/rore/keir-core/actions/runs/43449720611) passed in 16 seconds: 23 recipe tests, build, offline verification and exact package checks. Prior source/runtime/package/measurement/old-package stages are explicitly skipped, not claimed rerun. All six evidence payload hashes/lengths verify (3244 bytes); receipt SHA-256 `8888c28c0e2b348330ceb6eb9075e732b32f28a659ed4652d4b90420abb788a6`.
+
+**Final unpublished companion:** `keir-authoring-companion-v9.zip`, 234142 bytes, SHA-256 `8668d9b3e32b3db16a73e2021166e270a1d8d09d36550c4e957fb53936d6fd40`. Manifest: 7010 bytes/SHA-256 `a5ab11a5382f93823156584146c3123972d5a86afdbd433e7e25fada319c37a9`. Source revision: `47a37f8e39079f9661a338e947287397e2b9dccf`; actual Core package revision: `3a383c2d0c6227eedc9c03927c2dd1910360d5b9`. All 34 payload members independently match their size/digest and exact source Git blobs. The guide is the finalized candidate, Git-LF SHA-256 `21615e93fc426f11eb756e850a4e0660d3a5cab55f69f47f5b3e818fc3fb1257`; title-based report status is qualified source. This new archive supersedes the draft archive as an adoption input, without changing or reusing its old hash.
+
+| Bundled schema | Bytes | SHA-256 |
+| --- | ---: | --- |
+| source 2 | 4252 | `8a496c63d06b25d76e4cf972c20bdf9e414fe4dc67e85f68f3157c5bb30d821a` |
+| source 3 | 863 | `52b705fd6ca319e52970ac7cecb26fb3403d53193666c52da4a0bf1fa5c24119` |
+| DCM 3 | 11206 | `78dc431b92913ff7e63c96154d17f07a9daa9d221536d65450ddd36429244945` |
+| DCM 4 | 1170 | `b525039877af5c71817a2a2738e7cf971ee23ae41d19a4d3b6b19fea73842614` |
+| artifact 3 | 6618 | `4f1fe6bbaa2cd292710a3c67617bad4746688e50310ac9588b7205cb70d585ac` |
+| artifact 4 | 1969 | `79b9c3545cefdf83b3bc97d8460685f42ab1305d154d80335707f9424bbd71df` |
+| scenario 3 | 15088 | `80761a26039bcf8f33fdc3b16da624f665c855eba48c37fa59f4584f66609161` |
+| scenario 4 | 842 | `886f98d9ee5367e4649ef8469558b20ebf20426ff6cceae9a95aa7230e6c5dc4` |
+
+Numeric source `/3` + model `/4` + recipe `/3` and retained source `/2` + model `/3` + recipe `/2` both use producer 0.5.0/artifact `/4`/scenario `/4`. Package pins remain compiler ZIP `ec36271caaa55714257601c2f8bc7aa19f2ced76858f02b15021dacd3a138e76`, Java Maven ZIP `88e9f903b32df239832e7c0a91b2db3a445a8e31bb5066f54578773c8b890e77` and Node tarball `9c59e4722f4d85bcd0e57580a1cef9526f7ceb52670e345576e39ca29d489736`. Actual package qualification is run 43438170269; later full-run downloads independently remain byte-identical. The final archive is within 256 KiB, and historical artifacts/approvals/guide editions remain unchanged.
+
+Core implementation, §11 executable reconciliation, current and historical installed consumers, bounded real-rule measurements, final human/agent documentation and matching companion are ready for manager acceptance. All known independent technical/documentation findings are resolved or covered by the explicit unchanged-review reuse recorded above. Remaining limitation: Decimal operand/result coefficient reparsing is retained and uninstrumented; sampled memory and fixed-order JIT/GC/topology screens do not prove hard containment, parse-once coefficients or whole-app performance. No publication, deployment, dependency upgrade, live environment change or Daymark journey is claimed. Manager alone updates the canonical feature and accepts combined delivery; final packets must carry these exact immutable bytes to the existing Daymark owner. Checkout is retained only for this pending acceptance/correction handoff, with explicit feature participation still attached until the assignment is accepted as finished.
