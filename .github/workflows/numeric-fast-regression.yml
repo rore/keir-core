@@ -102,7 +102,8 @@ jobs:
           set -euo pipefail
           started=$SECONDS
           {
-            timeout --kill-after=5s 30s python -B -m unittest discover -s scripts -p 'test-*release*.py'
+            timeout --kill-after=5s 15s python -B scripts/test-release-core.py
+            timeout --kill-after=5s 15s python -B scripts/test-verify-core-release.py
             timeout --kill-after=5s 150s python -B scripts/release-core.py --revision "$GITHUB_SHA" --version 0.5.0 --output "$QUALIFICATION_ROOT/candidate" --maven-repo "$MAVEN_USER_HOME/repository" --npm-cache "$NPM_CONFIG_CACHE"
             timeout --kill-after=5s 90s python -B scripts/verify-core-release.py --version 0.5.0 --assets "$QUALIFICATION_ROOT/candidate" --checksums "$QUALIFICATION_ROOT/candidate/SHA256SUMS" --smoke-revision "$GITHUB_SHA" --maven-repo "$MAVEN_USER_HOME/repository" --npm-cache "$NPM_CONFIG_CACHE"
           } > "$QUALIFICATION_ROOT/logs/packages.log" 2>&1
