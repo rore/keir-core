@@ -128,8 +128,8 @@ public final class ScenarioHost {
         boolean old = "keir-dcm/2".equals(model.get("format")) && "keir-artifact/2".equals(artifact.get("format")) &&
                 "keir-compiler-java/0.2.0".equals(artifact.get("compiler"));
         boolean current = "keir-dcm/3".equals(model.get("format")) && "keir-artifact/3".equals(artifact.get("format")) &&
-                Set.of("keir-compiler-java/0.3.0","keir-compiler-java/0.3.1","keir-compiler-java/0.4.0").contains(artifact.get("compiler"));
-        boolean modern = Set.of("keir-dcm/3","keir-dcm/4").contains(model.get("format"))
+                artifact.get("compiler") instanceof String producer && Set.of("keir-compiler-java/0.3.0","keir-compiler-java/0.3.1","keir-compiler-java/0.4.0").contains(producer);
+        boolean modern = model.get("format") instanceof String format && Set.of("keir-dcm/3","keir-dcm/4").contains(format)
                 && "keir-artifact/4".equals(artifact.get("format")) && "keir-compiler-java/0.5.0".equals(artifact.get("compiler"));
         check(old || current || modern,
                 "Incompatible scenario contract");
@@ -238,7 +238,8 @@ public final class ScenarioHost {
             same(consumed, consumption, "Invalid expected outcome or DECISION");
         } else {
             check("EVENT_REPORT".equals(consumer) && "REPORTED".equals(consumption.get("status")), "Expected EVENT_REPORT");
-            same(EffectConsumer.consume(outcome), consumption, "Invalid expected outcome or EVENT_REPORT");
+            same("keir-artifact/4".equals(artifact.get("format")) ? consumeEvent(model,(String)entry.get("output"),outcome)
+                    : EffectConsumer.consume(outcome), consumption, "Invalid expected outcome or EVENT_REPORT");
         }
         validateTrace(catalog, artifact, calls, outcome);
     }
@@ -350,6 +351,10 @@ public final class ScenarioHost {
 
     private byte[] pinned(String name, int max) throws IOException {
         return pinned(corpus(),name,max);
+    }
+
+    static Map<String,Object> consumeEvent(Map<String,Object> model,String output,Object outcome) {
+        return EffectConsumer.consume(outcome,result -> { typedValue(model,output,result); return true; });
     }
 
     private static byte[] pinned(Path directory,String name,int max) throws IOException {

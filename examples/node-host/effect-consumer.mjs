@@ -43,12 +43,13 @@ function priorConfirmation(effect, outcome) {
     && lastDispatch.step === lastStep?.step && lastDispatch.step !== effect.step && lastDispatch.capability !== effect.capability;
 }
 
-export function consumeEffect(outcome) {
+export function consumeEffect(outcome, validResult = resultShape) {
   if (!record(outcome, ['classification', 'effects', 'trace'], ['result', 'error'])
       || !classifications.has(outcome.classification) || !Array.isArray(outcome.effects)
       || outcome.effects.length > 1 || !outcome.effects.every(effectShape) || !traceShape(outcome.trace)) return invalid();
   const hasResult = own(outcome, 'result'), hasError = own(outcome, 'error');
-  if ((hasResult && !resultShape(outcome.result)) || (hasError && !errorShape(outcome.error, ['FAILED', 'LIMIT_EXCEEDED'].includes(outcome.classification)))) return invalid();
+  try { if (hasResult && validResult(outcome.result) !== true) return invalid(); } catch { return invalid(); }
+  if (hasError && !errorShape(outcome.error, ['FAILED', 'LIMIT_EXCEEDED'].includes(outcome.classification))) return invalid();
   if (hasError && own(outcome.error, 'cause')) {
     const cause = outcome.error.cause;
     const handler = cause.path + '/onError/' + cause.code.replaceAll('~', '~0').replaceAll('/', '~1');

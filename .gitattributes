@@ -9,3 +9,9 @@
 /scripts/agent-workflow-runtime.py linguist-vendored
 /scripts/agent-workflow-runtime.sh linguist-vendored
 /scripts/agent-workflow-runtime.ps1 linguist-vendored
+
+# These new example pins cover raw compiler/model bytes on every checkout.
+/examples/numeric/stock/dcm.json -text
+/examples/numeric/stock/artifact.json -text
+/examples/numeric/quote/dcm.json -text
+/examples/numeric/quote/artifact.json -text

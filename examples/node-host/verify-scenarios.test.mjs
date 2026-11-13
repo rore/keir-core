@@ -24,7 +24,8 @@ test('numeric scenario4 uses complete stock/quote consumers and rejects relabele
     const scenario = readFileSync(new URL('scenarios/normal.json', directory));
     const pair = [readFileSync(new URL('../../compiler-java/target/numeric-' + group + '.json', import.meta.url)),
       readFileSync(new URL('dcm.json', directory))];
-    const actual = await prepareScenario(group, scenario, python, pair).run();
+    assert.deepEqual(pair[0], readFileSync(new URL('artifact.json', directory)));
+    const [actual] = await verifyGroup(group, python);
     assert.equal(actual.consumption.status, group === 'stock' ? 'REPORTED' : 'ALLOWED');
     const row = JSON.parse(scenario); row.format = 'keir-scenario/3';
     assert.throws(() => prepareScenario(group, Buffer.from(JSON.stringify(row)), python, pair), /Scenario schema/);

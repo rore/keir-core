@@ -2,6 +2,7 @@ package dev.keir.examples;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Predicate;
 
 /** EVENT_REPORT validates the public outcome independently of the runtime. */
 final class EffectConsumer {
@@ -17,6 +18,9 @@ final class EffectConsumer {
     private EffectConsumer() {}
 
     static Map<String,Object> consume(Object value) {
+        return consume(value,EffectConsumer::result);
+    }
+    static Map<String,Object> consume(Object value,Predicate<Object> validResult) {
         try {
             if(!shape(value,Set.of("classification","effects","trace"),Set.of("result","error")))return invalid();
             Map<?,?> outcome=(Map<?,?>)value; Object classification=outcome.get("classification");
@@ -25,7 +29,7 @@ final class EffectConsumer {
             boolean hasResult=outcome.containsKey("result"),hasError=outcome.containsKey("error");
             Object result=outcome.get("result"),error=outcome.get("error");
             boolean failure=kind.equals("FAILED") || kind.equals("LIMIT_EXCEEDED");
-            if(hasResult && !result(result) || hasError && !error(error,failure))return invalid();
+            if(hasResult && !validResult.test(result) || hasError && !error(error,failure))return invalid();
             if(hasError && ((Map<?,?>)error).containsKey("cause")) {
                 Map<?,?> original=(Map<?,?>)((Map<?,?>)error).get("cause");
                 String originalPath=(String)original.get("path"),originalCode=(String)original.get("code");

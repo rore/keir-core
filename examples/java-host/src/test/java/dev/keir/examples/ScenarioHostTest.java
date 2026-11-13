@@ -21,7 +21,8 @@ class ScenarioHostTest {
             byte[] scenario=Files.readAllBytes(directory.resolve("scenarios/normal.json"));
             var selected=new ScenarioHost.Selection(group,Files.readAllBytes(directory.resolve("dcm.json")),
                     Files.readAllBytes(root.resolve("compiler-java/target/numeric-"+group+".json")));
-            var rows=host.verify(group,List.of(scenario),selected);
+            assertArrayEquals(Files.readAllBytes(directory.resolve("artifact.json")),selected.artifact());
+            var rows=host.verifyGroup(group);
             assertEquals(1,rows.size());
             assertEquals(group.equals("stock") ? "REPORTED" : "ALLOWED",object(rows.getFirst().get("consumption")).get("status"));
             var relabeled=object(EffectJson.parse(scenario)); relabeled.put("format","keir-scenario/3");

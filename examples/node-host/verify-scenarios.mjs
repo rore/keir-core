@@ -124,7 +124,9 @@ export function prepareScenario(group, bytes, python, testPair) {
   assert.equal(row.format, 'keir-scenario/' + (modern ? '4' : legacy ? '2' : '3'), 'Scenario artifact compatibility: scenario');
   const entry = dcm.entrypoints[artifact.entrypoint];
   const quote = dcm.format === 'keir-dcm/4' && dcm.domain.id === 'example.quotes' && entry.output === 'QuoteDecision';
-  const consume = quote ? consumeQuote : entry.consumer.kind === 'DECISION' ? consumeDecision : consumeEffect;
+  const consume = quote ? consumeQuote : entry.consumer.kind === 'DECISION' ? consumeDecision : modern
+    ? outcome => consumeEffect(outcome, result => { typed(result, entry.output, dcm); return true; })
+    : consumeEffect;
   const actor = artifact.steps.some(step => step.op === 'CALL' && dcm.capabilities[step.capability].parameters.actorId?.binding === 'host');
   const key = nativeKey();
   const decision = entry.consumer.kind === 'DECISION';

@@ -15,9 +15,13 @@ final class BoundScenarioSimulation implements AutoCloseable {
     final Map<String,Boolean> decisions=new HashMap<>();
     final Map<String,String> eventSources=new HashMap<>();
     final Set<String> quotePrograms=new HashSet<>();
+    final Set<String> modernPrograms=new HashSet<>();
+    final Map<String,String> outputs=new HashMap<>();
+    final Map<String,Object> document;
     final Set<String> actorPrograms=new HashSet<>();
     final Set<String> writes=new HashSet<>();
     BoundScenarioSimulation(byte[] dcm,Map<String,byte[]> programs,Map<String,Object> document) {
+        this.document=object(EffectJson.copy(document));
         try {
             GenericCapacity.capacity(dcm.length<=65_536); leases.add(capacity.model(dcm.length,EffectJson.encode(document).length,65_536));
             var invokers=new LinkedHashMap<String,KeirRuntime.BoundEffectAdapter>();
@@ -34,6 +38,8 @@ final class BoundScenarioSimulation implements AutoCloseable {
                 try(var work=capacity.work()) { var result=KeirRuntime.prepareProgram(program,model); check(result.succeeded(),"Bound program preparation failed"); prepared.put(entry.getKey(),result.prepared()); }
                 var artifact=object(EffectJson.parse(program));
                 var entrypoint=object(object(document.get("entrypoints")).get(artifact.get("entrypoint")));
+                outputs.put(entry.getKey(),(String)entrypoint.get("output"));
+                if("keir-artifact/4".equals(artifact.get("format"))) modernPrograms.add(entry.getKey());
                 decisions.put(entry.getKey(),"DECISION".equals(object(entrypoint.get("consumer")).get("kind")));
                 eventSources.put(entry.getKey(),switch ((String)object(entrypoint.get("event")).get("sourceType")) {
                     case "TaskId" -> "task1";
@@ -95,12 +101,14 @@ final class BoundScenarioSimulation implements AutoCloseable {
             var calls=reconcile(state.captures,outcome.trace(),state.stubs,state.violations); check(state.violations.isEmpty(),"Simulation violations");
             var actual=Map.<String,Object>of("outcome",outcome.toMap(),"calls",calls,"consumption",
                      quotePrograms.contains(group)?DecisionConsumer.consumeQuote(outcome.toMap())
-                             :state.decision?DecisionConsumer.consumeDecision(outcome.toMap()):EffectConsumer.consume(outcome.toMap()));
+                             :state.decision?DecisionConsumer.consumeDecision(outcome.toMap())
+                             :modernPrograms.contains(group)?ScenarioHost.consumeEvent(document,outputs.get(group),outcome.toMap())
+                             :EffectConsumer.consume(outcome.toMap()));
             same(actual,row.get("expect"),"Simulation result mismatch"); var result=new LinkedHashMap<String,Object>(actual); result.put("id",row.get("id")); return result;
         } catch(Exception failure) { if(failure instanceof RuntimeException runtime) throw runtime; throw new IllegalArgumentException("Bound simulation invocation failed"); }
         finally { current=null; }
     }
-    public void close() { check(current==null,"Cannot release in-flight bound model"); prepared.clear(); decisions.clear(); eventSources.clear(); quotePrograms.clear(); actorPrograms.clear(); model=null; for(int i=leases.size()-1;i>=0;i--) leases.get(i).close(); leases.clear(); }
+    public void close() { check(current==null,"Cannot release in-flight bound model"); prepared.clear(); decisions.clear(); eventSources.clear(); quotePrograms.clear(); modernPrograms.clear(); outputs.clear(); document.clear(); actorPrograms.clear(); model=null; for(int i=leases.size()-1;i>=0;i--) leases.get(i).close(); leases.clear(); }
 
     private static final class Active {
         final String fixture; final Map<String,Object> input,event; final UUID key=UUID.fromString("00000000-0000-4000-8000-000000000001");

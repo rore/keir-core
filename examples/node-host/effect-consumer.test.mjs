@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { consumeEffect } from './effect-consumer.mjs';
+import { typed } from './generic-simulation.mjs';
 
 const trace = code => [{ sequence: 0, event: 'INVOCATION_START' }, { sequence: 1, event: 'TERMINATED', ...(code ? { code } : {}) }];
 const base = { classification: 'COMPLETED', result: { status: 'CREATED' }, effects: [], trace: trace() };
@@ -22,6 +23,22 @@ const consume = outcome => {
   return consumeEffect(value);
 };
 const invalid = outcome => assert.deepEqual(consume(outcome), { status: 'NOT_REPORTED', code: 'OUTCOME_INVALID' });
+
+test('selected-model reports preserve the default result restriction and receipt checks', () => {
+  const model = { format: 'keir-dcm/4', types: {
+    Status: { kind: 'enum', values: ['REQUESTED', 'NO_OP'] },
+    Report: { kind: 'record', fields: { status: 'Status', ordered: 'Integer' } },
+  } };
+  const validResult = value => { try { typed(value, 'Report', model); return true; } catch { return false; } };
+  const value = { ...base, result: { status: 'REQUESTED', ordered: '3' } };
+  const rejected = { status: 'NOT_REPORTED', code: 'OUTCOME_INVALID' };
+  assert.deepEqual(consumeEffect(value), rejected);
+  assert.equal(consumeEffect(value, validResult).status, 'REPORTED');
+  assert.deepEqual(consumeEffect(value, () => { throw new Error('Invalid declared result'); }), rejected);
+  for (const ordered of ['03', 3, 3n, '9223372036854775808'])
+    assert.deepEqual(consumeEffect({ ...value, result: { status: 'REQUESTED', ordered } }, validResult), rejected);
+  assert.deepEqual(consumeEffect({ ...value, effects: receipt('NONE') }, validResult), rejected);
+});
 
 test('reports completed created and no-op results without deriving effects', () => {
   assert.equal(consumeEffect(base).result.status, 'CREATED');

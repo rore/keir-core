@@ -7,6 +7,21 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EffectConsumerTest {
+    @Test void selectedModelResultsDoNotWidenTheDefaultResultOrReceiptContract() {
+        var model=Map.<String,Object>of("format","keir-dcm/4","types",Map.of(
+                "Status",Map.of("kind","enum","values",List.of("REQUESTED","NO_OP")),
+                "Report",Map.of("kind","record","fields",Map.of("status","Status","ordered","Integer"))));
+        var value=completed(); value.put("result",Map.of("status","REQUESTED","ordered","3"));
+        invalid(value);
+        assertEquals("REPORTED",ScenarioHost.consumeEvent(model,"Report",value).get("status"));
+        for (Object number:List.of("03",3L,"9223372036854775808")) {
+            value.put("result",Map.of("status","REQUESTED","ordered",number));
+            assertEquals(INVALID,ScenarioHost.consumeEvent(model,"Report",value));
+        }
+        value.put("result",Map.of("status","REQUESTED","ordered","3"));
+        value.put("effects",List.of(Map.of("step","write","capability","stock.request","state","NONE")));
+        assertEquals(INVALID,ScenarioHost.consumeEvent(model,"Report",value));
+    }
     private static final Map<String,Object> INVALID=Map.of("status","NOT_REPORTED","code","OUTCOME_INVALID");
     private static final Map<String,Object> ERROR=Map.of("code","BUSINESS_RULE","path","/steps/0");
     private static List<Object> trace(String code) {

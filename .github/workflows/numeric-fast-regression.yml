@@ -87,7 +87,12 @@ jobs:
             tar -xzf .tools/packages/keir-runtime-node-0.5.0.tgz -C "$QUALIFICATION_ROOT/node-packed"
             diff -r "$QUALIFICATION_ROOT/node-packed/package" examples/node-host/node_modules/@keir/runtime-node
             diff -r runtime-node/src "$QUALIFICATION_ROOT/node-packed/package/src"
-            timeout --kill-after=5s 90s node --test examples/node-host/follow-up.test.mjs examples/node-host/verify-scenarios.test.mjs examples/node-host/decision-consumer.test.mjs examples/node-host/decision-host.test.mjs examples/node-host/pre-operation.test.mjs
+            timeout --kill-after=5s 90s node --test examples/node-host/follow-up.test.mjs examples/node-host/verify-scenarios.test.mjs examples/node-host/decision-consumer.test.mjs examples/node-host/effect-consumer.test.mjs examples/node-host/decision-host.test.mjs examples/node-host/pre-operation.test.mjs
+            for group in stock quote; do
+              timeout --kill-after=5s 45s java -Xmx256m -jar examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar "$group" python > "$QUALIFICATION_ROOT/logs/java-$group.json"
+              timeout --kill-after=5s 45s node examples/node-host/verify-scenarios.mjs "$group" python > "$QUALIFICATION_ROOT/logs/node-$group.json"
+              python -B -c 'import json, sys; from pathlib import Path; assert json.loads(Path(sys.argv[1]).read_bytes()) == json.loads(Path(sys.argv[2]).read_bytes())' "$QUALIFICATION_ROOT/logs/java-$group.json" "$QUALIFICATION_ROOT/logs/node-$group.json"
+            done
           } > "$QUALIFICATION_ROOT/logs/node-host.log" 2>&1
       - name: Preserve bounded sanitized evidence
         id: evidence
@@ -121,6 +126,9 @@ jobs:
           paths.append(Path('compiler-java/target/numeric-stock.json'))
           paths.append(Path('compiler-java/target/numeric-quote.json'))
           paths.append(root / 'logs/node-host.log')
+          for engine in ('java', 'node'):
+              for example in ('stock', 'quote'):
+                  paths.append(root / 'logs' / f'{engine}-{example}.json')
           for module in ('compiler-java', 'runtime-java', 'examples/java-host'):
               paths += sorted(Path(module, 'target/surefire-reports').glob('TEST-*.xml'))
           for index, path in enumerate(paths):
