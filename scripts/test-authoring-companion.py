@@ -548,6 +548,78 @@ class AuthoringCompanionV6Test(unittest.TestCase):
             module["make_pinned_archive"](6, revision, compatibility, altered)
 
 
+class AuthoringCompanionV9Test(unittest.TestCase):
+    def payload(self):
+        module = runpy.run_path(str(SCRIPT))
+        root = SCRIPT.parent.parent
+        payload = {name: (root / name).read_bytes() for name in module["V9_FILES"]}
+        payload["LICENSE"] = git("show", "HEAD:LICENSE")
+        compatibility = json.loads((root / "docs/agents/authoring-companion-v9-compatibility.json").read_bytes())
+        return module, payload, compatibility
+
+    def test_numeric_recipe_is_bounded_exact_and_verifies_without_git(self):
+        module, payload, compatibility = self.payload()
+        revision = git("rev-parse", "HEAD").decode().strip()
+        data = module["make_pinned_archive"](9, revision, compatibility, payload)
+        self.assertLessEqual(len(data), 256 * 1024)
+        self.assertEqual(data, module["make_pinned_archive"](9, revision, compatibility, payload))
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            manifest = json.loads(archive.read("manifest.json"))
+            self.assertEqual(manifest["contracts"]["descriptorRecipe"], "keir-record-descriptors/3")
+            self.assertEqual(manifest["contracts"]["retainedAuthoring"]["descriptorRecipe"], "keir-record-descriptors/2")
+            self.assertEqual(set(archive.namelist()), {*module["V9_FILES"], "manifest.json"})
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "candidate.zip"; path.write_bytes(data)
+            with patch("subprocess.check_output", side_effect=AssertionError("Offline verification must not read Git or network")):
+                module["verify"](9, path, digest(data))
+            with self.assertRaisesRegex(ValueError, "trusted pin"):
+                module["verify"](9, path, "sha256:" + "0" * 64)
+
+    def test_changed_numeric_profiles_sources_pins_and_packages_fail(self):
+        module, payload, compatibility = self.payload()
+        revision = git("rev-parse", "HEAD").decode().strip()
+        for mutation in ("license", "producer", "recipe", "source", "model", "scenario", "retained", "retained-recipe", "retained-environment", "packages"):
+            changed, record = dict(payload), deepcopy(compatibility)
+            prefix = "examples/numeric/stock"
+            if mutation == "license":
+                changed["LICENSE"] = b"incomplete"
+            elif mutation in ("producer", "recipe"):
+                artifact = json.loads(changed[f"{prefix}/artifact.json"])
+                if mutation == "producer": artifact["compiler"] = "keir-compiler-java/0.4.0"
+                else: artifact["modelRef"]["descriptorRecipe"] = "keir-record-descriptors/2"
+                changed[f"{prefix}/artifact.json"] = json.dumps(artifact).encode()
+                changed[f"{prefix}/artifact.sha256"] = digest(changed[f"{prefix}/artifact.json"]).encode()
+            elif mutation == "source":
+                source = json.loads(changed[f"{prefix}/source.json"]); source["name"] = "different-source"
+                changed[f"{prefix}/source.json"] = json.dumps(source).encode()
+            elif mutation == "model":
+                changed[f"{prefix}/dcm.json"] += b"\n"
+            elif mutation == "scenario":
+                scenario = json.loads(changed[f"{prefix}/scenarios/normal.json"]); scenario["format"] = "keir-scenario/3"
+                changed[f"{prefix}/scenarios/normal.json"] = json.dumps(scenario).encode()
+            elif mutation.startswith("retained"):
+                retained = json.loads(changed["conformance/keir-4/retained-names.json"])
+                if mutation == "retained": retained["dcm"]["types"]["Integer"] = {"kind": "record", "fields": {}}
+                elif mutation == "retained-recipe": retained["artifact"]["modelRef"]["descriptorRecipe"] = "keir-record-descriptors/3"
+                else: retained["artifact"]["environment"]["celNode"] = "0.7.0"
+                changed["conformance/keir-4/retained-names.json"] = json.dumps(retained).encode()
+                changed["conformance/keir-4/retained-names.sha256"] = digest(changed["conformance/keir-4/retained-names.json"]).encode()
+            else:
+                record["packages"]["nodeRuntime"] = {"version": "0.4.0", "assets": {"keir-runtime-node-0.4.0.tgz": "sha256:" + "0" * 64}}
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                module["make_pinned_archive"](9, revision, record, changed)
+
+    def test_exact_candidate_asset_pins_are_required(self):
+        module, _, compatibility = self.payload()
+        self.assertEqual(compatibility["coreRevision"], "b9782d1cb7dd7106d44878f7199cbd4774e91510")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for package in compatibility["packages"].values():
+                for name in package["assets"]: (root / name).write_bytes(b"wrong asset")
+            with self.assertRaisesRegex(ValueError, "does not match"):
+                module["check_core_assets"](compatibility, root)
+
+
 class AuthoringCompanionV8Test(unittest.TestCase):
     def test_unreleased_recipe_is_exact_offline_and_preserves_prior_editions(self):
         module = runpy.run_path(str(SCRIPT))

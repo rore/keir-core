@@ -1,8 +1,15 @@
 name: Numeric fast regression
 on:
   workflow_dispatch:
+    inputs:
+      scope:
+        type: choice
+        options: [full, packages, companion]
+        default: full
+        description: Full regression, final package snapshot, or matching companion-only verification
 permissions:
   contents: read
+  actions: read # Companion-only mode reads the exact qualified same-repository artifact.
 jobs:
   regression:
     runs-on: ubuntu-latest
@@ -11,6 +18,7 @@ jobs:
       MAVEN_OPTS: -Xmx256m
       NODE_OPTIONS: --max-old-space-size=256
       KEIR_SCENARIO_PYTHON: python
+      QUALIFICATION_SCOPE: ${{ inputs.scope || 'full' }}
     steps:
       - name: Create isolated temporary roots
         shell: bash
@@ -30,6 +38,7 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+          fetch-depth: 0 # Immutable companion editions verify their recorded source trees.
       - name: Verify exact committed source
         shell: bash
         run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
@@ -37,15 +46,18 @@ jobs:
         with:
           python-version: '3.12'
       - uses: actions/setup-java@v6
+        if: ${{ inputs.scope != 'companion' }}
         with:
           distribution: temurin
           java-version: '21'
       - uses: actions/setup-node@v7
+        if: ${{ inputs.scope != 'companion' }}
         with:
           node-version: '24'
           package-manager-cache: false
       - name: Resolve isolated schema and Node dependencies
         id: dependencies
+        if: ${{ inputs.scope == 'full' }}
         timeout-minutes: 4
         shell: bash
         run: |
@@ -54,12 +66,14 @@ jobs:
           timeout --kill-after=5s 120s npm ci --prefix runtime-node --cache "$NPM_CONFIG_CACHE" --ignore-scripts --no-audit --no-fund > "$QUALIFICATION_ROOT/logs/node-setup.log" 2>&1
       - name: Validate existing and new schema contracts
         id: schemas
+        if: ${{ inputs.scope == 'full' }}
         timeout-minutes: 1
         env:
           PYTHONPATH: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/python
         run: timeout --kill-after=5s 45s python -B scripts/check-keir-contracts.py > "$QUALIFICATION_ROOT/logs/schemas.log" 2>&1
       - name: Compile and run existing Java fast tests
         id: java
+        if: ${{ inputs.scope == 'full' }}
         timeout-minutes: 9
         shell: bash
         env:
@@ -69,11 +83,13 @@ jobs:
           timeout --kill-after=5s 480s ./mvnw -B -ntp -Dmaven.repo.local="$MAVEN_USER_HOME/repository" verify > "$QUALIFICATION_ROOT/logs/java.log" 2>&1
       - name: Run existing Node fast tests
         id: node
+        if: ${{ inputs.scope == 'full' }}
         timeout-minutes: 3
         shell: bash
         run: timeout --kill-after=5s 150s npm test --prefix runtime-node > "$QUALIFICATION_ROOT/logs/node.log" 2>&1
       - name: Verify the packed Node teaching host
         id: node_host
+        if: ${{ inputs.scope == 'full' }}
         timeout-minutes: 4
         shell: bash
         env:
@@ -96,18 +112,22 @@ jobs:
           } > "$QUALIFICATION_ROOT/logs/node-host.log" 2>&1
       - name: Verify unpublished installed Core candidate packages
         id: packages
+        if: ${{ inputs.scope != 'companion' }}
         timeout-minutes: 5
         shell: bash
         run: |
           set -euo pipefail
           started=$SECONDS
+          revision="$GITHUB_SHA"
+          if [[ "$QUALIFICATION_SCOPE" == packages ]]; then revision=3a383c2d0c6227eedc9c03927c2dd1910360d5b9; fi
           {
             timeout --kill-after=5s 15s python -B scripts/test-release-core.py
             timeout --kill-after=5s 15s python -B scripts/test-verify-core-release.py
-            timeout --kill-after=5s 150s python -B scripts/release-core.py --revision "$GITHUB_SHA" --version 0.5.0 --output "$QUALIFICATION_ROOT/candidate" --maven-repo "$MAVEN_USER_HOME/repository" --npm-cache "$NPM_CONFIG_CACHE"
-            timeout --kill-after=5s 90s python -B scripts/verify-core-release.py --version 0.5.0 --assets "$QUALIFICATION_ROOT/candidate" --checksums "$QUALIFICATION_ROOT/candidate/SHA256SUMS" --smoke-revision "$GITHUB_SHA" --maven-repo "$MAVEN_USER_HOME/repository" --npm-cache "$NPM_CONFIG_CACHE"
+            timeout --kill-after=5s 150s python -B scripts/release-core.py --revision "$revision" --version 0.5.0 --output "$QUALIFICATION_ROOT/candidate" --maven-repo "$MAVEN_USER_HOME/repository" --npm-cache "$NPM_CONFIG_CACHE"
+            timeout --kill-after=5s 90s python -B scripts/verify-core-release.py --version 0.5.0 --assets "$QUALIFICATION_ROOT/candidate" --checksums "$QUALIFICATION_ROOT/candidate/SHA256SUMS" --smoke-revision "$revision" --maven-repo "$MAVEN_USER_HOME/repository" --npm-cache "$NPM_CONFIG_CACHE"
           } > "$QUALIFICATION_ROOT/logs/packages.log" 2>&1
           export PACKAGE_SECONDS=$((SECONDS - started))
+          export PACKAGE_REVISION="$revision"
           python -B - <<'PY'
           import hashlib, json, os
           from pathlib import Path
@@ -118,7 +138,7 @@ jobs:
           assert all(path.is_file() and not path.is_symlink() for path in assets.iterdir())
           assert sum(path.stat().st_size for path in assets.iterdir()) <= 64 * 1024 * 1024
           assert 'matched 130 complete outcomes per runtime.' in (root / 'logs/packages.log').read_text(encoding='utf-8')
-          report = {'revision': os.environ['GITHUB_SHA'], 'version': '0.5.0', 'published': False,
+          report = {'revision': os.environ['PACKAGE_REVISION'], 'workflowRevision': os.environ['GITHUB_SHA'], 'version': '0.5.0', 'published': False,
                     'seconds': int(os.environ['PACKAGE_SECONDS']), 'outcomesPerRuntime': 130,
                     'assets': [{'name': path.name, 'bytes': path.stat().st_size, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
                                for path in sorted(assets.iterdir())]}
@@ -126,11 +146,75 @@ jobs:
           PY
       - name: Measure actual nonnumeric Integer and Decimal runtime rules
         id: measurements
+        if: ${{ inputs.scope == 'full' }}
         timeout-minutes: 3
         shell: bash
         env:
           NUMERIC_ROOT: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}
         run: timeout --kill-after=5s 140s node conformance/cel-profile/numeric.mjs runtime > "$QUALIFICATION_ROOT/logs/runtime-measurements.log" 2>&1
+      - name: Fetch only the exact qualified Core candidate
+        id: companion_inputs
+        if: ${{ inputs.scope == 'companion' }}
+        timeout-minutes: 2
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          {
+            timeout --kill-after=5s 15s gh run view 43431976777 --repo "$GITHUB_REPOSITORY" --json headSha,conclusion > "$QUALIFICATION_ROOT/logs/companion-source.json"
+            timeout --kill-after=5s 45s gh run download 43431976777 --repo "$GITHUB_REPOSITORY" --name numeric-candidate-43431976777-1 --dir "$QUALIFICATION_ROOT/candidate"
+            python -B - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path(os.environ['QUALIFICATION_ROOT'])
+          row = json.loads(Path('docs/agents/authoring-companion-v9-compatibility.json').read_bytes())
+          source = json.loads((root / 'logs/companion-source.json').read_bytes())
+          assert source == {'headSha': row['coreRevision'], 'conclusion': 'success'}
+          assets = root / 'candidate'
+          assert {p.name for p in assets.iterdir()} == {'LICENSE', 'SHA256SUMS', 'keir-compiler-cli-0.5.0.zip', 'keir-java-runtime-maven-0.5.0.zip', 'keir-runtime-node-0.5.0.tgz'}
+          assert all(p.is_file() and not p.is_symlink() for p in assets.iterdir())
+          assert sum(p.stat().st_size for p in assets.iterdir()) <= 64 * 1024 * 1024
+          assert hashlib.sha256((assets / 'SHA256SUMS').read_bytes()).hexdigest() == '58b025d40c8e43c9a7ce18ad7f000e45a2414fe0a318545dc9542f645d1922df'
+          PY
+            timeout --kill-after=5s 15s python -B scripts/verify-core-release.py --version 0.5.0 --assets "$QUALIFICATION_ROOT/candidate"
+          } > "$QUALIFICATION_ROOT/logs/companion-inputs.log" 2>&1
+      - name: Qualify the matching unpublished authoring companion
+        id: companion
+        if: ${{ inputs.scope == 'companion' }}
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            timeout --kill-after=5s 45s python -B scripts/test-authoring-companion.py
+            mkdir "$QUALIFICATION_ROOT/companion"
+            archive="$QUALIFICATION_ROOT/companion/keir-authoring-companion-v9.zip"
+            pin=$(timeout --kill-after=5s 30s python -B scripts/authoring-companion.py build "$archive" --version 9 --revision "$GITHUB_SHA" --core-assets "$QUALIFICATION_ROOT/candidate")
+            [[ "$pin" =~ ^sha256:[0-9a-f]{64}$ ]]
+            timeout --kill-after=5s 15s python -B scripts/authoring-companion.py verify "$archive" --version 9 --sha256 "$pin" --core-assets "$QUALIFICATION_ROOT/candidate"
+            printf '%s\n' "$pin" > "$QUALIFICATION_ROOT/companion/keir-authoring-companion-v9.sha256"
+            python -B - <<'PY'
+          import hashlib, json, os, zipfile
+          from pathlib import Path
+          root = Path(os.environ['QUALIFICATION_ROOT'])
+          directory = root / 'companion'
+          assert {p.name for p in directory.iterdir()} == {'keir-authoring-companion-v9.zip', 'keir-authoring-companion-v9.sha256'}
+          archive = directory / 'keir-authoring-companion-v9.zip'
+          data = archive.read_bytes()
+          assert len(data) <= 256 * 1024
+          pin = 'sha256:' + hashlib.sha256(data).hexdigest()
+          assert (directory / 'keir-authoring-companion-v9.sha256').read_text().strip() == pin
+          with zipfile.ZipFile(archive) as bundle:
+              manifest = json.loads(bundle.read('manifest.json'))
+              assert manifest['sourceRevision'] == os.environ['GITHUB_SHA']
+              guide = bundle.read(manifest['guide']).decode('utf-8')
+          report = {'sourceRevision': manifest['sourceRevision'], 'compatibility': manifest['compatibility'],
+                    'bytes': len(data), 'digest': pin, 'members': len(manifest['files']), 'published': False,
+                    'guideStatus': 'draft' if 'DRAFT' in guide else 'qualified source', 'scope': 'matching companion candidate only'}
+          (root / 'logs/companion.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          PY
+          } > "$QUALIFICATION_ROOT/logs/companion.log" 2>&1
       - name: Preserve bounded sanitized evidence
         id: evidence
         if: ${{ always() }}
@@ -143,6 +227,8 @@ jobs:
           NODE_HOST_OUTCOME: ${{ steps.node_host.outcome }}
           PACKAGES_OUTCOME: ${{ steps.packages.outcome }}
           MEASUREMENTS_OUTCOME: ${{ steps.measurements.outcome }}
+          COMPANION_INPUTS_OUTCOME: ${{ steps.companion_inputs.outcome }}
+          COMPANION_OUTCOME: ${{ steps.companion.outcome }}
         shell: bash
         run: |
           set -euo pipefail
@@ -171,6 +257,7 @@ jobs:
           paths.extend(root / 'output' / name for name in ('runtime-manifest.json', 'java-runtime-report.json', 'node-runtime-report.json',
                                                         'runtime-workload.json', 'java-runtime-process.json', 'node-runtime-process.json', 'runtime.json'))
           paths.extend(root / 'logs' / name for name in ('runtime-measurements.log', 'java-runtime.log', 'node-runtime.log'))
+          paths.extend(root / 'logs' / name for name in ('companion-source.json', 'companion-inputs.log', 'companion.log', 'companion.json'))
           for engine in ('java', 'node'):
               for example in ('stock', 'quote'):
                   paths.append(root / 'logs' / f'{engine}-{example}.json')
@@ -190,11 +277,20 @@ jobs:
               name = f'{index:03d}-{path.name}'
               (evidence / name).write_bytes(data)
               inventory.append({'name': name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()})
-          outcomes = {name: os.environ[name.upper() + '_OUTCOME'] for name in ('dependencies', 'schemas', 'java', 'node', 'node_host', 'packages', 'measurements')}
+          full = ('dependencies', 'schemas', 'java', 'node', 'node_host', 'packages', 'measurements')
+          companion = ('companion_inputs', 'companion')
+          mode = os.environ['QUALIFICATION_SCOPE']
+          assert mode in ('full', 'packages', 'companion')
+          outcomes = {name: os.environ[name.upper() + '_OUTCOME'] for name in (*full, *companion)}
+          required = companion if mode == 'companion' else ('packages',) if mode == 'packages' else full
+          skipped = tuple(name for name in (*full, *companion) if name not in required)
           report = {'revision': os.environ['GITHUB_SHA'], 'outcomes': outcomes,
-                    'status': 'passed' if all(value == 'success' for value in outcomes.values()) else 'failed',
+                    'status': 'passed' if all(outcomes[name] == 'success' for name in required) and all(outcomes[name] == 'skipped' for name in skipped) else 'failed',
+                    'qualificationMode': mode,
                     'platform': platform.platform(), 'evidence': inventory,
-                    'scope': 'fast regression, teaching host, unpublished installed candidate and bounded real-rule runtime measurements; not companion or feature acceptance'}
+                    'scope': 'matching companion only; prior source/package/measurement evidence reused, not rerun' if mode == 'companion' else
+                             'installed candidate only; prior source/measurement evidence reused, not rerun' if mode == 'packages' else
+                             'fast regression, teaching host, unpublished installed candidate and bounded real-rule runtime measurements; not companion or feature acceptance'}
           data = (json.dumps(report, indent=2) + '\n').encode()
           assert total + len(data) <= 10 * 1024 * 1024
           (evidence / 'receipt.json').write_bytes(data)
@@ -206,6 +302,19 @@ jobs:
         with:
           name: numeric-fast-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/evidence
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+          include-hidden-files: false
+          overwrite: false
+          archive: true
+      - name: Retain the bounded unpublished companion
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ success() && steps.companion.outcome == 'success' }}
+        timeout-minutes: 2
+        with:
+          name: numeric-companion-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/companion
           if-no-files-found: error
           retention-days: 7
           compression-level: 0

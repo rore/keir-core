@@ -127,6 +127,21 @@ V8_FILES = (
         ("source", "json"), ("artifact", "json"), ("artifact", "sha256"))),
     *V8_SCENARIOS,
 )
+V9_GUIDE = "docs/agents/customer-authoring-guide-v9.md"
+V9_FORMATS = {"language": "keir/3", "dcm": "keir-dcm/4", "artifact": "keir-artifact/4", "scenario": "keir-scenario/4",
+              "descriptorRecipe": "keir-record-descriptors/3",
+              "retainedAuthoring": {"language": "keir/2", "dcm": "keir-dcm/3", "artifact": "keir-artifact/4",
+                                    "scenario": "keir-scenario/4", "descriptorRecipe": "keir-record-descriptors/2"}}
+V9_FILES = (
+    V9_GUIDE, "LICENSE",
+    *(f"docs/specs/{name}.md" for name in ("language", "compiler-artifact", "runtime", "workflow-expressions", "domain-model", "pre-operation-decisions", "host-model-binding")),
+    *(f"schemas/{kind}-{version}/{kind}.schema.json" for kind, versions in (
+        ("source", (2, 3)), ("dcm", (3, 4)), ("artifact", (3, 4)), ("scenario", (3, 4))) for version in versions),
+    "examples/numeric/README.md",
+    *(f"examples/numeric/{name}/{file}" for name in ("stock", "quote") for file in (
+        "dcm.json", "dcm.sha256", "source.json", "artifact.json", "artifact.sha256", "scenarios/normal.json", "cases.json")),
+    "conformance/keir-4/retained-names.json", "conformance/keir-4/retained-names.sha256",
+)
 PINNED_EDITIONS = {
     3: (V3_COMPATIBILITY, V3_GUIDE, V3_ARTIFACT, V3_FORMATS, V3_FILES),
     4: (V4_COMPATIBILITY, V4_GUIDE, V4_ARTIFACT, V4_FORMATS, V4_FILES),
@@ -138,7 +153,9 @@ PINNED_EDITIONS = {
         "docs/agents/customer-authoring-guide-v7.md", V5_ARTIFACT, V5_FORMATS,
         ("docs/agents/customer-authoring-guide-v7.md", "LICENSE", *V5_FILES[1:])),
     8: ("docs/agents/authoring-companion-v8-compatibility.json",
-        "docs/agents/customer-authoring-guide-v8.md", f"{V8_FIXTURES}/artifact-guarded-result.json", V5_FORMATS, V8_FILES),
+         "docs/agents/customer-authoring-guide-v8.md", f"{V8_FIXTURES}/artifact-guarded-result.json", V5_FORMATS, V8_FILES),
+    9: ("docs/agents/authoring-companion-v9-compatibility.json", V9_GUIDE,
+        "examples/numeric/stock/artifact.json", V9_FORMATS, V9_FILES),
 }
 LICENSE_PIN = "sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
 RELEASE_ASSETS = {
@@ -257,12 +274,27 @@ def check_core_assets(record, directory):
                 raise ValueError(f"Core asset digest does not match: {name}.")
 
 
+def example_digest(value):
+    # ponytail: frozen control-free edition-9 examples; qualify other JSON forms in a later edition.
+    def supported(item):
+        if isinstance(item, str):
+            return all(ord(char) >= 32 for char in item)
+        if isinstance(item, dict):
+            return all(supported(key) and supported(child) for key, child in item.items())
+        if isinstance(item, list):
+            return all(supported(child) for child in item)
+        return isinstance(item, (int, bool))
+    if not supported(value):
+        raise ValueError("Edition 9 examples require exact control-free JSON values.")
+    return digest(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8"))
+
+
 def make_pinned_archive(version, revision, compatibility, payload):
     _, guide, artifact_path, formats, _ = PINNED_EDITIONS[version]
     if not matches(r"[0-9a-f]{40}", revision):
         raise ValueError("A pinned edition requires a full Git commit.")
     validate_compatibility(compatibility)
-    if version in (6, 7, 8) and digest(payload.get("LICENSE", b"")) != LICENSE_PIN:
+    if version in (6, 7, 8, 9) and digest(payload.get("LICENSE", b"")) != LICENSE_PIN:
         raise ValueError(f"Edition {version} requires the complete Apache-2.0 LICENSE.")
     artifact = json.loads(payload[artifact_path])
     if (not isinstance(artifact, dict) or artifact.get("format") != formats["artifact"]
@@ -343,6 +375,38 @@ def make_pinned_archive(version, revision, compatibility, payload):
         if compatibility["status"] == "release" and any(
                 package["version"] != "0.4.0" for package in compatibility["packages"].values()):
             raise ValueError("Edition 8 requires Core 0.4.0 packages.")
+    if version == 9:
+        environment = {"celJava": "0.14.0", "celNode": "0.6.1", "protobufJava": "4.35.1", "protobufNode": "2.6.2"}
+        for name in ("stock", "quote"):
+            prefix = f"examples/numeric/{name}"
+            model_bytes, artifact_bytes = payload[f"{prefix}/dcm.json"], payload[f"{prefix}/artifact.json"]
+            model, example = json.loads(model_bytes), json.loads(artifact_bytes)
+            source = json.loads(payload[f"{prefix}/source.json"])
+            if (digest(model_bytes) != payload[f"{prefix}/dcm.sha256"].decode("ascii").strip()
+                    or digest(artifact_bytes) != payload[f"{prefix}/artifact.sha256"].decode("ascii").strip()
+                    or model.get("format") != "keir-dcm/4" or source.get("language") != "keir/3"
+                    or example.get("format") != "keir-artifact/4" or example.get("compiler") != "keir-compiler-java/0.5.0"
+                    or example.get("environment") != environment or example.get("sourceDigest") != example_digest(source)
+                    or example.get("modelRef") != {"domainId": model["domain"]["id"], "domainVersion": model["domain"]["version"],
+                        "format": "keir-dcm/4", "digest": example_digest(model), "descriptorRecipe": "keir-record-descriptors/3"}
+                    or source.get("domain") != {**model["domain"], "fingerprint": example_digest(model)}
+                    or source.get("entrypoint") != example.get("entrypoint")):
+                raise ValueError("Invalid edition 9 numeric example or producer tuple.")
+            if json.loads(payload[f"{prefix}/scenarios/normal.json"]).get("format") != "keir-scenario/4":
+                raise ValueError("Invalid edition 9 scenario format.")
+        retained_bytes = payload["conformance/keir-4/retained-names.json"]
+        retained = json.loads(retained_bytes)
+        if (digest(retained_bytes) != payload["conformance/keir-4/retained-names.sha256"].decode("ascii").strip()
+                or retained["dcm"]["format"] != "keir-dcm/3" or retained["artifact"]["format"] != "keir-artifact/4"
+                or retained["artifact"]["compiler"] != "keir-compiler-java/0.5.0"
+                or retained["artifact"].get("environment") != environment
+                or retained["artifact"]["modelRef"] != {"domainId": retained["dcm"]["domain"]["id"],
+                    "domainVersion": retained["dcm"]["domain"]["version"], "format": "keir-dcm/3",
+                    "digest": example_digest(retained["dcm"]), "descriptorRecipe": "keir-record-descriptors/2"}
+                or any(retained["dcm"]["types"][name] != {"kind": "nominal", "base": "String"} for name in ("Integer", "Decimal"))):
+            raise ValueError("Invalid edition 9 retained-name example.")
+        if compatibility["status"] == "release" and any(package["version"] != "0.5.0" for package in compatibility["packages"].values()):
+            raise ValueError("Edition 9 requires Core 0.5.0 packages.")
     manifest = {
         "format": f"keir-authoring-companion/{version}",
         "sourceRevision": revision,
@@ -438,7 +502,7 @@ def main():
     check.add_argument("archive", type=Path)
     check.add_argument("--sha256", required=True, help="Trusted archive pin in sha256:<hex> form")
     for command in (create, check):
-        command.add_argument("--version", type=int, choices=(1, 2, 3, 4, 5, 6, 7, 8), default=1,
+        command.add_argument("--version", type=int, choices=(1, 2, 3, 4, 5, 6, 7, 8, 9), default=1,
                              help="Companion version (default: 1)")
         command.add_argument("--core-assets", type=Path, help="Directory containing the pinned Core release assets")
     args = parser.parse_args()

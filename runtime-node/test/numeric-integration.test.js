@@ -17,7 +17,7 @@ const programs = ['stock', 'quote'].map(name => ({ name,
 }));
 assert.equal(cases.length, 97);
 test('independent Node descriptors match exact compiler bytes and hashes', () => {
-  const batch = JSON.parse(readFileSync(new URL('../../compiler-java/target/numeric-descriptors.json', import.meta.url)));
+  const batch = JSON.parse(readFileSync(new URL('../../conformance/keir-4/descriptors.json', import.meta.url)));
   for (const row of batch.cases) {
     const { registry } = prepareModelTypes(row.dcm);
     const actual = Buffer.from(toBinary(FileDescriptorSetSchema, create(FileDescriptorSetSchema, {

@@ -12,7 +12,7 @@ import static dev.keir.runtime.RuntimeData.*;
 
 class NumericIntegrationTest {
     @Test void descriptorsMatchExactCompilerBytesAndHashes() throws Exception {
-        var batch=map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-descriptors.json")),65_536),"");
+        var batch=map(parseJson(Files.readAllBytes(Path.of("..","conformance","keir-4","descriptors.json")),65_536),"");
         var method=CheckedCel.class.getDeclaredMethod("expectedDescriptors",Map.class); method.setAccessible(true);
         for (Object raw:list(batch.get("cases"),"")) {
             var row=map(raw,"");

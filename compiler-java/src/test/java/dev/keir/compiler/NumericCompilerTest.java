@@ -73,7 +73,9 @@ class NumericCompilerTest {
             rows.add(Map.of("id",entry.getKey(),"dcm",entry.getValue(),"base64",Base64.getEncoder().encodeToString(descriptor),
                     "sha256",HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(descriptor))));
         }
-        Files.write(Path.of("target","numeric-descriptors.json"),bytes(Map.of("cases",rows)));
+        byte[] batch=bytes(Map.of("cases",rows));
+        assertArrayEquals(Files.readAllBytes(Path.of("..","conformance","keir-4","descriptors.json")),batch);
+        Files.write(Path.of("target","numeric-descriptors.json"),batch);
     }
 
     @Test void compileRealNonnumericIntegerAndDecimalMeasurementRules() throws Exception {

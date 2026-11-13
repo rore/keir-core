@@ -18,3 +18,4 @@
 /conformance/keir-4/engine-matrix.json -text
 /conformance/keir-4/retained-names.json -text
 /conformance/keir-4/host-boundaries-artifact.json -text
+/conformance/keir-4/descriptors.json -text
