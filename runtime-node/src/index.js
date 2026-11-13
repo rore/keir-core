@@ -1,9 +1,10 @@
 import { parseCanonical } from './canonical.js';
-import { prepareExpressions, evaluateBinding } from './cel.js';
+import { prepareExpressions, evaluateBinding, createActivation } from './cel.js';
 import { ENVIRONMENT, LIMITS, ARTIFACT_FIELDS, Fault, requireThat as ok, keys, shape, freeze, pointer, validateEnvelope, validatePlan, validateValue } from './validation.js';
 import { modelFor } from './model.js';
 
 export { ENVIRONMENT };
+export { normalizeInteger, normalizeDecimal } from './numeric.js';
 export { bindModel } from './model.js';
 const handles = new WeakMap();
 const diagnostic = (code, path) => Object.freeze({ code, path, message: 'The selected artifact or host configuration is invalid.' });
@@ -136,7 +137,8 @@ export async function invokeProgram(prepared, businessInput, trustedInvocation) 
     } catch { throw new Fault('HOST_CONTEXT_INVALID', ''); }
     clock.remaining('');
     const { artifact, entrypoint, adapters, hostFields, dcm, grants, effectGrant } = plan;
-    const state = Object.fromEntries([['input', validateValue(dcm, entrypoint.input, businessInput, '/input', 'INPUT_INVALID')]]);
+    const activation = createActivation(dcm, plan.cel);
+    const state = Object.fromEntries([['input', activation.accept('input', entrypoint.input, businessInput, '/input', 'INPUT_INVALID')]]);
     const bindings = Object.create(null);
     try {
       shape(trustedInvocation.bindings, Object.keys(hostFields), '/hostBindings');
@@ -156,10 +158,10 @@ export async function invokeProgram(prepared, businessInput, trustedInvocation) 
     clock.remaining('');
     const counts = Object.create(null);
     let totalCalls = 0, totalEffects = 0;
-    const evaluate = (binding, path) => {
+    const evaluate = (binding, path, retainedId) => {
       clock.remaining(path);
       // shortcut: CEL is synchronous; qualify interruption before promising hard deadlines.
-      const value = evaluateBinding(binding, state, dcm, plan.cel, path);
+      const value = evaluateBinding(binding, state, dcm, plan.cel, path, activation, retainedId);
       clock.remaining(path);
       return value;
     };
@@ -169,7 +171,7 @@ export async function invokeProgram(prepared, businessInput, trustedInvocation) 
       ok(index < LIMITS.steps, path, 'BUDGET_EXCEEDED');
       emit('STEP_START', { step: step.id }, path);
       if (step.op === 'BIND') {
-        state[step.id] = evaluate(step.value, path);
+        state[step.id] = evaluate(step.value, path, step.id);
         emit('VALUE_BOUND', { step: step.id }, path);
         continue;
       }
@@ -219,8 +221,10 @@ export async function invokeProgram(prepared, businessInput, trustedInvocation) 
         if (response?.kind === 'SUCCESS') {
           shape(response, ['kind', 'value', ...(write ? ['effect'] : [])], path);
           if (write) ok(response.effect === 'CONFIRMED', path, 'ADAPTER_INVALID');
-          const value = validateValue(dcm, cap.result, response.value, path, 'ADAPTER_INVALID');
-          if (!Object.hasOwn(step, 'when') || plan.guardedResultDataflow) state[step.id] = value;
+          const retained = !Object.hasOwn(step, 'when') || plan.guardedResultDataflow;
+          const value = retained ? activation.accept(step.id, cap.result, response.value, path, 'ADAPTER_INVALID')
+            : validateValue(dcm, cap.result, response.value, path, 'ADAPTER_INVALID');
+          if (retained) state[step.id] = value;
         } else if (response?.kind === 'BUSINESS_REJECTION') {
           shape(response, ['kind', 'code', ...(write ? ['effect'] : [])], path);
           if (write) ok(response.effect === 'NONE', path, 'ADAPTER_INVALID');

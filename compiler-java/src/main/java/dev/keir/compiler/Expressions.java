@@ -5,6 +5,8 @@ import dev.cel.common.CelOptions;
 import dev.cel.common.CelAbstractSyntaxTree;
 import dev.cel.common.CelProtoAbstractSyntaxTree;
 import dev.cel.common.CelValidationException;
+import dev.cel.common.CelFunctionDecl;
+import dev.cel.common.CelOverloadDecl;
 import dev.cel.common.types.CelType;
 import dev.cel.common.types.ListType;
 import dev.cel.common.types.SimpleType;
@@ -16,6 +18,7 @@ import dev.cel.expr.Type;
 import dev.cel.parser.CelStandardMacro;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatterBuilder;
@@ -29,6 +32,14 @@ import java.util.Set;
 import java.util.TreeMap;
 
 final class Expressions {
+    private static final Map<String,Integer> NUMERIC_ARITIES = Map.ofEntries(
+            Map.entry("decimal",1), Map.entry("toDecimal",1), Map.entry("toInteger",1), Map.entry("size",1),
+            Map.entry("-_",1), Map.entry("_+_",2), Map.entry("_-_",2), Map.entry("_*_",2), Map.entry("_/_",2),
+            Map.entry("_<_",2), Map.entry("_<=_",2), Map.entry("_>_",2), Map.entry("_>=_",2),
+            Map.entry("round",3), Map.entry("multiplyRounded",4), Map.entry("divideRounded",4));
+    private static final Map<String,String> NUMERIC_OPERATORS = Map.of("_+_","add", "_-_","subtract", "_*_","multiply",
+            "_/_","divide", "-_","negate", "_<_","less", "_<=_","less_equals", "_>_","greater", "_>=_","greater_equals");
+    private static final Set<String> ROUNDING = Set.of("UNNECESSARY","DOWN","FLOOR","CEILING","HALF_UP","HALF_EVEN");
     private static final Map<String, String> OVERLOADS = Map.of(
             "_==_", "equals", "_!=_", "not_equals", "!_", "logical_not",
             "_&&_", "logical_and", "_||_", "logical_or", "_?_:_", "conditional",
@@ -69,6 +80,21 @@ final class Expressions {
                             Map<String, String> guardedResults, Dcm dcm, String path) {
         var builder = CelCompilerFactory.standardCelCompilerBuilder().setOptions(OPTIONS)
                 .setStandardMacros(Set.of(CelStandardMacro.HAS)).addFileTypes(dcm.fileDescriptor());
+        if (dcm.numeric()) {
+            builder.addFileTypes(dcm.fileDescriptor().getDependencies());
+            CelType decimal = StructTypeReference.create("keir.numeric.Decimal");
+            builder.addFunctionDeclarations(
+                    declaration("decimal","keir_decimal_from_string",decimal,SimpleType.STRING),
+                    declaration("toDecimal","keir_decimal_from_integer",decimal,SimpleType.INT),
+                    declaration("toInteger","keir_integer_from_decimal",SimpleType.INT,decimal),
+                    declaration("round","keir_decimal_round",decimal,decimal,SimpleType.INT,SimpleType.STRING),
+                    declaration("multiplyRounded","keir_decimal_multiply_rounded",decimal,decimal,decimal,SimpleType.INT,SimpleType.STRING),
+                    declaration("divideRounded","keir_decimal_divide_rounded",decimal,decimal,decimal,SimpleType.INT,SimpleType.STRING));
+            NUMERIC_OPERATORS.forEach((function, operation) -> builder.addFunctionDeclarations(declaration(function,
+                    "keir_decimal_" + operation.replace("_equals","_equal"),
+                    Set.of("less","less_equals","greater","greater_equals").contains(operation) ? SimpleType.BOOL : decimal,
+                    function.equals("-_") ? List.of(decimal) : List.of(decimal,decimal))));
+        }
         variables.forEach((name, type) -> builder.addVar(name, celType(type, dcm)));
         var compiler = builder.build();
         CheckedExpr checked;
@@ -101,6 +127,10 @@ final class Expressions {
     }
 
     static String nominalLiteral(Object value, Object annotation, String expected, Dcm dcm, String path) {
+        if (annotation instanceof String numeric && dcm.numeric(numeric)) {
+            canonicalNumber(value,numeric,path + "/literal");
+            return expected == null ? numeric : assign(new Value(numeric),expected,dcm,path + "/literal");
+        }
         if (!(annotation instanceof String type) || dcm.type(type) == null
                 || !dcm.type(type).kind().equals("nominal")) throw new CompileFailure("NOMINAL_MISMATCH", path + "/type");
         if (!(value instanceof String text)) throw new CompileFailure("PROFILE_UNSUPPORTED", path + "/literal");
@@ -109,6 +139,7 @@ final class Expressions {
     }
 
     private static CelType celType(String type, Dcm dcm) {
+        if (dcm.numeric(type)) return type.equals("Integer") ? SimpleType.INT : StructTypeReference.create("keir.numeric.Decimal");
         return switch (dcm.type(type).kind()) {
             case "record" -> StructTypeReference.create("keir.read." + type);
             case "list" -> ListType.create(celType(dcm.type(type).element(), dcm));
@@ -118,6 +149,50 @@ final class Expressions {
                 default -> SimpleType.STRING;
             };
         };
+    }
+
+    private static CelFunctionDecl declaration(String name,String id,CelType result,CelType... args) {
+        return declaration(name,id,result,List.of(args));
+    }
+    private static CelFunctionDecl declaration(String name,String id,CelType result,List<CelType> args) {
+        return CelFunctionDecl.newFunctionDeclaration(name,CelOverloadDecl.newGlobalOverload(id,result,args));
+    }
+
+    // Independent compiler validation; runtime code is not a compiler dependency.
+    private static void canonicalNumber(Object raw,String type,String path) {
+        if (!(raw instanceof String)) fail("TYPE_MISMATCH",path);
+        String text = (String)raw;
+        if (type.equals("Integer")) {
+            if (text.length()>20 || !text.matches("0|-?[1-9][0-9]*") || new BigInteger(text).bitLength()>63)
+                fail("TYPE_MISMATCH",path);
+        } else {
+            if (text.length()>40 || !text.matches("-?(?:0|[1-9][0-9]*)(?:\\.[0-9]*[1-9])?") || text.equals("-0"))
+                fail("TYPE_MISMATCH",path);
+            int point = text.indexOf('.');
+            if (point>=0 && text.length()-point-1>18 || new BigInteger(text.replace(".","")).abs().toString().length()>38)
+                fail("TYPE_MISMATCH",path);
+        }
+    }
+
+    static void numericTokens(CelAbstractSyntaxTree parsed,String source,String path) {
+        var proto = CelProtoAbstractSyntaxTree.fromCelAst(parsed);
+        numericTokens(proto.getExpr(),proto.getSourceInfo().getPositionsMap(),source,path);
+    }
+    private static void numericTokens(Expr expr,Map<Long,Integer> positions,String source,String path) {
+        if (expr.hasConstExpr()) {
+            var constant=expr.getConstExpr();
+            if (constant.hasBoolValue() || constant.hasStringValue()) return;
+            if (!constant.hasInt64Value() || !positions.containsKey(expr.getId())) fail("CEL_POLICY_DENIED",path);
+            int offset=positions.get(expr.getId());
+            if (offset<0 || offset>=source.codePointCount(0,source.length())) fail("CEL_POLICY_DENIED",path);
+            int start=source.offsetByCodePoints(0,offset);
+            var token=java.util.regex.Pattern.compile("-?(?:0|[1-9][0-9]*)(?![A-Za-z0-9_.])").matcher(source).region(start,source.length());
+            if (!token.lookingAt()) fail("CEL_POLICY_DENIED",path);
+        } else if (expr.hasSelectExpr()) numericTokens(expr.getSelectExpr().getOperand(),positions,source,path);
+        else if (expr.hasCallExpr()) {
+            if (expr.getCallExpr().hasTarget()) numericTokens(expr.getCallExpr().getTarget(),positions,source,path);
+            for (Expr arg:expr.getCallExpr().getArgsList()) numericTokens(arg,positions,source,path);
+        } else if (!expr.hasIdentExpr()) fail("CEL_POLICY_DENIED",path);
     }
 
     private static String assign(Value value, String expected, Dcm dcm, String path) {
@@ -177,6 +252,8 @@ final class Expressions {
             if (++nodes > 64 || depth > 16) fail("BUDGET_EXCEEDED", path);
             Type wireType = checked.getTypeMapMap().get(expr.getId());
             if (wireType == null || !(wireType.getPrimitive() == Type.PrimitiveType.BOOL
+                    || dcm.numeric() && (wireType.getPrimitive() == Type.PrimitiveType.INT64
+                    || wireType.hasMessageType() && wireType.getMessageType().equals("keir.numeric.Decimal"))
                     || wireType.getPrimitive() == Type.PrimitiveType.STRING
                     || wireType.hasMessageType() && wireType.getMessageType().startsWith("keir.read.")
                     || wireType.hasListType() || wireType.getWellKnown() == Type.WellKnownType.TIMESTAMP
@@ -184,6 +261,7 @@ final class Expressions {
                 fail("CEL_POLICY_DENIED", path);
             if (expr.hasConstExpr()) {
                 var constant = expr.getConstExpr();
+                if (dcm.numeric() && constant.hasInt64Value()) return new Value("Integer");
                 if (constant.hasBoolValue()) return new Value("Boolean");
                 if (constant.hasStringValue()) {
                     bounded(constant.getStringValue(), path);
@@ -228,16 +306,23 @@ final class Expressions {
             String function = call.getFunction();
             boolean addition = function.equals("_+_");
             boolean constructor = function.equals("timestamp") || function.equals("duration");
-            int arity = function.equals("!_") || constructor ? 1 : function.equals("_?_:_") ? 3 : 2;
+            int arity = dcm.numeric() && NUMERIC_ARITIES.containsKey(function) ? NUMERIC_ARITIES.get(function)
+                    : function.equals("!_") || constructor ? 1 : function.equals("_?_:_") ? 3 : 2;
             var reference = checked.getReferenceMapMap().get(expr.getId());
-            if ((!addition && !OVERLOADS.containsKey(function)) || call.hasTarget() || call.getArgsCount() != arity
+            if ((!addition && !OVERLOADS.containsKey(function) && !(dcm.numeric() && NUMERIC_ARITIES.containsKey(function))) || call.hasTarget() || call.getArgsCount() != arity
                     || reference == null)
                 fail("CEL_POLICY_DENIED", path);
             var args = new ArrayList<Value>();
             for (int i = 0; i < arity; i++) args.add(visit(call.getArgs(i), depth + 1,
                     branchProofs(call, i, proofs), branchGuards(call, i, guards), false));
+            Operation numeric = dcm.numeric() ? numericCall(call,args) : null;
+            if (numeric != null) {
+                if (!reference.getOverloadIdList().equals(List.of(numeric.overload))) fail("CEL_POLICY_DENIED",path);
+                return new Value(numeric.type);
+            }
             boolean temporalAdd = addition && pair(args, "Timestamp", "Duration");
             String overload = addition ? temporalAdd ? "add_timestamp_duration" : "add_string" : OVERLOADS.get(function);
+            if (overload == null) fail("CEL_POLICY_DENIED",path);
             if (!reference.getOverloadIdList().equals(List.of(overload))) fail("CEL_POLICY_DENIED", path);
             if (constructor) {
                 Expr literal = call.getArgs(0);
@@ -279,6 +364,41 @@ final class Expressions {
                 for (Value arg : args) if (!arg.type().equals("Boolean")) fail("TYPE_MISMATCH", path);
             }
             return new Value("Boolean");
+        }
+
+        private record Operation(String type,String overload) {}
+        private Operation numericCall(Expr.Call call,List<Value> args) {
+            String f=call.getFunction();
+            if (f.equals("decimal")) {
+                Expr literal=call.getArgs(0);
+                if (!literal.hasConstExpr() || !literal.getConstExpr().hasStringValue()) fail("TYPE_MISMATCH",path);
+                canonicalNumber(literal.getConstExpr().getStringValue(),"Decimal",path);
+                return new Operation("Decimal","keir_decimal_from_string");
+            }
+            if (f.equals("toDecimal") || f.equals("toInteger")) {
+                if (!args.get(0).type.equals(f.equals("toDecimal") ? "Integer" : "Decimal")) fail("TYPE_MISMATCH",path);
+                return new Operation(f.equals("toDecimal") ? "Decimal" : "Integer",
+                        f.equals("toDecimal") ? "keir_decimal_from_integer" : "keir_integer_from_decimal");
+            }
+            if (f.equals("size")) {
+                if (!dcm.type(args.get(0).type).list()) fail("CEL_POLICY_DENIED",path);
+                return new Operation("Integer","size_list");
+            }
+            if (Set.of("round","multiplyRounded","divideRounded").contains(f)) {
+                int index=args.size()-2;
+                var scale=call.getArgs(index).getConstExpr(); var mode=call.getArgs(index+1).getConstExpr();
+                if (!args.subList(0,index).stream().allMatch(a -> a.type.equals("Decimal"))
+                        || !scale.hasInt64Value() || scale.getInt64Value()<0 || scale.getInt64Value()>18
+                        || !mode.hasStringValue() || !ROUNDING.contains(mode.getStringValue())) fail("TYPE_MISMATCH",path);
+                return new Operation("Decimal",Map.of("round","keir_decimal_round","multiplyRounded","keir_decimal_multiply_rounded",
+                        "divideRounded","keir_decimal_divide_rounded").get(f));
+            }
+            if (!NUMERIC_OPERATORS.containsKey(f) || !args.stream().anyMatch(a -> dcm.numeric(a.type))) return null;
+            String type=args.get(0).type;
+            if (!dcm.numeric(type) || !args.stream().allMatch(a -> a.type.equals(type))) fail("TYPE_MISMATCH",path);
+            String operation=NUMERIC_OPERATORS.get(f);
+            return new Operation(Set.of("less","less_equals","greater","greater_equals").contains(operation) ? "Boolean" : type,
+                    type.equals("Integer") ? operation+"_int64" : "keir_decimal_"+operation.replace("_equals","_equal"));
         }
 
         private Value branches(Value a, Value b) {

@@ -1,5 +1,6 @@
 import { types as nodeTypes } from 'node:util';
 import { CanonicalLimitError, canonicalBytes } from './canonical.js';
+import * as numeric from './numeric.js';
 
 export const ENVIRONMENT = Object.freeze({ celJava: '0.14.0', celNode: '0.6.1', protobufJava: '4.35.1', protobufNode: '2.6.2' });
 export const LIMITS = Object.freeze({ artifactBytes: 1048576, dcmBytes: 65536, steps: 8, calls: 4, expressionNodes: 64, totalAstNodes: 512, traceEvents: 64, valueBytes: 8192, stringBytes: 256 });
@@ -9,6 +10,7 @@ const idPattern = /^[A-Za-z][A-Za-z0-9.]{0,99}$/;
 const reserved = new Set(['true', 'false', 'null', 'in', 'as', 'break', 'const', 'continue', 'else', 'for', 'function', 'if', 'import', 'let', 'loop', 'package', 'namespace', 'return', 'var', 'void', 'while']);
 const builtinTypes = new Set(['Boolean', 'String', 'Timestamp', 'Duration', 'bool', 'bytes', 'double', 'dyn', 'int', 'list', 'map', 'null_type', 'string', 'type', 'uint', 'input']);
 const timestampPattern = /^(?!0000)[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$/;
+export const numericType = (dcm, type) => dcm.format === 'keir-dcm/4' && (type === 'Integer' || type === 'Decimal');
 
 export class Fault extends Error {
   constructor(code, path) { super(code); this.code = code; this.path = path; }
@@ -72,14 +74,14 @@ export function narrowPolicy(dcm, policy, previous, path) {
 
 export function validateModel(dcm, p) {
   shape(dcm, ['format', 'domain', 'types', 'capabilities', 'entrypoints', 'hostKey'], p);
-  requireThat(dcm.format === 'keir-dcm/2' || dcm.format === 'keir-dcm/3', p);
+  requireThat(['keir-dcm/2', 'keir-dcm/3', 'keir-dcm/4'].includes(dcm.format), p);
   requireThat(canonicalBytes(dcm).length <= LIMITS.dcmBytes, p, 'BUDGET_EXCEEDED');
   shape(dcm.domain, ['id', 'version'], p + '/domain');
   text(dcm.domain.id, p, true); text(dcm.domain.version, p, true);
   const types = keys(dcm.types, p + '/types', 16);
   requireThat(types.length > 0, p);
   for (const name of types) {
-    named(name, p); requireThat(!builtinTypes.has(name), p);
+    named(name, p); requireThat(!builtinTypes.has(name) && !numericType(dcm, name), p);
     const type = dcm.types[name];
     if (type?.kind === 'nominal') { shape(type, ['kind', 'base'], p); requireThat(type.base === 'String', p); }
     else if (type?.kind === 'enum') {
@@ -96,7 +98,7 @@ export function validateModel(dcm, p) {
     } else throw new Fault('DCM_INVALID', p);
   }
   const listElement = type => typeof type === 'string' && (type === 'Boolean' || type === 'String' || ['nominal', 'enum'].includes(dcm.types[type]?.kind));
-  const scalar = type => type === 'Timestamp' || listElement(type);
+  const scalar = type => type === 'Timestamp' || numericType(dcm, type) || listElement(type);
   const valueType = type => scalar(type) || typeof type === 'string' && dcm.types[type]?.kind === 'list';
   const record = type => typeof type === 'string' && dcm.types[type]?.kind === 'record';
   shape(dcm.hostKey, ['source', 'type'], p + '/hostKey');
@@ -143,7 +145,7 @@ export function validateModel(dcm, p) {
     named(entry.consumer.id, p, true); text(entry.consumer.version, p, true);
     const decision = entry.consumer.kind === 'DECISION';
     if (decision) {
-      requireThat(dcm.format === 'keir-dcm/3' && entry.trigger === 'REQUEST' && entry.placement === 'BEFORE_COMMIT', p);
+      requireThat(['keir-dcm/3', 'keir-dcm/4'].includes(dcm.format) && entry.trigger === 'REQUEST' && entry.placement === 'BEFORE_COMMIT', p);
       const field = dcm.types[entry.output].fields.decision;
       const type = typeof field === 'string' ? dcm.types[field] : undefined;
       requireThat(type?.kind === 'enum' && type.values.length === 2 &&
@@ -160,9 +162,13 @@ export function validateModel(dcm, p) {
   return { scalar, valueType, policies, effectGrants };
 }
 
-function checkValue(dcm, typeName, value, path) {
+function checkValue(dcm, typeName, value, path, numbers) {
   const type = dcm.types[typeName];
   if (typeName === 'Boolean') requireThat(typeof value === 'boolean', path);
+  else if (numericType(dcm, typeName)) {
+    const parsed = typeName === 'Integer' ? numeric.integer(value) : numeric.decimal(value);
+    numbers?.set(path, parsed);
+  }
   else if (typeName === 'Timestamp') {
     requireThat(typeof value === 'string' && timestampPattern.test(value), path);
     const millis = Date.parse(value);
@@ -178,20 +184,20 @@ function checkValue(dcm, typeName, value, path) {
     for (let i = 0; i < value.length; i++) {
       const item = Object.getOwnPropertyDescriptor(value, String(i));
       requireThat(item?.enumerable && Object.hasOwn(item, 'value'), path);
-      checkValue(dcm, type.element, item.value, path + '/' + i);
+      checkValue(dcm, type.element, item.value, path + '/' + i, numbers);
     }
   } else if (type?.kind === 'record') {
     requireThat(!nodeTypes.isProxy(value), path);
     shapeWithOptional(value, Object.keys(type.fields), field => typeof type.fields[field] !== 'string', path);
     for (const [field, declaration] of Object.entries(type.fields)) {
-      if (Object.hasOwn(value, field)) checkValue(dcm, fieldType(declaration), value[field], path + '/' + pointer(field));
+      if (Object.hasOwn(value, field)) checkValue(dcm, fieldType(declaration), value[field], path + '/' + pointer(field), numbers);
     }
   } else throw new Fault('ARTIFACT_INVALID', path);
 }
 
-export function validateValue(dcm, typeName, value, path, code) {
+export function validateValue(dcm, typeName, value, path, code, numbers) {
   try {
-    checkValue(dcm, typeName, value, path);
+    checkValue(dcm, typeName, value, path, numbers);
     canonicalBytes(value, LIMITS.valueBytes);
     return freeze(structuredClone(value));
   } catch (error) {
@@ -208,10 +214,12 @@ export function validateEnvelope(artifact, bound) {
   text(artifact.compiler, '/artifact/compiler', true);
   requireThat(typeof artifact.entrypoint === 'string' && Object.hasOwn(bound.dcm.entrypoints, artifact.entrypoint), '/artifact/entrypoint');
   requireThat(Object.keys(ENVIRONMENT).every(k => artifact.environment[k] === ENVIRONMENT[k]), '/artifact/environment', 'PIN_MISMATCH');
-  requireThat(['keir-artifact/2', 'keir-artifact/3'].includes(artifact.format), '/artifact/format');
+  requireThat(['keir-artifact/2', 'keir-artifact/3', 'keir-artifact/4'].includes(artifact.format), '/artifact/format');
   const legacy = artifact.format === 'keir-artifact/2';
-  requireThat((legacy ? artifact.compiler === 'keir-compiler-java/0.2.0' : ['keir-compiler-java/0.3.0', 'keir-compiler-java/0.3.1', 'keir-compiler-java/0.4.0'].includes(artifact.compiler)), '/artifact/compiler', 'PIN_MISMATCH');
-  requireThat(bound.dcm.format === (legacy ? 'keir-dcm/2' : 'keir-dcm/3'), '/artifact/modelRef', 'PIN_MISMATCH');
+  const modern = artifact.format === 'keir-artifact/4';
+  requireThat(modern ? artifact.compiler === 'keir-compiler-java/0.5.0' : legacy ? artifact.compiler === 'keir-compiler-java/0.2.0' : ['keir-compiler-java/0.3.0', 'keir-compiler-java/0.3.1', 'keir-compiler-java/0.4.0'].includes(artifact.compiler), '/artifact/compiler', 'PIN_MISMATCH');
+  requireThat(modern ? ['keir-dcm/3', 'keir-dcm/4'].includes(bound.dcm.format) : bound.dcm.format === (legacy ? 'keir-dcm/2' : 'keir-dcm/3'), '/artifact/modelRef', 'PIN_MISMATCH');
+  if (modern) requireThat(artifact.modelRef.descriptorRecipe === bound.modelRef.descriptorRecipe, '/artifact/modelRef', 'PIN_MISMATCH');
   requireThat(canonicalBytes(artifact.modelRef).equals(canonicalBytes(bound.modelRef)), '/artifact/modelRef');
   requireThat(typeof artifact.sourceDigest === 'string' && /^sha256:[0-9a-f]{64}$/.test(artifact.sourceDigest), '/artifact/sourceDigest');
 }
@@ -224,12 +232,13 @@ export function validatePlan(artifact, { dcm, model }) {
   requireThat(Array.isArray(artifact.steps) && artifact.steps.length > 0 && artifact.steps.length <= LIMITS.steps, '/artifact/steps', 'BUDGET_EXCEEDED');
   const expressionNames = keys(artifact.expressions, '/artifact/expressions', LIMITS.totalAstNodes);
   const variables = Object.fromEntries([['input', entrypoint.input]]);
-  const guardedResultDataflow = artifact.compiler === 'keir-compiler-java/0.4.0';
+  const guardedResultDataflow = ['keir-compiler-java/0.4.0', 'keir-compiler-java/0.5.0'].includes(artifact.compiler);
   const guardedResults = Object.create(null);
   const contexts = new Map();
   let nextExpression = 0, callCount = 0, writeCount = 0;
   const calls = Object.create(null);
   const names = new Set(['input', 'Boolean', 'String', 'Timestamp', 'Duration', ...Object.keys(dcm.types)]);
+  if (dcm.format === 'keir-dcm/4') { names.add('Integer'); names.add('Decimal'); }
   const booleanBinds = new Set();
   function binding(value, type, path) {
     const isLiteral = Object.hasOwn(value ?? {}, 'literal');

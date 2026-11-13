@@ -29,8 +29,9 @@ class PreOperationCompilerTest {
             byte[] source = Files.readAllBytes(corpus.resolve("source-" + name + ".json"));
             var result = COMPILER.compile(source, model, ENV);
             assertTrue(result.succeeded(), result.diagnostics().toString());
-            assertArrayEquals(Files.readAllBytes(corpus.resolve("producers/0.4.0/artifact-" + name + ".json")), result.artifact(), name);
-            assertEquals(Files.readString(corpus.resolve("producers/0.4.0/artifact-" + name + ".sha256")).strip(), result.artifactDigest(), name);
+            byte[] golden=Files.readAllBytes(corpus.resolve("producers/0.4.0/artifact-" + name + ".json"));
+            assertArrayEquals(NumericCompilerTest.retainedAuthoringArtifact(golden), result.artifact(), name);
+            assertEquals(NumericCompilerTest.retainedAuthoringDigest(golden), result.artifactDigest(), name);
             var artifact = map(StrictData.parse(result.artifact(), "/artifact"));
             assertEquals(modelDigest, map(artifact.get("modelRef")).get("digest"), name);
         }
@@ -126,8 +127,8 @@ class PreOperationCompilerTest {
                 var source = source();
                 map(map(source.get("return")).get("record")).put("decision", Map.of("literal", value));
                 var artifact = compiled(source, model);
-                assertEquals("keir-artifact/3", artifact.get("format"));
-                assertEquals("keir-compiler-java/0.4.0", artifact.get("compiler"));
+                assertEquals("keir-artifact/4", artifact.get("format"));
+                assertEquals(KeirCompiler.IDENTITY, artifact.get("compiler"));
                 assertEquals("keir-dcm/3", map(artifact.get("modelRef")).get("format"));
                 assertEquals("keir-record-descriptors/2", map(artifact.get("modelRef")).get("descriptorRecipe"));
                 assertEquals(ENV.packages(), artifact.get("environment"));

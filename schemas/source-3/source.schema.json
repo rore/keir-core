@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:keir:schema:source:3",
+  "title": "Keir numeric source structure",
+  "description": "Native validation enforces the source/model pair, canonical typed literals and numeric CEL policy. Existing binding and control shapes are unchanged.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["language", "domain", "entrypoint", "name", "steps", "return"],
+  "properties": {
+    "language": {"const": "keir/3"},
+    "domain": {"$ref": "urn:keir:schema:source:2#/properties/domain"},
+    "entrypoint": {"$ref": "urn:keir:schema:source:2#/properties/entrypoint"},
+    "name": {"$ref": "urn:keir:schema:source:2#/properties/name"},
+    "steps": {"$ref": "urn:keir:schema:source:2#/properties/steps"},
+    "return": {"$ref": "urn:keir:schema:source:2#/properties/return"}
+  }
+}

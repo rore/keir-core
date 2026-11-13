@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:keir:schema:dcm:4",
+  "title": "Keir numeric model structure",
+  "description": "Integer and Decimal are built-in scalars. Native validation checks references, canonical numeric values, optional presence, guards and authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "domain", "types", "capabilities", "entrypoints", "hostKey"],
+  "properties": {
+    "format": {"const": "keir-dcm/4"},
+    "domain": {"$ref": "urn:keir:schema:dcm:3#/properties/domain"},
+    "types": {
+      "$ref": "urn:keir:schema:dcm:3#/properties/types",
+      "propertyNames": {"not": {"enum": ["Integer", "Decimal"]}},
+      "additionalProperties": {
+        "if": {"properties": {"kind": {"const": "list"}}, "required": ["kind"]},
+        "then": {"properties": {"element": {"not": {"enum": ["Integer", "Decimal", "Timestamp"]}}}}
+      }
+    },
+    "capabilities": {"$ref": "urn:keir:schema:dcm:3#/properties/capabilities"},
+    "entrypoints": {"$ref": "urn:keir:schema:dcm:3#/properties/entrypoints"},
+    "hostKey": {"$ref": "urn:keir:schema:dcm:3#/properties/hostKey"}
+  }
+}

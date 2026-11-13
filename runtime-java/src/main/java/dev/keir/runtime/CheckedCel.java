@@ -19,6 +19,7 @@ import dev.cel.runtime.CelRuntime;
 import dev.cel.runtime.CelRuntimeFactory;
 import dev.cel.runtime.CelStandardFunctions;
 import dev.cel.runtime.standard.AddOperator;
+import dev.cel.runtime.standard.DivideOperator;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -30,6 +31,15 @@ import static dev.keir.runtime.RuntimeData.*;
 /** Admission checks remain independent of the CEL planner's willingness to execute bytes. */
 final class CheckedCel {
     private static final String EXPRESSIONS = "/artifact/expressions";
+    private static final String DECIMAL = "keir.numeric.Decimal";
+    private static final Map<String,Integer> NUMERIC_ARITIES = Map.ofEntries(
+            Map.entry("decimal",1), Map.entry("toDecimal",1), Map.entry("toInteger",1), Map.entry("size",1),
+            Map.entry("-_",1), Map.entry("_+_",2), Map.entry("_-_",2), Map.entry("_*_",2), Map.entry("_/_",2),
+            Map.entry("_<_",2), Map.entry("_<=_",2), Map.entry("_>_",2), Map.entry("_>=_",2),
+            Map.entry("round",3), Map.entry("multiplyRounded",4), Map.entry("divideRounded",4));
+    private static final Map<String,String> NUMERIC_OPERATORS = Map.of("_+_","add", "_-_","subtract", "_*_","multiply",
+            "_/_","divide", "-_","negate", "_<_","less", "_<=_","less_equals", "_>_","greater", "_>=_","greater_equals");
+    private static final Set<String> ROUNDING = Set.of("UNNECESSARY","DOWN","FLOOR","CEILING","HALF_UP","HALF_EVEN");
     private static final long MAX_ID = 9_007_199_254_740_991L;
     private static final Map<String,String> OVERLOADS = Map.of("_==_", "equals", "_!=_", "not_equals",
             "!_", "logical_not", "_&&_", "logical_and", "_||_", "logical_or", "_?_:_", "conditional",
@@ -58,17 +68,21 @@ final class CheckedCel {
             this.dcm = map(immutable(dcm),"/binding/dcm");
             this.descriptor = descriptor; this.descriptorBytes = descriptorBytes;
             var standard = CelStandardFunctions.newBuilder().filterFunctions((function, overload) ->
-                    overload != AddOperator.AddOverload.ADD_TIMESTAMP_DURATION).build();
+                    overload != AddOperator.AddOverload.ADD_TIMESTAMP_DURATION
+                            && (!Artifact.numeric(dcm) || overload != DivideOperator.DivideOverload.DIVIDE_INT64)).build();
             var checkedAdd = CelFunctionBinding.from("add_timestamp_duration", Instant.class, Duration.class,
                     (instant, duration) -> {
                         Instant result = instant.plus(duration);
                         if (!timestampInRange(result)) throw new TimestampOverflow();
                         return result;
                     });
-            this.runtime = CelRuntimeFactory.plannerRuntimeBuilder()
+            var builder = CelRuntimeFactory.plannerRuntimeBuilder()
                     .setOptions(CelOptions.current().enableHeterogeneousNumericComparisons(true)
                             .comprehensionMaxIterations(0).build()).addFileTypes(descriptor)
-                    .setStandardFunctions(standard).addFunctionBindings(checkedAdd).build();
+                    .setStandardFunctions(standard).addFunctionBindings(checkedAdd);
+            if (Artifact.numeric(dcm)) builder.addFileTypes(descriptor.getDependencies())
+                    .addFunctionBindings(numericBindings(decimalDescriptor(descriptor)));
+            this.runtime = builder.build();
         }
 
         int descriptorBytes() { return descriptorBytes; }
@@ -80,9 +94,13 @@ final class CheckedCel {
         if (size > 65_536) throw new RuntimeFault("BUDGET_EXCEEDED","/binding/dcm/types");
         try {
             int recordFile = descriptors.getFileCount() - 1;
-            var dependencies = recordFile == 0 ? new Descriptors.FileDescriptor[0]
-                    : new Descriptors.FileDescriptor[]{Timestamp.getDescriptor().getFile()};
-            return new Model(dcm,Descriptors.FileDescriptor.buildFrom(descriptors.getFile(recordFile),dependencies),size);
+            var dependencies = new ArrayList<Descriptors.FileDescriptor>();
+            for (int i=0;i<recordFile;i++) {
+                var file=descriptors.getFile(i);
+                dependencies.add(file.getName().equals("google/protobuf/timestamp.proto") ? Timestamp.getDescriptor().getFile()
+                        : Descriptors.FileDescriptor.buildFrom(file,new Descriptors.FileDescriptor[0]));
+            }
+            return new Model(dcm,Descriptors.FileDescriptor.buildFrom(descriptors.getFile(recordFile),dependencies.toArray(Descriptors.FileDescriptor[]::new)),size);
         } catch (Exception failure) { throw new RuntimeFault("ADMISSION_INVALID","/binding/dcm"); }
     }
 
@@ -99,10 +117,15 @@ final class CheckedCel {
         }
 
         int totalNodes() { return totalNodes; }
+        Activation activation() { return new Activation(dcm,descriptor); }
 
         Object evaluate(Map<String,Object> binding, Map<String,Object> state, String path) {
-            if (binding.containsKey("literal"))
-                return Artifact.value(dcm, (String)binding.get("type"), binding.get("literal"), path, "EXPRESSION_FAILED");
+            return evaluate(binding,state,activation(),null,path);
+        }
+        Object evaluate(Map<String,Object> binding,Map<String,Object> state,Activation activation,String retainedId,String path) {
+            if (binding.containsKey("literal")) return retainedId == null
+                    ? Artifact.value(dcm,(String)binding.get("type"),binding.get("literal"),path,"EXPRESSION_FAILED")
+                    : activation.accept(retainedId,(String)binding.get("type"),binding.get("literal"),path,"EXPRESSION_FAILED");
             Prepared expression = expressions.get(binding.get("expr"));
             if (expression == null) throw new RuntimeFault("EXPRESSION_FAILED", path);
             Map<String,Object> variables = new HashMap<>();
@@ -117,22 +140,7 @@ final class CheckedCel {
                     if (!state.containsKey(variable.getKey())) throw new RuntimeFault("EXPRESSION_FAILED", path);
                 }
                 String type = (String)variable.getValue();
-                Object value = Artifact.value(dcm, type, state.get(variable.getKey()), path, "EXPRESSION_FAILED");
-                if (Artifact.record(dcm, type)) {
-                    var record = DynamicMessage.newBuilder(descriptor.findMessageTypeByName(type));
-                    for (var field : map(value, path).entrySet()) {
-                        var definition = record.getDescriptorForType().findFieldByName(field.getKey());
-                        Object fieldValue = field.getValue();
-                        if (definition.getJavaType() == Descriptors.FieldDescriptor.JavaType.MESSAGE) {
-                            Instant instant = Artifact.timestamp((String)fieldValue);
-                            fieldValue = Timestamp.newBuilder().setSeconds(instant.getEpochSecond())
-                                    .setNanos(instant.getNano()).build();
-                        }
-                        record.setField(definition, fieldValue);
-                    }
-                    value = record.build();
-                } else if (type.equals("Timestamp")) value = Artifact.timestamp((String)value);
-                variables.put(variable.getKey(), value);
+                variables.put(variable.getKey(),activation.get(variable.getKey(),type,state.get(variable.getKey()),path));
             }
             Object result;
             try { result = expression.program().eval(variables); }
@@ -141,8 +149,21 @@ final class CheckedCel {
                     if (cause instanceof TimestampOverflow) throw new RuntimeFault("BUDGET_EXCEEDED", path);
                 throw new RuntimeFault("EXPRESSION_FAILED", path);
             }
-            if (expression.resultType().equals("Timestamp")) result = timestampResult(result, path);
-            return Artifact.value(dcm, expression.resultType(), result, path, "EXPRESSION_FAILED");
+            Object engine=result;
+            String type=expression.resultType();
+            if (Artifact.numeric(dcm,type)) {
+                try {
+                    if (type.equals("Integer")) {
+                        if (!(result instanceof Long)) throw new IllegalArgumentException();
+                        result=Long.toString((Long)result);
+                    } else result=Numeric.text(decimalValue(result));
+                } catch (RuntimeException failure) { throw new RuntimeFault("EXPRESSION_FAILED",path); }
+                if (retainedId != null) activation.retain(retainedId,type,result,engine);
+                return result;
+            }
+            if (type.equals("Timestamp")) result = timestampResult(result, path);
+            return retainedId == null ? Artifact.value(dcm,type,result,path,"EXPRESSION_FAILED")
+                    : activation.accept(retainedId,type,result,path,"EXPRESSION_FAILED");
         }
 
         private static String timestampResult(Object result, String path) {
@@ -221,9 +242,12 @@ final class CheckedCel {
                     usesTimestamp = true;
                     descriptor.setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE)
                             .setTypeName(".google.protobuf.Timestamp");
+                } else if (Artifact.numeric(dcm,type) && type.equals("Decimal")) {
+                    descriptor.setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE).setTypeName(".keir.numeric.Decimal");
                 } else {
                     String scalar = repeated ? (String)Artifact.definition(dcm, type).get("element") : type;
-                    descriptor.setType(scalar.equals("Boolean") ? DescriptorProtos.FieldDescriptorProto.Type.TYPE_BOOL
+                    descriptor.setType(Artifact.numeric(dcm,scalar) && scalar.equals("Integer") ? DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT64
+                            : scalar.equals("Boolean") ? DescriptorProtos.FieldDescriptorProto.Type.TYPE_BOOL
                             : DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING);
                     if (Artifact.optionalField(fields.get(field))) {
                         String oneof = "_" + field;
@@ -244,7 +268,122 @@ final class CheckedCel {
             file.addDependency(timestamp.getName());
             set.addFile(timestamp.toProto());
         }
+        if (Artifact.numeric(dcm)) {
+            var numeric=DescriptorProtos.FileDescriptorProto.newBuilder().setName("keir_numeric.proto")
+                    .setPackage("keir.numeric").setSyntax("proto3")
+                    .addMessageType(DescriptorProtos.DescriptorProto.newBuilder().setName("Decimal")
+                            .addField(DescriptorProtos.FieldDescriptorProto.newBuilder().setName("value").setJsonName("value")
+                                    .setNumber(1).setLabel(DescriptorProtos.FieldDescriptorProto.Label.LABEL_OPTIONAL)
+                                    .setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING)));
+            set.addFile(numeric); file.addDependency("keir_numeric.proto");
+        }
         return set.addFile(file).build();
+    }
+
+    /** Per-invocation slots only. Guard checks occur before lookup; prepared plans own no values. */
+    static final class Activation {
+        private final Map<String,Object> dcm;
+        private final Descriptors.FileDescriptor descriptor;
+        private final Map<String,Slot> slots=new HashMap<>();
+        private int projections, boundaryParses;
+        private static final class Slot {
+            final String type,path;
+            final Object canonical;
+            final Map<String,Object> numbers;
+            Object engine;
+            Slot(String type,Object canonical,String path,Map<String,Object> numbers,Object engine) {
+                this.type=type; this.canonical=canonical; this.path=path; this.numbers=numbers; this.engine=engine;
+            }
+        }
+        private Activation(Map<String,Object> dcm,Descriptors.FileDescriptor descriptor) { this.dcm=dcm; this.descriptor=descriptor; }
+        Object accept(String id,String type,Object raw,String path,String code) {
+            var numbers=new HashMap<String,Object>();
+            Object canonical=Artifact.value(dcm,type,raw,path,code,numbers);
+            boundaryParses+=numbers.size();
+            slots.put(id,new Slot(type,canonical,path,Map.copyOf(numbers),null));
+            return canonical;
+        }
+        private void retain(String id,String type,Object canonical,Object engine) {
+            slots.put(id,new Slot(type,canonical,"",Map.of(),engine));
+        }
+        Object get(String id,String type,Object canonical,String path) {
+            if (!slots.containsKey(id)) accept(id,type,canonical,path,"EXPRESSION_FAILED");
+            Slot slot=slots.get(id);
+            if (!slot.type.equals(type)) throw new RuntimeFault("EXPRESSION_FAILED",path);
+            if (slot.engine==null) { slot.engine=project(type,slot.canonical,slot.path,slot.numbers); projections++; }
+            return slot.engine;
+        }
+        int projections() { return projections; }
+        int boundaryParses() { return boundaryParses; }
+        private Object project(String type,Object canonical,String path,Map<String,Object> numbers) {
+            if (Artifact.numeric(dcm,type)) return type.equals("Integer") ? numbers.get(path)
+                    : decimalMessage((Numeric.Decimal)numbers.get(path),decimalDescriptor(descriptor));
+            if (type.equals("Timestamp")) return Artifact.timestamp((String)canonical);
+            if (!Artifact.record(dcm,type)) return canonical;
+            var schema=descriptor.findMessageTypeByName(type);
+            var message=DynamicMessage.newBuilder(schema);
+            var fields=map(Artifact.definition(dcm,type).get("fields"),path);
+            for (var field:map(canonical,path).entrySet()) {
+                String fieldType=Artifact.fieldType(fields.get(field.getKey()));
+                Object value=project(fieldType,field.getValue(),pointer(path,field.getKey()),numbers);
+                if (fieldType.equals("Timestamp")) {
+                    Instant instant=(Instant)value;
+                    value=Timestamp.newBuilder().setSeconds(instant.getEpochSecond()).setNanos(instant.getNano()).build();
+                }
+                message.setField(schema.findFieldByName(field.getKey()),value);
+            }
+            return message.build();
+        }
+    }
+
+    private static Descriptors.Descriptor decimalDescriptor(Descriptors.FileDescriptor records) {
+        return records.getDependencies().stream().filter(file -> file.getName().equals("keir_numeric.proto"))
+                .findFirst().orElseThrow().findMessageTypeByName("Decimal");
+    }
+    private static Message decimalMessage(Numeric.Decimal value,Descriptors.Descriptor descriptor) {
+        return DynamicMessage.newBuilder(descriptor).setField(descriptor.findFieldByName("value"),Numeric.text(value)).build();
+    }
+    private static Numeric.Decimal decimalValue(Object raw) {
+        if (!(raw instanceof Message message) || !message.getDescriptorForType().getFullName().equals(DECIMAL)
+                || !message.getUnknownFields().asMap().isEmpty()) throw new IllegalArgumentException("Invalid Decimal engine value.");
+        return Numeric.decimal(message.getField(message.getDescriptorForType().findFieldByName("value")));
+    }
+    private static List<CelFunctionBinding> numericBindings(Descriptors.Descriptor descriptor) {
+        var bindings=new ArrayList<CelFunctionBinding>();
+        bindings.add(CelFunctionBinding.from("divide_int64",Long.class,Long.class,Numeric::divide));
+        bindings.add(CelFunctionBinding.from("keir_decimal_from_string",String.class,a -> decimalMessage(Numeric.decimal(a),descriptor)));
+        bindings.add(CelFunctionBinding.from("keir_decimal_from_integer",Long.class,a -> decimalMessage(Numeric.fromInteger(a),descriptor)));
+        bindings.add(CelFunctionBinding.from("keir_integer_from_decimal",Message.class,a -> Numeric.toInteger(decimalValue(a))));
+        for (String operation:List.of("add","subtract","multiply","divide","negate","less","less_equal","greater","greater_equal")) {
+            List<Class<?>> args=operation.equals("negate") ? List.of(Message.class) : List.of(Message.class,Message.class);
+            bindings.add(CelFunctionBinding.from("keir_decimal_"+operation,args,values -> {
+                var a=decimalValue(values[0]);
+                if (operation.equals("negate")) return decimalMessage(Numeric.negate(a),descriptor);
+                var b=decimalValue(values[1]);
+                return switch (operation) {
+                    case "less" -> Numeric.compare(a,b)<0;
+                    case "less_equal" -> Numeric.compare(a,b)<=0;
+                    case "greater" -> Numeric.compare(a,b)>0;
+                    case "greater_equal" -> Numeric.compare(a,b)>=0;
+                    default -> decimalMessage(switch (operation) {
+                        case "add" -> Numeric.add(a,b);
+                        case "subtract" -> Numeric.subtract(a,b);
+                        case "multiply" -> Numeric.multiply(a,b);
+                        default -> Numeric.divide(a,b);
+                    },descriptor);
+                };
+            }));
+        }
+        bindings.add(CelFunctionBinding.from("keir_decimal_round",List.of(Message.class,Long.class,String.class),args ->
+                decimalMessage(Numeric.round(decimalValue(args[0]),Math.toIntExact((Long)args[1]),(String)args[2]),descriptor)));
+        for (boolean multiply:List.of(true,false)) bindings.add(CelFunctionBinding.from(
+                multiply ? "keir_decimal_multiply_rounded" : "keir_decimal_divide_rounded",
+                List.of(Message.class,Message.class,Long.class,String.class),args -> {
+                    var a=decimalValue(args[0]); var b=decimalValue(args[1]); int scale=Math.toIntExact((Long)args[2]);
+                    return decimalMessage(multiply ? Numeric.multiplyRounded(a,b,scale,(String)args[3])
+                            : Numeric.divideRounded(a,b,scale,(String)args[3]),descriptor);
+                }));
+        return bindings;
     }
 
     private static final class Gate {
@@ -266,6 +405,7 @@ final class CheckedCel {
             if (expression.hasConstExpr()) {
                 var constant = expression.getConstExpr();
                 if (constant.hasBoolValue()) value = new Value("Boolean");
+                else if (Artifact.numeric(dcm) && constant.hasInt64Value()) value = new Value("Integer");
                 else {
                     require(constant.hasStringValue(), EXPRESSIONS);
                     String literal = (String)Artifact.value(dcm, "String", constant.getStringValue(), EXPRESSIONS, "ARTIFACT_INVALID");
@@ -306,19 +446,22 @@ final class CheckedCel {
                 String function = call.getFunction();
                 boolean addition = function.equals("_+_");
                 boolean constructor = function.equals("timestamp") || function.equals("duration");
-                int arity = constructor || function.equals("!_") ? 1 : function.equals("_?_:_") ? 3 : 2;
-                require((addition || OVERLOADS.containsKey(function)) && !call.hasTarget()
+                int arity = Artifact.numeric(dcm) && NUMERIC_ARITIES.containsKey(function) ? NUMERIC_ARITIES.get(function)
+                        : constructor || function.equals("!_") ? 1 : function.equals("_?_:_") ? 3 : 2;
+                require((addition || OVERLOADS.containsKey(function) || Artifact.numeric(dcm) && NUMERIC_ARITIES.containsKey(function)) && !call.hasTarget()
                         && call.getArgsCount() == arity, EXPRESSIONS);
                 List<Value> args = new ArrayList<>();
                 for (int i = 0; i < arity; i++) args.add(visit(call.getArgs(i), depth + 1,
                         branchProofs(call, i, proofs), branchGuards(call, i, guards), false));
                 boolean temporalAdd = addition && pair(args, "Timestamp", "Duration");
-                String overload = addition ? (temporalAdd ? "add_timestamp_duration" : "add_string") : OVERLOADS.get(function);
+                Operation numeric=Artifact.numeric(dcm) ? numericCall(call,args) : null;
+                String overload = numeric != null ? numeric.overload : addition ? (temporalAdd ? "add_timestamp_duration" : "add_string") : OVERLOADS.get(function);
                 var reference = checked.getReferenceMapMap().get(id);
                 require(reference != null && reference.getName().isEmpty() && !reference.hasValue()
                         && reference.getOverloadIdList().equals(List.of(overload)), EXPRESSIONS);
                 references.add(id);
-                if (constructor) {
+                if (numeric != null) value=new Value(numeric.type);
+                else if (constructor) {
                     Expr argument = call.getArgs(0);
                     require(argument.hasConstExpr() && argument.getConstExpr().hasStringValue(), EXPRESSIONS);
                     String literal = argument.getConstExpr().getStringValue();
@@ -363,12 +506,48 @@ final class CheckedCel {
 
         private Type wireType(String name) {
             var type = Type.newBuilder();
+            if (Artifact.numeric(dcm,name)) return name.equals("Integer") ? type.setPrimitive(Type.PrimitiveType.INT64).build()
+                    : type.setMessageType(DECIMAL).build();
             if (name.equals("Timestamp")) return type.setWellKnown(Type.WellKnownType.TIMESTAMP).build();
             if (name.equals("Duration")) return type.setWellKnown(Type.WellKnownType.DURATION).build();
             if (Artifact.record(dcm, name)) return type.setMessageType("keir.read." + name).build();
             if (Artifact.listType(dcm, name)) return type.setListType(Type.ListType.newBuilder()
                     .setElemType(wireType((String)Artifact.definition(dcm, name).get("element")))).build();
             return type.setPrimitive(name.equals("Boolean") ? Type.PrimitiveType.BOOL : Type.PrimitiveType.STRING).build();
+        }
+
+        private record Operation(String type,String overload) {}
+        private Operation numericCall(Expr.Call call,List<Value> args) {
+            String f=call.getFunction();
+            if (f.equals("decimal")) {
+                var literal=call.getArgs(0).getConstExpr();
+                require(literal.hasStringValue(),EXPRESSIONS); Numeric.decimal(literal.getStringValue());
+                return new Operation("Decimal","keir_decimal_from_string");
+            }
+            if (f.equals("toDecimal") || f.equals("toInteger")) {
+                require(args.get(0).type.equals(f.equals("toDecimal") ? "Integer" : "Decimal"),EXPRESSIONS);
+                return new Operation(f.equals("toDecimal") ? "Decimal" : "Integer",
+                        f.equals("toDecimal") ? "keir_decimal_from_integer" : "keir_integer_from_decimal");
+            }
+            if (f.equals("size")) {
+                require(Artifact.listType(dcm,args.get(0).type),EXPRESSIONS);
+                return new Operation("Integer","size_list");
+            }
+            if (Set.of("round","multiplyRounded","divideRounded").contains(f)) {
+                int index=args.size()-2;
+                var scale=call.getArgs(index).getConstExpr(); var mode=call.getArgs(index+1).getConstExpr();
+                require(args.subList(0,index).stream().allMatch(a -> a.type.equals("Decimal"))
+                        && scale.hasInt64Value() && scale.getInt64Value()>=0 && scale.getInt64Value()<=18
+                        && mode.hasStringValue() && ROUNDING.contains(mode.getStringValue()),EXPRESSIONS);
+                return new Operation("Decimal",Map.of("round","keir_decimal_round","multiplyRounded","keir_decimal_multiply_rounded",
+                        "divideRounded","keir_decimal_divide_rounded").get(f));
+            }
+            if (!NUMERIC_OPERATORS.containsKey(f) || !args.stream().anyMatch(a -> Artifact.numeric(dcm,a.type))) return null;
+            String type=args.get(0).type;
+            require(Artifact.numeric(dcm,type) && args.stream().allMatch(a -> a.type.equals(type)),EXPRESSIONS);
+            String operation=NUMERIC_OPERATORS.get(f);
+            return new Operation(Set.of("less","less_equals","greater","greater_equals").contains(operation) ? "Boolean" : type,
+                    type.equals("Integer") ? operation+"_int64" : "keir_decimal_"+operation.replace("_equals","_equal"));
         }
 
         private static boolean pair(List<Value> args, String left, String right) {

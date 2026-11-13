@@ -48,7 +48,7 @@ class GenericHookCompilerTest {
         for(String variant:List.of("title","title-max")) {
             var compiled=COMPILER.compile(bytes("source-"+variant+".yaml"),dcmBytes,ENV);
             var document=artifact(compiled);
-            assertArrayEquals(bytes("artifact-"+variant+".json"),compiled.artifact());
+            assertArrayEquals(NumericCompilerTest.retainedAuthoringArtifact(bytes("artifact-"+variant+".json")),compiled.artifact());
             var call=steps(document).getLast();
             var title=map(map(call.get("args")).get("title"));
             var expression=map(map(document.get("expressions")).get(title.get("expr")));
@@ -90,12 +90,12 @@ class GenericHookCompilerTest {
             var first=COMPILER.compile(source,dcm,ENV);
             var artifact=artifact(first);
             assertArrayEquals(first.artifact(),COMPILER.compile(source,dcm,ENV).artifact(),suffix);
-            assertArrayEquals(bytes("artifact"+suffix+".json"),first.artifact(),suffix);
-            assertEquals(Files.readString(fixture("artifact"+suffix+".sha256")).trim(),first.artifactDigest(),suffix);
+            assertArrayEquals(NumericCompilerTest.retainedAuthoringArtifact(bytes("artifact"+suffix+".json")),first.artifact(),suffix);
+            assertEquals(NumericCompilerTest.retainedAuthoringDigest(bytes("artifact"+suffix+".json")),first.artifactDigest(),suffix);
             assertEquals(Set.of("format","compiler","environment","sourceDigest","modelRef","entrypoint",
                     "expressions","steps","return"),artifact.keySet());
-            assertEquals("keir-artifact/3",artifact.get("format"));
-            assertEquals("keir-compiler-java/0.4.0",artifact.get("compiler"));
+            assertEquals("keir-artifact/4",artifact.get("format"));
+            assertEquals(ENV.compiler(),artifact.get("compiler"));
             assertEquals(StrictData.digest(StrictData.parse(source,"/source")),artifact.get("sourceDigest"));
             assertEquals(Map.of("celJava","0.14.0","celNode","0.6.1","protobufJava","4.35.1",
                     "protobufNode","2.6.2"),artifact.get("environment"));
@@ -117,7 +117,7 @@ class GenericHookCompilerTest {
     @Test void jsonAndYamlSourceRepresentationsCompileToTheSameBytes() throws Exception {
         var result=COMPILER.compile(StrictData.canonical(source()),bytes("dcm.json"),ENV);
         artifact(result);
-        assertArrayEquals(bytes("artifact.json"),result.artifact());
+        assertArrayEquals(NumericCompilerTest.retainedAuthoringArtifact(bytes("artifact.json")),result.artifact());
     }
 
     @Test void artifactSchemaPinsMatchTheCompiler() throws Exception {
@@ -125,7 +125,9 @@ class GenericHookCompilerTest {
                 "artifact.schema.json")),"/schema"));
         assertEquals("urn:keir:schema:artifact:3",schema.get("$id"));
         var properties=map(schema.get("properties"));
-        assertEquals(List.of("keir-compiler-java/0.3.0", "keir-compiler-java/0.3.1", ENV.compiler()),map(properties.get("compiler")).get("enum"));
+        assertEquals(List.of("keir-compiler-java/0.3.0", "keir-compiler-java/0.3.1", "keir-compiler-java/0.4.0"),map(properties.get("compiler")).get("enum"));
+        var numericSchema=map(StrictData.parse(Files.readAllBytes(Path.of("..","schemas","artifact-4","artifact.schema.json")),"/schema"));
+        assertEquals(ENV.compiler(),map(map(numericSchema.get("properties")).get("compiler")).get("const"));
         var environment=map(map(properties.get("environment")).get("properties"));
         var packages=new TreeMap<String,Object>();
         environment.forEach((key,value) -> packages.put(key,map(value).get("const")));

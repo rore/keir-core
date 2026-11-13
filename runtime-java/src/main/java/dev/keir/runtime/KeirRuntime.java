@@ -10,6 +10,12 @@ public final class KeirRuntime {
     public static final Map<String,String> ENVIRONMENT = Profile.ENVIRONMENT;
     private KeirRuntime() {}
 
+    /** Normalize exact ASCII numeric text to a canonical int64 String, without rounding. */
+    public static String normalizeInteger(String value) { return Numeric.normalizeInteger(value); }
+
+    /** Normalize exact ASCII numeric text to a canonical precision-38/scale-18 Decimal String. */
+    public static String normalizeDecimal(String value) { return Numeric.normalizeDecimal(value); }
+
     @FunctionalInterface public interface BoundEffectFunction {
         CompletionStage<?> invoke(Map<String,Object> args, Map<String,Object> protectedArgs, long remainingMs, BoundEffectContext context);
     }
@@ -175,6 +181,7 @@ public final class KeirRuntime {
         private final Prepared prepared;
         private final List<Map<String,Object>> trace=new ArrayList<>();
         private final Map<String,Object> state=new LinkedHashMap<>(),bindings=new LinkedHashMap<>();
+        private final CheckedCel.Activation activation;
         private final Map<String,Integer> counts=new HashMap<>();
         private InvocationClock clock;
         private int totalCalls;
@@ -182,6 +189,7 @@ public final class KeirRuntime {
         private Map<String,Object> receipt;
         private Run(Prepared prepared) {
             this.prepared=prepared;
+            this.activation=prepared == null ? null : prepared.cel.activation();
             emit("INVOCATION_START",Map.of(),"");
         }
         private void emit(String event,Map<String,Object> attributes,String path) {
@@ -211,7 +219,7 @@ public final class KeirRuntime {
         private CompletionStage<Outcome> start(Object input,BoundEffectInvocation invocation) {
             clock=new InvocationClock(invocation.deadline().clock(),invocation.deadline().expiresAtMs());
             clock.remaining("");
-            state.put("input",Artifact.value(prepared.plan.dcm(),(String)prepared.plan.entrypoint().get("input"),input,"/input","INPUT_INVALID"));
+            state.put("input",activation.accept("input",(String)prepared.plan.entrypoint().get("input"),input,"/input","INPUT_INVALID"));
             try {
                 shape(invocation.bindings(),prepared.hostFields.keySet(),"/hostBindings");
                 for (var field:prepared.hostFields.entrySet()) {
@@ -230,9 +238,12 @@ public final class KeirRuntime {
             return step(0);
         }
         private Object evaluate(Object binding,String path) {
+            return evaluate(binding,path,null);
+        }
+        private Object evaluate(Object binding,String path,String retainedId) {
             clock.remaining(path);
             // shortcut: synchronous CEL is checked before and after; interruption needs separate qualification.
-            Object value=prepared.cel.evaluate(map(binding,path),state,path);
+            Object value=prepared.cel.evaluate(map(binding,path),state,activation,retainedId,path);
             clock.remaining(path); return value;
         }
         private CompletionStage<Outcome> step(int index) {
@@ -249,7 +260,7 @@ public final class KeirRuntime {
             Map<String,Object> step=map(steps.get(index),path); String id=(String)step.get("id");
             emit("STEP_START",Map.of("step",id),path);
             if ("BIND".equals(step.get("op"))) {
-                state.put(id,evaluate(step.get("value"),path)); emit("VALUE_BOUND",Map.of("step",id),path); return step(index+1);
+                state.put(id,evaluate(step.get("value"),path,id)); emit("VALUE_BOUND",Map.of("step",id),path); return step(index+1);
             }
             if (step.containsKey("when")) {
                 boolean taken=Boolean.TRUE.equals(state.get(step.get("when")));
@@ -293,8 +304,10 @@ public final class KeirRuntime {
                     if ("SUCCESS".equals(value.get("kind"))) {
                         shape(value,write?Set.of("kind","value","effect"):Set.of("kind","value"),path);
                         if (write) require("CONFIRMED".equals(value.get("effect")),"ADAPTER_INVALID",path);
-                        Object result=Artifact.value(prepared.plan.dcm(),(String)cap.get("result"),value.get("value"),path,"ADAPTER_INVALID");
-                        if (!step.containsKey("when") || Artifact.guardedResultDataflow(prepared.plan.document())) state.put(id,result);
+                        boolean retained=!step.containsKey("when") || Artifact.guardedResultDataflow(prepared.plan.document());
+                        Object result=retained ? activation.accept(id,(String)cap.get("result"),value.get("value"),path,"ADAPTER_INVALID")
+                                : Artifact.value(prepared.plan.dcm(),(String)cap.get("result"),value.get("value"),path,"ADAPTER_INVALID");
+                        if (retained) state.put(id,result);
                     } else if ("BUSINESS_REJECTION".equals(value.get("kind"))) {
                         shape(value,write?Set.of("kind","code","effect"):Set.of("kind","code"),path);
                         if (write) require("NONE".equals(value.get("effect")),"ADAPTER_INVALID",path);

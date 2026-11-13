@@ -19,7 +19,7 @@ final class Artifact {
     private Artifact() {}
 
     static boolean guardedResultDataflow(Map<String,Object> artifact) {
-        return "keir-compiler-java/0.4.0".equals(artifact.get("compiler"));
+        return Set.of("keir-compiler-java/0.4.0","keir-compiler-java/0.5.0").contains(artifact.get("compiler"));
     }
 
     record Plan(Map<String,Object> document, Map<String,Object> dcm, Map<String,Object> entrypoint,
@@ -52,7 +52,11 @@ final class Artifact {
     static boolean scalar(Map<String,Object> dcm, String type) {
         if (type == null) return false;
         Object kind = definition(dcm, type).get("kind");
-        return SCALARS.contains(type) || "nominal".equals(kind) || "enum".equals(kind);
+        return SCALARS.contains(type) || numeric(dcm,type) || "nominal".equals(kind) || "enum".equals(kind);
+    }
+    static boolean numeric(Map<String,Object> dcm) { return "keir-dcm/4".equals(dcm.get("format")); }
+    static boolean numeric(Map<String,Object> dcm,String type) {
+        return numeric(dcm) && ("Integer".equals(type) || "Decimal".equals(type));
     }
     static boolean record(Map<String,Object> dcm, String type) { return "record".equals(definition(dcm, type).get("kind")); }
     static boolean listType(Map<String,Object> dcm, String type) { return "list".equals(definition(dcm, type).get("kind")); }
@@ -72,13 +76,13 @@ final class Artifact {
         Map<String,Object> domain = map(dcm.get("domain"),MODEL);
         return Map.of("domainId",domain.get("id"),"domainVersion",domain.get("version"),
                 "format",dcm.get("format"),"digest",digest(canonical(dcm)),
-                "descriptorRecipe","keir-record-descriptors/2");
+                "descriptorRecipe",numeric(dcm) ? "keir-record-descriptors/3" : "keir-record-descriptors/2");
     }
 
     static void validateModel(Map<String,Object> dcm) {
         String p = MODEL;
         exact(dcm, p, "format", "domain", "types", "capabilities", "entrypoints", "hostKey");
-        require(Set.of("keir-dcm/2","keir-dcm/3").contains(dcm.get("format")), p);
+        require(Set.of("keir-dcm/2","keir-dcm/3","keir-dcm/4").contains(dcm.get("format")), p);
         require(canonical(dcm).length <= Profile.DCM_BYTES, p, "BUDGET_EXCEEDED");
         exact(dcm.get("hostKey"),p+"/hostKey","source","type");
         Map<String,Object> key = map(dcm.get("hostKey"),p+"/hostKey");
@@ -90,7 +94,7 @@ final class Artifact {
         Map<String,Object> types = bounded(dcm.get("types"), p + "/types", 16);
         require(!types.isEmpty(), p);
         for (var item : new TreeMap<>(types).entrySet()) {
-            named(item.getKey(), p, false); require(!BUILTINS.contains(item.getKey()), p);
+            named(item.getKey(), p, false); require(!BUILTINS.contains(item.getKey()) && !numeric(dcm,item.getKey()), p);
             Map<String,Object> type = map(item.getValue(), p);
             Object kind = type.get("kind");
             if ("nominal".equals(kind)) { exact(type, p, "kind", "base"); require("String".equals(type.get("base")), p); }
@@ -110,7 +114,7 @@ final class Artifact {
             Map<String,Object> type = definition(dcm, name);
             if (listType(dcm, name)) {
                 Object element = type.get("element");
-                require(!"Timestamp".equals(element) && scalarType(dcm, element), p);
+                require(!"Timestamp".equals(element) && !(element instanceof String e && numeric(dcm,e)) && scalarType(dcm, element), p);
             } else if (record(dcm, name)) {
                 for (Object field : map(type.get("fields"), p).values()) {
                     if (field instanceof Map<?,?> declaration) {
@@ -152,7 +156,7 @@ final class Artifact {
             exact(entry.get("consumer"),p,"id","version","kind"); Map<String,Object> consumer = map(entry.get("consumer"),p);
             named(consumer.get("id"),p,true); text(consumer.get("version"),p,true,256);
             boolean decision="DECISION".equals(consumer.get("kind"));
-            require(decision ? "keir-dcm/3".equals(dcm.get("format")) : "EVENT_REPORT".equals(consumer.get("kind")),path+"/consumer/kind","DCM_INVALID");
+            require(decision ? Set.of("keir-dcm/3","keir-dcm/4").contains(dcm.get("format")) : "EVENT_REPORT".equals(consumer.get("kind")),path+"/consumer/kind","DCM_INVALID");
             require((decision?"REQUEST":"EVENT").equals(entry.get("trigger")),path+"/trigger","DCM_INVALID");
             require((decision?"BEFORE_COMMIT":"AFTER_COMMIT").equals(entry.get("placement")),path+"/placement","DCM_INVALID");
             try { if (entry.containsKey("effectGrant")) number(entry.get("effectGrant"),0,1,path+"/effectGrant"); }
@@ -199,16 +203,23 @@ final class Artifact {
     }
 
     static Object value(Map<String,Object> dcm, String name, Object value, String path, String code) {
-        Object checked = typedValue(dcm, name, value, path, code);
+        return value(dcm,name,value,path,code,null);
+    }
+    static Object value(Map<String,Object> dcm,String name,Object value,String path,String code,Map<String,Object> numbers) {
+        Object checked = typedValue(dcm, name, value, path, code,numbers);
         try { canonical(checked, Profile.VALUE_BYTES); }
         catch (RuntimeFault fault) { throw new RuntimeFault(fault.code,path); }
         return checked;
     }
 
-    private static Object typedValue(Map<String,Object> dcm, String name, Object value, String path, String code) {
+    private static Object typedValue(Map<String,Object> dcm, String name, Object value, String path, String code,Map<String,Object> numbers) {
         try {
             Map<String,Object> type = definition(dcm,name); Object kind = type.get("kind");
             if ("Boolean".equals(name)) require(value instanceof Boolean,path);
+            else if (numeric(dcm,name)) {
+                Object parsed = name.equals("Integer") ? Numeric.integer(value) : Numeric.decimal(value);
+                if (numbers != null) numbers.put(path,parsed);
+            }
             else if ("Timestamp".equals(name)) {
                 require(value instanceof String, path);
                 timestamp((String)value);
@@ -226,7 +237,7 @@ final class Artifact {
                 List<Object> copied = new ArrayList<>(count);
                 String elementType = (String)type.get("element");
                 for (int i = 0; i < count; i++)
-                    copied.add(typedValue(dcm,elementType,elements.get(i),pointer(path,Integer.toString(i)),code));
+                    copied.add(typedValue(dcm,elementType,elements.get(i),pointer(path,Integer.toString(i)),code,numbers));
                 value = Collections.unmodifiableList(copied);
             } else if ("record".equals(kind)) {
                 Map<String,Object> fields = map(type.get("fields"),path);
@@ -235,7 +246,7 @@ final class Artifact {
                 validateMembers(supplied,fields,path);
                 Map<String,Object> copied = new LinkedHashMap<>();
                 for (var field : fields.entrySet()) if (supplied.containsKey(field.getKey()))
-                    copied.put(field.getKey(),typedValue(dcm,fieldType(field.getValue()),supplied.get(field.getKey()),pointer(path,field.getKey()),code));
+                    copied.put(field.getKey(),typedValue(dcm,fieldType(field.getValue()),supplied.get(field.getKey()),pointer(path,field.getKey()),code,numbers));
                 value = Collections.unmodifiableMap(copied);
             } else throw new RuntimeFault(code,path);
         } catch (RuntimeException error) {
@@ -250,10 +261,14 @@ final class Artifact {
         text(artifact.get("compiler"),"/artifact/compiler",true,256);
         require(map(dcm.get("entrypoints"),MODEL).containsKey(artifact.get("entrypoint")),"/artifact/entrypoint");
         require(Profile.ENVIRONMENT.equals(artifact.get("environment")),"/artifact/environment","PIN_MISMATCH");
-        require(Set.of("keir-artifact/2","keir-artifact/3").contains(artifact.get("format")),"/artifact/format");
-        boolean current="keir-artifact/3".equals(artifact.get("format"));
-        require((current ? Set.of("keir-compiler-java/0.3.0", "keir-compiler-java/0.3.1", "keir-compiler-java/0.4.0").contains(artifact.get("compiler")) : "keir-compiler-java/0.2.0".equals(artifact.get("compiler"))),"/artifact/compiler","PIN_MISMATCH");
-        require((current?"keir-dcm/3":"keir-dcm/2").equals(dcm.get("format")),"/artifact/modelRef","PIN_MISMATCH");
+        require(Set.of("keir-artifact/2","keir-artifact/3","keir-artifact/4").contains(artifact.get("format")),"/artifact/format");
+        boolean modern="keir-artifact/4".equals(artifact.get("format")), current="keir-artifact/3".equals(artifact.get("format"));
+        require(modern ? "keir-compiler-java/0.5.0".equals(artifact.get("compiler")) : current
+                ? Set.of("keir-compiler-java/0.3.0", "keir-compiler-java/0.3.1", "keir-compiler-java/0.4.0").contains(artifact.get("compiler"))
+                : "keir-compiler-java/0.2.0".equals(artifact.get("compiler")),"/artifact/compiler","PIN_MISMATCH");
+        require(modern ? Set.of("keir-dcm/3","keir-dcm/4").contains(dcm.get("format"))
+                : (current?"keir-dcm/3":"keir-dcm/2").equals(dcm.get("format")),"/artifact/modelRef","PIN_MISMATCH");
+        if (modern) require(Objects.equals(modelRef(dcm).get("descriptorRecipe"),map(artifact.get("modelRef"),"/artifact/modelRef").get("descriptorRecipe")),"/artifact/modelRef","PIN_MISMATCH");
         require(modelRef(dcm).equals(artifact.get("modelRef")),"/artifact/modelRef");
         require(artifact.get("sourceDigest") instanceof String text && text.matches("sha256:[0-9a-f]{64}"),"/artifact/sourceDigest");
     }
@@ -273,7 +288,7 @@ final class Artifact {
         for (int i=0; i<steps.size(); i++) {
             String p = "/artifact/steps/"+i; Map<String,Object> step = map(steps.get(i),p);
             named(step.get("id"),p,false); String id = (String)step.get("id");
-            require(!"input".equals(id) && !SCALARS.contains(id) && !"Duration".equals(id) && ids.add(id) && !types(dcm).containsKey(id),p);
+            require(!"input".equals(id) && !SCALARS.contains(id) && !numeric(dcm,id) && !"Duration".equals(id) && ids.add(id) && !types(dcm).containsKey(id),p);
             if ("CALL".equals(step.get("op"))) {
                 Set<String> fields = new HashSet<>(Set.of("op","id","capability","version","args","resultType"));
                 for (String optional : List.of("when","onError")) if (step.containsKey(optional)) fields.add(optional);

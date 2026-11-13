@@ -19,7 +19,7 @@ class GuardedResultCompilerTest {
         var result = compiler.compile(source, model, KeirCompiler.Environment.supported());
         assertTrue(result.succeeded(), result.diagnostics().toString());
         var artifact = map(StrictData.parse(result.artifact(), "/artifact"));
-        assertEquals("keir-compiler-java/0.4.0", artifact.get("compiler"));
+        assertEquals(KeirCompiler.IDENTITY, artifact.get("compiler"));
         var expressions = map(artifact.get("expressions"));
         assertEquals(Map.of("input", "RecordInput", "createNew", "Boolean", "created", "CreatedRecord"),
                 map(map(expressions.get("e2")).get("variables")));

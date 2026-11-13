@@ -20,9 +20,9 @@ class WorkflowCompilerTest {
             byte[] selected = name.equals("inventory-enum") ? file("dcm-inventory-enum.json") : model;
             var result = COMPILER.compile(source, selected, ENV);
             assertTrue(result.succeeded(), result.diagnostics().toString());
-            assertArrayEquals(file("artifact-" + name + ".json"), result.artifact());
+            assertArrayEquals(NumericCompilerTest.retainedAuthoringArtifact(file("artifact-" + name + ".json")), result.artifact());
             assertArrayEquals(result.artifact(), COMPILER.compile(source, selected, ENV).artifact());
-            assertEquals(Files.readString(CORPUS.resolve("producers/0.4.0/artifact-" + name + ".sha256")).strip(), result.artifactDigest());
+            assertEquals(NumericCompilerTest.retainedAuthoringDigest(file("artifact-" + name + ".json")), result.artifactDigest());
         }
         assertEquals(Files.readString(CORPUS.resolve("dcm-inventory.sha256")).strip(),
                 StrictData.digest(StrictData.parse(model, "/dcm")));

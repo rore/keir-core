@@ -13,7 +13,7 @@ from referencing.exceptions import NoSuchResource
 
 ROOT = Path(__file__).resolve().parents[1]
 NAMES = ("source", "dcm", "artifact", "scenario")
-REVISIONS = (1, 2, 3)
+REVISIONS = (1, 2, 3, 4)
 
 
 def deny_retrieval(uri):
@@ -23,7 +23,7 @@ def deny_retrieval(uri):
 def validators(revision):
     if version("jsonschema") != "4.26.0":
         raise RuntimeError("Use the pinned development requirements in an isolated environment.")
-    schema_revisions = {name: 2 if name == "source" and revision == 3 else revision for name in NAMES}
+    schema_revisions = {name: revision - 1 if name == "source" and revision >= 3 else revision for name in NAMES}
     schemas = {
         name: read_document(ROOT / "schemas" / f"{name}-{schema_revisions[name]}" / f"{name}.schema.json")
         for name in NAMES
@@ -32,8 +32,13 @@ def validators(revision):
         if schema["$id"] != f"urn:keir:schema:{name}:{schema_revisions[name]}":
             raise ValueError(f"Unexpected {name} schema ID")
         Draft202012Validator.check_schema(schema)
+    resources = list(schemas.values())
+    if revision == 4:
+        for name in NAMES:
+            old = 2 if name == "source" else 3
+            resources.append(read_document(ROOT / "schemas" / f"{name}-{old}" / f"{name}.schema.json"))
     registry = Registry(retrieve=deny_retrieval).with_resources(
-        (schema["$id"], Resource.from_contents(schema)) for schema in schemas.values()
+        (schema["$id"], Resource.from_contents(schema)) for schema in resources
     )
     return {name: Draft202012Validator(schema, registry=registry) for name, schema in schemas.items()}
 
@@ -73,6 +78,8 @@ def check_scenario_rejections(validator, fixtures):
 
 
 def check_fixtures(schemas, revision):
+    if revision == 4:
+        return check_numeric_schemas(schemas)
     fixtures = ROOT / "conformance" / f"keir-{revision}"
     if revision == 3:
         for group in ("guard", "guard-input", "guard-handler", "guard-reversed", "guarded-result",
@@ -123,6 +130,47 @@ def check_fixtures(schemas, revision):
 
     rejections = len(mutants) + check_scenario_rejections(schemas["scenario"], fixtures)
     print(f"Validated {count} public /{revision} fixtures and {rejections} structural rejections. Native checks remain required.")
+
+
+def check_numeric_schemas(schemas):
+    """Check new closed identities against retained shapes, without relabeling stored fixtures."""
+    from copy import deepcopy
+    corpus = ROOT / "conformance" / "keir-3"
+    samples = {"source": read_document(corpus / "source-handler.json"),
+               "dcm": read_document(corpus / "dcm.json"),
+               "artifact": read_document(corpus / "producers" / "0.4.0" / "artifact.json"),
+               "scenario": read_document(next((corpus / "scenarios" / "main").glob("*.json")))}
+    samples["source"]["language"] = "keir/3"
+    samples["dcm"]["format"] = "keir-dcm/4"
+    artifact = samples["artifact"]
+    artifact.update(format="keir-artifact/4", compiler="keir-compiler-java/0.5.0")
+    artifact["modelRef"].update(format="keir-dcm/4", descriptorRecipe="keir-record-descriptors/3")
+    samples["scenario"]["format"] = "keir-scenario/4"
+    for name, sample in samples.items():
+        if not schemas[name].is_valid(sample):
+            raise ValueError(f"New {name} schema rejects its supported structure")
+    retained = deepcopy(artifact)
+    retained["modelRef"].update(format="keir-dcm/3", descriptorRecipe="keir-record-descriptors/2")
+    if not schemas["artifact"].is_valid(retained):
+        raise ValueError("Artifact /4 rejects retained-authoring tuple")
+    for model, recipe in (("keir-dcm/3", "keir-record-descriptors/3"), ("keir-dcm/4", "keir-record-descriptors/2")):
+        crossed = deepcopy(artifact)
+        crossed["modelRef"].update(format=model, descriptorRecipe=recipe)
+        if schemas["artifact"].is_valid(crossed):
+            raise ValueError("Artifact /4 accepts crossed descriptor tuple")
+    for producer in ("0.2.0", "0.3.0", "0.3.1", "0.4.0"):
+        if schemas["artifact"].is_valid({**artifact, "compiler": "keir-compiler-java/" + producer}):
+            raise ValueError("Artifact /4 accepts a relabeled old producer")
+    for name in ("Integer", "Decimal"):
+        model = deepcopy(samples["dcm"])
+        model["types"][name] = {"kind": "nominal", "base": "String"}
+        if schemas["dcm"].is_valid(model):
+            raise ValueError("Numeric model accepts a reserved type name")
+        model = deepcopy(samples["dcm"])
+        model["types"]["NumericList"] = {"kind": "list", "element": name, "maxItems": 16}
+        if schemas["dcm"].is_valid(model):
+            raise ValueError("Numeric model accepts numeric list elements")
+    print("Validated four new closed schemas and both 0.5 artifact tuples; native numeric checks remain required.")
 
 
 def workflow_mutants(samples):

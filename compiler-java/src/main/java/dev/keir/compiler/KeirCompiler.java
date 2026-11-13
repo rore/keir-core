@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 /** Compiles the public Keir single-mutation contract. */
 public final class KeirCompiler {
-    public static final String IDENTITY = "keir-compiler-java/0.4.0";
+    public static final String IDENTITY = "keir-compiler-java/0.5.0";
     private static final Map<String, String> PACKAGES = Map.of("celJava", "0.14.0", "celNode", "0.6.1",
             "protobufJava", "4.35.1", "protobufNode", "2.6.2");
     private static final Set<String> RESERVED = Set.of("input", "as", "break", "const", "continue", "else",
@@ -40,6 +40,8 @@ public final class KeirCompiler {
             Object parsedDcm = StrictData.parse(trustedDcmBytes, "/dcm");
             Map<String, Object> source = sourceShape(parsedSource);
             Dcm dcm = Dcm.parse(parsedDcm);
+            if (!(dcm.numeric() ? "keir/3" : "keir/2").equals(source.get("language")))
+                fail("PROFILE_UNSUPPORTED", "/source/language");
             if (StrictData.canonical(dcm.root()).length > StrictData.MAX_BYTES) fail("BUDGET_EXCEEDED", "/dcm");
             if (environment == null || !IDENTITY.equals(environment.compiler()) || !PACKAGES.equals(environment.packages()))
                 fail("PIN_MISMATCH", "/source");
@@ -107,11 +109,11 @@ public final class KeirCompiler {
             if (nodes[0] > 512) fail("BUDGET_EXCEEDED", "/source/steps");
             if (dcm.descriptors().getSerializedSize() > 65_536) fail("BUDGET_EXCEEDED", "/dcm/types");
             var artifact = new TreeMap<String, Object>();
-            artifact.put("format", "keir-artifact/3");
+            artifact.put("format", "keir-artifact/4");
             artifact.put("compiler", environment.compiler()); artifact.put("environment", environment.packages());
             artifact.put("sourceDigest", StrictData.digest(source)); artifact.put("entrypoint", entryId);
             artifact.put("modelRef", Map.of("domainId", modelDomain.get("id"), "domainVersion", modelDomain.get("version"),
-                    "format", dcm.root().get("format"), "digest", dcmDigest, "descriptorRecipe", "keir-record-descriptors/2"));
+                    "format", dcm.root().get("format"), "digest", dcmDigest, "descriptorRecipe", dcm.descriptorRecipe()));
             artifact.put("expressions", expressions); artifact.put("steps", steps);
             artifact.put("return", Map.of("type", entry.output(), "fields", fields));
             byte[] bytes = StrictData.canonical(artifact);
@@ -133,6 +135,7 @@ public final class KeirCompiler {
             return Map.of("literal", value, "type", type);
         }
         var parsed = Expressions.parse((String) binding.get("cel"), variables.keySet(), path + "/cel");
+        if (dcm.numeric()) Expressions.numericTokens(parsed, (String)binding.get("cel"), path + "/cel");
         var compiled = Expressions.compile(parsed, expected, variables, guardedResults, dcm, path + "/cel");
         String id = "e" + expressions.size();
         nodes[0] += compiled.nodes();
@@ -163,6 +166,7 @@ public final class KeirCompiler {
             var step = object(steps.get(i), path);
             String id = (String) step.get("id");
             if (names.contains(id) || RESERVED.contains(id) || dcm.types().containsKey(id)
+                    || dcm.numeric(id)
                     || Set.of("Boolean", "String", "Timestamp", "Duration").contains(id)) fail("DATAFLOW_UNAVAILABLE", path + "/id");
             if (step.containsKey("call")) {
                 String capability = (String) step.get("call");
@@ -230,7 +234,7 @@ public final class KeirCompiler {
     private static Map<String, Object> sourceShape(Object parsed) {
         var source = object(parsed, "/source");
         shape(source, Set.of("language", "domain", "entrypoint", "name", "steps", "return"), "/source");
-        if (!"keir/2".equals(source.get("language"))) fail("PROFILE_UNSUPPORTED", "/source/language");
+        if (!Set.of("keir/2", "keir/3").contains(source.get("language"))) fail("PROFILE_UNSUPPORTED", "/source/language");
         var domain = object(source.get("domain"), "/source/domain");
         shape(domain, Set.of("id", "version", "fingerprint"), "/source/domain");
         domain.forEach((key, value) -> text(value, pointer("/source/domain", key), 256));

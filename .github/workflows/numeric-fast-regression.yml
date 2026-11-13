@@ -1,0 +1,133 @@
+name: Numeric fast regression
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      QUALIFICATION_ROOT: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}
+      MAVEN_USER_HOME: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/maven
+      NPM_CONFIG_CACHE: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/npm-cache
+      TMPDIR: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/tmp
+      MAVEN_OPTS: -Xmx256m
+      NODE_OPTIONS: --max-old-space-size=256
+      KEIR_SCENARIO_PYTHON: python
+    steps:
+      - name: Create isolated temporary roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e "$QUALIFICATION_ROOT"
+          mkdir -p "$QUALIFICATION_ROOT"/{maven,npm-cache,tmp,logs,evidence}
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify exact committed source
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Resolve isolated schema and Node dependencies
+        id: dependencies
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --kill-after=5s 90s python -m pip install --no-cache-dir --target "$QUALIFICATION_ROOT/python" -r scripts/requirements-read2-contracts.txt > "$QUALIFICATION_ROOT/logs/python-setup.log" 2>&1
+          timeout --kill-after=5s 120s npm ci --prefix runtime-node --cache "$NPM_CONFIG_CACHE" --ignore-scripts --no-audit --no-fund > "$QUALIFICATION_ROOT/logs/node-setup.log" 2>&1
+      - name: Validate existing and new schema contracts
+        id: schemas
+        timeout-minutes: 1
+        env:
+          PYTHONPATH: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/python
+        run: timeout --kill-after=5s 45s python -B scripts/check-keir-contracts.py > "$QUALIFICATION_ROOT/logs/schemas.log" 2>&1
+      - name: Compile and run existing Java fast tests
+        id: java
+        timeout-minutes: 9
+        shell: bash
+        env:
+          PYTHONPATH: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/python
+        run: |
+          set -euo pipefail
+          timeout --kill-after=5s 480s ./mvnw -B -ntp -Dmaven.repo.local="$MAVEN_USER_HOME/repository" verify > "$QUALIFICATION_ROOT/logs/java.log" 2>&1
+      - name: Run existing Node fast tests
+        id: node
+        timeout-minutes: 3
+        shell: bash
+        run: timeout --kill-after=5s 150s npm test --prefix runtime-node > "$QUALIFICATION_ROOT/logs/node.log" 2>&1
+      - name: Preserve bounded sanitized evidence
+        id: evidence
+        if: ${{ always() }}
+        timeout-minutes: 1
+        env:
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          SCHEMAS_OUTCOME: ${{ steps.schemas.outcome }}
+          JAVA_OUTCOME: ${{ steps.java.outcome }}
+          NODE_OUTCOME: ${{ steps.node.outcome }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B - <<'PY'
+          import hashlib, json, os, platform, re
+          from pathlib import Path
+          root = Path(os.environ['QUALIFICATION_ROOT'])
+          assert root.resolve().parent == Path(os.environ['RUNNER_TEMP']).resolve()
+          assert root.resolve() == root and not root.is_symlink()
+          evidence = root / 'evidence'
+          replacements = [(str(root), '<qualification-root>'), (str(Path.cwd()), '<source-checkout>'),
+                          (str(Path.home()), '<runner-home>')]
+          inventory, total = [], 0
+          logs = ['python-setup', 'node-setup', 'schemas', 'java', 'node']
+          paths = [root / 'logs' / (name + '.log') for name in logs]
+          paths.append(Path('compiler-java/target/numeric-integration.json'))
+          for module in ('compiler-java', 'runtime-java', 'examples/java-host'):
+              paths += sorted(Path(module, 'target/surefire-reports').glob('TEST-*.xml'))
+          for index, path in enumerate(paths):
+              if not path.exists():
+                  continue
+              assert path.is_file() and not path.is_symlink() and path.stat().st_size <= 1_048_576
+              text = path.read_text(encoding='utf-8', errors='strict')
+              for private, public in sorted(replacements, key=lambda pair: -len(pair[0])):
+                  text = text.replace(private, public)
+              assert not re.search(r'(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]+)', text)
+              data = text.encode()
+              total += len(data)
+              assert total <= 10 * 1024 * 1024
+              name = f'{index:03d}-{path.name}'
+              (evidence / name).write_bytes(data)
+              inventory.append({'name': name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()})
+          outcomes = {name: os.environ[name.upper() + '_OUTCOME'] for name in ('dependencies', 'schemas', 'java', 'node')}
+          report = {'revision': os.environ['GITHUB_SHA'], 'outcomes': outcomes,
+                    'status': 'passed' if all(value == 'success' for value in outcomes.values()) else 'failed',
+                    'platform': platform.platform(), 'evidence': inventory,
+                    'scope': 'fast regression only; not package, performance or feature acceptance'}
+          data = (json.dumps(report, indent=2) + '\n').encode()
+          assert total + len(data) <= 10 * 1024 * 1024
+          (evidence / 'receipt.json').write_bytes(data)
+          print(report['status'])
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ always() && steps.evidence.outcome == 'success' }}
+        timeout-minutes: 2
+        with:
+          name: numeric-fast-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/evidence
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+          include-hidden-files: false
+          overwrite: false
+          archive: true

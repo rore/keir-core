@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:keir:schema:artifact:4",
+  "title": "Keir numeric and retained-authoring artifact structure",
+  "description": "Only the two exact 0.5 tuples are admitted. Native independent gates check declared semantic types, descriptor recipes, checked metadata, budgets and authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "compiler", "environment", "sourceDigest", "modelRef", "entrypoint", "expressions", "steps", "return"],
+  "properties": {
+    "format": {"const": "keir-artifact/4"},
+    "compiler": {"const": "keir-compiler-java/0.5.0"},
+    "environment": {"$ref": "urn:keir:schema:artifact:3#/properties/environment"},
+    "sourceDigest": {"$ref": "urn:keir:schema:artifact:3#/$defs/digest"},
+    "modelRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["domainId", "domainVersion", "format", "digest", "descriptorRecipe"],
+      "properties": {
+        "domainId": {"$ref": "urn:keir:schema:artifact:3#/$defs/text"},
+        "domainVersion": {"$ref": "urn:keir:schema:artifact:3#/$defs/text"},
+        "digest": {"$ref": "urn:keir:schema:artifact:3#/$defs/digest"},
+        "format": {"enum": ["keir-dcm/3", "keir-dcm/4"]},
+        "descriptorRecipe": {"enum": ["keir-record-descriptors/2", "keir-record-descriptors/3"]}
+      },
+      "oneOf": [
+        {"properties": {"format": {"const": "keir-dcm/3"}, "descriptorRecipe": {"const": "keir-record-descriptors/2"}}},
+        {"properties": {"format": {"const": "keir-dcm/4"}, "descriptorRecipe": {"const": "keir-record-descriptors/3"}}}
+      ]
+    },
+    "entrypoint": {"$ref": "urn:keir:schema:artifact:3#/properties/entrypoint"},
+    "expressions": {"$ref": "urn:keir:schema:artifact:3#/properties/expressions"},
+    "steps": {"$ref": "urn:keir:schema:artifact:3#/properties/steps"},
+    "return": {"$ref": "urn:keir:schema:artifact:3#/properties/return"}
+  }
+}

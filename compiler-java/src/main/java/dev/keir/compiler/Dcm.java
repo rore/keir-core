@@ -50,12 +50,23 @@ final class Dcm {
         boolean usesTimestamp = types.values().stream().anyMatch(type -> type.fields.containsValue("Timestamp"))
                 || capabilities.values().stream().flatMap(cap -> cap.parameters.values().stream())
                         .anyMatch(param -> param.type.equals("Timestamp"));
-        var dependencies = new Descriptors.FileDescriptor[usesTimestamp ? 1 : 0];
+        var dependencies = new ArrayList<Descriptors.FileDescriptor>();
         if (usesTimestamp) {
             var timestamp = Timestamp.getDescriptor().getFile();
-            dependencies[0] = timestamp;
+            dependencies.add(timestamp);
             set.addFile(timestamp.toProto());
             file.addDependency(timestamp.getName());
+        }
+        if (numeric()) {
+            var numeric = DescriptorProtos.FileDescriptorProto.newBuilder().setName("keir_numeric.proto")
+                    .setPackage("keir.numeric").setSyntax("proto3")
+                    .addMessageType(DescriptorProtos.DescriptorProto.newBuilder().setName("Decimal")
+                            .addField(DescriptorProtos.FieldDescriptorProto.newBuilder().setName("value").setJsonName("value")
+                                    .setNumber(1).setLabel(DescriptorProtos.FieldDescriptorProto.Label.LABEL_OPTIONAL)
+                                    .setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING))).build();
+            set.addFile(numeric); file.addDependency(numeric.getName());
+            try { dependencies.add(Descriptors.FileDescriptor.buildFrom(numeric, new Descriptors.FileDescriptor[0])); }
+            catch (Descriptors.DescriptorValidationException impossible) { throw invalid("/dcm/types"); }
         }
         this.types.forEach((name, type) -> {
             if (type.record()) {
@@ -73,9 +84,12 @@ final class Dcm {
                     if (fieldType.equals("Timestamp")) {
                         descriptor.setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE)
                                 .setTypeName(".google.protobuf.Timestamp");
+                    } else if (numeric(fieldType) && fieldType.equals("Decimal")) {
+                        descriptor.setType(DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE).setTypeName(".keir.numeric.Decimal");
                     } else {
                         String scalarType = definition.list() ? definition.element : fieldType;
-                        descriptor.setType(scalarType.equals("Boolean")
+                        descriptor.setType(numeric(scalarType) && scalarType.equals("Integer")
+                                     ? DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT64 : scalarType.equals("Boolean")
                                     ? DescriptorProtos.FieldDescriptorProto.Type.TYPE_BOOL
                                     : DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING);
                         if (type.optionalFields.contains(fieldName)) {
@@ -93,7 +107,7 @@ final class Dcm {
         var proto = file.build();
         descriptors = set.addFile(proto).build();
         try {
-            fileDescriptor = Descriptors.FileDescriptor.buildFrom(proto, dependencies);
+            fileDescriptor = Descriptors.FileDescriptor.buildFrom(proto, dependencies.toArray(Descriptors.FileDescriptor[]::new));
         } catch (Descriptors.DescriptorValidationException e) {
             throw invalid("/dcm/types");
         }
@@ -101,7 +115,8 @@ final class Dcm {
 
     static Dcm parse(Object value) {
         var root = shape(value,"/dcm","format","domain","types","capabilities","entrypoints","hostKey");
-        supported(root.get("format"),"keir-dcm/3","/dcm/format");
+        boolean numeric = "keir-dcm/4".equals(root.get("format"));
+        if (!numeric) supported(root.get("format"),"keir-dcm/3","/dcm/format");
         var key = shape(root.get("hostKey"),"/dcm/hostKey","source","type");
         if (!"requestKey".equals(key.get("source"))) throw invalid("/dcm/hostKey/source");
         metadataText(key.get("type"),"/dcm/hostKey/type");
@@ -112,7 +127,7 @@ final class Dcm {
         for (var entry : boundedMap(root.get("types"),"/dcm/types",16).entrySet()) {
             String path = child("/dcm/types",entry.getKey());
             identifier(entry.getKey(),path,false);
-            if (BUILTIN_NAMES.contains(entry.getKey())) throw invalid(path);
+            if (BUILTIN_NAMES.contains(entry.getKey()) || numeric && Set.of("Integer", "Decimal").contains(entry.getKey())) throw invalid(path);
             var def = object(entry.getValue(),path);
             String kind = text(def.get("kind"),child(path,"kind"));
             Type type;
@@ -164,12 +179,13 @@ final class Dcm {
             var definition = entry.getValue();
             if (definition.list()) {
                 String element = definition.element;
-                if (element.equals("Timestamp") || !scalarType(types,element)) throw invalid(child(path,"element"));
+                if (element.equals("Timestamp") || numeric && Set.of("Integer", "Decimal").contains(element)
+                        || !scalarType(types,element,numeric)) throw invalid(child(path,"element"));
             }
             for (var field : definition.fields.entrySet()) {
                 String fp = child(child(path,"fields"),field.getKey());
                 boolean optional = definition.optionalFields.contains(field.getKey());
-                requireValueType(types,field.getValue(),optional ? child(fp,"type") : fp,optional);
+                requireValueType(types,field.getValue(),optional ? child(fp,"type") : fp,optional,numeric);
             }
         }
         var capabilities = new TreeMap<String,Capability>();
@@ -191,7 +207,7 @@ final class Dcm {
                 if (optional) shape(p,pp,"type","binding","optional");
                 else shape(p,pp,"type","binding");
                 String type = reference(p.get("type"),child(pp,"type"));
-                requireValueType(types,type,child(pp,"type"),optional);
+                requireValueType(types,type,child(pp,"type"),optional,numeric);
                 String binding = text(p.get("binding"),child(pp,"binding"));
                 if (!binding.equals("agent") && !binding.equals("host")) throw invalid(child(pp,"binding"));
                 if (optional && (!Boolean.TRUE.equals(p.get("optional")) || binding.equals("host")))
@@ -223,7 +239,7 @@ final class Dcm {
                 if (result.optionalFields.contains("decision") || decisionType == null
                         || !decisionType.kind.equals("enum") || decisionType.values.size() != 2
                         || !decisionType.values.containsAll(List.of("ALLOW","DENY"))) throw invalid(child(path,"output"));
-                if (result.fields.values().stream().anyMatch(type -> !scalarType(types,type)))
+                if (result.fields.values().stream().anyMatch(type -> !scalarType(types,type,numeric)))
                     throw invalid(child(path,"output"));
             } else {
                 if (!"EVENT".equals(ep.get("trigger"))) throw invalid(child(path,"trigger"));
@@ -252,8 +268,11 @@ final class Dcm {
     Map<String,Capability> capabilities() { return capabilities; }
     Map<String,Entrypoint> entrypoints() { return entrypoints; }
     Type type(String name) {
-        return BUILTIN_TYPES.contains(name) ? new Type("builtin",name,List.of()) : types.get(name);
+        return BUILTIN_TYPES.contains(name) || numeric(name) ? new Type("builtin",name,List.of()) : types.get(name);
     }
+    boolean numeric() { return "keir-dcm/4".equals(root.get("format")); }
+    boolean numeric(String name) { return numeric() && ("Integer".equals(name) || "Decimal".equals(name)); }
+    String descriptorRecipe() { return numeric() ? "keir-record-descriptors/3" : "keir-record-descriptors/2"; }
     Type record(String name) { Type t = types.get(name); return t != null && t.record() ? t : null; }
     DescriptorProtos.FileDescriptorSet descriptors() { return descriptors; }
     Descriptors.FileDescriptor fileDescriptor() { return fileDescriptor; }
@@ -309,13 +328,13 @@ final class Dcm {
         Type t = types.get(name);
         if (t == null || !t.record()) throw invalid(path);
     }
-    private static boolean scalarType(Map<String,Type> types,String name) {
+    private static boolean scalarType(Map<String,Type> types,String name,boolean numeric) {
         Type t = types.get(name);
-        return BUILTIN_TYPES.contains(name) || t != null && t.scalar();
+        return BUILTIN_TYPES.contains(name) || numeric && Set.of("Integer", "Decimal").contains(name) || t != null && t.scalar();
     }
-    private static void requireValueType(Map<String,Type> types,String name,String path,boolean optional) {
+    private static void requireValueType(Map<String,Type> types,String name,String path,boolean optional,boolean numeric) {
         Type t = types.get(name);
-        if (!scalarType(types,name) && (optional || t == null || !t.list())) throw invalid(path);
+        if (!scalarType(types,name,numeric) && (optional || t == null || !t.list())) throw invalid(path);
     }
     private static String reference(Object value,String path) {
         String ref = text(value,path);
