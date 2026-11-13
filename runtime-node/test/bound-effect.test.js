@@ -115,8 +115,8 @@ test('public model binding matches the shared byte boundary cases without dispat
   }
 });
 
-test('only the host-bound API is exported and extra admission inputs fail closed', async () => {
-  assert.deepEqual(Object.keys(api).sort(), ['ENVIRONMENT', 'bindModel', 'invokeProgram', 'prepareProgram']);
+test('only the host-bound API and exact helpers are exported and extra admission inputs fail closed', async () => {
+  assert.deepEqual(Object.keys(api).sort(), ['ENVIRONMENT', 'bindModel', 'invokeProgram', 'normalizeDecimal', 'normalizeInteger', 'prepareProgram']);
   const f = boundFixture(api), binding = f.bind(), handle = prepared(f);
   assert.equal(api.bindModel(f.dcmBytes, f.implementations, undefined).boundModel, null);
   assert.equal(api.bindModel(f.dcmBytes, {}, f.implementations).boundModel, null);

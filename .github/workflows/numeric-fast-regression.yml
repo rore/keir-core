@@ -91,8 +91,8 @@ jobs:
           assert root.resolve().parent == Path(os.environ['RUNNER_TEMP']).resolve()
           assert root.resolve() == root and not root.is_symlink()
           evidence = root / 'evidence'
-          replacements = [(str(root), '<qualification-root>'), (str(Path.cwd()), '<source-checkout>'),
-                          (str(Path.home()), '<runner-home>')]
+          replacements = [(str(root), '[qualification-root]'), (str(Path.cwd()), '[source-checkout]'),
+                          (str(Path.home()), '[runner-home]')]
           inventory, total = [], 0
           logs = ['python-setup', 'node-setup', 'schemas', 'java', 'node']
           paths = [root / 'logs' / (name + '.log') for name in logs]

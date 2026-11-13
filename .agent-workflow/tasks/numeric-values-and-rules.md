@@ -61,7 +61,7 @@ Manager continuation delegates reviewed task commits, non-force main delivery an
 **Exceptions:**
 —
 
-**State:** Ready for review
+**State:** Ready to implement
 <!-- agent-workflow:end -->
 
 ## Initial released slice
@@ -149,3 +149,13 @@ Final checkpoint governance: fresh path-only Redline over the exact 29-path inve
 ### Hosted regression delivery and routine repair
 
 Reviewed checkpoint `42ee6724bd1a6da622515a86bfc57495d02ac45a` was committed with `[skip ci]`, pushed non-force to main and read back exactly, including manual workflow bytes. The first dispatch request was rejected by GitHub with HTTP 422 before a run was created: runner context is unavailable in job-level environment expressions. This is workflow setup/validation failure, not engine evidence. Routine repair reuses the existing qualified workflow's step-level runner environment plus `GITHUB_ENV` handoff, keeping paths, dependencies, time/evidence limits and exclusions unchanged. No duplicate job or local execution occurred. The source review is reused for unchanged production code and the equivalent environment-location correction; hosted compilation/tests remain pending.
+
+Bootstrap repair commit `9f70dc3560d8c8e74737d364bbd5c65e195cedca` was pushed non-force and read back with exact workflow SHA-256 `234ace46baac8fc9cc36fb9bfa0408f2d6d778f2704587b28ae12ee61fbdab06`. Inert YAML/context-location checks passed; no production code changed. Exactly one accepted manual run was submitted for that revision: [43409988188](https://github.com/rore/keir-core/actions/runs/43409988188), admitted 2026-11-13T10:33:37Z, head SHA verified. It completed failure in 1m9s: dependency setup, schemas and Java passed; Node passed 274/276 tests, including all 97 numeric complete outcomes, but two legacy expectations failed. Evidence upload succeeded. Completion watch ended; do not poll or redispatch this revision. All local execution holds remain.
+
+Receipt inventory and every downloaded file's byte count/SHA-256 were verified before repair. The two Node failures are contract updates missed by the implementation: the exact root-export allowlist omits the two approved helpers, and the decision-model rejection list still treats `/4` as unsupported. Extend ownership to `runtime-node/test/bound-effect.test.js` and `runtime-node/test/pre-operation.test.js`; keep closed exports and unsupported-version rejection, add positive `/4` decision coverage and retain its authority restrictions. Production code and independent numeric expectations remain unchanged. Reuse focused SOURCE GO for unchanged semantics under delegated routine repair authority.
+
+Evidence inspection also found that angle-bracket redaction placeholders make sanitized Surefire XML invalid. Preserve the received evidence bytes; repair the same workflow to use XML-safe bracket placeholders and statically check the redaction shape. No dependency, bounds, credentials or policy changes. Historical receipt/report text is not executable test content.
+
+Verified first-run inventory: 37 files, 584550 bytes, receipt SHA-256 `dd2493edf6d7ed356847374417805cbed183ee879d409127c3124e83dd03a037`. Original sanitized XML bytes remain untouched; an in-memory placeholder-only repair permits structural report inspection: 31 Java suites, 215 tests, zero failures/errors/skips. Shared 97-case batch SHA-256 `8f1de157a6250b907c3321c5808108b8a5f713a9034830db1f1342a37552e230`. All 97 Node complete-outcome cases passed. These are actual fast-regression results, not package/performance/full-feature acceptance.
+
+Routine repair is test/evidence-only: exact export allowlist now names just the approved additions; decision admission/denial assertions cover both `/3` and `/4`, with `/5` retained as unsupported. XML placeholders now use brackets. Node `--check`, inert workflow/Python syntax, XML-safe placeholder inspection, receipt hash verification, privacy/whitespace and requirement-baseline checks passed. No production code, numeric oracle, local test execution or runtime policy changed. Next action: personal attribution check, `[skip ci]` commit/non-force push, exact remote readback and one bounded manual repair run.

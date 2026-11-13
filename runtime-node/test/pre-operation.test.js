@@ -28,9 +28,10 @@ function bind(dcm) {
 }
 
 test('decision model admits both enum orders and only zero write grants', () => {
-  for (const values of [['ALLOW', 'DENY'], ['DENY', 'ALLOW']]) {
+  for (const format of ['keir-dcm/3', 'keir-dcm/4']) for (const values of [['ALLOW', 'DENY'], ['DENY', 'ALLOW']]) {
     for (const effectGrant of [undefined, 0]) {
       const dcm = decisionModel();
+      dcm.format = format;
       dcm.types.Decision.values = values;
       if (effectGrant !== undefined) dcm.entrypoints.TaskCompleted.effectGrant = effectGrant;
       assert.equal(bind(dcm).diagnostic, null);
@@ -43,7 +44,7 @@ test('decision model admits both enum orders and only zero write grants', () => 
 test('decision model rejects wrong versions, lifecycles, output types and nonzero grant', () => {
   for (const mutate of [
     dcm => { dcm.format = 'keir-dcm/2'; },
-    dcm => { dcm.format = 'keir-dcm/4'; },
+    dcm => { dcm.format = 'keir-dcm/5'; },
     dcm => { dcm.entrypoints.TaskCompleted.trigger = 'EVENT'; },
     dcm => { dcm.entrypoints.TaskCompleted.placement = 'AFTER_COMMIT'; },
     dcm => { dcm.entrypoints.TaskCompleted.consumer.kind = 'EVENT_REPORT'; },
@@ -56,11 +57,14 @@ test('decision model rejects wrong versions, lifecycles, output types and nonzer
     dcm => { dcm.types.Decision.values = ['ALLOW', 'DENY', 'OTHER']; },
     dcm => { dcm.types.Decision.values = ['ALLOW', 'deny']; },
   ]) {
-    const dcm = decisionModel();
-    mutate(dcm);
-    const denied = bind(dcm);
-    assert.equal(denied.boundModel, null);
-    assert.equal(denied.diagnostic.code, 'ADMISSION_INVALID');
+    for (const format of ['keir-dcm/3', 'keir-dcm/4']) {
+      const dcm = decisionModel();
+      dcm.format = format;
+      mutate(dcm);
+      const denied = bind(dcm);
+      assert.equal(denied.boundModel, null);
+      assert.equal(denied.diagnostic.code, 'ADMISSION_INVALID');
+    }
   }
 });
 
