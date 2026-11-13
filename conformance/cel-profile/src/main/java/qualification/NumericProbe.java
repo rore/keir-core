@@ -572,8 +572,11 @@ public final class NumericProbe {
             }
             int rejects = 0;
             for (Object source : list(fixtures.get("rejectSources"))) {
-                try { new Gate(compile((String)source, models.get("numeric")), "numeric").verify(); throw new AssertionError("Forbidden source accepted"); }
-                catch (Exception rejected) { rejects++; }
+                boolean rejected = false;
+                try { new Gate(compile((String)source, models.get("numeric")), "numeric").verify(); }
+                catch (Exception | AssertionError expected) { rejected = true; }
+                require(rejected);
+                rejects++;
             }
             var descriptors = new TreeMap<String,String>(); var descriptorHashes = new TreeMap<String,String>();
             for (var model : models.entrySet()) { byte[] descriptor = deterministic(model.getValue().descriptors); descriptors.put(model.getKey(), Base64.getEncoder().encodeToString(descriptor)); descriptorHashes.put(model.getKey(), hash(descriptor)); }
