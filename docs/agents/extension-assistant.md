@@ -1,75 +1,45 @@
-<a id="customer-extension-assistant"></a>
 # Build a customer authoring assistant
 
-Select the [authoring companion](authoring-companion.md#choose-an-edition) matching the host's packages and model. Its compatibility record identifies the exact package and document combination.
+Implement the conversation and tools around Keir. The assistant proposes a rule; the application checks it and owns approval, activation and execution.
 
-Qualified unpublished numeric authoring uses [companion edition 9](authoring-companion.md#qualified-candidate-edition-9). [Runtime/package checks, the corrected companion and tested Daymark adoption are accepted](../specs/README.md#numeric-qualification-status). Published Core 0.4.0 remains nonnumeric; candidate acceptance does not upgrade an installed host. The live catalog distinguishes current qualification from the frozen guide's preparation-time status.
+## Inputs
 
-## Task and inputs
+- The host's exact model, supported compiler/runtime profile and [matching authoring packet](authoring-companion.md).
+- An allowlist of owner-scoped discovery, compilation, simulation and submission tools, with strict argument schemas.
+- Saved draft/revision identity, independent expected examples and the current user's authorized scope.
 
-Give the assistant the exact model approved for the customer, including hooks, capabilities, result contracts, types and limits. Give it separate access to the authoring tools you want it to use. For example, the follow-up extension chooses a project and title and calls the app’s existing `tasks.create` operation. The project choice belongs in source. Resource permissions belong to the application.
-
-Use the [language reference](../specs/language.md) and [domain capability model reference](../specs/domain-model.md) to understand expression, type and call rules. Use the matching schemas identified by the [format matrix](../specs/compiler-artifact.md#source-and-artifact-identity) to check document structure.
+Use the matching guide for syntax, types, conditional results and numeric rules. Do not copy language rules into provider prompts from an unrelated edition or infer support from current repository source.
 
 ## Workflow
 
-### Business-user interaction
+1. Ask for missing business choices. Resolve names through authorized discovery rather than inventing identifiers, operations or fields. Ask before replacing an unsupported request with another behavior.
+2. Draft source and compile it against the host-selected model. Preserve diagnostic codes and paths so the assistant can repair the proposal. A changed source/model needs a new compile.
+3. Agree on expected matching, nonmatching and failure cases independently of observed results. Simulate the exact compiled artifact with controlled service responses; no real writes belong in this step.
+4. Compare complete expected and observed outcomes, calls, decisions and write evidence. Preserve rejection, skipped calls and uncertain effects as distinct states. A passing error-case example does not prove every failure safe.
+5. Present what the rule will do, the exact checked revision, example results and coverage limits. The user approves; the host separately activates that exact version. Edits need new checks and approval. The assistant cannot approve or activate itself.
 
-1. Let the customer describe the desired behavior. Ask only for business choices the assistant cannot resolve from the scoped context.
-2. Have the assistant draft against the published model and use structured compiler diagnostics for bounded repair. Preserve the model identity and the customer's intent.
-3. Agree on expected outcomes before running the compiled artifact with simulated implementations. Include a case where the extension should do nothing and relevant denial or uncertain-write cases. Show observed results and effect evidence separately.
-4. Present the exact checked revision to the authorized reviewer. Record approval and activation as separate decisions. Changes to the revision require renewed checks and approval.
+## Example
 
-Keep the conversation usable without a dashboard. If the application offers a separate example view, open it on request and preserve the customer’s place and unsent text when a new response arrives.
+For “create a follow-up after an eligible completion,” discover the host's completion hook and approved read/create operations. Ask which project and title to use. Check a matching completion, another project and an unavailable read. Report simulated creations as examples, then hand the checked proposal to the host's review flow. Task services are this host's operations, not built-in Keir features.
 
-### Example authoring session
+## Tool and integration checks
 
-A customer asks for a follow-up when someone completes a task in the launch project. These tool names illustrate an API the application defines.
+- Validate every tool argument, current owner and exact draft/version on the server. Keep protected identity, original request key and deployment credentials out of authored arguments.
+- Keep compiler output, saved evidence and approval bound to their exact model/artifact bytes. Reject malformed or incomplete evidence rather than turning it into eligibility.
+- Bind real or simulated operations as the appropriate complete set. Runtime execution uses approved compiled bytes without another AI request.
+- Test failed discovery/compilation, rejected examples, late responses, changed drafts and lost-response recovery. A reload must not repeat a paid turn or native write automatically.
+- For before-save decisions, compare decision consumption and native save results separately. ALLOW still requires the host's own permission, consistency and commit checks.
 
-1. **`discoverExtensionContext`** returns the approved task model, `TaskCompleted` entrypoint and permitted operations. **`findProject`** resolves “launch” within the customer’s scope and returns its `ProjectId`.
-2. **`compileDraft`** compiles against that exact model. If the draft declares the selected project as a plain string, the compiler reports `NOMINAL_MISMATCH` at the project comparison. The assistant changes the declaration to a typed `ProjectId` literal and compiles again.
-3. **`simulateDraft`** takes the compiled artifact and runs it with the app’s simulated operations. The assistant compares against agreed expectations for a matching task, a task in another project, and a lost write response.
-4. **`submitForReview`** presents the exact artifact, the expected and observed outcomes, and the write receipts. The customer can review the result. The host handles approval and activation separately for that revision.
+[Host integration](../embedding.md) · [Simulation contract](../specs/single-effect.md#ordered-simulation-protocol-and-acceptance) · [Before-save decisions](../specs/pre-operation-decisions.md)
 
-### Author a pre-operation decision
-
-Discover a REQUEST/BEFORE_COMMIT/DECISION hook in the host's current model. Read its input and result, then compose approved READs if the request needs more facts. Compile against that exact model. A WRITE is rejected even when guarded by false; repair the draft without replacing the requested decision with a mutation.
-
-Agree on ALLOW, DENY, failed read, timeout and changed-fact cases before simulation. Report the runtime result, decision consumption and native result separately. A handled BUSINESS_REJECTION returning ALLOW still blocks. Present the exact artifact and evidence for approval and activation. The [neutral walkthrough](../decision-walkthrough.md) follows this flow; discovery, compilation, simulation and review tool names and permissions are defined by your application.
-
-## Guarded results require matching host support
-
-Use guarded-result scalar access only when the host explicitly supports a compatible [compiler/runtime tuple](../specs/compiler-artifact.md#source-and-artifact-identity). Older installed consumers and companion editions retain their original limits; do not suggest an automatic upgrade or recompile an approved artifact in place.
-
-For an earlier CALL `r` with `when: g`, use `g ? r.reference : input.existingReference`. For an optional scalar, keep both proofs: `g ? (has(r.note) ? r.note : "") : ""`. Use the exact Boolean BIND identifier named by the CALL's `when`, not an equivalent expression or an alias of a different guard. If the CALL itself names an alias as its guard, use that exact identifier. Do not read the record or its lists, infer proof from a later CALL's guard, or refer to a CALL's own result in its arguments/handler. Preserve exact scalar types and the one-possible-WRITE ceiling (zero for decisions).
-
-Agree on true, skipped, optional absent/empty/false, rejected and uncertain cases before simulation. Return the adapter's actual validated reference on success. Failure is not absence: never replace rejection, expiry, invalid data or UNKNOWN effect with the skipped fallback. Show receipts separately, including CONFIRMED beside a later failure. The [complete neutral examples](../../conformance/keir-3/README.md) and [language rules](../specs/language.md#steps-and-data-flow) define the bounded capability.
-
-## Numeric authoring requires the numeric profile
-
-Discover the exact producer, source/model pair and guide supported by the host. Only development `keir/3` + DCM `/4` adds Integer, Decimal and supplied-list size. The same 0.5 compiler can retain nonnumeric `keir/2` + DCM `/3` authoring, including nominal String types named Integer/Decimal. Both emit new 0.5 artifact identities requiring fresh approval; no old approval transfers.
-
-Use [canonical numeric strings](../specs/domain-model.md#numeric-values), typed literals such as `{literal: "0.075", type: Decimal}` and literal-only `decimal("1")`. Ordinary decimal Integer CEL constants are allowed; floating-point/hex/uint/exponent forms are not. Same-type comparisons/arithmetic, exact conversions and [explicit rounding](../specs/workflow-expressions.md#numeric-arithmetic-and-rounding) are the whole numeric surface, not full CEL. Never silently round, parse an arbitrary String or promote Integer to Decimal. Ask for a business rounding scale/mode when the request needs rounding. A rate of `0.075` means 7.5% only because the host/customer defines it that way.
-
-For a host declaring Decimal `subtotal` and `discountRate`, a draft amount expression can use `multiplyRounded(input.subtotal, decimal("1") - input.discountRate, 2, "HALF_EVEN")`. Optional fields still require presence proof; guarded numeric results still require their exact guard. Include absent versus present zero, overflow/inexact division, rejected calls and receipt-preserving failures in independent expectations. A failed call never supplies numeric zero as fallback.
-
-`size(input.tags)` counts the actual bounded list, not remote matching rows. The host owns normalization and distinctness. Core enforces no money/units and supplies no domain services. Do not invent Decimal fields in Daymark or another host. Normalization helpers are host APIs, not authoring expressions. Keep source checks, packaged-consumer evidence, simulated outcomes and actual native execution distinct; approval and activation remain separate.
-
-## Authority and tools
-
-The application selects the DCM and capabilities available for authoring. It supplies protected values at execution and owns permissions, native commits, approval and activation. Keep catalog publication and capability registration outside the assistant’s authority. See the [embedding guide](../embedding.md) for runtime setup.
-
-| Authoring responsibility | What the application supplies |
-| --- | --- |
-| Scoped discovery | The approved model identity, the available operations and any authorized resource lookup. |
-| Draft compilation and diagnostics | A call to the [Keir compiler](../../compiler-java/README.md) with the host-selected model, and safe diagnostic results. |
-| Simulation and review | The [same compiled artifact](../embedding.md) with simulated implementations, independent expectations and a result the customer can inspect. |
-| Approval and activation | Separate host-owned operations for the authorized user and the exact reviewed revision. |
-
-These are responsibilities for tools your application defines. Keep tool permissions separate from the capabilities a rule can call, and surface missing tools, failed validation or uncertain outcomes in the review.
-
+<a id="author-a-pre-operation-decision"></a>
+<a id="authority-and-tools"></a>
+<a id="business-user-interaction"></a>
+<a id="customer-extension-assistant"></a>
+<a id="earlier-examples"></a>
+<a id="example-authoring-session"></a>
 <a id="first-worked-customization-classify-a-task"></a>
+<a id="guarded-results-require-matching-host-support"></a>
 <a id="implementation-reference-earlier-task-examples"></a>
-## Earlier examples
-
-For the current contract, [run the follow-up example](../quickstart.md). For compatibility work, see the [original read-only source](../internal/history/compatibility-reference.md#original-read-source), [original simulated-write scenarios](../../conformance/single-effect/README.md) or [catalog-bound follow-up walkthrough](../internal/history/compatibility-reference.md#earlier-follow-up).
+<a id="numeric-authoring-requires-the-numeric-profile"></a>
+<a id="task-and-inputs"></a>

@@ -34,7 +34,7 @@ Guards over native transactions, extension-owned writes, when/onError constructs
 - Unknown capability, forbidden write, host-field override, invalid source/type, oversized input, and incompatible or tampered artifact cases fail closed with no unauthorized adapter dispatch.
 - The admitted CEL profile, tested data/budget limits, artifact provenance boundary and remaining containment limitations are documented; no unverified production deadline guarantee is claimed.
 - No task-specific behavior enters the generic compiler or runtimes.
-- Fast default regression commands, component coverage baselines and relevant explicit slow checks are documented with timings. The [selected behavioral contract](../../docs/testing.md#initial-protected-contract) runs in a real CI check before workflow-level protection is activated; advisory governance does not make test failures advisory.
+- Fast default regression commands, component coverage baselines and relevant explicit slow checks are documented with timings. The [selected behavioral contract](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/testing.md#initial-protected-contract) runs in a real CI check before workflow-level protection is activated; advisory governance does not make test failures advisory.
 
 ## Notes
 
@@ -46,7 +46,7 @@ The two core developers cover compiler, both runtimes, shared fixtures and Java/
 
 The local read-and-decide checkpoint passes as of 2026-10-29. The Java compiler emits the same 2,874-byte artifact for both runtimes; two fresh compiler processes reproduce the golden digest `sha256:7ba9478b9d8f47ddc1834b1e4a05ad98326f1a0c81f85e5549e12936c1ad4424`. Both independently packaged hosts demonstrate DONE/PENDING display and missing/wrong-resource failure consumption.
 
-Canonical verification passed 92 Java tests (31 compiler, 56 runtime, 5 host) in a 35.40-second clean coverage build and 154 default Node tests in 3.80 seconds. The combined verifier compares the entire 61-case/52-invocation transport, fresh artifact bytes and both packaged hosts. Both module suites also execute the same compiled two-read artifact, covering grant exhaustion before second-call authorization, counter/identity reset and first-read failure. [Commands, coverage baselines and remaining misses](../../docs/testing.md) are recorded separately from cold dependency setup.
+Canonical verification passed 92 Java tests (31 compiler, 56 runtime, 5 host) in a 35.40-second clean coverage build and 154 default Node tests in 3.80 seconds. The combined verifier compares the entire 61-case/52-invocation transport, fresh artifact bytes and both packaged hosts. Both module suites also execute the same compiled two-read artifact, covering grant exhaustion before second-call authorization, counter/identity reset and first-read failure. [Commands, coverage baselines and remaining misses](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/testing.md) are recorded separately from cold dependency setup.
 
 Review corrected consumer-ID validation, scalar-only conditional admission, canonical DCM overflow and cross-invocation timeout scheduling. The architect clarified independent raw/canonical DCM ceilings without widening the profile. Runtime-local artifact helpers keep compiler/source parsing out of runtime dependencies; no shared module or worker framework was added. Hard synchronous deadlines, complete process-memory isolation and real adapter guarantees remain unqualified.
 

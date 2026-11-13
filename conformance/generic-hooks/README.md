@@ -1,7 +1,7 @@
 <a id="shared-generic-hook-simulations"></a>
 # Generic capability simulation reference
 
-Internal engineering reference: the current single-write behavior is exercised by this corpus. Exact selectors and wire identifiers are implementation details; see the [implementation reference](../../docs/internal/implementation-reference.md). A program-authored `CREATED` label in a zero-WRITE case carries no confirmed effect. The separate [qualified-write corpus](effect3/) checks the earlier admission protocol. See the [single-write verification record](../../docs/testing.md#effect4-verification) for local and hosted results.
+Internal engineering reference: the current single-write behavior is exercised by this corpus. Exact selectors and wire identifiers are implementation details; see the [implementation reference](../../docs/internal/implementation-reference.md). A program-authored `CREATED` label in a zero-WRITE case carries no confirmed effect. The separate [qualified-write corpus](effect3/) checks the earlier admission protocol. See the [single-write verification record](../../CONTRIBUTING.md#testing-principles) for local and hosted results.
 
 Historical compatibility reference: `admission-cases.json` supplies 28 independently authored facts for fixed trusted host fixtures. Its driver and results cover that earlier protocol. In the current contract, permission denial inside an implementation is an attempted call and definite NONE only when no effect is established. Exceptions, timeout and response loss after dispatch remain UNKNOWN.
 

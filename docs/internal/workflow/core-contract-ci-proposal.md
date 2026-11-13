@@ -143,7 +143,7 @@ behaviorContracts:
   verification: keir-contract
 ```
 
-These paths cover behavior, expected vectors and test selection. Do not blanket-protect benchmarks or unrelated helpers. Preserve meaningful assertions during equivalent/coverage-only edits; weakening or redefining an obligation requires exact user approval under [testing guidance](../../testing.md#agent-workflow). Workflow-level protection adds no required PR, branch check, CODEOWNERS, hook or mandatory Work Record. Never register a nonexistent verification check.
+These paths cover behavior, expected vectors and test selection. Do not blanket-protect benchmarks or unrelated helpers. Preserve meaningful assertions during equivalent/coverage-only edits; weakening or redefining an obligation requires exact user approval under [testing guidance](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/testing.md#agent-workflow). Workflow-level protection adds no required PR, branch check, CODEOWNERS, hook or mandatory Work Record. Never register a nonexistent verification check.
 
 ## Acceptance
 

@@ -6,4 +6,4 @@ Run `node conformance/read-simulation/verify.mjs` after building Java and instal
 
 With the pinned development schema dependency already installed in an isolated environment, run `python conformance/read-simulation/check_schemas.py`. It validates all decoded case/report structures offline and tests rejection of authority fields, invalid bounds and unknown external schema references. Byte/depth/DCM/allowlist checks remain native obligations. Both commands run in product CI.
 
-See [the contract](../../docs/specs/read-simulation.md) and [operator guide](../../docs/agents/read-simulation.md). Existing legacy/generic corpora and runtime semantics remain unchanged.
+See [the contract](../../docs/internal/history/read-simulation-contract.md) and [operator guide](../../docs/agents/read-simulation.md). Existing legacy/generic corpora and runtime semantics remain unchanged.

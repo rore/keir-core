@@ -8,7 +8,7 @@ The compiler and both runtimes use shared fixtures to verify that the same rule 
 - [Development `/4` corpus](keir-4/) covers numeric source `/3` with model `/4` and retained source `/2` with model `/3`; both authoring routes emit artifact `/4`. It includes numeric expression, host-boundary, descriptor and retained-nominal-name fixtures. [Stock/quote examples and commands](../examples/numeric/README.md) exercise complete programs in both hosts. [Qualified unpublished-candidate evidence](../docs/specs/README.md#numeric-qualification-status) is not a public Core 0.5 release or host-upgrade approval.
 - [Keir 2 fixtures](keir-2/README.md) preserve the `/2` execution pair retained for compatibility. Authoring routes and runtime applicability are defined by the matrix.
 - [Contract workflow](../.github/workflows/keir-contract.yml) runs the structural checker, compiler and runtime tests, and the packaged host comparison.
-- [Testing evidence](../docs/testing.md#current-single-write-behavior-verification) records the results and their scope.
+- [Testing evidence](../docs/internal/history/verification.md) records the results and their scope.
 
 <a id="earlier-profiles"></a>
 ## Compatibility and historical fixtures
@@ -23,6 +23,6 @@ The [generic-hook fixtures](generic-hooks/README.md) retain earlier compatibilit
 
 Compare typed values, exact call order and arguments, guard decisions, effects and termination classes. Keep compiler rejection tests, expression interoperability, runner conformance and real host adapter guarantees distinct.
 
-The [testing plan](../docs/testing.md) records the current checks and earlier evidence. Update fixtures and independent expectations together when the contract changes.
+The [testing plan](../docs/internal/history/verification.md) records the current checks and earlier evidence. Update fixtures and independent expectations together when the contract changes.
 
 The older design fixtures remain in [the baseline](../docs/internal/design-baseline/public/examples/). They are illustrative and have pending host certifications; they are not passing executable tests. Maintained fixtures here require explicit provenance and acceptance checks.

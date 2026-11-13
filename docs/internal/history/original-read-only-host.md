@@ -27,7 +27,7 @@ See [Use Keir with an assistant](../../agents/README.md) for developer integrati
 
 ## Acceptance fixtures
 
-This is the acceptance matrix for the original read-only host. See [verification and testing](../../testing.md) for measured results and the [conformance guide](../../../conformance/README.md) for current coverage. Each scenario contains host-selected artifact/model references, business input, trusted fixture bindings and ordered adapter responses. The scenario loader keeps protected fixture bindings outside customer-authorable production context. The trusted test adapter captures exact agent and protected arguments separately from redacted public traces. Missing, extra, out-of-order or unused response stubs fail the test.
+This is the acceptance matrix for the original read-only host. See [verification and testing](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/testing.md) for measured results and the [conformance guide](../../../conformance/README.md) for current coverage. Each scenario contains host-selected artifact/model references, business input, trusted fixture bindings and ordered adapter responses. The scenario loader keeps protected fixture bindings outside customer-authorable production context. The trusted test adapter captures exact agent and protected arguments separately from redacted public traces. Missing, extra, out-of-order or unused response stubs fail the test.
 
 | Case | Expected evidence |
 | --- | --- |

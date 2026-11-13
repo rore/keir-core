@@ -18,4 +18,4 @@ Replace `python` with that environment's Python executable if needed. The explic
 
 The extended `/3` corpus has 54 scenarios and the same 51 raw vectors; the retained `/2` corpus keeps 28 scenarios and 51 vectors. Compare full normalized reports, not just returned values or totals. The compiler tests separately verify deterministic bytes and the new producer pins. Schema checking includes those pins but does not establish independent runtime preparation or approval.
 
-See [current verification evidence](../../docs/testing.md#current-single-write-behavior-verification) and the [parent conformance guide](../README.md). Historical corpora require their matching producer and contract versions.
+See [current verification evidence](../../docs/internal/history/verification.md) and the [parent conformance guide](../README.md). Historical corpora require their matching producer and contract versions.

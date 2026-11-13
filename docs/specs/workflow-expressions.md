@@ -1,7 +1,7 @@
 <a id="keir-2-workflow-expressions"></a>
 # Workflow expressions
 
-This reference preserves the Keir 2 expressions introduced in Core 0.2.0 and defines the development numeric profile. Published Core 0.4.0 uses source `keir/2`; development numeric authoring uses `keir/3` with DCM `/4`. The [exact matrix](compiler-artifact.md#source-and-artifact-identity) separates those profiles and package evidence. Numeric source-regression results are not package or complete-feature qualification.
+This reference defines scalar, list, time and numeric expressions. The [profile matrix](compiler-artifact.md#source-and-artifact-identity) determines which forms a host supports.
 
 Keir 2 adds bounded list membership, optional values and elapsed-time expressions. The host defines input data, operations and lifecycle. It binds a model and prepares the compiled artifact. Event extensions run after commit; read-only [decisions](pre-operation-decisions.md) run before a native operation under the `/3` model contract.
 

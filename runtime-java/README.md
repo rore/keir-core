@@ -13,7 +13,7 @@ Event extensions and pre-operation decisions use the same `KeirRuntime` entrypoi
 
 See [Embed Keir](../docs/embedding.md), the [runnable Java example](../examples/java-host/README.md), and the [exact adapter and deadline types](../docs/specs/host-model-binding.md#api-shapes).
 
-An EVENT/AFTER_COMMIT extension may contain at most one possible write. A REQUEST/BEFORE_COMMIT decision permits only reads. Consume its complete outcome before the native operation: only valid COMPLETED ALLOW with empty effects permits fresh host checks; DENY and failed evaluation stop continuation. ALLOW is not a commit receipt. The host retains authorization, read consistency, selection, cancellation and native commit responsibilities. [Decision walkthrough](../docs/decision-walkthrough.md) · [Supported version pairs](../docs/specs/compiler-artifact.md#source-and-artifact-identity)
+An EVENT/AFTER_COMMIT extension may contain at most one possible write. A REQUEST/BEFORE_COMMIT decision permits only reads. Consume its complete outcome before the native operation: only valid COMPLETED ALLOW with empty effects permits fresh host checks; DENY and failed evaluation stop continuation. ALLOW is not a commit receipt. The host retains authorization, read consistency, selection, cancellation and native commit responsibilities. [Decision walkthrough](../docs/quickstart.md#try-a-pre-operation-decision) · [Supported version pairs](../docs/specs/compiler-artifact.md#source-and-artifact-identity)
 
 <a id="legacy-2-apis"></a>
 <a id="implementation-reference-for-earlier-apis"></a>
@@ -44,6 +44,6 @@ $env:MAVEN_USER_HOME = "$PWD/.tools/maven"
 
 The opt-in coverage profile uses [JaCoCo](https://www.jacoco.org/jacoco/index.html), pinned in the [parent POM](../pom.xml). It reports actual component coverage in each module's `target/site/jacoco/` directory; it adds no coverage threshold or CI gate. Tests use local fixtures and simulated callbacks, with no live services. The runtime tests include checked-wire/AST mutations, fresh authority, exact traces, Unicode/false/empty values, and native timeout behavior. Shared scenario execution uses the same externally pinned golden bytes as Node; the batch test driver lives only in test sources.
 
-[Verification results](../docs/testing.md#current-single-write-behavior-verification) identify the tested package versions, scenarios and raw validation cases. See the [conformance index](../conformance/README.md) for the versioned inputs and independent expectations.
+[Verification results](../docs/internal/history/verification.md) identify the tested package versions, scenarios and raw validation cases. See the [conformance index](../conformance/README.md) for the versioned inputs and independent expectations.
 
 See the [compiler build notes](../compiler-java/README.md) for pinned tooling and POSIX cache isolation.

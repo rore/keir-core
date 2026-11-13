@@ -1,6 +1,6 @@
 # Working in keir-core
 
-This repository uses `persistent-agent-roles`. At start, resume, handoff, or a new assignment, load the skill to verify your current Relay name and mapped guidance. If missing, install it globally from [Collection](https://github.com/rore/rore-collection/tree/main/skills/persistent-agent-roles).
+This repository uses `persistent-agent-roles`. At start, resume, handoff, or a new assignment, load the skill to verify your current Relay name and mapped guidance. If guidance is unavailable, report the gap and continue authorized work. Missing guidance is not permission to install global tools; that requires explicit approval.
 
 Role mappings live in `roles/mapping.yaml`; see [the team roles](roles/README.md) and linked shared guidance. Role guidance does not itself assign work or change model settings.
 
@@ -12,5 +12,7 @@ Role mappings live in `roles/mapping.yaml`; see [the team roles](roles/README.md
 - Both Java and Node runtimes are initial scope. A semantic feature is complete only when the compiler and both runtimes pass shared conformance for the same artifact.
 - Update affected specifications, fixtures and compatibility rules together. Treat `docs/internal/design-baseline/` as historical input; current decisions and the roadmap take precedence over its deferred Java-runtime statements.
 - Fail closed on unsupported constructs. Preserve host-bound authority, explicit uncertainty and runtime resource enforcement.
-- Keep changes small and verify affected behavior under the [testing guidelines](docs/testing.md): fast regression by default, explicit slow suites, preserved behavioral contracts. Do not invent versions, results or implemented capabilities.
+- Keep changes small and verify affected behavior under the [testing guidelines](CONTRIBUTING.md#testing-principles): fast regression by default, explicit slow suites, preserved behavioral contracts. Do not invent versions, results or implemented capabilities.
 - Protect the user's environment: use isolated project tooling. Obtain explicit approval before changing installed tools, global configuration, PATH, persistent environment variables, integrations or user services. Ordinary repository edits and isolated tests are authorized by the task.
+
+- Write for one reader and task. Human guides lead with purpose and an example; agent guides give inputs, actions and constraints. Consolidate before adding pages, link canonical contracts, and keep release/qualification logs out of usage instructions. Follow the [documentation guidance](roles/documentation.md).

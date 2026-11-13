@@ -1,7 +1,7 @@
 <a id="read-and-decide-dcm-contract"></a>
 # Domain capability model
 
-The domain capability model (DCM) is the host's contract for an extension. It describes hooks, data and approved operations. Published Core 0.4.0 authors against `keir-dcm/3`. Development Core 0.5 retains that authoring pair and adds numeric `keir-dcm/4` with source `keir/3`. Numeric source regressions are not installed-package qualification. The compiler and runtimes check decoded structure, references, byte limits and field relationships.
+The domain capability model (DCM) is the host's contract for an extension: hooks, data and approved operations. The compiler and runtimes check decoded structure, references, byte limits and field relationships. Use the [profile matrix](compiler-artifact.md#source-and-artifact-identity) to select a supported source/model pair.
 
 The [`keir-dcm/3` schema](../../schemas/dcm-3/dcm.schema.json) stays unchanged; development `/4` uses a separate schema. Use the [version rules](compiler-artifact.md#source-and-artifact-identity) to select the exact schema and distinguish authoring, retained execution and package support.
 
@@ -120,7 +120,7 @@ All IDs must exist in the catalog. Lists contain unique IDs. Each list or quota 
 
 ## Complete example
 
-The [current decision model](../../conformance/keir-3/dcm-guard.json) exposes `BeforeOperation`, typed input and an optional result message. The [walkthrough](../decision-walkthrough.md) explains its input-only and READ-based extensions and the host's native commit boundary.
+The [current decision model](../../conformance/keir-3/dcm-guard.json) exposes `BeforeOperation`, typed input and an optional result message. The [walkthrough](../quickstart.md#try-a-pre-operation-decision) explains its input-only and READ-based extensions and the host's native commit boundary.
 
 For a post-commit example, the table below explains the task operations in the [readable follow-up model](../../examples/node-host/follow-up/dcm.json), migrated to `/3` alongside its [source](../../examples/node-host/follow-up/source.yaml). Use each checked-in source/artifact with its exact model; the [format matrix](compiler-artifact.md#source-and-artifact-identity) identifies compatible producer and runtime versions.
 

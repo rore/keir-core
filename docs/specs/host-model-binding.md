@@ -3,7 +3,7 @@
 
 Bind a trusted [DCM](domain-model.md) and its host implementations, prepare an approved [artifact](compiler-artifact.md), and reuse the prepared handle with fresh invocation context. Event extensions and pre-operation decisions use the same APIs. The [contract matrix](compiler-artifact.md#source-and-artifact-identity) identifies supported exact pairs.
 
-Development Core 0.5 adds numeric DCM `/4` and exact String helpers without changing bind/prepare/invoke signatures. Source regression evidence is not installed-package qualification. Published 0.4 packages do not support the numeric profile or helpers. Select packages and host definitions deliberately; never relabel an approved artifact.
+Use the [profile matrix](compiler-artifact.md#source-and-artifact-identity) when selecting packages and host definitions. Package adoption does not relabel or approve an existing artifact.
 
 <a id="corrected-host-bound-4-binding"></a>
 <a id="effect4-binding-and-preparation"></a>
@@ -110,7 +110,7 @@ Implementations can call local code or remote services. The host owns service ro
 
 A REQUEST/BEFORE_COMMIT/DECISION hook uses these same methods and context fields. Its `event.id` identifies an operation attempt and `event.source` its host-defined scope, without claiming a prior commit. Its plan has no possible writes; binding still requires registrations for the full catalog. No-call plans legitimately need no protected actor binding, so the host must authenticate and authorize native continuation independently.
 
-The host distinguishes authoritative absence from a selected artifact that is unavailable or incompatible. Absence takes the ordinary native path; unavailable selection blocks. Only a valid completed ALLOW with empty effects is eligible to continue. Recheck approval, selection, permissions, proposed input and read facts at native commit. Reserve part of the enclosing deadline for those checks and commit, and discard late results after cancellation. See the [walkthrough](../decision-walkthrough.md) and [complete decision obligations](pre-operation-decisions.md#host-invocation-and-consistency-obligations).
+The host distinguishes authoritative absence from a selected artifact that is unavailable or incompatible. Absence takes the ordinary native path; unavailable selection blocks. Only a valid completed ALLOW with empty effects is eligible to continue. Recheck approval, selection, permissions, proposed input and read facts at native commit. Reserve part of the enclosing deadline for those checks and commit, and discard late results after cancellation. See the [walkthrough](../quickstart.md#try-a-pre-operation-decision) and [complete decision obligations](pre-operation-decisions.md#host-invocation-and-consistency-obligations).
 
 ## Exact reference artifact
 

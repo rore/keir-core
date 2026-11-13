@@ -73,7 +73,7 @@ The contextual canvas shows proposed examples and, separately, recent real react
 
 ## Implementation seams and acceptance
 
-Core changes: profile/format selection and DCM validation in compiler; artifact/binding/admission checks in both runtimes; current qualification checks; /3 scenario/consumer fixtures and packaged examples. Keep existing /1-/2 tests and semantics. The core [shared acceptance list](../../specs/real-single-effect-admission.md#required-shared-acceptance) is mandatory.
+Core changes: profile/format selection and DCM validation in compiler; artifact/binding/admission checks in both runtimes; current qualification checks; /3 scenario/consumer fixtures and packaged examples. Keep existing /1-/2 tests and semantics. The core [shared acceptance list](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/specs/real-single-effect-admission.md#required-shared-acceptance) is mandatory.
 
 Demo changes: native completion and keyed creation in task service/data migration; small event dispatcher and invoker binding; exact pinned model catalog/compiler selection; effect simulation and proof validation in lifecycle; per-hook selections; scoped project discovery and business summaries in authoring; retirement/direct-link handling and task outcome UI. Preserve deletion, replay identities, human approval boundaries and existing authoring accounting.
 

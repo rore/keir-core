@@ -7,7 +7,7 @@
 
 The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-Compiler identity, document formats and runtime compatibility version independently. Published Core 0.4.0 and the qualified unpublished 0.5 profiles are distinct. The latter have [accepted compiler/runtime, installed-package, corrected-companion and tested Daymark evidence](README.md#numeric-qualification-status). Acceptance is not public release or permission to upgrade an installed host. Use the [installation guide](../installation.md) for released packages and the [companion catalog](../agents/authoring-companion.md#qualified-candidate-edition-9) for exact candidate selection.
+Compiler identity, document formats and runtime compatibility version independently. This matrix defines their exact supported combinations. The [companion catalog](../agents/authoring-companion.md) records package/guide availability; use [installation](../installation.md) for released packages.
 
 | Compiler | Source | DCM | Artifact | Scenario | Descriptor recipe | Status |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -129,7 +129,7 @@ Validate complete closed values before constructing a message and after extracti
 
 Node and Java prepare the same checked expressions in environments derived from these descriptors and variables. Runners independently validate the checked AST, overloads, type/reference maps and nominal/enum overlays; evaluator acceptance alone is not validation. Missing checked metadata must be rejected before execution.
 
-Supported artifact environment pins are `celJava: "0.14.0"`, `celNode: "0.6.1"`, `protobufJava: "4.35.1"`, `protobufNode: "2.6.2"`. Supporting packages are `dev.cel:protobuf:0.14.0` and `@bufbuild/cel-spec:0.6.1`. Java's heterogeneous-comparison option grants no mixed numeric comparisons or numeric support to retained profiles. See [testing](../testing.md) for verification evidence.
+Supported artifact environment pins are `celJava: "0.14.0"`, `celNode: "0.6.1"`, `protobufJava: "4.35.1"`, `protobufNode: "2.6.2"`. Supporting packages are `dev.cel:protobuf:0.14.0` and `@bufbuild/cel-spec:0.6.1`. Java's heterogeneous-comparison option grants no mixed numeric comparisons or numeric support to retained profiles. See [testing](../internal/history/verification.md) for verification evidence.
 
 ### Numeric checked operations
 
