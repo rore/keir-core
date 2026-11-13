@@ -22,6 +22,7 @@
 - api-schema-import
 - enrich-followup-expressions
 - guarded-result-dataflow
+- numeric-values-and-rules
 - rich-task-customizations
 - broader-language-types
 - response-projection-consumer
