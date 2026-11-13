@@ -42,4 +42,4 @@ Each stub is `{step,capability,version,args,protectedArgs,response}` in exact di
 
 For decision integration, observe the native operation independently of `consumption`. DENIED and BLOCKED cause zero native attempts. ALLOWED reaches fresh native validation once and may still fail before commit. Test authoritative no binding separately from a selected-but-unavailable extension, along with changed selection, permissions, proposed input and read facts. Native permissions, persistence, consistency and duplicate handling require separate host evidence. See the [decision acceptance matrix](pre-operation-decisions.md#acceptance-matrix-and-implementation-split).
 
-See [testing evidence](../testing.md) for measured behavior and [earlier qualification](real-single-effect-admission.md#legacy-effect3-qualification) for historical fixtures.
+See [testing evidence](../internal/history/verification.md) for measured behavior and [earlier qualification](../internal/history/compatibility-reference.md#earlier-qualification) for historical fixtures.

@@ -176,7 +176,7 @@ Calls execute in source order. Success binds a required result record; a failure
 <a id="legacy-read1-effect1-read2-effect2-and-effect3"></a>
 #### Implementation reference: earlier binding contracts
 
-The remaining sections preserve the versioned legacy binding and admission contracts. Their approval, scope, authorization and qualification inputs do not apply to effect/4. The `/2` reference-model API extends `/1`; effect/3 adds real-mode qualification. See [testing](../../testing.md) for implementation evidence, separately from these requirements.
+The remaining sections preserve the versioned legacy binding and admission contracts. Their approval, scope, authorization and qualification inputs do not apply to effect/4. The `/2` reference-model API extends `/1`; effect/3 adds real-mode qualification. See [testing](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/testing.md) for implementation evidence, separately from these requirements.
 
 #### One binding boundary
 
@@ -238,7 +238,7 @@ Diagnostics are redacted and deterministic across runtimes. Binding schema/ident
 
 #### Equivalent host sketches
 
-Both sketches use the complete two-capability [walkthrough catalog](../../specs/generic-hook-example.md). Helpers represent host-owned values/clients, not Keir utilities. Approval pins the modelRef, environment and simulation mode; admission pins the artifact and hook/consumer. `freshInvocation` supplies matching scope, current authorizer, bindings, deadline and original key/event. These sketches show the implemented wrappers; complete runnable integrations are in the [Java](../../../examples/java-host/README.md) and [Node](../../../examples/node-host/README.md) hosts. Real-write admission remains rejected.
+Both sketches use the complete two-capability [walkthrough catalog](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/specs/generic-hook-example.md). Helpers represent host-owned values/clients, not Keir utilities. Approval pins the modelRef, environment and simulation mode; admission pins the artifact and hook/consumer. `freshInvocation` supplies matching scope, current authorizer, bindings, deadline and original key/event. These sketches show the implemented wrappers; complete runnable integrations are in the [Java](../../../examples/java-host/README.md) and [Node](../../../examples/node-host/README.md) hosts. Real-write admission remains rejected.
 
 ```java
 var binding = bindModel(approvedDcmBytes, approval, Map.of(
@@ -283,7 +283,7 @@ Run identical artifact/model bytes in Java and Node. Acceptance requires:
 | Fresh bindings/key/event and source constants reach the right channels | Protected override/key conversion fails; second potential WRITE rejects |
 | Cache eviction permits exact reload | Missing retired dependency fails; finite preparation limits reject excess |
 
-The local shared corpus and component negatives exercise model binding, preparation and invocation while preserving all `/1` goldens; see [testing evidence](../../testing.md). Real transport/native guarantees still require host evidence. Host-owned cache eviction, revocation and retirement remain lifecycle responsibilities, not new runtime management APIs.
+The local shared corpus and component negatives exercise model binding, preparation and invocation while preserving all `/1` goldens; see [testing evidence](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/testing.md). Real transport/native guarantees still require host evidence. Host-owned cache eviction, revocation and retirement remain lifecycle responsibilities, not new runtime management APIs.
 
 <a id="earlier-qualification"></a>
 ## Earlier qualified-write admission
@@ -291,7 +291,7 @@ The local shared corpus and component negatives exercise model binding, preparat
 <a id="legacy-effect3-qualification"></a>
 #### Compatibility reference: qualification and admission
 
-The following sections specify only `keir-effect/3`. They preserve its qualification protocol and extend the [single-effect semantics](https://github.com/rore/keir-core/blob/57a74a57e6c5fec2e74d3561d4b2ad1da2e650c1/docs/specs/single-effect.md) and [legacy host model binding](#earlier-binding). Effect/4 does not accept this qualification input. Implementation and native-host evidence are recorded in [testing](../../testing.md), outside this contract.
+The following sections specify only `keir-effect/3`. They preserve its qualification protocol and extend the [single-effect semantics](https://github.com/rore/keir-core/blob/57a74a57e6c5fec2e74d3561d4b2ad1da2e650c1/docs/specs/single-effect.md) and [legacy host model binding](#earlier-binding). Effect/4 does not accept this qualification input. Implementation and native-host evidence are recorded in [testing](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/testing.md), outside this contract.
 
 #### Compatibility boundary
 
@@ -493,7 +493,7 @@ A behavior-preserving migration converts each old grant map into `capabilityPoli
 
 New host API entrypoints distinguish the optional-policy context from old required-grant records without breaking existing callers. Node selects semantics from the validated profile, not the presence of `effectGrant`; Java uses new context types and explicit methods. Adapter signatures and consumer wire outcomes need no change: read/2 keeps the read signature, effect/2 keeps the protected original-key/event signature. Revalidate registration version/mode/key compatibility and selected consumer; do not silently reroute old consumers. Scenario formats `keir-scenario/read-2` and `keir-scenario/effect-2` distinguish these defaults from old required-grant fixtures.
 
-Acceptance requires positive/negative fixtures from the table, identical deterministic compiler bytes for both runtimes, all existing `/1` regression, packaged-host examples without default named grants, and matching product assistant guidance. The local [conformance corpus](../../../conformance/generic-hooks/README.md) and [testing evidence](../../testing.md) record passing checks. This technical regression does not establish real-adapter guarantees or production readiness.
+Acceptance requires positive/negative fixtures from the table, identical deterministic compiler bytes for both runtimes, all existing `/1` regression, packaged-host examples without default named grants, and matching product assistant guidance. The local [conformance corpus](../../../conformance/generic-hooks/README.md) and [testing evidence](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/testing.md) record passing checks. This technical regression does not establish real-adapter guarantees or production readiness.
 
 <a id="earlier-follow-up"></a>
 ## Earlier follow-up walkthrough
@@ -616,7 +616,7 @@ Each emits the same nineteen verified rows, including creation, no-op conditions
 
 Change only the source literal from `project1` to `project2`: DCM bytes/digest, hook schema, host code, input and protected context remain unchanged. Canonical source and artifact digests change; normal review and selection of the new artifact are required. With the original project1 task, the new program skips the write. Changing only the title similarly changes source/artifact, not the hook. Compare Java and Node executing each exact compiled artifact, not independently regenerated variants.
 
-Reject wrong nominal types, unknown/non-nominal annotations, dynamic casts, bounds overflow, forged literal metadata, protected argument overrides, unauthorized capabilities and a second potential WRITE. Keep `/1` fixture bytes and literal rejection behavior unchanged. Regression covers these obligations and current authorization after source review; see [measured evidence](../../testing.md). Native authorization, idempotency and production readiness still require separate host proof.
+Reject wrong nominal types, unknown/non-nominal annotations, dynamic casts, bounds overflow, forged literal metadata, protected argument overrides, unauthorized capabilities and a second potential WRITE. Keep `/1` fixture bytes and literal rejection behavior unchanged. Regression covers these obligations and current authorization after source review; see [measured evidence](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/testing.md). Native authorization, idempotency and production readiness still require separate host proof.
 
 <a id="original-write-formats"></a>
 ## Original simulated-write source and artifact
@@ -644,7 +644,7 @@ Entrypoint is exactly `{input,output,trigger,placement,consumer,grants,effectGra
 <a id="original-write-host-api"></a>
 ## Original simulated-write host API
 
-This section preserves the legacy effect/1 API. Later compatibility profiles move key binding into model binding and add qualification. The current API uses [BoundEffect APIs](../../specs/host-model-binding.md#api-shapes) with no key validator or authorizer callback and adds the absolute deadline to adapter context. The [original-key identity rule](../../specs/real-single-effect-admission.md#effect-outcomes-and-key-identity) applies to every version. See the [implementation reference](../implementation-reference.md) for retained historical contract details.
+This section preserves the legacy effect/1 API. Later compatibility profiles move key binding into model binding and add qualification. The current API uses [BoundEffect APIs](../../specs/host-model-binding.md#api-shapes) with no key validator or authorizer callback and adds the absolute deadline to adapter context. The [original-key identity rule](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/specs/real-single-effect-admission.md#effect-outcomes-and-key-identity) applies to every version. See the [implementation reference](../implementation-reference.md) for retained historical contract details.
 
 For this profile only, admission extends the existing closed record with required `effectGrant` and `keyBinding`. `effectGrant` is 0 or 1, may only narrow the selected entrypoint, and must cover the artifact's conservative WRITE count. `keyBinding` is the host-only closed `{type,validate}` registration: type exactly matches `dcm.hostKey.type`; validate is a synchronous host function accepting one opaque value and returning Boolean. Snapshot its function reference and metadata during preparation. Do not invoke it at prepare time. Each adapter registration is exactly `{version,mode,keyType,invoke}`; `keyType` must equal `dcm.hostKey.type` for both READ and WRITE, otherwise preparation fails with `ADMISSION_INVALID` at `/admission/adapters`. Version, mode and keyBinding mismatches also fail preparation with `ADMISSION_INVALID` under `/admission`. All adapters and admission must have `mode:simulation`; reject `real` for this profile, even with supplied assertions or certificates. Real effect admission needs a separately reviewed host-evidence contract and compatibility change.
 

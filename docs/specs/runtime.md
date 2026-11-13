@@ -3,9 +3,9 @@
 
 This page defines how the runtime executes a prepared program. See [Host model binding](host-model-binding.md#bind-the-dcm-and-prepare-a-compiled-rule) for Java and Node APIs and [Compiler and artifact](compiler-artifact.md) for the artifact format.
 
-Implementation evidence belongs in [testing](../testing.md); pending resource qualification belongs in the [resource roadmap](../../roadmap/features/runtime-resource-qualification.md). Neither changes the limits or guarantees specified here.
+Implementation evidence belongs in [testing](../internal/history/verification.md); pending resource qualification belongs in the [resource roadmap](../../roadmap/features/runtime-resource-qualification.md). Neither changes the limits or guarantees specified here.
 
-Numeric behavior below is the development 0.5 contract. Source regressions, [stock/quote teaching consumers](language.md#numeric-programs) and independently installed candidate packages have [passing evidence](README.md#numeric-qualification-status). [Descriptor comparisons and bounded actual-runtime measurements](README.md#descriptor-and-bounded-runtime-evidence) also pass within their recorded scope, not whole-application or hard-memory guarantees. Evidence stays pinned to its source/assets; public release, companion, Daymark and full-feature acceptance remain separate. Published Core 0.4.0 retains its nonnumeric contract; use the [exact tuple matrix](compiler-artifact.md#source-and-artifact-identity).
+Select the host-supported [exact profile](compiler-artifact.md#source-and-artifact-identity). Qualification and package availability are recorded in the [companion catalog](../agents/authoring-companion.md); they do not upgrade an installed host or change the limits below.
 
 <a id="corrected-effect4-invocation-boundary"></a>
 <a id="effect4-execution"></a>
@@ -110,11 +110,11 @@ The [Node](../../examples/node-host/decision-consumer.mjs) and [Java](../../exam
 
 A handled BUSINESS_REJECTION with a result containing ALLOW still blocks. Failures, resource limits, uncertain outcomes, malformed results and nonempty effects also block. A selected extension that cannot be invoked is not equivalent to an absent selection. The host never treats a customer-supplied outcome as its invocation result.
 
-ALLOWED permits fresh native checks; it supplies no evidence of a native commit. Selection, approval, authorization, proposed input, read consistency, cancellation and the native deadline remain host obligations. The host records the native result separately. See [pre-operation decisions](pre-operation-decisions.md#consumption-and-failure-policy) and the [integration walkthrough](../decision-walkthrough.md).
+ALLOWED permits fresh native checks; it supplies no evidence of a native commit. Selection, approval, authorization, proposed input, read consistency, cancellation and the native deadline remain host obligations. The host records the native result separately. See [pre-operation decisions](pre-operation-decisions.md#consumption-and-failure-policy) and the [integration walkthrough](../quickstart.md#try-a-pre-operation-decision).
 
 ## Limits
 
-The compiler and runtime enforce these ceilings at the applicable boundaries. The current binding and invocation APIs use fixed runtime limits. The DCM can [restrict capability use](domain-model.md#call-and-write-policy). Measured performance belongs in the [verification record](../testing.md).
+The compiler and runtime enforce these ceilings at the applicable boundaries. The current binding and invocation APIs use fixed runtime limits. The DCM can [restrict capability use](domain-model.md#call-and-write-policy). Measured performance belongs in the [verification record](../internal/history/verification.md).
 
 | Quantity | Ceiling |
 | --- | ---: |

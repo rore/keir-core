@@ -4,11 +4,15 @@ An application that embeds Keir is called the **host**. The host decides when ru
 
 Choose the lifecycle the application needs. An event extension runs after a native operation commits and can contain at most one possible write. A pre-operation decision can only read and returns `ALLOW` or `DENY` before the native operation. The [format matrix](specs/compiler-artifact.md#source-and-artifact-identity) identifies supported authoring and execution pairs.
 
-Start with [released-package installation](installation.md) for a small Node or Java consumer outside this repository. Use the [annotated example](guided-tour.md) to understand how the source and model fit together.
+Start with [released-package installation](installation.md) for a small Node or Java consumer outside this repository. The [screenshot tour](guided-tour.md) shows the user flow.
 
 ## 1. Define what the host exposes
 
 Describe the hook, its input and result, and the available operations in a domain capability model (DCM). For the [follow-up example](../examples/node-host/follow-up/dcm.json), the hook receives a task ID after the app saves the completion. The rule can read that task and request a new task. The host provides the authenticated actor separately from the rule’s arguments.
+
+The model is a published snapshot. A customer can combine already-published operations within its policy without adding a hook for each rule. Changing the catalog changes the model identity. The host owns service routing, credentials and permission checks; a model reference identifies an operation's contract, not a transport or a grant of authority.
+
+Expose reusable native operations such as `tasks.create(projectId, title)`. The extension owns its eligibility conditions and follow-up composition; the adapter enforces the native operation. A genuine atomic business operation guaranteed by the host is also valid—do not split it merely to make it generic.
 
 Implement each operation in host code. An implementation can call an existing local service or an internal API. The host checks current permissions, authenticates the original request key, and reports what happened to a write. [Model rules](specs/domain-model.md) · [Write evidence](specs/runtime.md#write-evidence)
 
@@ -16,7 +20,7 @@ Implement each operation in host code. An implementation can call an existing lo
 
 Write the rule in Keir, then compile it against the exact DCM. For your own model, [calculate its canonical fingerprint](model-fingerprint.md) for the source header. The compiler produces an **artifact**, the compiled rule the runtime executes. The artifact references the model it was checked against. [Compile and run the example](../examples/README.md#compile-the-rule)
 
-Run the same artifact with simulated implementations before enabling it. Write down the expected outcome for each case before running the simulation. For the follow-up rule, check a matching completion, a completion in another project, and a lost response after a write request. For a decision, check ALLOW, DENY and failed evaluation, including a handled rejection returning ALLOW. The host records approval and activation as separate decisions for the exact reviewed artifact. [Run the sample cases](../examples/README.md#run-both-hosts) · [Decision walkthrough](decision-walkthrough.md)
+Run the same artifact with simulated implementations before enabling it. Write down the expected outcome for each case before running the simulation. For the follow-up rule, check a matching completion, a completion in another project, and a lost response after a write request. For a decision, check ALLOW, DENY and failed evaluation, including a handled rejection returning ALLOW. The host records approval and activation as separate decisions for the exact reviewed artifact. [Run the sample cases](../examples/README.md#run-both-hosts) · [Run a decision](quickstart.md#try-a-pre-operation-decision)
 
 ## 3. Bind, prepare and run
 
@@ -38,7 +42,7 @@ A decision uses the same binding, preparation and invocation methods. The host s
 
 Consume the complete runtime outcome. Only valid COMPLETED ALLOW with an empty effects array permits continuation. DENY stops the native operation. A handled rejection, failure, malformed outcome, timeout or unavailable selected artifact blocks it. Authoritatively no active binding takes the ordinary native path; do not confuse absence with an unavailable selection.
 
-Keep the proposed input fixed and reserve time for native validation and commit. After ALLOW, recheck selection, approval, authorization and mutable facts at the native commit boundary. Cancellation or expiry closes the attempt. The decision supplies no commit evidence; report the native result separately. [Full walkthrough](decision-walkthrough.md) · [Consistency and deadlines](specs/pre-operation-decisions.md#host-invocation-and-consistency-obligations)
+For an operation expiry `D` and native-work reserve `R > 0`, give the extension at most `D - R`; block if no positive budget remains. Carry the enclosing absolute expiry through nested work. Keep the proposed input fixed and reserve time for native validation and commit. After ALLOW, recheck selection, approval, authorization and mutable facts at the native commit boundary. Cancellation or expiry closes the attempt. The decision supplies no commit evidence; report the native result separately. [Runnable example](quickstart.md#try-a-pre-operation-decision) · [Consistency and deadlines](specs/pre-operation-decisions.md#host-invocation-and-consistency-obligations)
 
 ## Example Node host
 

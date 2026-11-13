@@ -7,13 +7,13 @@
 
 The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-Compiler identity, document formats and runtime compatibility version independently. Published Core 0.4.0 and the development 0.5 profiles are distinct. The latter have [source, teaching and independently installed candidate-package evidence](README.md#numeric-qualification-status), not public release, matching companion or full-feature acceptance. Use the [installation guide](../installation.md) for released packages; a source profile or candidate is not permission to upgrade an installed host.
+Compiler identity, document formats and runtime compatibility version independently. This matrix defines their exact supported combinations. The [companion catalog](../agents/authoring-companion.md) records package/guide availability; use [installation](../installation.md) for released packages.
 
 | Compiler | Source | DCM | Artifact | Scenario | Descriptor recipe | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | `keir-compiler-java/0.4.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/3` | `keir-scenario/3` | `keir-record-descriptors/2` | Published; no numeric types or size |
-| `keir-compiler-java/0.5.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/2` | Development retained authoring; no numeric types or size |
-| `keir-compiler-java/0.5.0` | `keir/3` | `keir-dcm/4` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/3` | Development numeric authoring |
+| `keir-compiler-java/0.5.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/2` | Qualified unpublished candidate; retained authoring, no numeric types or size |
+| `keir-compiler-java/0.5.0` | `keir/3` | `keir-dcm/4` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/3` | Qualified unpublished candidate; numeric authoring |
 
 Structural schemas: retained [source `/2`](../../schemas/source-2/source.schema.json), [model `/3`](../../schemas/dcm-3/dcm.schema.json), [artifact `/3`](../../schemas/artifact-3/artifact.schema.json) and [scenario `/3`](../../schemas/scenario-3/scenario.schema.json); new [source `/3`](../../schemas/source-3/source.schema.json), [model `/4`](../../schemas/dcm-4/dcm.schema.json), [artifact `/4`](../../schemas/artifact-4/artifact.schema.json) and [scenario `/4`](../../schemas/scenario-4/scenario.schema.json). Semantic and cross-document checks remain required. Scenario `/4` covers both new artifact tuples without rewriting old scenarios or their identities. Its consumers require matching support; schemas alone do not qualify a runner.
 
@@ -129,7 +129,7 @@ Validate complete closed values before constructing a message and after extracti
 
 Node and Java prepare the same checked expressions in environments derived from these descriptors and variables. Runners independently validate the checked AST, overloads, type/reference maps and nominal/enum overlays; evaluator acceptance alone is not validation. Missing checked metadata must be rejected before execution.
 
-Supported artifact environment pins are `celJava: "0.14.0"`, `celNode: "0.6.1"`, `protobufJava: "4.35.1"`, `protobufNode: "2.6.2"`. Supporting packages are `dev.cel:protobuf:0.14.0` and `@bufbuild/cel-spec:0.6.1`. Java's heterogeneous-comparison option grants no mixed numeric comparisons or numeric support to retained profiles. See [testing](../testing.md) for verification evidence.
+Supported artifact environment pins are `celJava: "0.14.0"`, `celNode: "0.6.1"`, `protobufJava: "4.35.1"`, `protobufNode: "2.6.2"`. Supporting packages are `dev.cel:protobuf:0.14.0` and `@bufbuild/cel-spec:0.6.1`. Java's heterogeneous-comparison option grants no mixed numeric comparisons or numeric support to retained profiles. See [testing](../internal/history/verification.md) for verification evidence.
 
 ### Numeric checked operations
 

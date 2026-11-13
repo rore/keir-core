@@ -2,7 +2,7 @@
 
 `source.yaml` and its trusted `dcm.json` describe the controlled read/classify sample. The Java compiler emits `artifact.json`; both runtimes must consume these same bytes. `artifact.sha256` contains the separately held `sha256:` digest for this curated test fixture. It does not authenticate arbitrary customer output or certify a real adapter.
 
-The artifact uses the [original read-only contract](../../docs/internal/implementation-reference.md#serialized-identifiers-and-compiler-selectors) and compiler identity `keir-compiler-java/0.1.0-SNAPSHOT`. Local Java/Node conformance passes for this checkpoint. See the [compiler commands](../../docs/internal/implementation-reference.md#original-compiler-examples), [acceptance contract](../../docs/specs/host-integration.md#acceptance-fixtures) and [testing evidence](../../docs/testing.md).
+The artifact uses the [original read-only contract](../../docs/internal/implementation-reference.md#serialized-identifiers-and-compiler-selectors) and compiler identity `keir-compiler-java/0.1.0-SNAPSHOT`. Local Java/Node conformance passes for this checkpoint. See the [compiler commands](../../docs/internal/implementation-reference.md#original-compiler-examples), [acceptance contract](../../docs/internal/history/original-read-only-host.md#acceptance-fixtures) and [testing evidence](../../CONTRIBUTING.md#testing-principles).
 
 Compiler tests read this directory and require byte-for-byte agreement with the golden artifact. Regenerate through the Java compiler after an intentional reviewed source/model/environment change, independently verify the resulting digest, and update all four files together. Do not recompile separately for Java and Node.
 
@@ -59,7 +59,7 @@ Expectations are hand-authored from the contract, not approved snapshots of runn
 
 The Java test driver should read this same file, prepare once per case and emit the same ordered array of `{id,prepare,runs}` objects. Each normalized run is `{outcome,calls,authorizations,consumption}`. Preparation diagnostics compare `code`/`path`; human message text is excluded. Callback requests and logical time follow the table above; exception text and wall timestamps are never compared. Java driver code belongs to `runtime-java`, and the embedding example remains separate.
 
-Both runtimes pass this corpus and the combined verifier compares their entire normalized outputs. Component coverage and independent packaged hosts are checked locally. Read and effect profiles pass local and CI verification; production qualification remains separate. See [current testing evidence](../../docs/testing.md). See the complete [acceptance matrix](../../docs/specs/host-integration.md#acceptance-fixtures) and [testing guidance](../../docs/testing.md).
+Both runtimes pass this corpus and the combined verifier compares their entire normalized outputs. Component coverage and independent packaged hosts are checked locally. Read and effect profiles pass local and CI verification; production qualification remains separate. See [current testing evidence](../../CONTRIBUTING.md#testing-principles). See the complete [acceptance matrix](../../docs/internal/history/original-read-only-host.md#acceptance-fixtures) and [testing guidance](../../CONTRIBUTING.md#testing-principles).
 
 ## Verify both runtimes and packaged hosts
 

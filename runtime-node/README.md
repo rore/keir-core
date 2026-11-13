@@ -48,7 +48,7 @@ For a pre-operation decision, consume the complete outcome and require valid COM
 
 Use the [compatibility matrix](https://github.com/rore/keir-core/blob/main/docs/specs/compiler-artifact.md#source-and-artifact-identity) to match the runtime, compiler and model. It distinguishes supported authoring contracts from retained execution of earlier approved artifacts.
 
-[API signatures](https://github.com/rore/keir-core/blob/main/docs/specs/host-model-binding.md#api-shapes) · [Write evidence](https://github.com/rore/keir-core/blob/main/docs/specs/runtime.md#write-evidence) · [Decision walkthrough](https://github.com/rore/keir-core/blob/main/docs/decision-walkthrough.md)
+[API signatures](https://github.com/rore/keir-core/blob/main/docs/specs/host-model-binding.md#api-shapes) · [Write evidence](https://github.com/rore/keir-core/blob/main/docs/specs/runtime.md#write-evidence) · [Decision walkthrough](https://github.com/rore/keir-core/blob/main/docs/quickstart.md#try-a-pre-operation-decision)
 
 <a id="legacy-effect3"></a>
 <a id="single-effect-profile"></a>

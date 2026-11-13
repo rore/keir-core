@@ -6,7 +6,7 @@
 
 The earlier qualification run passed 250 Java tests (64 compiler, 155 runtime, 31 host) and 424 Node tests, with no skips. Its transport checked 28 independently authored facts and compared full outcomes, calls, traces and consumer receipts between Java and Node using the same pinned programs in separate simulation and real bindings. Its simulation corpus had 19 rows. These controlled fakes do not qualify native SQLite or deployments.
 
-Coverage for that protocol included bounded canonical escaping before snapshot, qualification descriptor/identity/mode validation, immutable capture, rejected native Promise containment, revocation during pending authorization, callback-time budget expiry with no effect intent, original key identity and retained CONFIRMED/UNKNOWN winner evidence. Compiler coverage was 853/898 lines and 743/856 branches; Java runtime 1341/1354 lines and 1258/1475 branches; Node source 100% lines and 97.95% branches. These figures cover the earlier protocol. See [current single-write verification](../../testing.md#effect4-verification) for host implementation permission checks.
+Coverage for that protocol included bounded canonical escaping before snapshot, qualification descriptor/identity/mode validation, immutable capture, rejected native Promise containment, revocation during pending authorization, callback-time budget expiry with no effect intent, original key identity and retained CONFIRMED/UNKNOWN winner evidence. Compiler coverage was 853/898 lines and 743/856 branches; Java runtime 1341/1354 lines and 1258/1475 branches; Node source 100% lines and 97.95% branches. These figures cover the earlier protocol. See [current single-write verification](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/testing.md#effect4-verification) for host implementation permission checks.
 
 <a id="historical-2-and-1-verification"></a>
 ### Historical compatibility verification
@@ -34,3 +34,32 @@ Accepted read-profile baseline commands and measurements (2026-10-29):
 Offline Maven requires a previously populated local cache; dependency/bootstrap time is separate. The package's LF checkout rules and host lockfile preserve tarball integrity across checkouts; never disable integrity checks to make the sample install.
 
 JaCoCo baselines: compiler 711/756 lines (94.05%), 501/607 branches (82.54%); Java runtime 697/704 lines (99.01%), 600/717 branches (83.68%); Java host 64/66 lines (96.97%), 52/52 branches (100%). Remaining misses include defensive invariant/CEL failure paths, the Java main wrapper and very long native timer rearming. Node host unit coverage excludes its CLI wrapper; the verifier exercises that wrapper without a coverage agent. No coverage floor or hard containment guarantee is inferred.
+
+
+## Core 0.3.0 verification baseline
+
+The following historical release record was retired from the current testing entry page. Its source and scope are unchanged.
+
+## Current single-write behavior verification
+
+Package verification follows the [release checklist](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/releasing.md). Each release records its qualified source, package checks and verified downloads.
+
+The historical [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0) qualification baseline used source [`b232944`](https://github.com/rore/keir-core/commit/b2329440dd2a25acc547f3ebfea214748d912022). Its [contract CI run](https://github.com/rore/keir-core/actions/runs/42576060993) passed and compared 39 shared scenarios and 51 raw verification vectors across Java and Node, including post-commit effects and read-only pre-operation decisions. That run checked normalized complete outcomes for exact parity, alongside compiler, runtime and installed-host tests.
+
+Use the [current corpus guide](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/conformance/keir-3/README.md) for fixture layout and commands. The retained [Keir 2 corpus](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/conformance/keir-2/README.md) checks the older execution contract; the [compatibility matrix](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/specs/compiler-artifact.md#source-and-artifact-identity) distinguishes current authoring from retained execution. Test totals belong to their source revision and run, rather than describing every later checkout.
+
+The [release installation guide](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/installation.md#verification-boundary) records a separate check of the packaged compiler and both runtimes outside the source repositories. These checks cover controlled hosts. Real service guarantees and production resource containment require separate qualification; see [resource qualification](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/conformance/resource-qualification/README.md).
+
+<a id="effect4-verification"></a>
+### Historical Core 0.1 verification
+
+The 2026-11-05 baseline passed 144 Java tests, 49 Node runtime tests, seven installed Node teaching-host tests, 31 structural fixtures and 19 rejection cases. Java and Node matched 20 scenarios, 45 raw verification vectors and eight packaged scenario groups. A Windows resource soak ran 3,000 timed invocations per runtime. These are historical measurements, not current test totals. [Original contract run](https://github.com/rore/keir-core/actions/runs/42072587793)
+
+<a id="earlier-profile-results"></a>
+<a id="historical-verification"></a>
+<a id="historical-3-qualification-verification-2026-11-04"></a>
+<a id="historical-host-protocol-qualification-2026-11-04"></a>
+<a id="historical-2-and-1-verification"></a>
+<a id="historical-compatibility-verification"></a>
+
+See [earlier verification and coverage results](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/internal/history/verification.md) for measurements from previous contracts.

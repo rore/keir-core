@@ -5,7 +5,7 @@
 
 Keir source defines how one host entrypoint combines typed data and approved operations. The compiler checks source structure, the trusted [domain capability model](domain-model.md), expression types, availability and call limits.
 
-Published Core 0.4.0 uses `keir/2` with DCM `/3`, including bounded lists, optional values, timestamps and exact-guard scalar results. Development Core 0.5 adds numeric `keir/3` with DCM `/4` and retains the old authoring pair. Numeric source, teaching commands and independently installed candidate packages have [passing evidence](README.md#numeric-qualification-status); public release, companion and full-feature acceptance remain separate. Use only a host-supported [exact tuple](compiler-artifact.md#source-and-artifact-identity). The [workflow reference](workflow-expressions.md) defines the operations below; old packages do not gain them by reading this page.
+Use a host-supported [source/model/producer profile](compiler-artifact.md#source-and-artifact-identity). The [workflow reference](workflow-expressions.md) defines the operations below.
 
 ## Source document
 
@@ -108,7 +108,7 @@ The [structural checker](../../scripts/check-keir-contracts.py) checks the avail
 
 ## Example source
 
-The complete [input-only decision source](../../conformance/keir-3/source-guard-input.json) reads a Boolean and returns ALLOW or DENY with a message. The [READ-based source](../../conformance/keir-3/source-guard.json) first calls a host capability, then combines its result with the input. Both use the exact [decision model](../../conformance/keir-3/dcm-guard.json). See the [walkthrough](../decision-walkthrough.md) for their roles and independent native checks. The [version matrix](compiler-artifact.md#source-and-artifact-identity) identifies their formats and supported compiler producers.
+The complete [input-only decision source](../../conformance/keir-3/source-guard-input.json) reads a Boolean and returns ALLOW or DENY with a message. The [READ-based source](../../conformance/keir-3/source-guard.json) first calls a host capability, then combines its result with the input. Both use the exact [decision model](../../conformance/keir-3/dcm-guard.json). See the [walkthrough](../quickstart.md#try-a-pre-operation-decision) for their roles and independent native checks. The [version matrix](compiler-artifact.md#source-and-artifact-identity) identifies their formats and supported compiler producers.
 
 The development [guarded-result source](../../conformance/keir-3/source-guarded-result.json) and [model](../../conformance/keir-3/dcm-guarded-result.json) conditionally create a domain-neutral record and return its actual validated reference, or preserve the input reference when skipped. Optional fields use explicit presence tests. The [guarded READ decision](../../conformance/keir-3/source-guarded-result-read.json) uses the same rule with zero WRITE authority. [Shared scenarios](../../conformance/keir-3/README.md) distinguish success, skipping, rejection and uncertain effects; no failure becomes fallback success.
 

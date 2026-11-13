@@ -1,6 +1,6 @@
 # Generic runtime alignment: implementation freeze
 
-Status: technical freeze for [the alignment task](../../../.agent-workflow/tasks/align-generic-hook-runtime.md), pending independent plan review. No implementation or passing `/2` execution is claimed. This appendix makes the [generic-hook](../../specs/generic-hook-capability-contract.md), [bound-model](../../specs/host-model-binding.md) and [worked-example](../../specs/generic-hook-example.md) targets concrete without changing their product semantics.
+Status: technical freeze for [the alignment task](../../../.agent-workflow/tasks/align-generic-hook-runtime.md), pending independent plan review. No implementation or passing `/2` execution is claimed. This appendix makes the [generic-hook](../../specs/generic-hook-capability-contract.md), [bound-model](../../specs/host-model-binding.md) and [worked-example](https://github.com/rore/keir-core/blob/3eefc59183c93efe0bce6bb56e7100a43fa06bc1/docs/specs/generic-hook-example.md) targets concrete without changing their product semantics.
 
 ## Profiles and compatibility
 
