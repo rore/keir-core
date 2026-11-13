@@ -60,7 +60,7 @@ class NumericIntegrationTest {
             var spec=map(value,""); current[0]=new Request(spec,new Object(),new ArrayList<>());
             var selected=prepared;
             if (spec.get("id").equals("handler-success")) {
-                var batch=map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-acceptance.json")),1_048_576),"");
+                var batch=map(parseJson(Files.readAllBytes(Path.of("..","conformance","keir-4","acceptance-artifacts.json")),1_048_576),"");
                 selected=KeirRuntime.prepareProgram(canonical(batch.get("handlerArtifact")),bound.boundModel()); assertTrue(selected.succeeded());
             }
             var context=new KeirRuntime.BoundEffectInvocation(map(spec.getOrDefault("bindings",fixture.get("bindings")),""),
@@ -221,7 +221,7 @@ class NumericIntegrationTest {
     @Test void sameCompilerArtifactsMatchCompleteIndependentOutcomes() throws Exception {
         var cases=cases(); assertEquals(97,cases.size());
         var all=new ArrayList<>(cases);
-        all.addAll(list(map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-acceptance.json")),1_048_576),"").get("cases"),""));
+        all.addAll(list(map(parseJson(Files.readAllBytes(Path.of("..","conformance","keir-4","acceptance-artifacts.json")),1_048_576),"").get("cases"),""));
         for (Object raw:all) {
             var row=map(raw,""); var prepared=prepare(row);
             assertTrue(prepared.succeeded(),row.get("id")+": "+prepared.diagnostic());

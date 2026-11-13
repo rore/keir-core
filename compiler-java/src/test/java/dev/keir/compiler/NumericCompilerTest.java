@@ -223,6 +223,7 @@ class NumericCompilerTest {
                 "integer",Map.of("literal","-7","type","Integer"),"decimal",Map.of("literal","0.5","type","Decimal")));
         var handler=compile(handlerSource,boundaries.get("dcm")); assertTrue(handler.succeeded(),handler.diagnostics().toString());
         byte[] batch=bytes(Map.of("cases",rows,"handlerArtifact",parse(handler.artifact()))); assertTrue(batch.length<1_048_576);
+        assertArrayEquals(Files.readAllBytes(Path.of("..","conformance","keir-4","acceptance-artifacts.json")),batch);
         Files.write(Path.of("target","numeric-acceptance.json"),batch);
     }
 

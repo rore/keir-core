@@ -62,7 +62,7 @@ function expected(row) {
   trace.push({ sequence: trace.length, event: 'TERMINATED' });
   return { classification: 'COMPLETED', result: { value: row.expected }, effects: [], trace };
 }
-const acceptanceBatch = JSON.parse(readFileSync(new URL('../../compiler-java/target/numeric-acceptance.json', import.meta.url)));
+const acceptanceBatch = JSON.parse(readFileSync(new URL('../../conformance/keir-4/acceptance-artifacts.json', import.meta.url)));
 const acceptance = acceptanceBatch.cases;
 for (const row of [...cases, ...acceptance]) test('numeric full outcome/' + row.id, async () => {
   const prepared = prepare(row);
