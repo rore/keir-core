@@ -2,12 +2,13 @@
 <a id="run-the-java-and-nodejs-host-examples"></a>
 # Keir examples
 
-The Java and Node.js hosts run the same compiled bytes with simulated services. The checked-in examples use source `/2` and model/artifact `/3`; build their packages from the same checkout.
+The Java and Node.js hosts run the same compiled bytes with simulated services. Follow-up and decision examples retain source `/2` and model/artifact `/3`. Numeric stock/quote examples use source `/3` and model/artifact `/4`; build their packages from the same checkout. Numeric support has [qualified unpublished-candidate evidence](../docs/specs/README.md#numeric-qualification-status), not a public Core 0.5 release or authority to upgrade a host.
 
 | Example | What it demonstrates |
 | --- | --- |
 | [Follow-up](node-host/follow-up/source.yaml) | After a task completion commits, read the task and request at most one follow-up write. |
 | [Pre-operation decision](node-host/pre-operation/source.yaml) | Read policy before a native operation, return ALLOW or DENY, and block continuation on evaluation failure. |
+| [Numeric stock and quote](numeric/README.md) | Request an exact Integer stock shortage or return a Decimal quote with explicit rounding. Includes commands for both hosts. |
 
 ## Run both hosts
 
@@ -39,4 +40,4 @@ The matching [edition-8 source guide](../docs/agents/customer-authoring-guide-v8
 - [Node decision host](node-host/pre-operation/run.mjs)
 - [Java decision host](node-host/pre-operation/BeforeOperation.java)
 
-See [Embed Keir](../docs/embedding.md) to adapt the examples to your application. The [current shared corpus](../conformance/keir-3/) records pinned artifacts and scenario expectations; the [conformance index](../conformance/README.md) separates current and historical inputs.
+See [Embed Keir](../docs/embedding.md) to adapt the examples to your application. The [retained `/3` corpus](../conformance/keir-3/) and [numeric/retained-authoring `/4` corpus](../conformance/keir-4/) record pinned artifacts and independent expectations; the [conformance index](../conformance/README.md) separates their contracts and historical inputs.

@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { cpus, availableParallelism, totalmem } from 'node:os';
+import { cpus, availableParallelism, totalmem, platform, release, arch } from 'node:os';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const source = resolve(here, '../..');
@@ -127,6 +127,41 @@ async function replay() {
     save('node-report.json', report);
   } catch (error) { save('node-report.json', { status: 'failed', progress, error: String(error.stack) }); throw error; }
 }
+async function runtimeWorkload() {
+  const start = performance.now(), deadline = start + 135000;
+  const remaining = () => { const left = Math.floor(deadline - performance.now()); assert(left > 0, '135-second runtime workload exhausted'); return Math.min(45000, left); };
+  const fixture = join(source, 'compiler-java/target/numeric-runtime-rules.json'), document = readJson(fixture);
+  assert.deepEqual(document.cases.map(row => row.id), ['Boolean', 'Integer', 'Decimal']);
+  assert(document.cases.every(row => row.artifact.steps.length === 4));
+  const xml = readFileSync(join(source, 'runtime-java/target/surefire-reports/TEST-dev.keir.runtime.NumericIntegrationTest.xml'), 'utf8');
+  const match = xml.match(/<property name="java.class.path" value="([^"]+)"/);
+  assert(match, 'Missing actual runtime classpath');
+  const classpath = match[1].replaceAll('&amp;', '&');
+  const paths = ['compiler-java/src/test/java/dev/keir/compiler/NumericCompilerTest.java',
+    'runtime-java/src/main/java/dev/keir/runtime/KeirRuntime.java', 'runtime-java/src/main/java/dev/keir/runtime/CheckedCel.java',
+    'runtime-java/src/main/java/dev/keir/runtime/Numeric.java', 'runtime-java/src/test/java/dev/keir/runtime/NumericRuntimeMeasurement.java',
+    'runtime-node/src/index.js', 'runtime-node/src/cel.js', 'runtime-node/src/numeric.js', 'runtime-node/test/numeric-measurement.mjs',
+    'runtime-node/package-lock.json', 'conformance/cel-profile/numeric.mjs'];
+  save('runtime-manifest.json', { revision: process.env.GITHUB_SHA, fixtureSha256: 'sha256:' + sha(readFileSync(fixture)),
+    os: { platform: platform(), release: release(), arch: arch() },
+    cpuModel: cpus()[0]?.model, visibleLogicalCpus: cpus().length, availableParallelism: availableParallelism(), hostMemoryBytes: totalmem(),
+    node: process.version, packages: { celJava: '0.14.0', celNode: '0.6.1', protobufJava: '4.35.1', protobufNode: '2.6.2' },
+    native: Object.fromEntries(['/sys/fs/cgroup/cpu.max', '/sys/fs/cgroup/memory.max'].filter(existsSync).map(path => [path, readFileSync(path, 'utf8')])),
+    sourceHashes: Object.fromEntries(paths.map(path => [path, sha(readFileSync(join(source, path)))])),
+    scope: 'Actual source-runtime rules; not a whole-app benchmark or hard CPU/memory containment guarantee.' });
+  await child('java', ['-Xmx256m', '-cp', classpath, 'dev.keir.runtime.NumericRuntimeMeasurement', fixture,
+    join(root, 'output/java-runtime-report.json')], 'java-runtime', remaining(), true);
+  await child(process.execPath, ['--expose-gc', '--max-old-space-size=256', join(source, 'runtime-node/test/numeric-measurement.mjs'),
+    fixture, join(root, 'output/node-runtime-report.json')], 'node-runtime', remaining(), true);
+  const java = readJson(join(root, 'output/java-runtime-report.json')), node = readJson(join(root, 'output/node-runtime-report.json'));
+  assert.equal(java.status, 'passed'); assert.equal(node.status, 'passed');
+  assert.equal(java.fixtureSha256, 'sha256:' + sha(readFileSync(fixture))); assert.equal(node.fixtureSha256, java.fixtureSha256);
+  assert.deepEqual(java.cases.map(row => [row.id, row.expectedSha256]), node.cases.map(row => [row.id, row.expectedSha256]));
+  save('runtime-workload.json', { status: 'passed', elapsedMs: performance.now() - start, independentOutcomes: true,
+    families: 3, warmupsPerPhase: 100, samplesPerPhase: 1000, batchesPerFamily: 3, requestsPerBatch: 1000,
+    scope: 'actual Keir source runtimes', coefficientReparsing: 'retained and uninstrumented; no parse-once claim' });
+  assert(performance.now() <= deadline, '135-second runtime workload exhausted');
+}
 function evidence() {
   const names = ['bundle.json', 'manifest.json', 'java-report.json', 'java-progress.json', 'node-report.json', 'workload.json', 'setup.json',
     'probe-build-process.json', 'node-dependencies-process.json', 'java-version-process.json', 'java-workload-process.json', 'node-workload-process.json'];
@@ -153,10 +188,11 @@ function evidence() {
   console.log('Bounded allowlisted evidence prepared; status=' + (passed ? 'passed' : 'failed'));
 }
 try {
-  assert(['setup', 'workload', 'replay', 'evidence'].includes(mode));
+  assert(['setup', 'workload', 'replay', 'evidence', 'runtime'].includes(mode));
   if (mode === 'setup') await setup();
   else if (mode === 'workload') await workload();
   else if (mode === 'replay') await replay();
+  else if (mode === 'runtime') await runtimeWorkload();
   else evidence();
 } catch (error) {
   if (mode !== 'replay' && mode !== 'evidence') save(mode + '.json', { status: 'failed', error: String(error.stack) });

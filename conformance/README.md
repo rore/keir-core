@@ -4,8 +4,9 @@
 The compiler and both runtimes use shared fixtures to verify that the same rule produces the same observable behavior. The suites use checked-in source, host models, compiled artifacts and independently written expectations. The checks compare results, calls, traces and any write evidence.
 
 - [Run the current examples](../examples/README.md) to compile and execute event extensions and decisions in both runtimes.
-- [Current `/3` fixtures](keir-3/) cover post-commit events and pre-operation decisions, with shared source, models, artifacts and scenario expectations. Their compiler producer is listed in the [compatibility matrix](../docs/specs/compiler-artifact.md#source-and-artifact-identity); original 0.3.0 event and decision artifacts are retained for compatibility tests.
-- [Keir 2 fixtures](keir-2/README.md) preserve the `/2` execution pair retained for compatibility. Current authoring targets `/3` models; runtime applicability is defined by the matrix.
+- [Retained `/3` fixtures](keir-3/) cover post-commit events and pre-operation decisions, including published Core 0.4.0, with shared source, models, artifacts and scenario expectations. Their compiler producer is listed in the [compatibility matrix](../docs/specs/compiler-artifact.md#source-and-artifact-identity); original 0.3.0 event and decision artifacts are retained for compatibility tests.
+- [Development `/4` corpus](keir-4/) covers numeric source `/3` with model `/4` and retained source `/2` with model `/3`; both authoring routes emit artifact `/4`. It includes numeric expression, host-boundary, descriptor and retained-nominal-name fixtures. [Stock/quote examples and commands](../examples/numeric/README.md) exercise complete programs in both hosts. [Qualified unpublished-candidate evidence](../docs/specs/README.md#numeric-qualification-status) is not a public Core 0.5 release or host-upgrade approval.
+- [Keir 2 fixtures](keir-2/README.md) preserve the `/2` execution pair retained for compatibility. Authoring routes and runtime applicability are defined by the matrix.
 - [Contract workflow](../.github/workflows/keir-contract.yml) runs the structural checker, compiler and runtime tests, and the packaged host comparison.
 - [Testing evidence](../docs/testing.md#current-single-write-behavior-verification) records the results and their scope.
 

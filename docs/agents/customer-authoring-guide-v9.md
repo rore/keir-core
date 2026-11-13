@@ -1,6 +1,6 @@
-# Customer authoring guide — draft edition 9
+# Customer authoring guide — edition 9
 
-**DRAFT Core 0.5 source guidance.** Matching compiler/runtime packages and the edition-9 companion are not yet qualified. Use only when the host explicitly supports the exact tuple below. Published Core 0.4.0 is nonnumeric. This draft neither upgrades a host nor changes earlier editions, archives or approved artifact bytes.
+**Core 0.5 qualified unpublished-candidate guidance.** Matching compiler/runtime packages and an edition-9 companion containing this guide's draft predecessor have passed. This revised guide still needs its own matching archive verification before distribution; see [evidence and matching references](#evidence-and-matching-references). Use only when the host explicitly supports the exact tuple below. Published Core 0.4.0 is nonnumeric. This guide neither upgrades a host nor changes earlier editions, archives or approved artifact bytes.
 
 ## Discover the exact contract
 
@@ -67,6 +67,10 @@ Only valid COMPLETED ALLOW with empty effects permits further native checks. DEN
 
 ## Evidence and matching references
 
-The [maintained specification index](../specs/README.md) identifies the source checkpoint and remaining qualification. The [stock/quote programs](../specs/language.md#numeric-programs) have shared Java/Node source-runtime case evidence, not standalone teaching-consumer or installed-package qualification. Raw CEL/component probes do not prove complete Keir artifacts, packages or a Studio-to-native journey. This draft has no qualified companion/package mapping; only the eventual verified manifest and compatibility record can establish one. Do not invent archive hashes, release rows or executable results. Preserve earlier guide editions and their exact bytes.
+The [qualification record](../specs/README.md#numeric-qualification-status) separates source, teaching, installed-candidate and bounded runtime evidence. The [stock/quote programs and commands](../specs/language.md#numeric-programs) pass complete independent teaching-consumer reports. [Package-only run 43438170269](https://github.com/rore/keir-core/actions/runs/43438170269) built and verified actual Core source `3a383c2d0c6227eedc9c03927c2dd1910360d5b9`, distinct from workflow revision `bfeaae33549b1fc7ce34afbc24f8dc48edb29cea`. Its unpublished packages pass 130 complete outcomes per installed runtime and callable helper vectors. All five assets are byte-identical to run `43431976777` in that record.
+
+[Companion-only run 43439660839](https://github.com/rore/keir-core/actions/runs/43439660839), source `f7507342ff1af7c5191056b1d96781b92cb1a780`, passed 23 recipe tests, archive build, offline verification and exact-package checks. Its manifest maps those Core packages to 34 payloads, including both authoring tuples and eight versioned schemas. That qualified unpublished archive contains the **DRAFT predecessor**, not this revised guide. Its archive/manifest hashes must not identify a later archive containing these new guide bytes.
+
+Before distributing this revision, verify its actual matching archive, manifest, source revision and package identities. Do not invent replacement pins or treat a compatibility status of `release` as public publication. The package-only and companion-only runs deliberately skipped prior source/runtime/performance stages; they reuse that evidence rather than rerun it. Neither candidate qualification nor this guide establishes a public release, host upgrade, Daymark journey or full-feature acceptance. Preserve earlier guide editions and their exact bytes. Raw CEL/component probes do not substitute for runtime or application evidence.
 
 Use the [language](../specs/language.md), [DCM](../specs/domain-model.md), [operations](../specs/workflow-expressions.md), [artifact](../specs/compiler-artifact.md), [runtime](../specs/runtime.md) and [decision](../specs/pre-operation-decisions.md) references with their matching schemas. Schemas check shape, not native authority or all semantic bounds. Supply the host's exact approved model, policy and scoped tools separately.

@@ -1,11 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { create, fromBinary, toBinary } from '@bufbuild/protobuf';
+import { CheckedExprSchema } from '@bufbuild/cel-spec/cel/expr/checked_pb.js';
+import { ExprSchema } from '@bufbuild/cel-spec/cel/expr/syntax_pb.js';
+import { FileDescriptorSetSchema } from '@bufbuild/protobuf/wkt';
 import { readFileSync } from 'node:fs';
 import { bindModel, prepareProgram, invokeProgram } from '../src/index.js';
 import { canonicalBytes } from '../src/canonical.js';
 import { modelFor } from '../src/model.js';
 import { validatePlan } from '../src/validation.js';
-import { createActivation, prepareExpressions, evaluateBinding } from '../src/cel.js';
+import { createActivation, prepareExpressions, evaluateBinding, prepareModelTypes } from '../src/cel.js';
 
 const { cases } = JSON.parse(readFileSync(new URL('../../conformance/keir-4/engine-matrix.json', import.meta.url), 'utf8'));
 const programs = ['stock', 'quote'].map(name => ({ name,
@@ -13,6 +18,17 @@ const programs = ['stock', 'quote'].map(name => ({ name,
   artifact: JSON.parse(readFileSync(new URL('../../examples/numeric/' + name + '/artifact.json', import.meta.url))),
 }));
 assert.equal(cases.length, 97);
+test('independent Node descriptors match exact compiler bytes and hashes', () => {
+  const batch = JSON.parse(readFileSync(new URL('../../conformance/keir-4/descriptors.json', import.meta.url)));
+  for (const row of batch.cases) {
+    const { registry } = prepareModelTypes(row.dcm);
+    const actual = Buffer.from(toBinary(FileDescriptorSetSchema, create(FileDescriptorSetSchema, {
+      file: [...registry.files].map(file => file.proto),
+    })));
+    assert.deepEqual(actual, Buffer.from(row.base64, 'base64'), row.id);
+    assert.equal(createHash('sha256').update(actual).digest('hex'), row.sha256, row.id);
+  }
+});
 test('retained nominal Integer and Decimal names keep String meaning in new artifacts', async () => {
   const row = JSON.parse(readFileSync(new URL('../../conformance/keir-4/retained-names.json', import.meta.url), 'utf8'));
   const prepared = prepare(row);
@@ -31,26 +47,41 @@ function prepare(row) {
 }
 function expected(row) {
   const trace = [{ sequence: 0, event: 'INVOCATION_START' }];
-  const ids = ['a', 'b', 'i', 'j', 'flag', 'text', ...(['bind', 'expression-only-size'].includes(row.id) ? ['d'] : [])];
+  const ids = row.binds ?? ['a', 'b', 'i', 'j', 'flag', 'text', ...(['bind', 'expression-only-size'].includes(row.id) ? ['d'] : [])];
   for (const step of ids) {
     trace.push({ sequence: trace.length, event: 'STEP_START', step });
     trace.push({ sequence: trace.length, event: 'VALUE_BOUND', step });
   }
   if (['ERROR', 'TIME_ERROR'].includes(row.expected)) {
-    const code = row.expected === 'TIME_ERROR' ? 'BUDGET_EXCEEDED' : 'EXPRESSION_FAILED';
+    const error = row.error ?? { code: row.expected === 'TIME_ERROR' ? 'BUDGET_EXCEEDED' : 'EXPRESSION_FAILED', path: '/return' };
+    const { code } = error;
     trace.push({ sequence: trace.length, event: 'TERMINATED', code });
-    return { classification: row.expected === 'TIME_ERROR' ? 'LIMIT_EXCEEDED' : 'FAILED', error: { code, path: '/return' }, effects: [], trace };
+    return { classification: code === 'BUDGET_EXCEEDED' ? 'LIMIT_EXCEEDED' : 'FAILED', error, effects: [], trace };
   }
   trace.push({ sequence: trace.length, event: 'RETURNED' });
   trace.push({ sequence: trace.length, event: 'TERMINATED' });
   return { classification: 'COMPLETED', result: { value: row.expected }, effects: [], trace };
 }
-for (const row of cases) test('numeric full outcome/' + row.id, async () => {
+const acceptanceBatch = JSON.parse(readFileSync(new URL('../../conformance/keir-4/acceptance-artifacts.json', import.meta.url)));
+const acceptance = acceptanceBatch.cases;
+for (const row of [...cases, ...acceptance]) test('numeric full outcome/' + row.id, async () => {
   const prepared = prepare(row);
   assert.equal(prepared.diagnostic, null);
-  const outcome = await invokeProgram(prepared.prepared, row.input, { bindings: {}, requestKey: 'original-key',
+  const input = { ...row.input, ...(row.nullField ? { [row.nullField]: null } : {}) };
+  const outcome = await invokeProgram(prepared.prepared, input, { bindings: {}, requestKey: 'original-key',
     event: { id: 'event1', source: 'owner1' }, deadline: { clock: { nowMs: () => 0 }, expiresAtMs: 10_000 } });
   assert.deepEqual(outcome, expected(row));
+});
+test('numeric host rejects native Number and bigint values without coercion', async () => {
+  for (const id of ['integer-negative-multiply', 'decimal-negative-product']) {
+    const row = acceptance.find(row => row.id === id), prepared = prepare(row);
+    assert.equal(prepared.diagnostic, null);
+    for (const value of [1, 1.5, 1n, NaN, Infinity]) {
+      const outcome = await invokeProgram(prepared.prepared, { value }, { bindings: {}, requestKey: Object.freeze({}),
+        event: { id: 'event1', source: 'owner1' }, deadline: { clock: { nowMs: () => 0 }, expiresAtMs: 10_000 } });
+      assert.deepEqual(outcome, expected({ ...row, expected: 'ERROR', binds: [], error: { code: 'INPUT_INVALID', path: '/input' } }));
+    }
+  }
 });
 
 test('relabeled historical producer and crossed descriptor recipe fail admission', () => {
@@ -60,6 +91,48 @@ test('relabeled historical producer and crossed descriptor recipe fail admission
   row.artifact.compiler = 'keir-compiler-java/0.5.0';
   row.artifact.modelRef.descriptorRecipe = 'keir-record-descriptors/2';
   assert.equal(prepare(row).diagnostic.code, 'PIN_MISMATCH');
+});
+
+test('selected numeric host rejects forged maps/constants/metadata before callbacks', () => {
+  const fixture = JSON.parse(readFileSync(new URL('../../conformance/keir-4/host-boundaries.json', import.meta.url)));
+  const original = JSON.parse(readFileSync(new URL('../../conformance/keir-4/host-boundaries-artifact.json', import.meta.url)));
+  let calls = 0;
+  const adapters = Object.fromEntries(Object.keys(fixture.dcm.capabilities).map(name => [name, {
+    version: '1', mode: 'simulation', keyType: 'numeric.Key', invoke() { calls++; assert.fail('Forged admission dispatched a callback'); },
+  }]));
+  const bound = bindModel(canonicalBytes(fixture.dcm), adapters); assert.equal(bound.diagnostic, null);
+  for (const mutation of ['type-missing', 'type-extra', 'ref-missing', 'ref-extra', 'overload', 'uint', 'double', 'internal-select',
+    'internal-construct', 'descriptor-extra', 'environment', 'model-format', 'recipe', 'producer']) {
+    const artifact = structuredClone(original);
+    if (mutation === 'descriptor-extra') artifact.descriptors = ['untrusted.proto'];
+    else if (mutation === 'environment') artifact.environment.celJava = '0.15.0';
+    else if (mutation === 'model-format') artifact.modelRef.format = 'keir-dcm/3';
+    else if (mutation === 'recipe') artifact.modelRef.descriptorRecipe = 'keir-record-descriptors/2';
+    else if (mutation === 'producer') artifact.compiler = 'keir-compiler-java/0.4.0';
+    else {
+      const expression = artifact.expressions.e1, checked = fromBinary(CheckedExprSchema, Buffer.from(expression.checked, 'base64'));
+      const { id } = checked.expr;
+      if (mutation === 'type-missing') delete checked.typeMap[id];
+      else if (mutation === 'type-extra') checked.typeMap[999] = structuredClone(checked.typeMap[id]);
+      else if (mutation === 'ref-missing') delete checked.referenceMap[Object.keys(checked.referenceMap)[0]];
+      else if (mutation === 'ref-extra') checked.referenceMap[999] = structuredClone(Object.values(checked.referenceMap)[0]);
+      else if (mutation === 'overload') checked.referenceMap[id] = { ...structuredClone(Object.values(checked.referenceMap)[0]), name: '', overloadId: ['add_string'] };
+      else if (mutation === 'uint' || mutation === 'double') checked.expr = create(ExprSchema, { id,
+        exprKind: { case: 'constExpr', value: { constantKind: { case: mutation === 'uint' ? 'uint64Value' : 'doubleValue', value: mutation === 'uint' ? 1n : 1 } } } });
+      else if (mutation === 'internal-select') {
+        checked.typeMap[999] = structuredClone(checked.typeMap[id]);
+        checked.expr = create(ExprSchema, { id: 999n, exprKind: { case: 'selectExpr', value: { operand: checked.expr, field: 'value' } } });
+      } else if (mutation === 'internal-construct') {
+        checked.typeMap = { [id]: checked.typeMap[id] }; checked.referenceMap = {};
+        checked.expr = create(ExprSchema, { id, exprKind: { case: 'structExpr', value: { messageName: 'keir.numeric.Decimal', entries: [] } } });
+      }
+      expression.checked = Buffer.from(toBinary(CheckedExprSchema, checked)).toString('base64');
+    }
+    const denied = prepareProgram(canonicalBytes(artifact), bound.boundModel);
+    assert.equal(denied.prepared, null, mutation);
+    assert.ok(['ARTIFACT_INVALID', 'PIN_MISMATCH'].includes(denied.diagnostic.code), mutation + ': ' + JSON.stringify(denied.diagnostic));
+  }
+  assert.equal(calls, 0);
 });
 
 test('invocation projections reuse actual Decimal payloads without shared values', () => {
@@ -182,13 +255,21 @@ test('numeric protected/agent/guarded boundaries preserve complete independent o
   assert.equal(binding.diagnostic, null);
   const prepared = prepareProgram(artifact, binding.boundModel);
   assert.equal(prepared.diagnostic, null);
-  for (const spec of fixture.cases) {
+  const handlerSuccess = { id: 'handler-success', args: { integer: '9007199254740993', decimal: '1.25' }, calls: 2,
+    write: { kind: 'BUSINESS_REJECTION', code: 'DENIED', effect: 'NONE' }, trace: 'handler-failed',
+    expect: { classification: 'BUSINESS_REJECTION', error: { code: 'DENIED', path: '/steps/4' }, result: { integer: '-7', decimal: '0.5' }, effects: [{ step: 'written', capability: 'numbers.write', state: 'NONE' }] } };
+  for (const spec of [...fixture.cases, handlerSuccess]) {
     current = { spec, calls: 0, key: Object.freeze({}) };
-    const outcome = await invokeProgram(prepared.prepared, spec.input ?? fixture.input, {
+    const selected = spec.id === 'handler-success' ? prepareProgram(canonicalBytes(acceptanceBatch.handlerArtifact), binding.boundModel) : prepared;
+    assert.equal(selected.diagnostic, null);
+    const outcome = await invokeProgram(selected.prepared, spec.input ?? fixture.input, {
       bindings: spec.bindings ?? fixture.bindings, requestKey: current.key, event: { id: 'event1', source: 'owner1' },
       deadline: { clock: { nowMs: () => 0 }, expiresAtMs: 10_000 },
     });
     const trace = fixture.traces[spec.trace].map((row, sequence) => ({ sequence, ...row }));
+    if (spec.id === 'handler-success') {
+      trace.pop(); trace.push({ sequence: trace.length, event: 'RETURNED' }); trace.push({ sequence: trace.length, event: 'TERMINATED', code: 'DENIED' });
+    }
     assert.deepEqual(outcome, { ...spec.expect, trace }, spec.id);
     assert.equal(current.calls, spec.calls, spec.id);
   }
