@@ -108,6 +108,21 @@ class NumericCompilerTest {
         Files.write(Path.of("target","numeric-programs.json"),bytes(Map.of("programs",programs)));
     }
 
+    @Test void compileGuardedNumericHostBoundariesOnceForBothRuntimes() throws Exception {
+        var document=parse(Files.readAllBytes(Path.of("..","conformance","keir-4","host-boundaries.json")));
+        var model=map(document.get("dcm")); var source=map(document.get("source"));
+        var compiled=compile(source,model);
+        assertTrue(compiled.succeeded(),compiled.diagnostics().toString());
+        Files.write(Path.of("target","numeric-host-boundaries.json"),compiled.artifact());
+        // Unguarded access, mixed numeric branches and unguarded presence tests fail closed.
+        for (String forbidden:List.of("read.integer","g ? read.integer : decimal(\"0\")",
+                "has(read.optionalInteger) ? read.optionalInteger : 0")) {
+            var changed=parse(bytes(source));
+            map(((List<?>)changed.get("steps")).get(2)).put("let",Map.of("cel",forbidden));
+            assertFalse(compile(changed,model).succeeded(),forbidden);
+        }
+    }
+
     @Test void retainedNominalNamesAndDescriptorBytesDoNotAcquireNumericMeaning() throws Exception {
         var retained=model("Boolean",false); retained.put("format","keir-dcm/3");
         var types=map(retained.get("types"));

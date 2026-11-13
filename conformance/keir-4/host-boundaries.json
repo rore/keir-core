@@ -1,0 +1,104 @@
+{
+  "dcm": {
+    "format": "keir-dcm/4", "domain": {"id": "numeric.boundaries", "version": "1"},
+    "hostKey": {"source": "requestKey", "type": "numeric.Key"},
+    "types": {
+      "EventId": {"kind": "nominal", "base": "String"},
+      "OwnerId": {"kind": "nominal", "base": "String"},
+      "Input": {"kind": "record", "fields": {"enabled": "Boolean", "integer": "Integer", "decimal": "Decimal"}},
+      "Data": {"kind": "record", "fields": {
+        "integer": "Integer", "decimal": "Decimal", "unused": "Decimal",
+        "optionalInteger": {"type": "Integer", "optional": true},
+        "optionalDecimal": {"type": "Decimal", "optional": true}
+      }},
+      "Output": {"kind": "record", "fields": {"integer": "Integer", "decimal": "Decimal"}}
+    },
+    "capabilities": {
+      "numbers.read": {"version": "1", "effect": "READ", "parameters": {
+        "integer": {"type": "Integer", "binding": "agent"}, "decimal": {"type": "Decimal", "binding": "agent"},
+        "protectedInteger": {"type": "Integer", "binding": "host"}, "protectedDecimal": {"type": "Decimal", "binding": "host"}
+      }, "result": "Data", "errors": ["DENIED"]},
+      "numbers.write": {"version": "1", "effect": "WRITE", "parameters": {
+        "integer": {"type": "Integer", "binding": "agent"}, "decimal": {"type": "Decimal", "binding": "agent"},
+        "protectedInteger": {"type": "Integer", "binding": "host"}, "protectedDecimal": {"type": "Decimal", "binding": "host"}
+      }, "result": "Data", "errors": ["DENIED"]}
+    },
+    "entrypoints": {"Run": {"input": "Input", "output": "Output", "trigger": "EVENT", "placement": "AFTER_COMMIT",
+      "consumer": {"id": "numeric.report", "version": "1", "kind": "EVENT_REPORT"}, "event": {"idType": "EventId", "sourceType": "OwnerId"}}}
+  },
+  "source": {
+    "language": "keir/3", "domain": {"id": "numeric.boundaries", "version": "1", "fingerprint": "sha256:2e42498f848a3fce4d3fdc6ed370c8e2532d67c0e5ccac2ff1da6fc9e31a6b89"},
+    "entrypoint": "Run", "name": "numeric-boundaries",
+    "steps": [
+      {"id": "g", "let": {"cel": "input.enabled"}},
+      {"id": "read", "call": "numbers.read", "when": "g", "args": {"integer": {"cel": "input.integer"}, "decimal": {"cel": "input.decimal"}}},
+      {"id": "i", "let": {"cel": "g ? (has(read.optionalInteger) ? read.optionalInteger : read.integer) : 0"}},
+      {"id": "d", "let": {"cel": "g ? (has(read.optionalDecimal) ? read.optionalDecimal : read.decimal) : decimal(\"0\")"}},
+      {"id": "written", "call": "numbers.write", "when": "g", "args": {
+        "integer": {"cel": "g ? i : 1 / 0"}, "decimal": {"cel": "g ? d : decimal(\"1\") / decimal(\"0\")"}
+      }, "onError": {"DENIED": {"record": {"integer": {"cel": "i / 0"}, "decimal": {"literal": "0", "type": "Decimal"}}}}}
+    ],
+    "return": {"record": {"integer": {"cel": "g ? written.integer : 0"}, "decimal": {"cel": "g ? written.decimal : decimal(\"0\")"}}}
+  },
+  "input": {"enabled": true, "integer": "9007199254740993", "decimal": "1.25"},
+  "bindings": {"protectedInteger": "-9223372036854775808", "protectedDecimal": "0.000000000000000001"},
+  "read": {"kind": "SUCCESS", "value": {"integer": "9007199254740993", "decimal": "1.25", "unused": "1"}},
+  "write": {"kind": "SUCCESS", "value": {"integer": "9007199254740993", "decimal": "1.25", "unused": "1"}, "effect": "CONFIRMED"},
+  "traces": {
+    "success": [
+      {"event": "INVOCATION_START"}, {"event": "STEP_START", "step": "g"}, {"event": "VALUE_BOUND", "step": "g"},
+      {"event": "STEP_START", "step": "read"}, {"event": "GUARD_EVALUATED", "step": "read", "taken": true},
+      {"event": "CALL_DISPATCHED", "step": "read", "capability": "numbers.read"}, {"event": "CALL_SUCCEEDED", "step": "read", "capability": "numbers.read"},
+      {"event": "STEP_START", "step": "i"}, {"event": "VALUE_BOUND", "step": "i"}, {"event": "STEP_START", "step": "d"}, {"event": "VALUE_BOUND", "step": "d"},
+      {"event": "STEP_START", "step": "written"}, {"event": "GUARD_EVALUATED", "step": "written", "taken": true},
+      {"event": "EFFECT_INTENT", "step": "written", "capability": "numbers.write"}, {"event": "CALL_DISPATCHED", "step": "written", "capability": "numbers.write"},
+      {"event": "EFFECT_RECORDED", "step": "written", "capability": "numbers.write", "state": "CONFIRMED"},
+      {"event": "CALL_SUCCEEDED", "step": "written", "capability": "numbers.write"}, {"event": "RETURNED"}, {"event": "TERMINATED"}
+    ],
+    "skipped": [
+      {"event": "INVOCATION_START"}, {"event": "STEP_START", "step": "g"}, {"event": "VALUE_BOUND", "step": "g"},
+      {"event": "STEP_START", "step": "read"}, {"event": "GUARD_EVALUATED", "step": "read", "taken": false}, {"event": "STEP_SKIPPED", "step": "read"},
+      {"event": "STEP_START", "step": "i"}, {"event": "VALUE_BOUND", "step": "i"}, {"event": "STEP_START", "step": "d"}, {"event": "VALUE_BOUND", "step": "d"},
+      {"event": "STEP_START", "step": "written"}, {"event": "GUARD_EVALUATED", "step": "written", "taken": false}, {"event": "STEP_SKIPPED", "step": "written"},
+      {"event": "RETURNED"}, {"event": "TERMINATED"}
+    ],
+    "host-invalid": [{"event": "INVOCATION_START"}, {"event": "TERMINATED", "code": "HOST_BINDING_INVALID"}],
+    "read-invalid": [
+      {"event": "INVOCATION_START"}, {"event": "STEP_START", "step": "g"}, {"event": "VALUE_BOUND", "step": "g"},
+      {"event": "STEP_START", "step": "read"}, {"event": "GUARD_EVALUATED", "step": "read", "taken": true},
+      {"event": "CALL_DISPATCHED", "step": "read", "capability": "numbers.read"}, {"event": "TERMINATED", "code": "ADAPTER_INVALID"}
+    ],
+    "write-invalid": [
+      {"event": "INVOCATION_START"}, {"event": "STEP_START", "step": "g"}, {"event": "VALUE_BOUND", "step": "g"},
+      {"event": "STEP_START", "step": "read"}, {"event": "GUARD_EVALUATED", "step": "read", "taken": true},
+      {"event": "CALL_DISPATCHED", "step": "read", "capability": "numbers.read"}, {"event": "CALL_SUCCEEDED", "step": "read", "capability": "numbers.read"},
+      {"event": "STEP_START", "step": "i"}, {"event": "VALUE_BOUND", "step": "i"}, {"event": "STEP_START", "step": "d"}, {"event": "VALUE_BOUND", "step": "d"},
+      {"event": "STEP_START", "step": "written"}, {"event": "GUARD_EVALUATED", "step": "written", "taken": true},
+      {"event": "EFFECT_INTENT", "step": "written", "capability": "numbers.write"}, {"event": "CALL_DISPATCHED", "step": "written", "capability": "numbers.write"},
+      {"event": "EFFECT_RECORDED", "step": "written", "capability": "numbers.write", "state": "CONFIRMED"}, {"event": "TERMINATED", "code": "ADAPTER_INVALID"}
+    ],
+    "handler-failed": [
+      {"event": "INVOCATION_START"}, {"event": "STEP_START", "step": "g"}, {"event": "VALUE_BOUND", "step": "g"},
+      {"event": "STEP_START", "step": "read"}, {"event": "GUARD_EVALUATED", "step": "read", "taken": true},
+      {"event": "CALL_DISPATCHED", "step": "read", "capability": "numbers.read"}, {"event": "CALL_SUCCEEDED", "step": "read", "capability": "numbers.read"},
+      {"event": "STEP_START", "step": "i"}, {"event": "VALUE_BOUND", "step": "i"}, {"event": "STEP_START", "step": "d"}, {"event": "VALUE_BOUND", "step": "d"},
+      {"event": "STEP_START", "step": "written"}, {"event": "GUARD_EVALUATED", "step": "written", "taken": true},
+      {"event": "EFFECT_INTENT", "step": "written", "capability": "numbers.write"}, {"event": "CALL_DISPATCHED", "step": "written", "capability": "numbers.write"},
+      {"event": "EFFECT_RECORDED", "step": "written", "capability": "numbers.write", "state": "NONE"}, {"event": "TERMINATED", "code": "EXPRESSION_FAILED"}
+    ]
+  },
+  "cases": [
+    {"id": "absent", "args": {"integer": "9007199254740993", "decimal": "1.25"}, "calls": 2, "trace": "success", "expect": {
+      "classification": "COMPLETED", "result": {"integer": "9007199254740993", "decimal": "1.25"}, "effects": [{"step": "written", "capability": "numbers.write", "state": "CONFIRMED"}]}},
+    {"id": "present-zero", "read": {"kind": "SUCCESS", "value": {"integer": "6", "decimal": "2", "unused": "1", "optionalInteger": "0", "optionalDecimal": "0"}},
+      "write": {"kind": "SUCCESS", "value": {"integer": "0", "decimal": "0", "unused": "1"}, "effect": "CONFIRMED"},
+      "args": {"integer": "0", "decimal": "0"}, "calls": 2, "trace": "success", "expect": {"classification": "COMPLETED", "result": {"integer": "0", "decimal": "0"}, "effects": [{"step": "written", "capability": "numbers.write", "state": "CONFIRMED"}]}},
+    {"id": "false-before", "input": {"enabled": false, "integer": "6", "decimal": "2"}, "calls": 0, "trace": "skipped", "expect": {"classification": "COMPLETED", "result": {"integer": "0", "decimal": "0"}, "effects": []}},
+    {"id": "bad-protected-integer", "bindings": {"protectedInteger": 3, "protectedDecimal": "0.1"}, "calls": 0, "trace": "host-invalid", "expect": {"classification": "FAILED", "error": {"code": "HOST_BINDING_INVALID", "path": "/hostBindings"}, "effects": []}},
+    {"id": "bad-protected-decimal", "bindings": {"protectedInteger": "3", "protectedDecimal": "1.0"}, "calls": 0, "trace": "host-invalid", "expect": {"classification": "FAILED", "error": {"code": "HOST_BINDING_INVALID", "path": "/hostBindings"}, "effects": []}},
+    {"id": "unused-read-invalid", "read": {"kind": "SUCCESS", "value": {"integer": "6", "decimal": "2", "unused": "1.0"}}, "calls": 1, "trace": "read-invalid", "expect": {"classification": "FAILED", "error": {"code": "ADAPTER_INVALID", "path": "/steps/1"}, "effects": []}},
+    {"id": "unused-confirmed-invalid", "write": {"kind": "SUCCESS", "value": {"integer": "6", "decimal": "2", "unused": "1.0"}, "effect": "CONFIRMED"}, "args": {"integer": "9007199254740993", "decimal": "1.25"}, "calls": 2, "trace": "write-invalid", "expect": {"classification": "FAILED", "error": {"code": "ADAPTER_INVALID", "path": "/steps/4"}, "effects": [{"step": "written", "capability": "numbers.write", "state": "CONFIRMED"}]}},
+    {"id": "handler-failure", "write": {"kind": "BUSINESS_REJECTION", "code": "DENIED", "effect": "NONE"}, "args": {"integer": "9007199254740993", "decimal": "1.25"}, "calls": 2, "trace": "handler-failed", "expect": {"classification": "FAILED", "error": {"code": "EXPRESSION_FAILED", "path": "/steps/4/onError/DENIED/integer", "cause": {"code": "DENIED", "path": "/steps/4"}}, "effects": [{"step": "written", "capability": "numbers.write", "state": "NONE"}]}},
+    {"id": "false-after", "input": {"enabled": false, "integer": "6", "decimal": "2"}, "calls": 0, "trace": "skipped", "expect": {"classification": "COMPLETED", "result": {"integer": "0", "decimal": "0"}, "effects": []}}
+  ]
+}

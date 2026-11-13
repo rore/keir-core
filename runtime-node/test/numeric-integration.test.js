@@ -160,3 +160,35 @@ for (const program of programs) test('complete numeric program/' + program.name,
     }
   }));
 });
+
+test('numeric protected/agent/guarded boundaries preserve complete independent outcomes', async () => {
+  const fixture = JSON.parse(readFileSync(new URL('../../conformance/keir-4/host-boundaries.json', import.meta.url), 'utf8'));
+  const artifact = readFileSync(new URL('../../compiler-java/target/numeric-host-boundaries.json', import.meta.url));
+  let current;
+  const adapters = Object.fromEntries(Object.entries(fixture.dcm.capabilities).map(([capability, cap]) => [capability, {
+    version: cap.version, mode: 'simulation', keyType: fixture.dcm.hostKey.type,
+    invoke(args, protectedArgs, remainingMs, context) {
+      assert.equal(context.requestKey, current.key);
+      assert.deepEqual({ ...protectedArgs }, fixture.bindings);
+      assert.equal(remainingMs, 10_000);
+      const read = capability === 'numbers.read';
+      assert.equal(capability, current.calls++ === 0 ? 'numbers.read' : 'numbers.write');
+      assert.deepEqual({ ...args }, read ? { integer: fixture.input.integer, decimal: fixture.input.decimal } : current.spec.args);
+      return structuredClone(current.spec[read ? 'read' : 'write'] ?? fixture[read ? 'read' : 'write']);
+    },
+  }]));
+  const binding = bindModel(canonicalBytes(fixture.dcm), adapters);
+  assert.equal(binding.diagnostic, null);
+  const prepared = prepareProgram(artifact, binding.boundModel);
+  assert.equal(prepared.diagnostic, null);
+  for (const spec of fixture.cases) {
+    current = { spec, calls: 0, key: Object.freeze({}) };
+    const outcome = await invokeProgram(prepared.prepared, spec.input ?? fixture.input, {
+      bindings: spec.bindings ?? fixture.bindings, requestKey: current.key, event: { id: 'event1', source: 'owner1' },
+      deadline: { clock: { nowMs: () => 0 }, expiresAtMs: 10_000 },
+    });
+    const trace = fixture.traces[spec.trace].map((row, sequence) => ({ sequence, ...row }));
+    assert.deepEqual(outcome, { ...spec.expect, trace }, spec.id);
+    assert.equal(current.calls, spec.calls, spec.id);
+  }
+});

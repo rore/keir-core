@@ -99,6 +99,7 @@ jobs:
           paths.append(Path('compiler-java/target/numeric-integration.json'))
           paths.append(Path('compiler-java/target/numeric-programs.json'))
           paths.append(Path('compiler-java/target/numeric-retained.json'))
+          paths.append(Path('compiler-java/target/numeric-host-boundaries.json'))
           for module in ('compiler-java', 'runtime-java', 'examples/java-host'):
               paths += sorted(Path(module, 'target/surefire-reports').glob('TEST-*.xml'))
           for index, path in enumerate(paths):

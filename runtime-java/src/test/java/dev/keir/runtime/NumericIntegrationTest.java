@@ -11,6 +11,47 @@ import static org.junit.jupiter.api.Assertions.*;
 import static dev.keir.runtime.RuntimeData.*;
 
 class NumericIntegrationTest {
+    @Test void numericProtectedAgentAndGuardedPathsMatchIndependentCompleteOutcomes() throws Exception {
+        var fixture=map(parseJson(Files.readAllBytes(Path.of("..","conformance","keir-4","host-boundaries.json")),65_536),"");
+        var dcm=map(fixture.get("dcm"),"");
+        record Request(Map<String,Object> spec,Object key,List<String> calls) {}
+        Request[] current={null};
+        var adapters=new HashMap<String,KeirRuntime.BoundEffectAdapter>();
+        for (String capability:map(dcm.get("capabilities"),"").keySet()) {
+            adapters.put(capability,new KeirRuntime.BoundEffectAdapter("1","simulation","numeric.Key",
+                    (args,protectedArgs,remaining,context) -> {
+                        var request=current[0]; var spec=request.spec();
+                        assertSame(request.key(),context.requestKey()); assertEquals(fixture.get("bindings"),protectedArgs);
+                        assertEquals(10_000L,remaining);
+                        boolean read=capability.equals("numbers.read");
+                        assertEquals(request.calls().isEmpty() ? "numbers.read" : "numbers.write",capability);
+                        var input=map(fixture.get("input"),"");
+                        assertEquals(read ? Map.of("integer",input.get("integer"),"decimal",input.get("decimal")) : spec.get("args"),args);
+                        request.calls().add(capability);
+                        String response=read ? "read" : "write";
+                        return CompletableFuture.completedFuture(spec.getOrDefault(response,fixture.get(response)));
+                    }));
+        }
+        var bound=KeirRuntime.bindModel(canonical(dcm),adapters);
+        assertTrue(bound.succeeded(),String.valueOf(bound.diagnostic()));
+        var prepared=KeirRuntime.prepareProgram(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-host-boundaries.json")),bound.boundModel());
+        assertTrue(prepared.succeeded(),String.valueOf(prepared.diagnostic()));
+        for (Object value:list(fixture.get("cases"),"")) {
+            var spec=map(value,""); current[0]=new Request(spec,new Object(),new ArrayList<>());
+            var context=new KeirRuntime.BoundEffectInvocation(map(spec.getOrDefault("bindings",fixture.get("bindings")),""),
+                    new KeirRuntime.Deadline(() -> 0L,10_000L),current[0].key(),Map.of("id","event1","source","owner1"));
+            var actual=KeirRuntime.invokeBoundEffectProgram(prepared.prepared(),spec.getOrDefault("input",fixture.get("input")),context)
+                    .toCompletableFuture().get(3,TimeUnit.SECONDS);
+            var expected=new LinkedHashMap<>(map(spec.get("expect"),""));
+            var trace=new ArrayList<Object>();
+            for (Object event:list(map(fixture.get("traces"),"").get(spec.get("trace")),"")) {
+                var row=new LinkedHashMap<>(map(event,"")); row.put("sequence",(long)trace.size()); trace.add(row);
+            }
+            expected.put("trace",trace);
+            assertArrayEquals(canonical(expected),actual.toJson(),(String)spec.get("id"));
+            assertEquals(((Number)spec.get("calls")).intValue(),current[0].calls().size(),(String)spec.get("id"));
+        }
+    }
     @Test void retainedNominalNamesStillExecuteAsStringsUnderNewProducer() throws Exception {
         var row=map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-retained.json")),65_536),"");
         var prepared=prepare(row); assertTrue(prepared.succeeded(),String.valueOf(prepared.diagnostic()));
