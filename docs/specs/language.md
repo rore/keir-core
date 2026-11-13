@@ -5,7 +5,7 @@
 
 Keir source defines how one host entrypoint combines typed data and approved operations. The compiler checks source structure, the trusted [domain capability model](domain-model.md), expression types, availability and call limits.
 
-Published Core 0.4.0 uses `keir/2` with DCM `/3`, including bounded lists, optional values, timestamps and exact-guard scalar results. Development Core 0.5 additionally supports numeric `keir/3` with DCM `/4` and retains the old authoring pair. Numeric behavior has compiler/Java/Node source-regression evidence, not yet matching-package or complete-feature qualification. Use only a host-supported [exact tuple](compiler-artifact.md#source-and-artifact-identity). The [workflow reference](workflow-expressions.md) defines the operations below; old packages do not gain them by reading this page.
+Published Core 0.4.0 uses `keir/2` with DCM `/3`, including bounded lists, optional values, timestamps and exact-guard scalar results. Development Core 0.5 adds numeric `keir/3` with DCM `/4` and retains the old authoring pair. Numeric source, teaching commands and independently installed candidate packages have [passing evidence](README.md#numeric-qualification-status); public release, companion and full-feature acceptance remain separate. Use only a host-supported [exact tuple](compiler-artifact.md#source-and-artifact-identity). The [workflow reference](workflow-expressions.md) defines the operations below; old packages do not gain them by reading this page.
 
 ## Source document
 
@@ -114,14 +114,24 @@ The development [guarded-result source](../../conformance/keir-3/source-guarded-
 
 ### Numeric programs
 
-The development numeric programs below use the exact source `/3` + model `/4` pair. [Run 43413093006](https://github.com/rore/keir-core/actions/runs/43413093006) compiled each program once and passed 27 independent complete cases across Java and Node. This is source/runtime evidence, not standalone teaching-consumer or installed-package qualification. No new run command or package compatibility is implied.
+The development numeric programs below use the exact source `/3` + model `/4` pair. [Run 43413093006](https://github.com/rore/keir-core/actions/runs/43413093006) compiled each program once and passed 27 independent complete cases across Java and Node. Later [teaching and candidate qualification](README.md#numeric-qualification-status) adds executed command and independently installed-package evidence; neither claims a public release.
 
 | Program | Complete inputs | Expected behavior |
 | --- | --- | --- |
 | Stock shortage | [Model](../../examples/numeric/stock/dcm.json) · [Source](../../examples/numeric/stock/source.json) · [11 cases](../../examples/numeric/stock/cases.json) | With stock `"7"`, request quantity `"3"` to reach threshold 10 and return the adapter's accepted quantity under the exact guard. Cover skip, overflow, rejection and confirmed/unknown write evidence. |
 | Quote decision | [Model](../../examples/numeric/quote/dcm.json) · [Source](../../examples/numeric/quote/source.json) · [16 cases](../../examples/numeric/quote/cases.json) | Subtotal `"100"` and discount rate `"0.075"` yield ALLOW and amount `"92.5"`. Cover optional zero/absence, HALF_EVEN ties, normalized carry and invalid input. |
 
-These case files are independent program-test data, not scenario `/4` documents. Host capabilities and amount units are example contracts, not Core services or money enforcement. A quote ALLOW still requires native authorization and commit checks; an event result never undoes its original event. Standalone consumers and package evidence remain separate work.
+These case files are independent program-test data, not scenario `/4` documents. Each directory also has the compiled artifact, byte pins and an independent normal scenario used by the teaching hosts. Host capabilities and amount units are example contracts, not Core services or money enforcement. A quote ALLOW still requires native authorization and commit checks; an event result never undoes its original event.
+
+After building the Java modules with the [source prerequisites](../../CONTRIBUTING.md#build-and-test), run from the repository root:
+
+```sh
+node scripts/setup-node-example.mjs
+java -Xmx256m -jar examples/java-host/target/keir-java-host-0.1.0-SNAPSHOT.jar stock python
+node examples/node-host/verify-scenarios.mjs stock python
+```
+
+Replace `stock` with `quote` for that program. `python` names the interpreter containing the pinned schema dependency. These exact command forms passed [run 43422161327](https://github.com/rore/keir-core/actions/runs/43422161327), comparing complete calls, arguments, outcomes, traces, receipts and consumer reports. Setup installs the locally packed source Node runtime into the teaching example, not an application's runtime; use the [example instructions](../../examples/numeric/README.md) for isolated caches. The snapshot JAR is a source-build name, not the versioned candidate compiler JAR or an installed Java runtime package. No new CLI flags or native services are implied.
 
 <a id="source-and-example"></a>
 <a id="implementation-reference-earlier-source-rules-and-example"></a>

@@ -7,7 +7,7 @@
 
 The compiler checks a [Keir source document](language.md) against a trusted [domain capability model (DCM)](domain-model.md). It emits one canonical artifact that Java and Node can execute.
 
-Compiler identity, document formats and runtime compatibility version independently. Published Core 0.4.0 and the development 0.5 source profiles are distinct. The latter have compiler/Java/Node fast-regression evidence, not yet matching-package or complete-feature qualification. Use the [installation guide](../installation.md) for released packages; a source profile is not permission to upgrade an installed host.
+Compiler identity, document formats and runtime compatibility version independently. Published Core 0.4.0 and the development 0.5 profiles are distinct. The latter have [source, teaching and independently installed candidate-package evidence](README.md#numeric-qualification-status), not public release, matching companion or full-feature acceptance. Use the [installation guide](../installation.md) for released packages; a source profile or candidate is not permission to upgrade an installed host.
 
 | Compiler | Source | DCM | Artifact | Scenario | Descriptor recipe | Status |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -43,6 +43,8 @@ java -jar compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar source.
 ```
 
 The CLI writes artifact bytes to stdout on exit 0. On failure it writes an array of `{code,path,message}` diagnostics to stderr. Exit 1 means the compiler rejected the inputs. Exit 2 means the number of arguments is wrong or an input file is unreadable. Use byte-preserving redirection, including PowerShell 7.4 or later on Windows.
+
+That path is the ordinary source-build output from the unchanged snapshot POMs. The candidate release builder stages the pinned source separately and versions its temporary Maven inputs: the 0.5 compiler ZIP contains `keir-compiler-java-0.5.0-cli.jar`. Do not substitute that filename into a source build or treat a snapshot JAR as the qualified candidate archive. The CLI still takes only source and DCM paths, in that order; select exact verified assets separately from build coordinates.
 
 In Java, call `new KeirCompiler().compile(sourceBytes, trustedDcmBytes, KeirCompiler.Environment.supported())`. A successful `Compilation` has `artifact()`, `artifactDigest()` and an empty `diagnostics()` list. A failed compilation returns diagnostics and null artifact bytes and digest. `succeeded()` distinguishes the two outcomes.
 

@@ -1,6 +1,6 @@
 # Customer authoring guide — draft edition 9
 
-**DRAFT Core 0.5 source guidance.** Matching compiler/runtime packages and the edition-9 companion are not yet qualified. Use only when the host explicitly supports the exact tuple below. Published Core 0.4.0 is nonnumeric. This draft neither upgrades a host nor changes earlier editions, archives or approved artifact bytes.
+**DRAFT Core 0.5 guidance; matching edition-9 companion qualification is pending.** [Independently installed candidate compiler/runtime packages have passed](../specs/README.md#numeric-qualification-status), but that does not qualify this guide's final companion payload or final source/asset freeze. Use only when the host explicitly supports the exact tuple below. Published Core 0.4.0 is nonnumeric. This draft neither upgrades a host nor changes earlier editions, archives or approved artifact bytes.
 
 ## Discover the exact contract
 
@@ -67,6 +67,8 @@ Only valid COMPLETED ALLOW with empty effects permits further native checks. DEN
 
 ## Evidence and matching references
 
-The [maintained specification index](../specs/README.md) identifies the source checkpoint and remaining qualification. The [stock/quote programs](../specs/language.md#numeric-programs) have shared Java/Node source-runtime case evidence, not standalone teaching-consumer or installed-package qualification. Raw CEL/component probes do not prove complete Keir artifacts, packages or a Studio-to-native journey. This draft has no qualified companion/package mapping; only the eventual verified manifest and compatibility record can establish one. Do not invent archive hashes, release rows or executable results. Preserve earlier guide editions and their exact bytes.
+The [qualification record](../specs/README.md#numeric-qualification-status) separates source, teaching and installed-candidate evidence. The [stock/quote programs and commands](../specs/language.md#numeric-programs) pass complete independent teaching-consumer reports; the pinned candidate packages pass 130 complete outcomes per installed runtime and callable helper vectors. These results do not establish a public release, matching companion, Daymark journey or full-feature acceptance. Raw CEL/component probes do not substitute for those later checks.
+
+This draft has no qualified companion/package mapping; only the eventual verified matching manifest, source/assets and compatibility record can establish one. Candidate hashes are qualification history, not final companion pins. Do not invent archive hashes, release rows or executable results. Preserve earlier guide editions and their exact bytes. Final descriptor and actual-runtime measurement evidence remain separate from package outcomes.
 
 Use the [language](../specs/language.md), [DCM](../specs/domain-model.md), [operations](../specs/workflow-expressions.md), [artifact](../specs/compiler-artifact.md), [runtime](../specs/runtime.md) and [decision](../specs/pre-operation-decisions.md) references with their matching schemas. Schemas check shape, not native authority or all semantic bounds. Supply the host's exact approved model, policy and scoped tools separately.
