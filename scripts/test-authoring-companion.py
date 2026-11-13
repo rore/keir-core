@@ -568,6 +568,13 @@ class AuthoringCompanionV9Test(unittest.TestCase):
             self.assertEqual(manifest["contracts"]["descriptorRecipe"], "keir-record-descriptors/3")
             self.assertEqual(manifest["contracts"]["retainedAuthoring"]["descriptorRecipe"], "keir-record-descriptors/2")
             self.assertEqual(set(archive.namelist()), {*module["V9_FILES"], "manifest.json"})
+            guide = archive.read(module["V9_GUIDE"]).decode("utf-8")
+            for target in re.findall(r"\]\(([^)]+)\)", guide):
+                path = target.split("#", 1)[0]
+                if path and not re.match(r"[a-zA-Z][a-zA-Z0-9+.-]*:", path):
+                    member = posixpath.normpath(posixpath.join(posixpath.dirname(module["V9_GUIDE"]), path))
+                    self.assertIn(member, archive.namelist(), target)
+            self.assertIn("## Numeric qualification status", archive.read("docs/specs/README.md").decode("utf-8"))
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "candidate.zip"; path.write_bytes(data)
             with patch("subprocess.check_output", side_effect=AssertionError("Offline verification must not read Git or network")):

@@ -133,7 +133,7 @@ V9_FORMATS = {"language": "keir/3", "dcm": "keir-dcm/4", "artifact": "keir-artif
               "retainedAuthoring": {"language": "keir/2", "dcm": "keir-dcm/3", "artifact": "keir-artifact/4",
                                     "scenario": "keir-scenario/4", "descriptorRecipe": "keir-record-descriptors/2"}}
 V9_FILES = (
-    V9_GUIDE, "LICENSE",
+    V9_GUIDE, "LICENSE", "docs/specs/README.md",
     *(f"docs/specs/{name}.md" for name in ("language", "compiler-artifact", "runtime", "workflow-expressions", "domain-model", "pre-operation-decisions", "host-model-binding")),
     *(f"schemas/{kind}-{version}/{kind}.schema.json" for kind, versions in (
         ("source", (2, 3)), ("dcm", (3, 4)), ("artifact", (3, 4)), ("scenario", (3, 4))) for version in versions),
