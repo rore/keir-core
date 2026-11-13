@@ -7,6 +7,9 @@ Follow a request through a proposed change, simulated checks, approval, activati
 
 These are real application screenshots with fictional, disposable data. The assistant's replies were scripted by an offline test fixture; compilation, simulation, approval, activation and task saves were real. See [image provenance and license](images/daymark-walkthrough/README.md).
 
+<a id="customer-extension-design"></a>
+<a id="what-the-extension-chooses"></a>
+<a id="write-and-review-a-rule"></a>
 ## 1. Describe and review the change
 
 A user asks:
@@ -37,6 +40,9 @@ Approval does not turn the extension on. Daymark shows **Approved · Not on yet*
 
 *The application owns which approved version is active. Approval and activation are separate decisions.*
 
+<a id="run-the-approved-rule"></a>
+<a id="runtime"></a>
+<a id="what-happens-when-it-runs"></a>
 ## 4. Run it and inspect the saved result
 
 After the application saves a matching task completion, it invokes Keir's runtime with the selected compiled extension. The runtime calls the application's task service, which checks permissions and business rules before saving the follow-up. No further AI request is needed.
@@ -47,17 +53,10 @@ Daymark shows the customization's outcome separately from the original completio
 
 *In this run, the follow-up is saved application data that the user can open and edit. It is no longer just a simulated result.*
 
-## Build this into an application
-
-[Run and change the small example](quickstart.md), then use the [embedding guide](embedding.md) to connect your own data and operations. The tour's task services belong to Daymark; Keir can use the operations another application exposes.
-
-<a id="customer-extension-design"></a>
 <a id="define-what-a-rule-can-do"></a>
 <a id="developer-deep-dive"></a>
 <a id="host-design-time"></a>
-<a id="run-the-approved-rule"></a>
-<a id="runtime"></a>
-<a id="what-happens-when-it-runs"></a>
 <a id="what-the-application-exposes"></a>
-<a id="what-the-extension-chooses"></a>
-<a id="write-and-review-a-rule"></a>
+## Build this into an application
+
+[Run and change the small example](quickstart.md), then use the [embedding guide](embedding.md) to connect your own data and operations. The tour's task services belong to Daymark; Keir can use the operations another application exposes.

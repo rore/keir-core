@@ -1,6 +1,6 @@
-<a id="build-and-verify-the-effect4-authoring-companion"></a>
 # Choose and verify an authoring packet
 
+<a id="semantic-references"></a>
 Use the packet matching the host's actual compiler, runtime and model. The packet supplies language instructions, schemas and examples; the host separately supplies its trusted model, authorized tools and approval flow.
 
 ## Choose an edition
@@ -8,9 +8,9 @@ Use the packet matching the host's actual compiler, runtime and model. The packe
 | Host packages/profile | Guide | Availability |
 | --- | --- | --- |
 | Staged Core 0.5.0, numeric source/model `3/4` or retained `2/3` | [Edition 9](customer-authoring-guide-v9.md) | Corrected packet qualified and adopted by the tested Daymark candidate; **not a public Core release**. [Exact packet/source record](../releases/source-provenance.md#authoring-companion-reproduction). |
-| Core 0.4.0 | [Edition 8](customer-authoring-guide-v8.md) | Archive published with [Core 0.4.0](https://github.com/rore/keir-core/releases/tag/v0.4.0). |
-| Core 0.3.1 | [Edition 7](customer-authoring-guide-v7.md) | Archive published with [Core 0.3.1](https://github.com/rore/keir-core/releases/tag/v0.3.1). |
-| Core 0.3.0 | [Edition 5](customer-authoring-guide-v5.md) | Published with [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). Edition 6 is a separate unpublished licensed source candidate. |
+| <a id="development-edition-8"></a> <a id="edition-8"></a> <a id="qualified-candidate-edition-8"></a> Core 0.4.0 | [Edition 8](customer-authoring-guide-v8.md) | Archive published with [Core 0.4.0](https://github.com/rore/keir-core/releases/tag/v0.4.0). |
+| <a id="licensed-candidate-edition-7"></a> Core 0.3.1 | [Edition 7](customer-authoring-guide-v7.md) | Archive published with [Core 0.3.1](https://github.com/rore/keir-core/releases/tag/v0.3.1). |
+| Core 0.3.0 | [Edition 5](customer-authoring-guide-v5.md) | Published with [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). <a id="licensed-candidate-edition-6"></a> Edition 6 is a separate unpublished licensed source candidate. |
 | Core 0.2.0 | [Edition 4](customer-authoring-guide-v4.md) | Published; matching historical contract. |
 | Core 0.1.0 | [Edition 3](customer-authoring-guide-v3.md) | Historical; use only with that host contract. |
 
@@ -29,15 +29,9 @@ python scripts/authoring-companion.py verify "$ARCHIVE" --version "$EDITION" --s
 
 Verification checks the trusted digest, exact inventory, manifest and payload hashes. Match the manifest's contracts and producer to the host, then load only the named guide. Supply the model and tools separately; a packet grants no execution authority.
 
-[Reproduction inputs, pins and optional package checks](../releases/source-provenance.md#authoring-companion-reproduction) belong to the provenance record. [Daymark's package record](https://github.com/rore/keir-demo-app/blob/main/docs/package-provenance.md) identifies its adopted packet and packages.
-
+<a id="build-and-verify-the-effect4-authoring-companion"></a>
 <a id="build-and-verify-the-authoring-companion"></a>
 <a id="build-from-committed-inputs"></a>
-<a id="development-edition-8"></a>
-<a id="edition-8"></a>
-<a id="licensed-candidate-edition-6"></a>
-<a id="licensed-candidate-edition-7"></a>
-<a id="qualified-candidate-edition-8"></a>
 <a id="record-release-assets"></a>
 <a id="reproduce-historical-edition-4"></a>
-<a id="semantic-references"></a>
+[Reproduction inputs, pins and optional package checks](../releases/source-provenance.md#authoring-companion-reproduction) belong to the provenance record. [Daymark's package record](https://github.com/rore/keir-demo-app/blob/main/docs/package-provenance.md) identifies its adopted packet and packages.
