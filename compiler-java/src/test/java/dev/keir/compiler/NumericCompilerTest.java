@@ -42,6 +42,66 @@ class NumericCompilerTest {
         return compiler.compile(bytes(source),bytes(model),KeirCompiler.Environment.supported());
     }
 
+    @Test void emitExactIndependentDescriptorInputs() throws Exception {
+        var models=new TreeMap<String,Map<String,Object>>();
+        models.put("expression-only",model("Boolean",false));
+        models.put("numeric-optionals",model("Decimal",true));
+        var timestamp=model("Decimal",true);
+        var types=map(timestamp.get("types"));
+        var fields=new TreeMap<>(map(map(types.get("Input")).get("fields"))); fields.put("at",Map.of("type","Timestamp","optional",true));
+        types.put("Input",Map.of("kind","record","fields",fields));
+        models.put("numeric-timestamp",timestamp);
+        models.put("retained-names",map(parse(Files.readAllBytes(Path.of("..","conformance","keir-4","retained-names.json"))).get("dcm")));
+        models.put("retained-current",parse(Files.readAllBytes(Path.of("..","conformance","keir-3","dcm-guarded-result.json"))));
+        for (String name:List.of("stock","quote")) models.put(name,parse(Files.readAllBytes(Path.of("..","examples","numeric",name,"dcm.json"))));
+        var rows=new ArrayList<Object>();
+        for (var entry:models.entrySet()) {
+            var dcm=Dcm.parse(entry.getValue()); byte[] descriptor=dcm.descriptorBytes();
+            var names=dcm.descriptors().getFileList().stream().map(com.google.protobuf.DescriptorProtos.FileDescriptorProto::getName).toList();
+            assertEquals("keir_read.proto",names.getLast());
+            assertEquals("keir-dcm/4".equals(entry.getValue().get("format")),names.contains("keir_numeric.proto"));
+            if (names.contains("google/protobuf/timestamp.proto")) assertEquals("google/protobuf/timestamp.proto",names.getFirst());
+            if (names.contains("keir_numeric.proto")) assertEquals("keir_numeric.proto",names.get(names.size()-2));
+            if (entry.getKey().equals("numeric-optionals")) {
+                var record=dcm.fileDescriptor().findMessageTypeByName("Input");
+                assertTrue(record.findFieldByName("zero").toProto().getProto3Optional());
+                assertEquals(com.google.protobuf.Descriptors.FieldDescriptor.Type.INT64,record.findFieldByName("zero").getType());
+                assertFalse(record.findFieldByName("maybe").toProto().getProto3Optional());
+                assertEquals("keir.numeric.Decimal",record.findFieldByName("maybe").getMessageType().getFullName());
+            }
+            assertArrayEquals(descriptor,Dcm.parse(parse(bytes(entry.getValue()))).descriptorBytes());
+            rows.add(Map.of("id",entry.getKey(),"dcm",entry.getValue(),"base64",Base64.getEncoder().encodeToString(descriptor),
+                    "sha256",HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(descriptor))));
+        }
+        Files.write(Path.of("target","numeric-descriptors.json"),bytes(Map.of("cases",rows)));
+    }
+
+    @Test void compileRealNonnumericIntegerAndDecimalMeasurementRules() throws Exception {
+        var rows=new ArrayList<Object>();
+        for (String type:List.of("Boolean","Integer","Decimal")) {
+            var model=model(type,false);
+            map(model.get("types")).put("Input",Map.of("kind","record","fields",Map.of("owner","OwnerId","value",type,"divisor",type)));
+            map(model.get("types")).put("Output",Map.of("kind","record","fields",Map.of("owner","OwnerId","value",type)));
+            boolean plain=type.equals("Boolean"), decimal=type.equals("Decimal");
+            if (plain) model.put("format","keir-dcm/3");
+            var steps=List.<Object>of(Map.of("id","a","let",Map.of("cel","input.value")),
+                    Map.of("id","b","let",Map.of("cel",plain ? "a != input.divisor" : decimal ? "a * decimal(\"1.5\")" : "a * 3")),
+                    Map.of("id","c","let",Map.of("cel",plain ? "b" : "b / input.divisor")),
+                    Map.of("id","d","let",Map.of("cel",plain ? "c" : decimal ? "round(c,2,\"HALF_EVEN\")" : "c + 1")));
+            var source=source(model,steps,Map.of("cel","d")); if (plain) source.put("language","keir/2");
+            source.put("return",Map.of("record",Map.of("owner",Map.of("cel","input.owner"),"value",Map.of("cel","d"))));
+            var compiled=compile(source,model); assertTrue(compiled.succeeded(),type+": "+compiled.diagnostics());
+            assertArrayEquals(compiled.artifact(),compile(source,model).artifact());
+            rows.add(Map.of("id",type,"dcm",model,"artifact",parse(compiled.artifact()),
+                    "values",plain ? List.of(true,false) : decimal ? List.of("1.25","2.555") : List.of("6","8"),
+                    "divisor",plain ? false : decimal ? "1.5" : "2",
+                    "expected",plain ? List.of(true,false) : decimal ? List.of("1.25","2.56") : List.of("10","13"),
+                    "failure",Map.of("value",plain ? "true" : "1","divisor",plain ? false : decimal ? "9" : "2",
+                            "code",plain ? "INPUT_INVALID" : "EXPRESSION_FAILED","path",plain ? "/input" : "/steps/2")));
+        }
+        Files.write(Path.of("target","numeric-runtime-rules.json"),bytes(Map.of("cases",rows)));
+    }
+
     @Test void compileQualifiedExpressionsOnceForBothRuntimeTests() throws Exception {
         var fixtures=map(new org.yaml.snakeyaml.Yaml().load(Files.readString(Path.of("..","conformance","cel-profile","numeric-fixtures.json"))));
         var rows=new ArrayList<Object>();

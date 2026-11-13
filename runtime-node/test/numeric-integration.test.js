@@ -1,11 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { create, toBinary } from '@bufbuild/protobuf';
+import { FileDescriptorSetSchema } from '@bufbuild/protobuf/wkt';
 import { readFileSync } from 'node:fs';
 import { bindModel, prepareProgram, invokeProgram } from '../src/index.js';
 import { canonicalBytes } from '../src/canonical.js';
 import { modelFor } from '../src/model.js';
 import { validatePlan } from '../src/validation.js';
-import { createActivation, prepareExpressions, evaluateBinding } from '../src/cel.js';
+import { createActivation, prepareExpressions, evaluateBinding, prepareModelTypes } from '../src/cel.js';
 
 const { cases } = JSON.parse(readFileSync(new URL('../../conformance/keir-4/engine-matrix.json', import.meta.url), 'utf8'));
 const programs = ['stock', 'quote'].map(name => ({ name,
@@ -13,6 +16,17 @@ const programs = ['stock', 'quote'].map(name => ({ name,
   artifact: JSON.parse(readFileSync(new URL('../../examples/numeric/' + name + '/artifact.json', import.meta.url))),
 }));
 assert.equal(cases.length, 97);
+test('independent Node descriptors match exact compiler bytes and hashes', () => {
+  const batch = JSON.parse(readFileSync(new URL('../../compiler-java/target/numeric-descriptors.json', import.meta.url)));
+  for (const row of batch.cases) {
+    const { registry } = prepareModelTypes(row.dcm);
+    const actual = Buffer.from(toBinary(FileDescriptorSetSchema, create(FileDescriptorSetSchema, {
+      file: [...registry.files].map(file => file.proto),
+    })));
+    assert.deepEqual(actual, Buffer.from(row.base64, 'base64'), row.id);
+    assert.equal(createHash('sha256').update(actual).digest('hex'), row.sha256, row.id);
+  }
+});
 test('retained nominal Integer and Decimal names keep String meaning in new artifacts', async () => {
   const row = JSON.parse(readFileSync(new URL('../../conformance/keir-4/retained-names.json', import.meta.url), 'utf8'));
   const prepared = prepare(row);

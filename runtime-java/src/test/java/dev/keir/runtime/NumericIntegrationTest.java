@@ -11,6 +11,17 @@ import static org.junit.jupiter.api.Assertions.*;
 import static dev.keir.runtime.RuntimeData.*;
 
 class NumericIntegrationTest {
+    @Test void descriptorsMatchExactCompilerBytesAndHashes() throws Exception {
+        var batch=map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-descriptors.json")),65_536),"");
+        var method=CheckedCel.class.getDeclaredMethod("expectedDescriptors",Map.class); method.setAccessible(true);
+        for (Object raw:list(batch.get("cases"),"")) {
+            var row=map(raw,"");
+            var descriptors=(com.google.protobuf.DescriptorProtos.FileDescriptorSet)method.invoke(null,map(row.get("dcm"),""));
+            byte[] actual=descriptors.toByteArray();
+            assertArrayEquals(Base64.getDecoder().decode((String)row.get("base64")),actual,(String)row.get("id"));
+            assertEquals("sha256:"+row.get("sha256"),digest(actual));
+        }
+    }
     @Test void numericProtectedAgentAndGuardedPathsMatchIndependentCompleteOutcomes() throws Exception {
         var fixture=map(parseJson(Files.readAllBytes(Path.of("..","conformance","keir-4","host-boundaries.json")),65_536),"");
         var dcm=map(fixture.get("dcm"),"");

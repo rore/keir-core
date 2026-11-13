@@ -124,6 +124,13 @@ jobs:
                                for path in sorted(assets.iterdir())]}
           (root / 'logs/packages.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
           PY
+      - name: Measure actual nonnumeric Integer and Decimal runtime rules
+        id: measurements
+        timeout-minutes: 3
+        shell: bash
+        env:
+          NUMERIC_ROOT: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}
+        run: timeout --kill-after=5s 140s node conformance/cel-profile/numeric.mjs runtime > "$QUALIFICATION_ROOT/logs/runtime-measurements.log" 2>&1
       - name: Preserve bounded sanitized evidence
         id: evidence
         if: ${{ always() }}
@@ -135,6 +142,7 @@ jobs:
           NODE_OUTCOME: ${{ steps.node.outcome }}
           NODE_HOST_OUTCOME: ${{ steps.node_host.outcome }}
           PACKAGES_OUTCOME: ${{ steps.packages.outcome }}
+          MEASUREMENTS_OUTCOME: ${{ steps.measurements.outcome }}
         shell: bash
         run: |
           set -euo pipefail
@@ -156,8 +164,13 @@ jobs:
           paths.append(Path('compiler-java/target/numeric-host-boundaries.json'))
           paths.append(Path('compiler-java/target/numeric-stock.json'))
           paths.append(Path('compiler-java/target/numeric-quote.json'))
+          paths.append(Path('compiler-java/target/numeric-descriptors.json'))
+          paths.append(Path('compiler-java/target/numeric-runtime-rules.json'))
           paths.append(root / 'logs/node-host.log')
           paths.extend(root / 'logs' / name for name in ('packages.log', 'packages.json'))
+          paths.extend(root / 'output' / name for name in ('runtime-manifest.json', 'java-runtime-report.json', 'node-runtime-report.json',
+                                                        'runtime-workload.json', 'java-runtime-process.json', 'node-runtime-process.json', 'runtime.json'))
+          paths.extend(root / 'logs' / name for name in ('runtime-measurements.log', 'java-runtime.log', 'node-runtime.log'))
           for engine in ('java', 'node'):
               for example in ('stock', 'quote'):
                   paths.append(root / 'logs' / f'{engine}-{example}.json')
@@ -177,11 +190,11 @@ jobs:
               name = f'{index:03d}-{path.name}'
               (evidence / name).write_bytes(data)
               inventory.append({'name': name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()})
-          outcomes = {name: os.environ[name.upper() + '_OUTCOME'] for name in ('dependencies', 'schemas', 'java', 'node', 'node_host', 'packages')}
+          outcomes = {name: os.environ[name.upper() + '_OUTCOME'] for name in ('dependencies', 'schemas', 'java', 'node', 'node_host', 'packages', 'measurements')}
           report = {'revision': os.environ['GITHUB_SHA'], 'outcomes': outcomes,
                     'status': 'passed' if all(value == 'success' for value in outcomes.values()) else 'failed',
                     'platform': platform.platform(), 'evidence': inventory,
-                    'scope': 'fast regression, packed teaching host and unpublished installed candidate; not companion, performance or feature acceptance'}
+                    'scope': 'fast regression, teaching host, unpublished installed candidate and bounded real-rule runtime measurements; not companion or feature acceptance'}
           data = (json.dumps(report, indent=2) + '\n').encode()
           assert total + len(data) <= 10 * 1024 * 1024
           (evidence / 'receipt.json').write_bytes(data)
