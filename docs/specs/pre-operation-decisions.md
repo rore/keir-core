@@ -2,12 +2,14 @@
 
 Evaluate a rule before the application performs a native operation. The rule may read and return a decision; the application owns authorization, consistency and saving.
 
+<a id="smallest-contract"></a>
 ## Decision contract
 
 The host binds its DCM and implementations, prepares an approved program, and invokes it before a native operation. The program returns one typed decision: `ALLOW` or `DENY`. The host consumes the decision and retains its existing validation, authorization and commit path. Keir does not perform the native operation through a new callback.
 
 Use the [binding and invocation APIs](host-model-binding.md#api-shapes), [expression rules](workflow-expressions.md), adapter responses and runtime limits. Historical REQUEST/DISPLAY is advisory and must not be relabeled as this authoritative check. EVENT/AFTER_COMMIT behavior remains unchanged.
 
+<a id="dcm-delta"></a>
 ## Hook and result
 
 A decision entrypoint uses these fields:
@@ -90,6 +92,7 @@ Cancellation belongs to the host operation lifetime. Mark that attempt closed an
 A post-commit extension may call one native WRITE whose host operation has a guard. That nested guard is READ-only. The host bounds synchronous depth and aggregate work across this chain and passes the enclosing expiry. Ordinary READ adapters do not re-enter guards. This adds no second extension WRITE and does not erase the outer write's evidence: if it times out after dispatch, its receipt can remain UNKNOWN even when the inner guard was read-only. Native reconciliation remains host-owned.
 
 <a id="compatibility-and-release-proposal"></a>
+<a id="compatibility-and-releases"></a>
 ## Compatibility
 
 Select the [exact model/artifact/producer combination](compiler-artifact.md#source-and-artifact-identity). Keep existing approved artifacts, model snapshots and receipts with their original identities. Recompiling creates new bytes that need their own checks and approval; installing a package must not silently recompile, transfer approval or deactivate an existing selection.
@@ -100,7 +103,3 @@ Select the [exact model/artifact/producer combination](compiler-artifact.md#sour
 Run the same compiled artifact through Java and Node and compare complete outcomes, calls and decision consumption. Exercise ALLOW, DENY, failed and malformed reads, forged plans/outcomes, unavailable selections, cancellation/expiry and changed permissions or facts. Observe native attempts and persistence separately: DENIED/BLOCKED cause no native attempt; ALLOWED reaches fresh native validation once and may still fail there. Check nested read-only guards without losing the outer write's evidence.
 
 The [original acceptance matrix](../internal/history/read-and-decide-design.md#acceptance-matrix-and-implementation-split) retains the initial rollout vectors. Each host must still qualify its own read-consistency mechanism, time reserve, cancellation and native persistence; simulation cannot establish those native guarantees.
-
-<a id="compatibility-and-releases"></a>
-<a id="dcm-delta"></a>
-<a id="smallest-contract"></a>
