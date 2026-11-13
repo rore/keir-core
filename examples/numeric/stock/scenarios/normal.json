@@ -1,0 +1,32 @@
+{
+  "format": "keir-scenario/4", "id": "stock-request",
+  "given": {"input": {"itemId": "item1"}, "fixture": "normal"},
+  "stubs": [
+    {"step": "stock", "capability": "stock.get", "version": "1", "args": {"itemId": "item1"}, "protectedArgs": {"actorId": "user1"}, "response": {"kind": "SUCCESS", "value": {"available": "7"}}},
+    {"step": "order", "capability": "stock.request", "version": "1", "args": {"itemId": "item1", "quantity": "3"}, "protectedArgs": {"actorId": "user1"}, "response": {"kind": "SUCCESS", "value": {"accepted": "3"}, "effect": "CONFIRMED"}}
+  ],
+  "expect": {
+    "calls": [
+      {"step": "stock", "capability": "stock.get", "version": "1", "args": {"itemId": "item1"}, "protectedArgs": {"actorId": "user1"}},
+      {"step": "order", "capability": "stock.request", "version": "1", "args": {"itemId": "item1", "quantity": "3"}, "protectedArgs": {"actorId": "user1"}}
+    ],
+    "outcome": {
+      "classification": "COMPLETED", "result": {"status": "REQUESTED", "ordered": "3"},
+      "effects": [{"step": "order", "capability": "stock.request", "state": "CONFIRMED"}],
+      "trace": [
+        {"sequence": 0, "event": "INVOCATION_START"}, {"sequence": 1, "event": "STEP_START", "step": "stock"},
+        {"sequence": 2, "event": "CALL_DISPATCHED", "step": "stock", "capability": "stock.get"},
+        {"sequence": 3, "event": "CALL_SUCCEEDED", "step": "stock", "capability": "stock.get"},
+        {"sequence": 4, "event": "STEP_START", "step": "low"}, {"sequence": 5, "event": "VALUE_BOUND", "step": "low"},
+        {"sequence": 6, "event": "STEP_START", "step": "quantity"}, {"sequence": 7, "event": "VALUE_BOUND", "step": "quantity"},
+        {"sequence": 8, "event": "STEP_START", "step": "order"}, {"sequence": 9, "event": "GUARD_EVALUATED", "step": "order", "taken": true},
+        {"sequence": 10, "event": "EFFECT_INTENT", "step": "order", "capability": "stock.request"},
+        {"sequence": 11, "event": "CALL_DISPATCHED", "step": "order", "capability": "stock.request"},
+        {"sequence": 12, "event": "EFFECT_RECORDED", "step": "order", "capability": "stock.request", "state": "CONFIRMED"},
+        {"sequence": 13, "event": "CALL_SUCCEEDED", "step": "order", "capability": "stock.request"},
+        {"sequence": 14, "event": "RETURNED"}, {"sequence": 15, "event": "TERMINATED"}
+      ]
+    },
+    "consumption": {"status": "REPORTED", "classification": "COMPLETED", "result": {"status": "REQUESTED", "ordered": "3"}, "effects": [{"step": "order", "capability": "stock.request", "state": "CONFIRMED"}]}
+  }
+}

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { normalizeDecimal, normalizeInteger } from '@keir/runtime-node';
 import { createHash } from 'node:crypto';
 import { createHarness } from './generic-capacity.mjs';
 import { consumeEffect } from './effect-consumer.mjs';
@@ -20,11 +21,14 @@ const quote = value => '"' + value.replace(/["\\\u0000-\u001f]/g, char => char =
 export function typed(value, type, dcm) {
   const definition = dcm.types[type];
   if (definition?.kind === 'record') {
-    shape(value, Object.keys(definition.fields));
-    for (const name of Object.keys(definition.fields)) typed(value[name], definition.fields[name], dcm);
+    const fields = Object.entries(definition.fields);
+    shape(value, fields.filter(([name, type]) => !type.optional || own(value, name)).map(([name]) => name));
+    for (const [name, type] of fields) if (own(value, name)) typed(value[name], typeof type === 'string' ? type : type.type, dcm);
     const canonical = '{' + Object.keys(value).sort().map(name => quote(name) + ':' + (typeof value[name] === 'boolean' ? String(value[name]) : quote(value[name]))).join(',') + '}';
     assert.ok(Buffer.byteLength(canonical) <= 8192, 'Bounded fixture record');
   } else if (type === 'Boolean') assert.equal(typeof value, 'boolean');
+  else if (dcm.format === 'keir-dcm/4' && ['Integer', 'Decimal'].includes(type))
+    assert.equal((type === 'Integer' ? normalizeInteger : normalizeDecimal)(value), value, 'Canonical fixture number');
   else { string(value); if (definition?.kind === 'enum') assert.ok(definition.values.includes(value), 'Fixture enum'); }
 }
 function json(value, max = 65536) {

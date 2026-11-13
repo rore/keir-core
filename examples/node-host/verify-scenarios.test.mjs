@@ -2,12 +2,47 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { decodeScenario, prepareScenario, verifyBatch, verifyGroup } from './verify-scenarios.mjs';
+import { typed } from './generic-simulation.mjs';
 
 const python = process.env.KEIR_SCENARIO_PYTHON ?? 'python';
 const corpus = new URL('../../conformance/keir-2/', import.meta.url);
 const fixture = path => readFileSync(new URL(path, corpus));
 const read = path => fixture('scenarios/' + path);
 const groups = ['main', 'zero', 'after-write-read', 'no-call', 'handler', 'title', 'title-max', 'title-composed'];
+
+test('fixture record byte ceiling uses canonical control-character escapes', () => {
+  const names = ['a', 'b', 'c', 'd', 'e', 'f'];
+  const fields = Object.fromEntries(names.map(name => [name, 'String']));
+  const value = Object.fromEntries(names.map(name => [name, '\n'.repeat(256)]));
+  assert.equal(Buffer.byteLength(JSON.stringify(value)), 3115);
+  assert.throws(() => typed(value, 'Oversized', { format: 'keir-dcm/4', types: { Oversized: { kind: 'record', fields } } }), /Bounded fixture record/);
+});
+
+test('numeric scenario4 uses complete stock/quote consumers and rejects relabeled scenarios', async () => {
+  for (const group of ['stock', 'quote']) {
+    const directory = new URL('../numeric/' + group + '/', import.meta.url);
+    const scenario = readFileSync(new URL('scenarios/normal.json', directory));
+    const pair = [readFileSync(new URL('../../compiler-java/target/numeric-' + group + '.json', import.meta.url)),
+      readFileSync(new URL('dcm.json', directory))];
+    const actual = await prepareScenario(group, scenario, python, pair).run();
+    assert.equal(actual.consumption.status, group === 'stock' ? 'REPORTED' : 'ALLOWED');
+    const row = JSON.parse(scenario); row.format = 'keir-scenario/3';
+    assert.throws(() => prepareScenario(group, Buffer.from(JSON.stringify(row)), python, pair), /Scenario schema/);
+  }
+});
+
+test('scenario4 retained-authoring branch keeps nominal Integer/Decimal strings', async () => {
+  const batch = JSON.parse(readFileSync(new URL('../../compiler-java/target/numeric-retained.json', import.meta.url)));
+  const outcome = { classification: 'COMPLETED', result: { value: true }, effects: [], trace: [
+    { sequence: 0, event: 'INVOCATION_START' }, { sequence: 1, event: 'STEP_START', step: 'value' },
+    { sequence: 2, event: 'VALUE_BOUND', step: 'value' }, { sequence: 3, event: 'RETURNED' }, { sequence: 4, event: 'TERMINATED' },
+  ] };
+  const row = { format: 'keir-scenario/4', id: 'retained-names', given: { input: batch.input, fixture: 'normal' }, stubs: [],
+    expect: { calls: [], outcome, consumption: { status: 'REPORTED', classification: 'COMPLETED', result: { value: true }, effects: [] } } };
+  // This compiler-emitted batch already has canonical key order; no sibling runtime fallback.
+  const pair = [Buffer.from(JSON.stringify(batch.artifact)), Buffer.from(JSON.stringify(batch.dcm))];
+  assert.deepEqual(await prepareScenario('main', Buffer.from(JSON.stringify(row)), python, pair).run(), { id: row.id, ...row.expect });
+});
 
 test('installed package verifies the eight frozen scenario groups', async () => {
   let count = 0;

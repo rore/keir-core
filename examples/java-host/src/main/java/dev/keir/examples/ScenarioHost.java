@@ -1,5 +1,6 @@
 package dev.keir.examples;
 
+import dev.keir.runtime.KeirRuntime;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -14,6 +15,7 @@ public final class ScenarioHost {
     static final Set<String> GROUPS = Set.of("main", "zero", "after-write-read", "no-call",
             "handler", "title", "title-max", "title-composed");
     static final Set<String> GUARD_GROUPS = Set.of("guard", "guard-input", "guard-handler", "guard-reversed");
+    static final Set<String> NUMERIC_GROUPS = Set.of("stock", "quote");
     private static final Set<String> FIXTURES = Set.of("normal", "read-throws", "lost-response", "response-expired", "read-expired", "read-malformed");
 
     record Selection(String group, byte[] model, byte[] artifact) {}
@@ -38,7 +40,7 @@ public final class ScenarioHost {
     }
 
     static int run(String[] args, PrintStream out, PrintStream err) {
-        if ((args.length != 2 && args.length != 3) || !(GROUPS.contains(args[0]) || GUARD_GROUPS.contains(args[0]))) {
+        if ((args.length != 2 && args.length != 3) || !(GROUPS.contains(args[0]) || GUARD_GROUPS.contains(args[0]) || NUMERIC_GROUPS.contains(args[0]))) {
             err.println("Usage: ScenarioHost <fixed-scenario-group> <python-executable> [corpus-directory]");
             return 2;
         }
@@ -59,16 +61,22 @@ public final class ScenarioHost {
     }
 
     Selection selection(String group) throws IOException {
-        check(GROUPS.contains(group) || GUARD_GROUPS.contains(group), "Unknown trusted scenario group");
+        check(GROUPS.contains(group) || GUARD_GROUPS.contains(group) || NUMERIC_GROUPS.contains(group), "Unknown trusted scenario group");
+        if (NUMERIC_GROUPS.contains(group)) {
+            Path example=root.resolve("examples/numeric").resolve(group);
+            return new Selection(group,pinned(example,"dcm",65_536),pinned(example,"artifact",1_048_576));
+        }
         String model = group.equals("guard-reversed") ? "dcm-guard-reversed" : GUARD_GROUPS.contains(group) ? "dcm-guard" : group.startsWith("title") ? "dcm-title" : "dcm";
         String artifact = group.equals("main") ? "artifact" : "artifact-" + group;
         return new Selection(group, pinned(model, 65_536), pinned(artifact, 1_048_576));
     }
 
     List<Map<String, Object>> verifyGroup(String group) throws Exception {
-        check(GROUPS.contains(group) || GUARD_GROUPS.contains(group), "Unknown trusted scenario group");
+        check(GROUPS.contains(group) || GUARD_GROUPS.contains(group) || NUMERIC_GROUPS.contains(group), "Unknown trusted scenario group");
         List<Path> files;
-        try (var entries = Files.list(corpus().resolve("scenarios").resolve(group))) {
+        Path directory=NUMERIC_GROUPS.contains(group) ? root.resolve("examples/numeric").resolve(group).resolve("scenarios")
+                : corpus().resolve("scenarios").resolve(group);
+        try (var entries = Files.list(directory)) {
             files = entries.filter(path -> path.getFileName().toString().endsWith(".json"))
                     .limit(129).sorted().toList();
         }
@@ -86,24 +94,22 @@ public final class ScenarioHost {
     List<Map<String, Object>> verify(String group, List<byte[]> documents, Selection testSelection) throws Exception {
         dispatchCount = 0;
         check(!documents.isEmpty(), "Empty scenario batch");
+        Selection selected = testSelection;
+        if (selected == null && group != null && NUMERIC_GROUPS.contains(group)) selected = selection(group);
+        boolean modern = selected != null && "keir-artifact/4".equals(object(EffectJson.parse(selected.artifact())).get("format"));
         var rows = new ArrayList<Map<String, Object>>();
         var ids = new HashSet<Object>();
         for (byte[] bytes : documents) {
-            var row = decode(bytes);
+            var row = modern ? decode(bytes, "4") : decode(bytes);
             check(ids.add(row.get("id")), "Duplicate scenario ID");
             rows.add(row);
         }
 
-        Selection selected = testSelection == null ? selection(group) : testSelection;
+        if (selected == null) selected = selection(group);
         var model = object(EffectJson.parse(selected.model()));
         var artifact = object(EffectJson.parse(selected.artifact()));
-        boolean old = "keir-dcm/2".equals(model.get("format")) && "keir-artifact/2".equals(artifact.get("format")) &&
-                "keir-compiler-java/0.2.0".equals(artifact.get("compiler"));
-        boolean current = "keir-dcm/3".equals(model.get("format")) && "keir-artifact/3".equals(artifact.get("format")) &&
-                ("keir-compiler-java/0.3.0".equals(artifact.get("compiler")) || "keir-compiler-java/0.3.1".equals(artifact.get("compiler")));
-        check(old || current,
-                "Incompatible scenario contract");
-        check(rows.stream().allMatch(row -> (old ? "keir-scenario/2" : "keir-scenario/3").equals(row.get("format"))),
+        String revision = scenarioRevision(model, artifact);
+        check(rows.stream().allMatch(row -> ("keir-scenario/" + revision).equals(row.get("format"))),
                 "Incompatible scenario contract");
         try (var simulation = new BoundScenarioSimulation(selected.model(),
                 Map.of(selected.group(), selected.artifact()), model)) {
@@ -118,13 +124,29 @@ public final class ScenarioHost {
         }
     }
 
+    private static String scenarioRevision(Map<String,Object> model,Map<String,Object> artifact) {
+        boolean old = "keir-dcm/2".equals(model.get("format")) && "keir-artifact/2".equals(artifact.get("format")) &&
+                "keir-compiler-java/0.2.0".equals(artifact.get("compiler"));
+        boolean current = "keir-dcm/3".equals(model.get("format")) && "keir-artifact/3".equals(artifact.get("format")) &&
+                Set.of("keir-compiler-java/0.3.0","keir-compiler-java/0.3.1","keir-compiler-java/0.4.0").contains(artifact.get("compiler"));
+        boolean modern = Set.of("keir-dcm/3","keir-dcm/4").contains(model.get("format"))
+                && "keir-artifact/4".equals(artifact.get("format")) && "keir-compiler-java/0.5.0".equals(artifact.get("compiler"));
+        check(old || current || modern,
+                "Incompatible scenario contract");
+        return modern ? "4" : old ? "2" : "3";
+    }
+
     Map<String, Object> decode(byte[] bytes) throws Exception {
-        Object decoded = EffectJson.parseScenario(bytes);
         String revision = switch ((String)object(EffectJson.parse(pinned("dcm", 65_536))).get("format")) {
             case "keir-dcm/2" -> "2";
             case "keir-dcm/3" -> "3";
             default -> throw new IllegalArgumentException("Incompatible scenario contract");
         };
+        return decode(bytes, revision);
+    }
+
+    private Map<String,Object> decode(byte[] bytes,String revision) throws Exception {
+        Object decoded = EffectJson.parseScenario(bytes);
         checkSchema(bytes, revision);
         var row = object(decoded);
         byteFields(row);
@@ -193,14 +215,13 @@ public final class ScenarioHost {
         var consumption = object(expect.get("consumption"));
         var stubs = array(row.get("stubs")).stream().map(ScenarioData::object).toList();
         var calls = array(expect.get("calls")).stream().map(ScenarioData::object).toList();
-        var types = object(model.get("types"));
         var catalog = object(model.get("capabilities"));
-        typedValue(types, entry.get("input"), given.get("input"));
+        typedValue(model, entry.get("input"), given.get("input"));
         for (var payload : List.of(outcome, consumption)) {
-            if (payload.containsKey("result")) typedValue(types, entry.get("output"), payload.get("result"));
+            if (payload.containsKey("result")) typedValue(model, entry.get("output"), payload.get("result"));
         }
-        for (var stub : stubs) typedCall(types, catalog, stub);
-        for (var call : calls) typedCall(types, catalog, call);
+        for (var stub : stubs) typedCall(model, catalog, stub);
+        for (var call : calls) typedCall(model, catalog, call);
         for (int i = 0; i < stubs.size(); i++) {
             var call = new LinkedHashMap<>(stubs.get(i));
             call.remove("response");
@@ -209,7 +230,12 @@ public final class ScenarioHost {
         check(stubs.size() == calls.size(), "Stub and expected call count mismatch");
         String consumer = (String)object(entry.get("consumer")).get("kind");
         if (consumer.equals("DECISION")) {
-            same(DecisionConsumer.consumeDecision(outcome), consumption, "Invalid expected outcome or DECISION");
+            boolean quote="keir-dcm/4".equals(model.get("format")) && "example.quotes".equals(object(model.get("domain")).get("id"))
+                    && "QuoteDecision".equals(entry.get("output"));
+            var consumed=quote ? DecisionConsumer.consumeQuote(outcome) : DecisionConsumer.consumeDecision(outcome);
+            check(!"COMPLETED".equals(outcome.get("classification")) || Set.of("ALLOWED","DENIED").contains(consumed.get("status")),
+                    "Invalid completed decision outcome");
+            same(consumed, consumption, "Invalid expected outcome or DECISION");
         } else {
             check("EVENT_REPORT".equals(consumer) && "REPORTED".equals(consumption.get("status")), "Expected EVENT_REPORT");
             same(EffectConsumer.consume(outcome), consumption, "Invalid expected outcome or EVENT_REPORT");
@@ -217,7 +243,7 @@ public final class ScenarioHost {
         validateTrace(catalog, artifact, calls, outcome);
     }
 
-    private static void typedCall(Map<String, Object> types, Map<String, Object> catalog, Map<String, Object> call) {
+    private static void typedCall(Map<String, Object> model, Map<String, Object> catalog, Map<String, Object> call) {
         check(catalog.containsKey(call.get("capability")), "Unknown DCM capability");
         var capability = object(catalog.get(call.get("capability")));
         check(Objects.equals(capability.get("version"), call.get("version")), "Wrong DCM capability version");
@@ -229,7 +255,7 @@ public final class ScenarioHost {
             var param = object(raw);
             boolean host = "host".equals(param.get("binding"));
             (host ? hostFields : agentFields).add(name);
-            typedValue(types, param.get("type"), (host ? protectedArgs : args).get(name));
+            typedValue(model, param.get("type"), (host ? protectedArgs : args).get(name));
         });
         check(agentFields.equals(args.keySet()) && hostFields.equals(protectedArgs.keySet()), "Wrong DCM arguments");
         if (!call.containsKey("response")) return;
@@ -237,33 +263,38 @@ public final class ScenarioHost {
         boolean write = "WRITE".equals(capability.get("effect"));
         check(write == response.containsKey("effect"), "Wrong DCM effect envelope");
         switch ((String) response.get("kind")) {
-            case "SUCCESS" -> typedValue(types, capability.get("result"), response.get("value"));
+            case "SUCCESS" -> typedValue(model, capability.get("result"), response.get("value"));
             case "BUSINESS_REJECTION" -> check(array(capability.get("errors")).contains(response.get("code")),
                     "Undeclared DCM business code");
             default -> { }
         }
     }
 
-    private static void typedValue(Map<String, Object> types, Object name, Object value) {
+    private static void typedValue(Map<String, Object> model, Object name, Object value) {
+        var types = object(model.get("types"));
         if ("Boolean".equals(name)) {
             check(value instanceof Boolean, "Wrong DCM value");
         } else if ("String".equals(name)) {
             check(value instanceof String text && text.getBytes(UTF_8).length <= 256, "Wrong DCM string value");
+        } else if ("keir-dcm/4".equals(model.get("format")) && Set.of("Integer","Decimal").contains(name)) {
+            check(value instanceof String, "Wrong DCM numeric value");
+            check(value.equals(name.equals("Integer") ? KeirRuntime.normalizeInteger((String)value)
+                    : KeirRuntime.normalizeDecimal((String)value)), "Noncanonical DCM numeric value");
         } else {
             var type = object(types.get(name));
             switch ((String) type.get("kind")) {
-                case "nominal" -> typedValue(types, type.get("base"), value);
+                case "nominal" -> typedValue(model, type.get("base"), value);
                 case "enum" -> check(array(type.get("values")).contains(value), "Wrong DCM enum value");
                 case "record" -> {
                     var record = object(value);
                     var fields = object(type.get("fields"));
                     check(fields.keySet().containsAll(record.keySet()), "Wrong DCM record fields");
                     fields.forEach((field, fieldType) -> {
-                        if (fieldType instanceof String) typedValue(types, fieldType, record.get(field));
+                        if (fieldType instanceof String) typedValue(model, fieldType, record.get(field));
                         else {
                             var definition = object(fieldType);
                             if (!record.containsKey(field) && Boolean.TRUE.equals(definition.get("optional"))) return;
-                            typedValue(types, definition.get("type"), record.get(field));
+                            typedValue(model, definition.get("type"), record.get(field));
                         }
                     });
                 }
@@ -318,8 +349,12 @@ public final class ScenarioHost {
     }
 
     private byte[] pinned(String name, int max) throws IOException {
-        byte[] bytes = read(corpus().resolve(name + ".json"), max);
-        String pin = new String(read(corpus().resolve(name + ".sha256"), 73), UTF_8).replaceFirst("\\r?\\n\\z", "");
+        return pinned(corpus(),name,max);
+    }
+
+    private static byte[] pinned(Path directory,String name,int max) throws IOException {
+        byte[] bytes = read(directory.resolve(name + ".json"), max);
+        String pin = new String(read(directory.resolve(name + ".sha256"), 73), UTF_8).replaceFirst("\\r?\\n\\z", "");
         check(sha256(bytes).equals(pin), "Pinned scenario selection mismatch");
         return bytes;
     }

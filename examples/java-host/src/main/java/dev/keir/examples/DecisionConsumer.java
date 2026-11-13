@@ -1,5 +1,6 @@
 package dev.keir.examples;
 
+import dev.keir.runtime.KeirRuntime;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -27,6 +28,20 @@ final class DecisionConsumer {
     }
 
     private static Map<String,Object> blocked() { return Map.of("status", "BLOCKED"); }
+
+    static Map<String,Object> consumeQuote(Object value) {
+        try {
+            if (!(value instanceof Map<?,?> raw) || !(raw.get("result") instanceof Map<?,?> result)
+                    || !result.keySet().equals(Set.of("decision","message","amount"))
+                    || !(result.get("amount") instanceof String amount)
+                    || !KeirRuntime.normalizeDecimal(amount).equals(amount)) return blocked();
+            var snapshot=new LinkedHashMap<>(ScenarioData.object(value));
+            snapshot.put("result",Map.of("decision",result.get("decision"),"message",result.get("message")));
+            var consumed=consumeDecision(snapshot);
+            return consumed.get("status").equals("BLOCKED") ? consumed
+                    : Map.of("status",consumed.get("status"),"result",EffectJson.copy(result));
+        } catch (RuntimeException invalid) { return blocked(); }
+    }
 
     private static boolean completedTrace(List<?> trace) {
         String step = null, capability = null;

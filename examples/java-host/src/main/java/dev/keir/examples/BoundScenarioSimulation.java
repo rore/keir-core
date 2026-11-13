@@ -13,7 +13,8 @@ final class BoundScenarioSimulation implements AutoCloseable {
     final List<GenericCapacity.Lease> leases=new ArrayList<>(); KeirRuntime.BoundModel model; Active current;
     int dispatchCount;
     final Map<String,Boolean> decisions=new HashMap<>();
-    final Set<String> taskPrograms=new HashSet<>();
+    final Map<String,String> eventSources=new HashMap<>();
+    final Set<String> quotePrograms=new HashSet<>();
     final Set<String> actorPrograms=new HashSet<>();
     final Set<String> writes=new HashSet<>();
     BoundScenarioSimulation(byte[] dcm,Map<String,byte[]> programs,Map<String,Object> document) {
@@ -34,7 +35,14 @@ final class BoundScenarioSimulation implements AutoCloseable {
                 var artifact=object(EffectJson.parse(program));
                 var entrypoint=object(object(document.get("entrypoints")).get(artifact.get("entrypoint")));
                 decisions.put(entry.getKey(),"DECISION".equals(object(entrypoint.get("consumer")).get("kind")));
-                if("TaskId".equals(object(entrypoint.get("event")).get("sourceType"))) taskPrograms.add(entry.getKey());
+                eventSources.put(entry.getKey(),switch ((String)object(entrypoint.get("event")).get("sourceType")) {
+                    case "TaskId" -> "task1";
+                    case "ItemId" -> "item1";
+                    case "QuoteId" -> "quote1";
+                    default -> "scope1";
+                });
+                if("keir-dcm/4".equals(document.get("format")) && "example.quotes".equals(object(document.get("domain")).get("id"))
+                        && "QuoteDecision".equals(entrypoint.get("output"))) quotePrograms.add(entry.getKey());
                 for(Object raw:array(artifact.get("steps"))) {
                     var step=object(raw);
                     if(!"CALL".equals(step.get("op"))) continue;
@@ -76,7 +84,7 @@ final class BoundScenarioSimulation implements AutoCloseable {
     Map<String,Object> run(String group,Map<String,Object> row) {
         check(current==null,"Concurrent scenario reuse");
         check(prepared.containsKey(group),"Unknown selected program");
-        current=new Active(row,decisions.get(group),taskPrograms.contains(group));
+        current=new Active(row,decisions.get(group),eventSources.get(group));
         try(var invocation=capacity.invocation()) {
             Active state=current;
             var handle=prepared.get(group);
@@ -86,12 +94,13 @@ final class BoundScenarioSimulation implements AutoCloseable {
             if(state.used!=state.stubs.size()) state.violations.add("Unconsumed scenario stub");
             var calls=reconcile(state.captures,outcome.trace(),state.stubs,state.violations); check(state.violations.isEmpty(),"Simulation violations");
             var actual=Map.<String,Object>of("outcome",outcome.toMap(),"calls",calls,"consumption",
-                    state.decision?DecisionConsumer.consumeDecision(outcome.toMap()):EffectConsumer.consume(outcome.toMap()));
+                     quotePrograms.contains(group)?DecisionConsumer.consumeQuote(outcome.toMap())
+                             :state.decision?DecisionConsumer.consumeDecision(outcome.toMap()):EffectConsumer.consume(outcome.toMap()));
             same(actual,row.get("expect"),"Simulation result mismatch"); var result=new LinkedHashMap<String,Object>(actual); result.put("id",row.get("id")); return result;
         } catch(Exception failure) { if(failure instanceof RuntimeException runtime) throw runtime; throw new IllegalArgumentException("Bound simulation invocation failed"); }
         finally { current=null; }
     }
-    public void close() { check(current==null,"Cannot release in-flight bound model"); prepared.clear(); decisions.clear(); taskPrograms.clear(); actorPrograms.clear(); model=null; for(int i=leases.size()-1;i>=0;i--) leases.get(i).close(); leases.clear(); }
+    public void close() { check(current==null,"Cannot release in-flight bound model"); prepared.clear(); decisions.clear(); eventSources.clear(); quotePrograms.clear(); actorPrograms.clear(); model=null; for(int i=leases.size()-1;i>=0;i--) leases.get(i).close(); leases.clear(); }
 
     private static final class Active {
         final String fixture; final Map<String,Object> input,event; final UUID key=UUID.fromString("00000000-0000-4000-8000-000000000001");
@@ -100,6 +109,6 @@ final class BoundScenarioSimulation implements AutoCloseable {
         final AtomicLong now=new AtomicLong();
         final KeirRuntime.Deadline deadline=new KeirRuntime.Deadline(now::get,1000);
         int used;
-        Active(Map<String,Object> row,boolean decision,boolean taskEvent) { this.decision=decision; var given=object(row.get("given")); fixture=(String)given.get("fixture"); input=object(given.get("input")); stubs=array(row.get("stubs")); event=decision?Map.of("id","attempt1","source","scope1"):Map.of("id","event1","source",taskEvent?"task1":"scope1"); }
+        Active(Map<String,Object> row,boolean decision,String source) { this.decision=decision; var given=object(row.get("given")); fixture=(String)given.get("fixture"); input=object(given.get("input")); stubs=array(row.get("stubs")); event=Map.of("id",decision?"attempt1":"event1","source",source); }
     }
 }

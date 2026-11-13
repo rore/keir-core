@@ -1,4 +1,5 @@
 import { types as nodeTypes } from 'node:util';
+import { normalizeDecimal } from '@keir/runtime-node';
 
 const own = (value, key) => Object.hasOwn(value, key);
 const requireValid = condition => { if (!condition) throw new Error('Invalid decision outcome'); };
@@ -86,6 +87,19 @@ export function consumeDecision(outcome) {
     array(snapshot.effects, 0);
     validateTrace(snapshot.trace);
     return { status: result.decision === 'ALLOW' ? 'ALLOWED' : 'DENIED', result };
+  } catch {
+    return { status: 'BLOCKED' };
+  }
+}
+
+// This separate host output has a required canonical amount; ALLOW never sets a native price.
+export function consumeQuote(outcome) {
+  try {
+    const snapshot = record(outcome, ['classification', 'result', 'effects', 'trace']);
+    const result = record(snapshot.result, ['decision', 'message', 'amount']);
+    requireValid(typeof result.amount === 'string' && normalizeDecimal(result.amount) === result.amount);
+    const consumed = consumeDecision({ ...snapshot, result: { decision: result.decision, message: result.message } });
+    return consumed.status === 'BLOCKED' ? consumed : { status: consumed.status, result };
   } catch {
     return { status: 'BLOCKED' };
   }

@@ -15,6 +15,34 @@ class ScenarioHostTest {
             ? Path.of("").toAbsolutePath() : Path.of("../..").toAbsolutePath().normalize();
     private final ScenarioHost host = new ScenarioHost(root, System.getenv("KEIR_SCENARIO_PYTHON"));
 
+    @Test void numericScenariosUseRealConsumersAndRejectRelabeledOldScenarios() throws Exception {
+        for (String group:List.of("stock","quote")) {
+            var directory=root.resolve("examples/numeric").resolve(group);
+            byte[] scenario=Files.readAllBytes(directory.resolve("scenarios/normal.json"));
+            var selected=new ScenarioHost.Selection(group,Files.readAllBytes(directory.resolve("dcm.json")),
+                    Files.readAllBytes(root.resolve("compiler-java/target/numeric-"+group+".json")));
+            var rows=host.verify(group,List.of(scenario),selected);
+            assertEquals(1,rows.size());
+            assertEquals(group.equals("stock") ? "REPORTED" : "ALLOWED",object(rows.getFirst().get("consumption")).get("status"));
+            var relabeled=object(EffectJson.parse(scenario)); relabeled.put("format","keir-scenario/3");
+            assertThrows(IllegalArgumentException.class,() -> host.verify(group,List.of(EffectJson.encode(relabeled)),selected));
+            assertEquals(0,host.dispatchCount);
+        }
+    }
+
+    @Test void scenario4RetainsTheModel3NominalNameBranch() throws Exception {
+        var batch=object(EffectJson.parse(Files.readAllBytes(root.resolve("compiler-java/target/numeric-retained.json"))));
+        var outcome=Map.<String,Object>of("classification","COMPLETED","result",Map.of("value",true),"effects",List.of(),"trace",List.of(
+                Map.of("sequence",0,"event","INVOCATION_START"),Map.of("sequence",1,"event","STEP_START","step","value"),
+                Map.of("sequence",2,"event","VALUE_BOUND","step","value"),Map.of("sequence",3,"event","RETURNED"),Map.of("sequence",4,"event","TERMINATED")));
+        var row=Map.of("format","keir-scenario/4","id","retained-names","given",Map.of("input",batch.get("input"),"fixture","normal"),
+                "stubs",List.of(),"expect",Map.of("calls",List.of(),"outcome",outcome,"consumption",Map.of("status","REPORTED",
+                        "classification","COMPLETED","result",Map.of("value",true),"effects",List.of())));
+        var selected=new ScenarioHost.Selection("main",EffectJson.encode(batch.get("dcm")),EffectJson.encode(batch.get("artifact")));
+        assertEquals(1,host.verify("main",List.of(EffectJson.encode(row)),selected).size());
+        assertEquals(0,host.dispatchCount);
+    }
+
     @Test void allFrozenGroupsUseThePackagedHost() throws Exception {
         int count = 0;
         for (String group : ScenarioHost.GROUPS) count += host.verifyGroup(group).size();

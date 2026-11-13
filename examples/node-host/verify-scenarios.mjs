@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { bindModel, invokeProgram, prepareProgram } from '@keir/runtime-node';
 import { lexical } from '../../runtime-node/test/scenario-lexical.mjs';
 import { consumeEffect } from './effect-consumer.mjs';
+import { consumeDecision, consumeQuote } from './decision-consumer.mjs';
 import { reconcileCalls } from './effect-simulation.mjs';
 import { readBoundedFixture } from './generic-capacity.mjs';
 import { callShape, nativeKey, typed } from './generic-simulation.mjs';
@@ -23,23 +24,25 @@ const groups = new Map([
   ['title', ['artifact-title', 'dcm-title']],
   ['title-max', ['artifact-title-max', 'dcm-title']],
   ['title-composed', ['artifact-title-composed', 'dcm-title']],
+  ['stock', ['../../examples/numeric/stock/artifact', '../../examples/numeric/stock/dcm']],
+  ['quote', ['../../examples/numeric/quote/artifact', '../../examples/numeric/quote/dcm']],
 ]);
 const fixtures = new Set(['normal', 'read-throws', 'lost-response', 'response-expired']);
 
 function pinned(name) {
-  const limit = name.startsWith('dcm') ? 65_536 : 1_048_576;
+  const limit = name.split('/').at(-1).startsWith('dcm') ? 65_536 : 1_048_576;
   const bytes = readBoundedFixture(new URL(name + '.json', corpus), limit);
   const expected = readBoundedFixture(new URL(name + '.sha256', corpus), 128).toString('ascii').trim();
   assert.equal('sha256:' + createHash('sha256').update(bytes).digest('hex'), expected, name + ' byte pin');
   return bytes;
 }
 
-function checkSchema(bytes, python) {
+function checkSchema(bytes, python, revision) {
   const directory = mkdtempSync(join(tmpdir(), 'keir-scenario-'));
   const file = join(directory, 'scenario.json');
   try {
     writeFileSync(file, bytes, { flag: 'wx', mode: 0o600 });
-    const result = spawnSync(python, ['-B', checker, '--revision', '2', 'scenario', file], { encoding: 'utf8', timeout: 30_000 });
+    const result = spawnSync(python, ['-B', checker, '--revision', revision, 'scenario', file], { encoding: 'utf8', timeout: 30_000 });
     if (result.error) throw result.error;
     assert.ok(result.status === 0 || result.status === 1, result.stderr);
     const check = JSON.parse(result.stdout);
@@ -65,7 +68,7 @@ function checkByteFields({ stubs, expect }) {
   }
 }
 
-function checkExpectations(row, artifact, dcm) {
+function checkExpectations(row, artifact, dcm, consume) {
   const { expect, stubs } = row;
   assert.deepEqual(stubs.map(({ response, ...call }) => call), expect.calls, 'Stub and expected call order');
   const target = ({ step, capability }) => ({ step, capability });
@@ -90,27 +93,44 @@ function checkExpectations(row, artifact, dcm) {
     const step = artifact.steps.find(step => step.id === call.step);
     assert.ok(step?.op === 'CALL' && step.capability === call.capability, 'Expected artifact call');
   }
-  const report = consumeEffect(expect.outcome);
-  assert.equal(report.status, 'REPORTED', 'Invalid expected outcome');
+  const report = consume(expect.outcome);
+  assert.ok(report.status === 'REPORTED' || (expect.outcome.classification === 'COMPLETED'
+    ? ['ALLOWED', 'DENIED'] : ['BLOCKED']).includes(report.status), 'Invalid expected outcome');
   assert.deepEqual(report, expect.consumption, 'Expected consumer report');
 }
 
-export function decodeScenario(bytes, python) {
+export function decodeScenario(bytes, python, revision = '2') {
   const row = lexical(bytes);
-  checkSchema(bytes, python);
+  checkSchema(bytes, python, revision);
   checkByteFields(row);
   return row;
 }
 
 export function prepareScenario(group, bytes, python, testPair) {
-  const row = decodeScenario(bytes, python);
+  const selectedFormat = testPair ? JSON.parse(testPair[0]).format : undefined;
+  const revision = testPair ? selectedFormat === 'keir-artifact/4' ? '4' : selectedFormat === 'keir-artifact/3' ? '3' : '2'
+    : ['stock', 'quote'].includes(group) ? '4' : '2';
+  const row = decodeScenario(bytes, python, revision);
   const pair = groups.get(group);
   assert.ok(pair, 'Unknown scenario group');
   const [artifactBytes, modelBytes] = testPair ?? pair.map(pinned);
   const artifact = JSON.parse(artifactBytes);
   const dcm = JSON.parse(modelBytes);
+  const legacy = dcm.format === 'keir-dcm/2' && artifact.format === 'keir-artifact/2' && artifact.compiler === 'keir-compiler-java/0.2.0';
+  const retained = dcm.format === 'keir-dcm/3' && artifact.format === 'keir-artifact/3'
+    && ['keir-compiler-java/0.3.0', 'keir-compiler-java/0.3.1', 'keir-compiler-java/0.4.0'].includes(artifact.compiler);
+  const modern = ['keir-dcm/3', 'keir-dcm/4'].includes(dcm.format) && artifact.format === 'keir-artifact/4' && artifact.compiler === 'keir-compiler-java/0.5.0';
+  assert.ok(legacy || retained || modern, 'Scenario artifact compatibility: tuple');
+  assert.equal(row.format, 'keir-scenario/' + (modern ? '4' : legacy ? '2' : '3'), 'Scenario artifact compatibility: scenario');
+  const entry = dcm.entrypoints[artifact.entrypoint];
+  const quote = dcm.format === 'keir-dcm/4' && dcm.domain.id === 'example.quotes' && entry.output === 'QuoteDecision';
+  const consume = quote ? consumeQuote : entry.consumer.kind === 'DECISION' ? consumeDecision : consumeEffect;
+  const actor = artifact.steps.some(step => step.op === 'CALL' && dcm.capabilities[step.capability].parameters.actorId?.binding === 'host');
   const key = nativeKey();
-  const event = Object.freeze({ id: 'event1', source: 'task1' });
+  const decision = entry.consumer.kind === 'DECISION';
+  const sources = new Map([['TaskId', 'task1'], ['ItemId', 'item1'], ['QuoteId', 'quote1']]);
+  const event = Object.freeze({ id: decision ? 'attempt1' : 'event1', source:
+    sources.get(entry.event.sourceType) ?? 'scope1' });
   const captures = [];
   const violations = [];
   const expiresAtMs = 1000;
@@ -133,8 +153,9 @@ export function prepareScenario(group, bytes, python, testPair) {
         assert.equal(host.deadline.expiresAtMs, expiresAtMs, 'Absolute deadline');
         assert.equal(host.deadline.clock.nowMs(), now, 'Trusted clock');
         assert.ok(remainingMs > 0 && remainingMs === expiresAtMs - now, 'Remaining deadline budget');
-        if (cap.effect === 'READ' && response.kind === 'SUCCESS') assert.equal(response.value.id, args.taskId);
-        if (cap.effect === 'WRITE') assert.equal(row.given.input.taskId, event.source);
+        if (capability === 'tasks.get' && response.kind === 'SUCCESS') assert.equal(response.value.id, args.taskId);
+        if (capability === 'tasks.create') assert.equal(row.given.input.taskId, event.source);
+        if (capability.startsWith('stock.')) assert.equal(args.itemId, event.source);
       } catch (error) {
         violations.push(error.message);
         throw error;
@@ -152,7 +173,6 @@ export function prepareScenario(group, bytes, python, testPair) {
   assert.equal(preparation.diagnostic, null, 'Scenario artifact compatibility');
 
   assert.ok(fixtures.has(row.given.fixture), 'Unknown scenario fixture');
-  const entry = dcm.entrypoints[artifact.entrypoint];
   typed(row.given.input, entry.input, dcm);
   for (const value of [row.expect.outcome, row.expect.consumption]) {
     if (Object.hasOwn(value, 'result')) typed(value.result, entry.output, dcm);
@@ -162,18 +182,18 @@ export function prepareScenario(group, bytes, python, testPair) {
     assert.deepEqual(stub.protectedArgs, { actorId: 'user1' }, 'Expected protected actor');
   }
   row.expect.calls.forEach(call => callShape(call, dcm, false));
-  checkExpectations(row, artifact, dcm);
+  checkExpectations(row, artifact, dcm, consume);
   assert.equal(captures.length, 0, 'Preflight dispatched a stub');
 
   return {
     id: row.id,
     async run() {
       const outcome = await invokeProgram(preparation.prepared, row.given.input, {
-        bindings: group === 'no-call' ? {} : { actorId: 'user1' }, deadline, requestKey: key, event,
+        bindings: actor ? { actorId: 'user1' } : {}, deadline, requestKey: key, event,
       });
       const calls = reconcileCalls(captures, outcome.trace, row.stubs, violations);
       assert.deepEqual(violations, [], row.id + ': host adapter violations');
-      const consumption = consumeEffect(outcome);
+      const consumption = consume(outcome);
       assert.deepEqual({ outcome, calls, consumption }, row.expect, row.id + ': scenario report');
       return { id: row.id, outcome, calls, consumption };
     },
@@ -182,7 +202,8 @@ export function prepareScenario(group, bytes, python, testPair) {
 
 export async function verifyGroup(group, python) {
   assert.ok(groups.has(group), 'Unknown scenario group');
-  const directory = new URL('scenarios/' + group + '/', corpus);
+  const directory = ['stock', 'quote'].includes(group) ? new URL('../numeric/' + group + '/scenarios/', import.meta.url)
+    : new URL('scenarios/' + group + '/', corpus);
   const files = readdirSync(directory).filter(name => name.endsWith('.json')).sort();
   assert.ok(files.length > 0 && files.length <= 128, 'Scenario file count');
   function* documents() {

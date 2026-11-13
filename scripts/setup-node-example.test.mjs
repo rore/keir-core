@@ -50,7 +50,7 @@ function commands(f, mutate = () => {}) {
     const stage = args[0];
     f.calls.push(stage);
     assert.ok(args.includes('--ignore-scripts'));
-    assert.equal(args[args.indexOf('--cache') + 1], '.tools/npm-cache');
+    assert.equal(args[args.indexOf('--cache') + 1], process.env.NPM_CONFIG_CACHE ?? '.tools/npm-cache');
     if (stage !== 'pack') assert.ok(args.includes('--no-audit') && args.includes('--no-fund'));
     const archive = join(f.root, '.tools/packages/keir-runtime-node-0.3.0.tgz');
     if (stage === 'pack') {
@@ -82,6 +82,18 @@ test('refresh changes only local tar integrity and repeated setup is idempotent'
   assert.equal(setupNodeExample(f.root, run), first);
   assert.ok(readFileSync(f.lockPath).equals(installedLock));
   assert.deepEqual(f.calls, ['pack', 'install', 'ci', 'pack', 'install', 'ci']);
+});
+
+test('explicit process cache keeps source setup caches outside the checkout', t => {
+  const f = fixture(t), previous = process.env.NPM_CONFIG_CACHE;
+  try {
+    process.env.NPM_CONFIG_CACHE = join(f.root, 'isolated-cache');
+    setupNodeExample(f.root, commands(f));
+    assert.deepEqual(f.calls, ['pack', 'install', 'ci']);
+  } finally {
+    if (previous === undefined) delete process.env.NPM_CONFIG_CACHE;
+    else process.env.NPM_CONFIG_CACHE = previous;
+  }
 });
 
 for (const [label, change] of [

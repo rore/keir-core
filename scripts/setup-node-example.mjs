@@ -35,7 +35,7 @@ export function setupNodeExample(root, runNpm = args => npm(root, args)) {
   assert.equal(lock.packages?.[entry]?.resolved, declaration, 'Unexpected locked runtime path');
   assert.equal(lock.packages[entry].version, runtime.version, 'Unexpected locked runtime version');
   assert.deepEqual(lock.packages[entry].dependencies ?? {}, runtime.dependencies ?? {}, 'Locked runtime dependencies differ');
-  const cache = ['--cache', '.tools/npm-cache', '--ignore-scripts'];
+  const cache = ['--cache', process.env.NPM_CONFIG_CACHE ?? '.tools/npm-cache', '--ignore-scripts'];
   const install = ['--prefix', 'examples/node-host', ...cache, '--no-audit', '--no-fund'];
   try {
     mkdirSync(join(root, '.tools/packages'), { recursive: true });

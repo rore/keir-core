@@ -5,6 +5,26 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DecisionConsumerTest {
+    @Test void quoteConsumerValidatesCompleteCanonicalAmountBeforeDecision() {
+        for (String decision:List.of("ALLOW","DENY")) {
+            var outcome=completed(decision); var result=new LinkedHashMap<String,Object>(Map.of("decision",decision,"message","","amount","92.5"));
+            outcome.put("result",result);
+            var consumed=DecisionConsumer.consumeQuote(outcome);
+            assertEquals(Map.of("status",decision.equals("ALLOW") ? "ALLOWED" : "DENIED","result",result),consumed);
+            result.put("amount","0");
+            assertEquals("92.5",ScenarioData.object(consumed.get("result")).get("amount"));
+            blocked(outcome);
+        }
+        for (Object amount:List.of(92.5,new java.math.BigDecimal("1"),"92.50","+1","-0","1e2","0.0000000000000000001","1".repeat(39))) {
+            var outcome=completed("ALLOW"); outcome.put("result",Map.of("decision","ALLOW","message","","amount",amount));
+            assertEquals(Map.of("status","BLOCKED"),DecisionConsumer.consumeQuote(outcome));
+        }
+        for (String missing:List.of("decision","message","amount")) {
+            var outcome=completed("ALLOW"); var result=new LinkedHashMap<String,Object>(Map.of("decision","ALLOW","message","","amount","1"));
+            result.remove(missing); outcome.put("result",result);
+            assertEquals(Map.of("status","BLOCKED"),DecisionConsumer.consumeQuote(outcome));
+        }
+    }
     static Map<String,Object> completed(String decision) {
         return new LinkedHashMap<>(Map.of("classification", "COMPLETED", "result", Map.of("decision", decision),
                 "effects", List.of(), "trace", List.of(

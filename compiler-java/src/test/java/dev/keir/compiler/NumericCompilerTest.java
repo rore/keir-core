@@ -103,6 +103,7 @@ class NumericCompilerTest {
             var compiled=compiler.compile(source,model,KeirCompiler.Environment.supported());
             assertTrue(compiled.succeeded(),name+": "+compiled.diagnostics());
             assertArrayEquals(compiled.artifact(),compiler.compile(source,model,KeirCompiler.Environment.supported()).artifact());
+            Files.write(Path.of("target","numeric-"+name+".json"),compiled.artifact());
             programs.add(Map.of("name",name,"dcm",parse(model),"artifact",parse(compiled.artifact())));
         }
         Files.write(Path.of("target","numeric-programs.json"),bytes(Map.of("programs",programs)));

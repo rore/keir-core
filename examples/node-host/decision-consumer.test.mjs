@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { consumeDecision } from './decision-consumer.mjs';
+import { consumeDecision, consumeQuote } from './decision-consumer.mjs';
 
 const sequence = events => events.map((event, sequence) => ({ sequence, ...event }));
 const completed = (decision = 'ALLOW') => ({
@@ -20,6 +20,33 @@ const read = (taken = true) => sequence([
   { event: 'RETURNED' }, { event: 'TERMINATED' },
 ]);
 const blocked = value => assert.deepEqual(consumeDecision(value), { status: 'BLOCKED' });
+
+test('quote consumer checks every output field and canonical amount before consuming a decision', () => {
+  for (const decision of ['ALLOW', 'DENY']) {
+    const outcome = { ...completed(decision), result: { decision, message: '', amount: '92.5' } };
+    const consumed = consumeQuote(outcome);
+    assert.deepEqual(consumed, { status: decision === 'ALLOW' ? 'ALLOWED' : 'DENIED', result: outcome.result });
+    outcome.result.amount = '0';
+    assert.equal(consumed.result.amount, '92.5');
+    assert.deepEqual(consumeDecision(outcome), { status: 'BLOCKED' });
+  }
+  for (const amount of [undefined, null, 92.5, 1n, '92.50', '+1', '-0', '1e2', '0.0000000000000000001', '1'.repeat(39)]) {
+    const outcome = { ...completed(), result: { decision: 'ALLOW', message: '', amount } };
+    assert.deepEqual(consumeQuote(outcome), { status: 'BLOCKED' });
+  }
+  for (const field of ['decision', 'message', 'amount']) {
+    const outcome = { ...completed(), result: { decision: 'ALLOW', message: '', amount: '1' } };
+    delete outcome.result[field];
+    assert.deepEqual(consumeQuote(outcome), { status: 'BLOCKED' });
+  }
+  const outcome = { ...completed(), result: { decision: 'ALLOW', message: '', amount: '1' } };
+  outcome.effects = [{ state: 'CONFIRMED' }];
+  assert.deepEqual(consumeQuote(outcome), { status: 'BLOCKED' });
+  let accessed = false;
+  Object.defineProperty(outcome.result, 'amount', { get() { accessed = true; return '1'; } });
+  assert.deepEqual(consumeQuote(outcome), { status: 'BLOCKED' });
+  assert.equal(accessed, false);
+});
 
 test('allows and denies completed pure, read-derived and skipped-read decisions', () => {
   for (const decision of ['ALLOW', 'DENY']) {
