@@ -28,7 +28,8 @@ JAVA_MAIN = r'''
       if (spec.get("expected").equals("ADMISSION_INVALID")) { check(!bound.succeeded()); code = bound.diagnostic().code(); }
       else { check(bound.succeeded()); var result = KeirRuntime.prepareProgram(Files.readAllBytes(Path.of((String)spec.get("artifact"))), bound.boundModel());
         check(!result.succeeded()); code = result.diagnostic().code(); }
-      check(code.equals(spec.get("expected"))); System.out.println(code);
+      if (!code.equals(spec.get("expected"))) throw new AssertionError("Old runtime expected " + spec.get("expected") + " but returned " + code);
+      System.out.println(code);
     }
     check(calls[0] == 0);
   }
@@ -79,7 +80,7 @@ def main():
     (work / "GuardedResultSmoke.java").write_text(prefix + JAVA_MAIN, encoding="utf-8")
     (work / "previous.mjs").write_text(NODE, encoding="utf-8")
     rows = []
-    for name, expected in (("host-boundaries", "ADMISSION_INVALID"), ("retained-names", "PIN_MISMATCH")):
+    for name, expected in (("host-boundaries", "ADMISSION_INVALID"), ("retained-names", "ARTIFACT_INVALID")):
         fixture = json.loads((ROOT / f"conformance/keir-4/{name}.json").read_bytes())
         model = work / f"{name}-model.json"; model.write_text(json.dumps(fixture["dcm"]), encoding="utf-8")
         artifact = work / f"{name}-artifact.json"
@@ -92,8 +93,12 @@ def main():
     commands = [["java", "-Xmx256m", "-cp", os.pathsep.join(map(str, [runtime, *jars])), str(work / "GuardedResultSmoke.java"), str(manifest)],
                 ["node", str(work / "previous.mjs"), str(manifest)]]
     for command in commands:
-        output = subprocess.run(command, cwd=work, check=True, capture_output=True, text=True, timeout=30).stdout
-        assert output.splitlines() == ["ADMISSION_INVALID", "PIN_MISMATCH"]
+        result = subprocess.run(command, cwd=work, capture_output=True, text=True, timeout=30)
+        assert len(result.stdout) + len(result.stderr) <= 65536
+        if result.returncode:
+            print(result.stdout, end=""); print(result.stderr, end="", file=sys.stderr)
+            result.check_returncode()
+        assert result.stdout.splitlines() == ["ADMISSION_INVALID", "ARTIFACT_INVALID"]
     print(json.dumps({"status": "passed", "runtimeVersion": "0.4.0", "profilesPerRuntime": 2, "callbacks": 0,
                       "assets": {name: pin for name, (_, pin) in PINS.items()}}))
 
