@@ -94,6 +94,35 @@ jobs:
               python -B -c 'import json, sys; from pathlib import Path; assert json.loads(Path(sys.argv[1]).read_bytes()) == json.loads(Path(sys.argv[2]).read_bytes())' "$QUALIFICATION_ROOT/logs/java-$group.json" "$QUALIFICATION_ROOT/logs/node-$group.json"
             done
           } > "$QUALIFICATION_ROOT/logs/node-host.log" 2>&1
+      - name: Verify unpublished installed Core candidate packages
+        id: packages
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          started=$SECONDS
+          {
+            timeout --kill-after=5s 30s python -B -m unittest discover -s scripts -p 'test-*release*.py'
+            timeout --kill-after=5s 150s python -B scripts/release-core.py --revision "$GITHUB_SHA" --version 0.5.0 --output "$QUALIFICATION_ROOT/candidate" --maven-repo "$MAVEN_USER_HOME/repository" --npm-cache "$NPM_CONFIG_CACHE"
+            timeout --kill-after=5s 90s python -B scripts/verify-core-release.py --version 0.5.0 --assets "$QUALIFICATION_ROOT/candidate" --checksums "$QUALIFICATION_ROOT/candidate/SHA256SUMS" --smoke-revision "$GITHUB_SHA" --maven-repo "$MAVEN_USER_HOME/repository" --npm-cache "$NPM_CONFIG_CACHE"
+          } > "$QUALIFICATION_ROOT/logs/packages.log" 2>&1
+          export PACKAGE_SECONDS=$((SECONDS - started))
+          python -B - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path(os.environ['QUALIFICATION_ROOT'])
+          assets = root / 'candidate'
+          expected = {'LICENSE', 'SHA256SUMS', 'keir-compiler-cli-0.5.0.zip', 'keir-java-runtime-maven-0.5.0.zip', 'keir-runtime-node-0.5.0.tgz'}
+          assert {path.name for path in assets.iterdir()} == expected
+          assert all(path.is_file() and not path.is_symlink() for path in assets.iterdir())
+          assert sum(path.stat().st_size for path in assets.iterdir()) <= 64 * 1024 * 1024
+          assert 'matched 130 complete outcomes per runtime.' in (root / 'logs/packages.log').read_text(encoding='utf-8')
+          report = {'revision': os.environ['GITHUB_SHA'], 'version': '0.5.0', 'published': False,
+                    'seconds': int(os.environ['PACKAGE_SECONDS']), 'outcomesPerRuntime': 130,
+                    'assets': [{'name': path.name, 'bytes': path.stat().st_size, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+                               for path in sorted(assets.iterdir())]}
+          (root / 'logs/packages.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          PY
       - name: Preserve bounded sanitized evidence
         id: evidence
         if: ${{ always() }}
@@ -104,6 +133,7 @@ jobs:
           JAVA_OUTCOME: ${{ steps.java.outcome }}
           NODE_OUTCOME: ${{ steps.node.outcome }}
           NODE_HOST_OUTCOME: ${{ steps.node_host.outcome }}
+          PACKAGES_OUTCOME: ${{ steps.packages.outcome }}
         shell: bash
         run: |
           set -euo pipefail
@@ -126,6 +156,7 @@ jobs:
           paths.append(Path('compiler-java/target/numeric-stock.json'))
           paths.append(Path('compiler-java/target/numeric-quote.json'))
           paths.append(root / 'logs/node-host.log')
+          paths.extend(root / 'logs' / name for name in ('packages.log', 'packages.json'))
           for engine in ('java', 'node'):
               for example in ('stock', 'quote'):
                   paths.append(root / 'logs' / f'{engine}-{example}.json')
@@ -145,11 +176,11 @@ jobs:
               name = f'{index:03d}-{path.name}'
               (evidence / name).write_bytes(data)
               inventory.append({'name': name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()})
-          outcomes = {name: os.environ[name.upper() + '_OUTCOME'] for name in ('dependencies', 'schemas', 'java', 'node', 'node_host')}
+          outcomes = {name: os.environ[name.upper() + '_OUTCOME'] for name in ('dependencies', 'schemas', 'java', 'node', 'node_host', 'packages')}
           report = {'revision': os.environ['GITHUB_SHA'], 'outcomes': outcomes,
                     'status': 'passed' if all(value == 'success' for value in outcomes.values()) else 'failed',
                     'platform': platform.platform(), 'evidence': inventory,
-                    'scope': 'fast regression and packed Node teaching host; not full release, performance or feature acceptance'}
+                    'scope': 'fast regression, packed teaching host and unpublished installed candidate; not companion, performance or feature acceptance'}
           data = (json.dumps(report, indent=2) + '\n').encode()
           assert total + len(data) <= 10 * 1024 * 1024
           (evidence / 'receipt.json').write_bytes(data)
@@ -161,6 +192,19 @@ jobs:
         with:
           name: numeric-fast-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/evidence
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+          include-hidden-files: false
+          overwrite: false
+          archive: true
+      - name: Retain the bounded unpublished candidate assets
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ success() && steps.packages.outcome == 'success' }}
+        timeout-minutes: 2
+        with:
+          name: numeric-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/keir-numeric-${{ github.run_id }}-${{ github.run_attempt }}/candidate
           if-no-files-found: error
           retention-days: 7
           compression-level: 0

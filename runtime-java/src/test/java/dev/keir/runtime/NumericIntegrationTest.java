@@ -34,7 +34,7 @@ class NumericIntegrationTest {
         }
         var bound=KeirRuntime.bindModel(canonical(dcm),adapters);
         assertTrue(bound.succeeded(),String.valueOf(bound.diagnostic()));
-        var prepared=KeirRuntime.prepareProgram(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-host-boundaries.json")),bound.boundModel());
+        var prepared=KeirRuntime.prepareProgram(Files.readAllBytes(Path.of("..","conformance","keir-4","host-boundaries-artifact.json")),bound.boundModel());
         assertTrue(prepared.succeeded(),String.valueOf(prepared.diagnostic()));
         for (Object value:list(fixture.get("cases"),"")) {
             var spec=map(value,""); current[0]=new Request(spec,new Object(),new ArrayList<>());
@@ -53,7 +53,7 @@ class NumericIntegrationTest {
         }
     }
     @Test void retainedNominalNamesStillExecuteAsStringsUnderNewProducer() throws Exception {
-        var row=map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-retained.json")),65_536),"");
+        var row=map(parseJson(Files.readAllBytes(Path.of("..","conformance","keir-4","retained-names.json")),65_536),"");
         var prepared=prepare(row); assertTrue(prepared.succeeded(),String.valueOf(prepared.diagnostic()));
         var context=new KeirRuntime.BoundEffectInvocation(Map.of(),new KeirRuntime.Deadline(() -> 0L,10_000L),
                 "retained-key",Map.of("id","event1","source","owner1"));
@@ -114,9 +114,10 @@ class NumericIntegrationTest {
     }
 
     @Test void completeNumericProgramsPreserveCallsReceiptsAndInvocationIsolation() throws Exception {
-        var batch=map(parseJson(Files.readAllBytes(Path.of("..","compiler-java","target","numeric-programs.json")),1_048_576),"");
-        for (Object raw:list(batch.get("programs"),"")) {
-            var program=map(raw,""); String name=(String)program.get("name");
+        for (String name:List.of("stock","quote")) {
+            var root=Path.of("..","examples","numeric",name);
+            var program=Map.of("dcm",parseJson(Files.readAllBytes(root.resolve("dcm.json")),65_536),
+                    "artifact",parseJson(Files.readAllBytes(root.resolve("artifact.json")),1_048_576));
             record Request(Map<String,Object> spec,List<Object> calls) {}
             var implementations=new HashMap<String,KeirRuntime.BoundEffectAdapter>();
             for (String capability:List.of("stock.get","stock.request")) if (name.equals("stock")) {
@@ -157,7 +158,6 @@ class NumericIntegrationTest {
     }
     private static List<Object> cases() throws Exception {
         Path path=Path.of("..","conformance","keir-4","engine-matrix.json");
-        if (!Files.exists(path)) path=Path.of("..","compiler-java","target","numeric-integration.json");
         return list(map(parseJson(Files.readAllBytes(path),1_048_576),"").get("cases"),"");
     }
     private static Map<String,Object> row(String id) throws Exception {

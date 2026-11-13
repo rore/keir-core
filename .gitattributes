@@ -15,3 +15,6 @@
 /examples/numeric/stock/artifact.json -text
 /examples/numeric/quote/dcm.json -text
 /examples/numeric/quote/artifact.json -text
+/conformance/keir-4/engine-matrix.json -text
+/conformance/keir-4/retained-names.json -text
+/conformance/keir-4/host-boundaries-artifact.json -text

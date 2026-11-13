@@ -16,6 +16,68 @@ verify_assets = verifier["verify_assets"]
 
 
 class ReleaseAssetTest(unittest.TestCase):
+    def test_numeric_package_selection_keeps_old_bytes_and_complete_oracles(self):
+        from subprocess import CompletedProcess
+        root = Path(__file__).resolve().parents[1]
+        select = verifier["numeric_smoke_inputs"]
+        corpus = root / "conformance/keir-4"
+        calls = []
+
+        def fixture_compiler(args, **kwargs):
+            # Unit transport stub only; real packaged compilation remains a hosted smoke obligation.
+            name = Path(args[-2]).name.removesuffix("-source.json")
+            calls.append(name)
+            if name == "retained-names":
+                data = verifier["canonical"](json.loads((corpus / "retained-names.json").read_bytes())["artifact"])
+            elif name == "boundaries":
+                data = (corpus / "host-boundaries-artifact.json").read_bytes()
+            else:
+                data = (root / "examples/numeric" / name / "artifact.json").read_bytes()
+            return CompletedProcess(args, 0, stdout=data)
+
+        with tempfile.TemporaryDirectory() as directory, patch.dict(select.__globals__, {"run": fixture_compiler}):
+            rows = select(root, Path("compiler.jar"), Path(directory))
+            self.assertEqual(calls, ["retained-names", "stock", "quote", "boundaries"])
+            self.assertEqual(len(rows), 109)
+            by_id = {row["scenario"]["id"]: row for row in rows}
+            self.assertEqual(by_id["matrix-expression-only-size"]["scenario"]["expect"]["outcome"]["result"], {"value": True})
+            retained = by_id["retained-names"]
+            self.assertEqual(json.loads(Path(retained["model"]).read_bytes())["types"]["Integer"], {"base": "String", "kind": "nominal"})
+            self.assertEqual(retained["scenario"]["given"]["input"]["integer"], "not-a-number")
+            self.assertEqual(by_id["stock"]["scenario"]["expect"]["calls"][1]["args"], {"itemId": "item1", "quantity": "3"})
+            self.assertEqual(by_id["quote"]["event"], {"id": "attempt1", "source": "quote1"})
+            self.assertEqual(by_id["boundary-bad-protected-integer"]["scenario"]["expect"]["calls"], [])
+            invalid = by_id["boundary-unused-confirmed-invalid"]["scenario"]["expect"]["outcome"]
+            self.assertEqual(invalid["error"]["code"], "ADAPTER_INVALID")
+            self.assertEqual(invalid["effects"][0]["state"], "CONFIRMED")
+            handler = by_id["boundary-handler-failure"]["scenario"]["expect"]["outcome"]
+            self.assertEqual(handler["error"]["cause"], {"code": "DENIED", "path": "/steps/4"})
+        with tempfile.TemporaryDirectory() as directory, patch.dict(select.__globals__, {
+                "run": lambda *args, **kwargs: CompletedProcess(args, 0, stdout=b"changed")}):
+            with self.assertRaisesRegex(ValueError, "Packaged compiler differs from numeric fixture"):
+                select(root, Path("compiler.jar"), Path(directory))
+
+    def test_new_guarded_authoring_does_not_relabel_historical_package_inputs(self):
+        from subprocess import CompletedProcess
+        root = Path(__file__).resolve().parents[1]
+        fixture = root / "conformance/keir-3"
+        select = verifier["guarded_smoke_inputs"]
+        before = {path: path.read_bytes() for path in fixture.glob("artifact-guarded*.json")}
+
+        def current_compiler(args, **kwargs):
+            path = fixture / Path(args[-2]).name.replace("source-", "artifact-", 1)
+            artifact = json.loads(path.read_bytes())
+            artifact.update(format="keir-artifact/4", compiler="keir-compiler-java/0.5.0")
+            return CompletedProcess(args, 0, stdout=verifier["canonical"](artifact))
+
+        with tempfile.TemporaryDirectory() as directory, patch.dict(select.__globals__, {"run": current_compiler}):
+            rows = select(root, Path("compiler.jar"), Path(directory), "0.5.0")
+            self.assertEqual(len(rows), 21)
+            producers = {json.loads(Path(row["artifact"]).read_bytes())["compiler"] for row in rows}
+            self.assertEqual(producers, {f"keir-compiler-java/{version}" for version in ("0.2.0", "0.3.0", "0.3.1", "0.4.0", "0.5.0")})
+            self.assertEqual([row["scenario"]["given"]["fixture"] for row in rows].count("response-expired"), 1)
+        self.assertEqual(before, {path: path.read_bytes() for path in before})
+
     def test_guarded_smoke_keeps_exact_compiled_and_historical_inputs(self):
         root = Path(__file__).resolve().parents[1]
         fixture = root / "conformance/keir-3"
@@ -129,7 +191,9 @@ def source_probe_check():
     with tempfile.TemporaryDirectory() as directory:
         work = Path(directory)
         assert not work.resolve().is_relative_to(root.resolve())
-        cases = verifier["guarded_smoke_inputs"](root, root / "compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar", work)
+        version = json.loads((root / "runtime-node/package.json").read_bytes())["version"]
+        cases = verifier["guarded_smoke_inputs"](root, root / "compiler-java/target/keir-compiler-java-0.1.0-SNAPSHOT-cli.jar", work, version)
+        guarded_count = len(cases)
         fixture = root / "conformance/keir-3"
         source = json.loads((fixture / "source-guarded-result.json").read_bytes())
         fields = source["return"]["record"]
@@ -145,7 +209,7 @@ def source_probe_check():
                                   cwd=work, capture_output=True, timeout=45)
         assert compiled.returncode == 0, compiled.stderr
         artifact = json.loads(compiled.stdout)
-        assert len(artifact["steps"]) == 8 and artifact["compiler"] == "keir-compiler-java/0.4.0"
+        assert len(artifact["steps"]) == 8 and artifact["compiler"] == f"keir-compiler-java/{version}"
         for field, kind in types.items():
             name = "bound" + field[0].upper() + field[1:]
             assert next(step["resultType"] for step in artifact["steps"] if step["id"] == name) == kind
@@ -172,7 +236,7 @@ def source_probe_check():
             rows = [json.loads(line) for line in result.stdout.splitlines()]
             assert rows == [row["scenario"]["expect"]["outcome"] for row in cases]
             outcomes.append(rows)
-        assert outcomes[0] == outcomes[1] and len(outcomes[0]) == 22
+        assert outcomes[0] == outcomes[1] and len(outcomes[0]) == guarded_count + 2
         cases[0]["scenario"]["expect"]["outcome"]["classification"] = "WRONG"
         manifest.write_text(json.dumps(cases), encoding="utf-8")
         for args in commands:

@@ -104,6 +104,7 @@ class GuardedResultSmoke {
       case VALUE_TRUE -> true;
       case VALUE_FALSE -> false;
       case VALUE_NUMBER_INT -> parser.getLongValue();
+      case VALUE_NULL -> null;
       default -> throw new AssertionError("Unexpected fixture token");
     };
   }
@@ -143,8 +144,30 @@ class GuardedResultSmoke {
 }
 '''
 
+NUMERIC_NODE_CHECKS = r'''
+for (const spec of JSON.parse(readFileSync(process.argv[3])).normalization) {
+  const input = Object.hasOwn(spec, 'repeat') ? spec.repeat.repeat(spec.count) : spec.input;
+  const normalize = spec.kind === 'integer' ? normalizeInteger : normalizeDecimal;
+  if (spec.expected === 'ERROR') assert.throws(() => normalize(input), TypeError);
+  else assert.equal(normalize(input), spec.expected);
+}
+'''
 
-def guarded_smoke_inputs(source, compiler, work):
+NUMERIC_JAVA_CHECKS = r'''
+    for (Object raw : list(map(json(Files.readAllBytes(Path.of(args[1])))).get("normalization"))) {
+      var spec = map(raw);
+      Object input = spec.containsKey("repeat") ? ((String)spec.get("repeat")).repeat(((Number)spec.get("count")).intValue()) : spec.get("input");
+      // Java has only String overloads: a numeric argument is rejected by the Java type checker.
+      if (input != null && !(input instanceof String)) { check("ERROR".equals(spec.get("expected"))); continue; }
+      try {
+        String result = "integer".equals(spec.get("kind")) ? KeirRuntime.normalizeInteger((String)input) : KeirRuntime.normalizeDecimal((String)input);
+        check(result.equals(spec.get("expected")));
+      } catch (IllegalArgumentException invalid) { check("ERROR".equals(spec.get("expected"))); }
+    }
+'''
+
+
+def guarded_smoke_inputs(source, compiler, work, version="0.4.0"):
     """Compile new inputs once; retain exact historical artifacts and full expectations."""
     fixture = source / "conformance/keir-3"
     cases = []
@@ -152,11 +175,17 @@ def guarded_smoke_inputs(source, compiler, work):
         model_name = "dcm-guarded-result-read" if group.endswith("-read") else "dcm-guarded-result"
         artifact = work / f"{group}.json"
         produced = run(["java", "-jar", str(compiler), str(fixture / f"source-{group}.json"),
-                        str(fixture / f"{model_name}.json")], cwd=work, capture_output=True).stdout
-        expected = (fixture / f"artifact-{group}.json").read_bytes()
+                        str(fixture / f"{model_name}.json")], cwd=work, capture_output=True, timeout=30).stdout
+        historical = (fixture / f"artifact-{group}.json").read_bytes()
         pin = (fixture / f"artifact-{group}.sha256").read_text().strip()
-        if (produced != expected or "sha256:" + hashlib.sha256(produced).hexdigest() != pin
-                or json.loads(produced)["compiler"] != "keir-compiler-java/0.4.0"):
+        if "sha256:" + hashlib.sha256(historical).hexdigest() != pin:
+            raise ValueError("Historical guarded-result fixture pin differs")
+        expected = historical
+        if version == "0.5.0":
+            retained = json.loads(historical)
+            retained.update(format="keir-artifact/4", compiler="keir-compiler-java/0.5.0")
+            expected = canonical(retained)
+        if produced != expected or json.loads(produced)["compiler"] != f"keir-compiler-java/{version}":
             raise ValueError("Packaged compiler differs from the guarded-result fixture")
         artifact.write_bytes(produced)
         scenarios = sorted((fixture / "scenarios" / group).glob("*.json"))
@@ -167,12 +196,15 @@ def guarded_smoke_inputs(source, compiler, work):
                           "scenario": json.loads(scenario.read_bytes())})
     if len(cases) != 15:
         raise ValueError("Guarded-result package scenario inventory changed")
-    for revision, artifact, model, scenario in (
+    historical_cases = [
             (2, "artifact", "dcm", "main/normal"),
             (3, "artifact", "dcm", "main/normal"),
             (3, "artifact-guard", "dcm-guard", "guard/guard-deny"),
             (3, "compatibility/0.3.0/event", "dcm", "main/normal"),
-            (3, "compatibility/0.3.0/decision", "dcm-guard", "guard-input/guard-input-allow")):
+            (3, "compatibility/0.3.0/decision", "dcm-guard", "guard-input/guard-input-allow")]
+    if version == "0.5.0":
+        historical_cases.append((3, "artifact-guarded-result", "dcm-guarded-result", "guarded-result/true"))
+    for revision, artifact, model, scenario in historical_cases:
         corpus = source / f"conformance/keir-{revision}"
         cases.append({"model": str(corpus / f"{model}.json"), "artifact": str(corpus / f"{artifact}.json"),
                       "scenario": json.loads((corpus / f"scenarios/{scenario}.json").read_bytes())})
@@ -187,6 +219,102 @@ def guarded_smoke_inputs(source, compiler, work):
             raise ValueError("Smoke fixture needs an explicit protected-value mapping")
         row["bindings"] = {name: "user1" for name in protected}
         row["event"] = {"id": "attempt1", "source": "scope1"} if decision else {"id": "event1", "source": "task1"}
+    return cases
+
+
+def canonical(value):
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def pinned(directory, name):
+    data = (directory / f"{name}.json").read_bytes()
+    if (directory / f"{name}.sha256").read_text().strip() != "sha256:" + hashlib.sha256(data).hexdigest():
+        raise ValueError(f"Numeric fixture pin differs: {name}")
+    return data
+
+
+def numeric_smoke_inputs(source, compiler, work):
+    """Reuse frozen compiler bytes and independent oracles; never import a source runtime."""
+    corpus = source / "conformance/keir-4"
+    cases = []
+
+    def row(name, model, artifact, input_value, outcome, *, stubs=(), bindings=None, event_source="owner1"):
+        model_path, artifact_path = work / f"{name}-model.json", work / f"{name}-artifact.json"
+        model_path.write_bytes(canonical(model)); artifact_path.write_bytes(canonical(artifact))
+        return {"model": str(model_path), "artifact": str(artifact_path), "bindings": bindings or {},
+                "event": {"id": "event1", "source": event_source},
+                "scenario": {"id": name, "given": {"input": input_value, "fixture": "normal"}, "stubs": list(stubs),
+                             "expect": {"calls": [{key: value for key, value in stub.items() if key != "response"} for stub in stubs],
+                                        "outcome": outcome}}}
+
+    def compile_exact(name, model, source_value, expected):
+        model_path, source_path = work / f"{name}-model.json", work / f"{name}-source.json"
+        model_path.write_bytes(canonical(model)); source_path.write_bytes(canonical(source_value))
+        produced = run(["java", "-jar", str(compiler), str(source_path), str(model_path)],
+                       cwd=work, capture_output=True, timeout=30).stdout
+        if produced != expected:
+            raise ValueError(f"Packaged compiler differs from numeric fixture: {name}")
+        return json.loads(produced)
+
+    matrix = json.loads(pinned(corpus, "engine-matrix"))["cases"]
+    if len(matrix) != 97:
+        raise ValueError("Numeric engine matrix inventory changed")
+    for spec in matrix:
+        # Same independent complete-trace oracle used by both runtime integration suites.
+        ids = ["a", "b", "i", "j", "flag", "text"] + (["d"] if spec["id"] in ("bind", "expression-only-size") else [])
+        trace = [{"event": "INVOCATION_START"}]
+        for name in ids:
+            trace.extend(({"event": "STEP_START", "step": name}, {"event": "VALUE_BOUND", "step": name}))
+        outcome = {"classification": "COMPLETED", "result": {"value": spec["expected"]}, "effects": []}
+        if spec["expected"] in ("ERROR", "TIME_ERROR"):
+            code = "BUDGET_EXCEEDED" if spec["expected"] == "TIME_ERROR" else "EXPRESSION_FAILED"
+            outcome = {"classification": "LIMIT_EXCEEDED" if code == "BUDGET_EXCEEDED" else "FAILED",
+                       "error": {"code": code, "path": "/return"}, "effects": []}
+            trace.append({"event": "TERMINATED", "code": code})
+        else:
+            trace.extend(({"event": "RETURNED"}, {"event": "TERMINATED"}))
+        outcome["trace"] = [{"sequence": i, **event} for i, event in enumerate(trace)]
+        cases.append(row("matrix-" + spec["id"], spec["dcm"], spec["artifact"], spec["input"], outcome))
+
+    retained = json.loads(pinned(corpus, "retained-names"))
+    authoring = {"language": "keir/2", "domain": {**retained["dcm"]["domain"], "fingerprint": retained["artifact"]["modelRef"]["digest"]},
+                 "entrypoint": "Run", "name": "numeric-rule", "steps": [
+                     {"id": "value", "let": {"literal": "not-a-number", "type": "Integer"}}],
+                 "return": {"record": {"value": {"cel": "value == input.integer"}}}}
+    compile_exact("retained-names", retained["dcm"], authoring, canonical(retained["artifact"]))
+    trace = [{"event": "INVOCATION_START"}, {"event": "STEP_START", "step": "value"},
+             {"event": "VALUE_BOUND", "step": "value"}, {"event": "RETURNED"}, {"event": "TERMINATED"}]
+    cases.append(row("retained-names", retained["dcm"], retained["artifact"], retained["input"],
+                     {"classification": "COMPLETED", "result": {"value": True}, "effects": [],
+                      "trace": [{"sequence": i, **event} for i, event in enumerate(trace)]}))
+
+    for name in ("stock", "quote"):
+        directory = source / "examples/numeric" / name
+        model = json.loads(pinned(directory, "dcm"))
+        artifact = compile_exact(name, model, json.loads((directory / "source.json").read_bytes()), pinned(directory, "artifact"))
+        scenario = json.loads((directory / "scenarios/normal.json").read_bytes())
+        entry = row(name, model, artifact, scenario["given"]["input"], scenario["expect"]["outcome"],
+                    stubs=scenario["stubs"], bindings={"actorId": "user1"} if name == "stock" else {},
+                    event_source="item1" if name == "stock" else "quote1")
+        if name == "quote":
+            entry["event"]["id"] = "attempt1"
+        cases.append(entry)
+
+    boundary = json.loads((corpus / "host-boundaries.json").read_bytes())
+    artifact = compile_exact("boundaries", boundary["dcm"], boundary["source"], pinned(corpus, "host-boundaries-artifact"))
+    for spec in boundary["cases"]:
+        stubs = []
+        for step, capability, args, response in (
+                ("read", "numbers.read", {key: boundary["input"][key] for key in ("integer", "decimal")}, spec.get("read", boundary["read"])),
+                ("written", "numbers.write", spec.get("args", {}), spec.get("write", boundary["write"]))):
+            if len(stubs) < spec["calls"]:
+                stubs.append({"step": step, "capability": capability, "version": "1", "args": args,
+                              "protectedArgs": boundary["bindings"], "response": response})
+        outcome = {**spec["expect"], "trace": [{"sequence": i, **event} for i, event in enumerate(boundary["traces"][spec["trace"]])]}
+        cases.append(row("boundary-" + spec["id"], boundary["dcm"], artifact, spec.get("input", boundary["input"]), outcome,
+                         stubs=stubs, bindings=spec.get("bindings", boundary["bindings"])))
+    if len(cases) != 109:
+        raise ValueError("Numeric installed-consumer inventory changed")
     return cases
 
 
@@ -340,23 +468,32 @@ def smoke(version, assets, revision, maven_repo, npm_cache, offline):
                 if result.stdout.splitlines() != expected:
                     raise ValueError(f"{label} package produced unexpected {name} outcomes: {result.stdout!r}")
 
-        if version == "0.4.0":
-            cases = guarded_smoke_inputs(source, compiler, work)
+        if version in ("0.4.0", "0.5.0"):
+            cases = guarded_smoke_inputs(source, compiler, work, version)
+            if version == "0.5.0":
+                cases += numeric_smoke_inputs(source, compiler, work)
             manifest = work / "guarded-cases.json"
             manifest.write_text(json.dumps(cases), encoding="utf-8")
+            java_source, node_source = GUARDED_JAVA_SMOKE, GUARDED_NODE_SMOKE
+            extra_args = []
+            if version == "0.5.0":
+                java_source = java_source.replace('  public static void main(String[] args) throws Exception {',
+                                                  '  public static void main(String[] args) throws Exception {' + NUMERIC_JAVA_CHECKS)
+                node_source = node_source.replace('invokeProgram }', 'invokeProgram, normalizeInteger, normalizeDecimal }') + NUMERIC_NODE_CHECKS
+                extra_args = [str(source / "conformance/numeric-values.json")]
             java_probe = work / "GuardedResultSmoke.java"
-            java_probe.write_text(GUARDED_JAVA_SMOKE, encoding="utf-8")
+            java_probe.write_text(java_source, encoding="utf-8")
             node_probe = example / "guarded-result-smoke.mjs"
-            node_probe.write_text(GUARDED_NODE_SMOKE, encoding="utf-8")
+            node_probe.write_text(node_source, encoding="utf-8")
             java_result = run(["java", "-cp", os.pathsep.join([str(runtime), classpath.read_text().strip()]),
-                               str(java_probe), str(manifest)], cwd=work, capture_output=True, text=True, timeout=45)
-            node_result = run(["node", str(node_probe), str(manifest)], cwd=work,
+                               str(java_probe), str(manifest), *extra_args], cwd=work, capture_output=True, text=True, timeout=45)
+            node_result = run(["node", str(node_probe), str(manifest), *extra_args], cwd=work,
                               capture_output=True, text=True, timeout=45)
             java_rows = [json.loads(line) for line in java_result.stdout.splitlines()]
             node_rows = [json.loads(line) for line in node_result.stdout.splitlines()]
             if java_rows != node_rows or java_rows != [row["scenario"]["expect"]["outcome"] for row in cases]:
-                raise ValueError("Packaged guarded-result complete outcomes differ")
-            print(f"Packaged guarded-result and historical smoke matched {len(cases)} complete outcomes per runtime.", flush=True)
+                raise ValueError("Packaged numeric/guarded/historical complete outcomes differ")
+            print(f"Packaged numeric/guarded/historical smoke matched {len(cases)} complete outcomes per runtime.", flush=True)
 
 
 def main():

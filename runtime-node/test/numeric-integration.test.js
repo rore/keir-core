@@ -1,19 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { bindModel, prepareProgram, invokeProgram } from '../src/index.js';
 import { canonicalBytes } from '../src/canonical.js';
 import { modelFor } from '../src/model.js';
 import { validatePlan } from '../src/validation.js';
 import { createActivation, prepareExpressions, evaluateBinding } from '../src/cel.js';
 
-const pinned = new URL('../../conformance/keir-4/engine-matrix.json', import.meta.url);
-const batch = existsSync(pinned) ? pinned : new URL('../../compiler-java/target/numeric-integration.json', import.meta.url);
-const { cases } = JSON.parse(readFileSync(batch, 'utf8'));
-const { programs } = JSON.parse(readFileSync(new URL('../../compiler-java/target/numeric-programs.json', import.meta.url), 'utf8'));
+const { cases } = JSON.parse(readFileSync(new URL('../../conformance/keir-4/engine-matrix.json', import.meta.url), 'utf8'));
+const programs = ['stock', 'quote'].map(name => ({ name,
+  dcm: JSON.parse(readFileSync(new URL('../../examples/numeric/' + name + '/dcm.json', import.meta.url))),
+  artifact: JSON.parse(readFileSync(new URL('../../examples/numeric/' + name + '/artifact.json', import.meta.url))),
+}));
 assert.equal(cases.length, 97);
 test('retained nominal Integer and Decimal names keep String meaning in new artifacts', async () => {
-  const row = JSON.parse(readFileSync(new URL('../../compiler-java/target/numeric-retained.json', import.meta.url), 'utf8'));
+  const row = JSON.parse(readFileSync(new URL('../../conformance/keir-4/retained-names.json', import.meta.url), 'utf8'));
   const prepared = prepare(row);
   assert.equal(prepared.diagnostic, null);
   const outcome = await invokeProgram(prepared.prepared, row.input, { bindings: {}, requestKey: 'retained-key',
@@ -163,7 +164,7 @@ for (const program of programs) test('complete numeric program/' + program.name,
 
 test('numeric protected/agent/guarded boundaries preserve complete independent outcomes', async () => {
   const fixture = JSON.parse(readFileSync(new URL('../../conformance/keir-4/host-boundaries.json', import.meta.url), 'utf8'));
-  const artifact = readFileSync(new URL('../../compiler-java/target/numeric-host-boundaries.json', import.meta.url));
+  const artifact = readFileSync(new URL('../../conformance/keir-4/host-boundaries-artifact.json', import.meta.url));
   let current;
   const adapters = Object.fromEntries(Object.entries(fixture.dcm.capabilities).map(([capability, cap]) => [capability, {
     version: cap.version, mode: 'simulation', keyType: fixture.dcm.hostKey.type,

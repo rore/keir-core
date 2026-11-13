@@ -70,7 +70,9 @@ class NumericCompilerTest {
         }
         var target=Path.of("target","numeric-integration.json");
         Files.createDirectories(target.getParent());
-        Files.write(target,bytes(Map.of("cases",rows)));
+        byte[] batch=bytes(Map.of("cases",rows));
+        assertArrayEquals(Files.readAllBytes(Path.of("..","conformance","keir-4","engine-matrix.json")),batch);
+        Files.write(target,batch);
         assertEquals(97,rows.size());
     }
 
@@ -103,6 +105,7 @@ class NumericCompilerTest {
             var compiled=compiler.compile(source,model,KeirCompiler.Environment.supported());
             assertTrue(compiled.succeeded(),name+": "+compiled.diagnostics());
             assertArrayEquals(compiled.artifact(),compiler.compile(source,model,KeirCompiler.Environment.supported()).artifact());
+            assertArrayEquals(Files.readAllBytes(root.resolve("artifact.json")),compiled.artifact());
             Files.write(Path.of("target","numeric-"+name+".json"),compiled.artifact());
             programs.add(Map.of("name",name,"dcm",parse(model),"artifact",parse(compiled.artifact())));
         }
@@ -114,6 +117,7 @@ class NumericCompilerTest {
         var model=map(document.get("dcm")); var source=map(document.get("source"));
         var compiled=compile(source,model);
         assertTrue(compiled.succeeded(),compiled.diagnostics().toString());
+        assertArrayEquals(Files.readAllBytes(Path.of("..","conformance","keir-4","host-boundaries-artifact.json")),compiled.artifact());
         Files.write(Path.of("target","numeric-host-boundaries.json"),compiled.artifact());
         // Unguarded access, mixed numeric branches and unguarded presence tests fail closed.
         for (String forbidden:List.of("read.integer","g ? read.integer : decimal(\"0\")",
@@ -140,8 +144,10 @@ class NumericCompilerTest {
         assertEquals(1,dcm.descriptors().getFileCount());
         assertEquals(com.google.protobuf.Descriptors.FieldDescriptor.Type.STRING,
                 dcm.fileDescriptor().findMessageTypeByName("Input").findFieldByName("integer").getType());
-        Files.write(Path.of("target","numeric-retained.json"),bytes(Map.of("dcm",retained,"artifact",parse(compiled.artifact()),
-                "input",Map.of("integer","not-a-number","decimal","also-not-a-number"))));
+        byte[] batch=bytes(Map.of("dcm",retained,"artifact",parse(compiled.artifact()),
+                "input",Map.of("integer","not-a-number","decimal","also-not-a-number")));
+        assertArrayEquals(Files.readAllBytes(Path.of("..","conformance","keir-4","retained-names.json")),batch);
+        Files.write(Path.of("target","numeric-retained.json"),batch);
         source.put("return",Map.of("record",Map.of("value",Map.of("cel","1 == 1"))));
         assertFalse(compile(source,retained).succeeded());
         source.put("language","keir/3");
