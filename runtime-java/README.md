@@ -23,6 +23,12 @@ An EVENT/AFTER_COMMIT extension may contain at most one possible write. A REQUES
 
 [Earlier Java runtime APIs](../docs/internal/compatibility-reference.md#earlier-java-apis).
 
+## Exact numbers in the current source profile
+
+Model `keir-dcm/4` uses canonical strings for Integer and Decimal business values, including capability arguments/results and rule outputs. Integer is signed int64. Decimal has at most 38 normalized coefficient digits and scale 0–18. Neither uses floating-point coercion or implicit rounding. Retained models keep their original type meanings.
+
+For opt-in host text normalization, use `KeirRuntime.normalizeInteger("+00100.00")` or `KeirRuntime.normalizeDecimal("100.00")`; both return `"100"`. They accept at most 256 ASCII characters and reject invalid or inexact input with `IllegalArgumentException`. The helpers do not grant native price, payment or write authority. Bind/prepare/invoke signatures are unchanged. See the [runnable source examples](../examples/numeric/README.md); installed hosts need separately selected compatible packages.
+
 ## Verification
 
 Async authorization and adapter waits have finite native timeouts even when an injected logical clock stays stationary. Expiry checks run on independent daemon workers so a blocking host clock does not occupy the shared scheduler; that clock can still retain its own worker/invocation. Expired or regressing clocks stop later work, and late completions are ignored. Synchronous CEL and synchronous host callbacks cannot be preempted. Checked-AST/data ceilings and before/after clock checks do not establish hard execution deadlines, CPU gas equivalence, memory isolation or production tenant containment. Stopping the wait does not cancel underlying host I/O.

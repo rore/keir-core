@@ -4,7 +4,7 @@ For the packaged CLI, follow [released-package installation](../docs/installatio
 
 The Java library and standalone CLI compile Keir against the application’s domain capability model (DCM). The output is a compiled artifact that refers to the exact model used for validation. [Compile and run the follow-up rule](../examples/README.md#compile-the-rule)
 
-The compiler accepts source `keir/2` with model `keir-dcm/3` and produces `keir-artifact/3`. That model supports post-commit event extensions and read-only pre-operation decisions. See the [decision walkthrough](../docs/decision-walkthrough.md) and [exact compatibility matrix](../docs/specs/compiler-artifact.md#source-and-artifact-identity).
+The current source compiler accepts source `keir/2` with model `keir-dcm/3`, or numeric source `keir/3` with model `keir-dcm/4`. Both produce `keir-artifact/4`. The retained pair keeps its old type meanings, including nominal String types named Integer or Decimal. The numeric pair adds signed int64 Integer, exact Decimal, explicit rounding and supplied bounded-list length. These source capabilities do not upgrade an installed host or its approved artifacts. See the [numeric examples](../examples/numeric/README.md), [decision walkthrough](../docs/decision-walkthrough.md) and [exact compatibility matrix](../docs/specs/compiler-artifact.md#source-and-artifact-identity).
 
 <a id="legacy-profile-selection"></a>
 For document identities and the Java compiler API, see the [compiler reference](../docs/specs/compiler-artifact.md).

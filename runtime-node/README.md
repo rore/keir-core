@@ -34,6 +34,12 @@ const outcome = await invokeProgram(prepared, businessInput, {
 
 The host supplies protected values such as the authenticated actor in `bindings`, the original non-null request key, and the event ID and source. For a REQUEST hook, those event fields identify the operation attempt and its host-defined scope, without asserting a commit. The deadline is an absolute time measured by the host's `clock.nowMs()`. Each implementation receives business arguments, protected arguments, the remaining time, and context with the key, event and deadline. The implementation checks current permission and key authenticity.
 
+## Exact numbers in the current source profile
+
+Model `keir-dcm/4` uses canonical strings for Integer and Decimal business values, including capability arguments/results and rule outputs. Integer is signed int64. Decimal has at most 38 normalized coefficient digits and scale 0–18. Neither uses floating-point coercion or implicit rounding. Retained models keep their original type meanings.
+
+The root exports `normalizeInteger(text)` and `normalizeDecimal(text)` normalize exact host text. For example, both turn `"+00100.00"` into `"100"`. They accept at most 256 ASCII characters and reject invalid, non-string or inexact input with `TypeError`. Do not convert through JavaScript `Number` first. The helpers do not grant native price, payment or write authority. Bind/prepare/invoke signatures are unchanged. See the [runnable source examples](https://github.com/rore/keir-core/blob/main/examples/numeric/README.md); installed hosts need separately selected compatible packages.
+
 ## Read the outcome
 
 A rule result describes what the rule returned. A separate write receipt records what the implementation reported. A skipped write has no receipt. `CONFIRMED` means the implementation reported a commit, `NONE` means it reported no write, and `UNKNOWN` means the write may have happened. Check with your application’s service before deciding what to do next.
