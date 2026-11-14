@@ -1,0 +1,129 @@
+# Deliver the compact Studio in the application
+
+Owning feature: [Extension Studio design](../../roadmap/features/extension-studio-design.md). Daymark baseline: `eb31d2541c350320fe99b2869c3e0bde42f6e985`. The fictional preview is a design reference, not this deliverable.
+
+<!-- agent-workflow:start -->
+**Outcome:**
+The actual Daymark Studio provides the compact conversation-first experience, with one Send and useful rule review, instead of leaving the improvement in a mockup.
+
+**Target:**
+Daymark production Studio and the retained running demo.
+
+**Scope:**
+Compact persistent target/active-draft status, cohesive workspace, growing single-Send composer, concise inline proposal/review/current-use presentation and recovery copy; safe conversational discussion versus explicit draft preparation; affected tests/docs and owning records. Reuse the reviewed preview, existing lifecycle, host reads and saved evidence.
+
+**Constraints:**
+No new mockup rounds, Core semantics, schema migration, dependencies, general memory, cross-user reads, automatic target changes, task writes, approval or activation. Preserve saved history/input, exact pending replay, approval/evidence freshness and separate activation. Discussion stays nonmutating; ambiguity clarifies rather than guessing. No keyword-based permission gate or client-only authority. No paid provider calls or unrelated environment changes. Preserve the running demo URL/data/settings and unrelated dirty checkouts.
+
+**Completion criteria:**
+The real Studio has one Send, persistent exact target/state and materially more usable chat space with readable text across desktop, short/mobile and zoom. Clear create/revise requests can prepare only the opened draft; questions/suggestions and ambiguous requests do not mutate it. One compact inline review retains full behavior/examples/limits and separate exact approval/activation; current use is read-only and distinct. Input/history/reading context and safe recovery remain. Focused/full regression and actual rendered interaction pass, required reviews are accepted, authorized delivery and data-preserving demo update complete.
+
+**Requirement baseline:**
+{"source":"user correction: improve the actual app, not just the preview","outcome":"The actual Daymark Studio provides the compact conversation-first experience, with one Send and useful rule review, instead of leaving the improvement in a mockup.","scope":"Compact persistent target/active-draft status, cohesive workspace, growing single-Send composer, concise inline proposal/review/current-use presentation and recovery copy; safe conversational discussion versus explicit draft preparation; affected tests/docs and owning records. Reuse the reviewed preview, existing lifecycle, host reads and saved evidence.","constraints":"No new mockup rounds, Core semantics, schema migration, dependencies, general memory, cross-user reads, automatic target changes, task writes, approval or activation. Preserve saved history/input, exact pending replay, approval/evidence freshness and separate activation. Discussion stays nonmutating; ambiguity clarifies rather than guessing. No keyword-based permission gate or client-only authority. No paid provider calls or unrelated environment changes. Preserve the running demo URL/data/settings and unrelated dirty checkouts.","completion_criteria":"The real Studio has one Send, persistent exact target/state and materially more usable chat space with readable text across desktop, short/mobile and zoom. Clear create/revise requests can prepare only the opened draft; questions/suggestions and ambiguous requests do not mutate it. One compact inline review retains full behavior/examples/limits and separate exact approval/activation; current use is read-only and distinct. Input/history/reading context and safe recovery remain. Focused/full regression and actual rendered interaction pass, required reviews are accepted, authorized delivery and data-preserving demo update complete."}
+
+**Relationships:**
+{"schema_version":1,"sources":[{"provider":"minimap","scope_ref":"roadmap:v1:git:github.com/rore/keir-core#roadmap","local_ref":"item:v1:extension-studio-design"}],"pull_requests":[]}
+
+**Risk:** Elevated
+**Complexity:** Moderate
+**Reason:**
+Production interaction and host-owned preparation authority change. Owner/persistence and exact approval/activation mechanisms must remain intact; independent technical plan/result review is required.
+
+**Discovery:**
+The current UI has separate discuss/prepare intents, dispatch and host-binding nonmutation fences, exact raw-request recovery, existing owner-bound Open navigation and multiple review/current-use surfaces. The whole-UI audit and designer's actual-rendered readback identify redundant chrome and review navigation. A single self-contained preview establishes the visual direction; it does not establish safe natural-intent handling.
+
+**Material assumptions:**
+Existing components/read models can support the compact layout without a second controller or schema change. The architect must settle how one Send routes explicit preparation versus discussion conservatively, using existing provider/host boundaries. If that requires a new permission mode or weakens discussion nonmutation, stop and revise the design rather than reintroducing the rejected button.
+
+**Plan:**
+1. Architect inspects the actual intent/dispatch/binding/recovery flow and gives one bounded safe contract and implementation-plan review; reuse accepted lifecycle/privacy contracts rather than reopening them.
+2. Developer maps the reviewed compact design onto the existing application components. Keep saved-name/status visible, remove redundant send/footer controls, collapse full proposal detail behind inline Review, and reuse that presentation for current use. Preserve useful evidence and navigation/focus restoration.
+3. Implement the accepted single-Send contract with owner/target/replay fences; update affected UI, provider coaching and documentation without changing approval/activation authority.
+4. Verify a representative populated real-host journey early against the preview, then focused and full checks. Designer reviews only representative actual-app renders for material drift, not another audit. Independent technical result and documentation review cover actual changes.
+5. Deliver through the existing authorized workflow and update the retained demo with fresh backup and data/settings readback. Preserve compact evidence and clean completed task checkouts.
+
+Settled single-Send contract:
+- New free-text Send/Enter submits explicit `intent: auto`, never an omitted field. Each auto turn begins unresolved with no mutation authority. Within the existing checkpointed provider loop, one bounded resolution phase exposes only a closed discuss/prepare/clarify response. It receives the current user text, bounded relevant same-target user history and necessary clarification context, not task/tool/source text, broader discovery or prior provider continuation. Assistant wording supplies context, never consent.
+- The host validates, fences and checkpoints the result for the exact owner/run/target/draft, then freezes that turn's resolved intent. Only resolved prepare enables compile/scenario/simulation in both dispatch and host bindings. No later tool can promote it; every new auto turn resolves afresh. Missing, malformed or ambiguous resolution never prepares. Failures stop or clarify safely.
+- Reuse the configured provider, reservation/preflight/checkpoint accounting and existing call/token/time/byte limits. Resolution is a real accounted provider call, including uncertain holds. Reset classifier continuation before normal context; store resolution in existing JSON state, with no migration or separate classifier service.
+- Preserve legacy omitted/discuss/prepare bodies and hashes. Exact duplicate/recovery returns its original operation without another resolution or redispatch. Generic Continue/Try again stays discuss; submitted-request retries preserve the exact original body. Another item's requested edit can only offer explicit Open.
+- Natural-language inference remains fallible. Host placement and schema validation cannot prove semantic consent; a false-positive draft preparation is residual risk. Owner/target boundaries, task-write exclusion and separate exact approval/activation do not depend on that inference. Do not claim infallible discussion nonmutation from scripted evidence.
+
+**Verification plan:**
+- Readable compact layout → actual-app desktop, short, mobile and native zoom renders with populated chat, visible exact target/state/composer and aligned workspace.
+- Natural one-Send behavior → clear preparation, discussion, suggestions, negative/ambiguous intent, contextual short replies and hostile task content; assert exact domain/draft nonmutation where required.
+- Exact authority and recovery → unsolicited tool calls, stale/foreign target, owner switch/late response, old pending-request replay and fresh continuation checks.
+- Inline review/current use → differing seven-day active/five-day proposed rule, examples and gaps, exact approval without activation, separate activation, read-only history, retained input/reading/focus.
+- Combined acceptance → affected tests, build and full Node/browser regression, independent technical/docs result review and bounded designer rendered comparison; no live-provider quality claim without separately authorized replay.
+
+**Plan review:**
+Agent technical review: independent architect PLAN GO for the production plan and settled single-Send contract at Daymark `eb31d2541c350320fe99b2869c3e0bde42f6e985`, reviewed initial record SHA-256 `b479372e031171c5b79901e34c83ab5f3e71bd584b3e2bc04818e2929c681308`. Elevated/Moderate accepted. Existing unchanged host-awareness/lifecycle contracts reused. No additional preview round or plan gate required; the contract above records the accepted decisions and residual semantic risk.
+
+**Approvals:**
+User explicitly directed improvement of the actual app after rejecting the extra send mode and wasted space. No additional approval is required for this scope at Elevated risk. Paid provider qualification remains unapproved.
+
+**Exceptions:**
+—
+
+**State:** Ready for review
+<!-- agent-workflow:end -->
+
+## Implementation
+
+Production work is now the active deliverable. The preview stops being the completion target. The manager owns this record/roadmap; the architect resolves the narrow natural-intent contract, the developer owns implementation, and the designer remains idle until a bounded real-app comparison is useful. No further mockup or generic approval loop is planned.
+
+Independent architecture review accepted the existing-loop resolution phase, frozen host intent and unchanged exact replay/approval boundaries. The developer may now implement the plan; parent edits are limited to affected documentation and owning records. No paid provider replay is approved.
+
+Implementation changed the actual assistant, host service and Studio layout/review components. Existing human guides and walkthrough instructions now describe one Send, intent-resolution data/cost boundaries, inline review and residual semantic uncertainty. The following evidence records the intermediate failures and their corrections.
+
+Manager inspected the first actual-app desktop, short and mobile populated/review captures, produced with real compiler/lifecycle evidence and seeded conversation on disposable fictional data. One Send, exact target/state and cohesive workspace are present. The captures remain intermediate: old review-navigation links need consolidation, Rename is still primary chrome, and the unconfigured fixture adds setup controls unlike the user's configured workspace. Those concrete reference gaps were sent to the developer; a configured synthetic/no-provider-call view is needed for the representative comparison. Truthful unconfigured setup controls must remain for users who need them. No final rendered or behavioral acceptance is claimed.
+
+The developer's intermediate report confirms the real-app build passed and 36 existing current-use/host-awareness checks passed. New intent checks reported 22 passes and one deletion-status assertion requiring correction; no final new-suite pass is claimed. Remaining header/review cleanup and configured synthetic renders are being completed before the stable contribution and combined regression. Offline tooling reused an already-installed isolated dependency tree only after confirming byte-identical package locks; no installed environment or dependency version changed.
+
+Later focused evidence is green: 69 Node checks (25 auto-intent, 32 API and 12 context) passed, and the new real-host single-Send journey passed desktop, short and mobile cases in 37.9 seconds. It uses explicit scripted intent decisions with real compilation, lifecycle evidence, separate approval/activation, a later draft, discussion/clarification nonmutation and read-only active-version inspection with retained input/focus. These are not live semantic-quality claims. Configured synthetic renders now omit the setup footer appropriately. Compatibility-focused checks and native zoom are still being finished before source freeze/full regression. The designer has one bounded comparison of fixed actual-app renders, not another audit or mockup task.
+
+The designer returned visual GO for the fixed actual-app short-desktop, mobile and expanded-review captures, with no further visual corrections. It accepted the cohesive workspace, exact target/active-draft context, compact proposal, composer and readable review structure. The in-place Go to approval anchor is useful within the same long inline review; this resolves the earlier literal-label concern rather than requiring deletion of helpful navigation. The mobile proposal and final decision area were not visible in those images; their behavior remains covered by the real-host journey and later combined verification, not by this visual verdict.
+
+Native 200% browser zoom is verified at zoom 2 and DPR 2, with inner 704×398 and outer 1440×900. Manager inspected the configured actual-app capture: target/state and composer remain visible. The frozen six-file source candidate matches all tracked source identity `41236fa5416e9d56a07ae03e13d893b27368b96c318007db2ce415993390807e`. Independent technical result review is now assigned against that fixed candidate while the developer finishes browser-test compatibility. Full Node regression has started; full browser regression waits for stable test handoff. Source changes require identity reconciliation and delta review. Publication and the retained demo update remain pending. No paid provider replay occurred.
+
+## Evidence
+
+Prior audit and preview evidence establish the visual direction only. Independent documentation-role review returned prose GO for the six changed human-guide surfaces against the accepted single-Send contract, including model data/cost disclosure, semantic uncertainty, exact legacy replay and separate approval/activation. Its limited in-progress UI readback still found competing approval/simulation navigation; that existing-scope alignment was forwarded to the developer and remains part of final actual-app acceptance. The prose GO is not source, rendered-app or test acceptance. Production verification is still pending.
+
+Manager's combined verification of the frozen source candidate: `npm run build` passed. Full `npm test` completed in 89.7 seconds with 661 total, 648 passed, 13 skipped and zero failures. Skips are the Windows-inapplicable POSIX mode check and 12 explicitly selected multiprocess qualification checks, not removed assertions. All tracked source bytes still match the frozen identity; Node-test identities were retained with the private run evidence. Full browser regression and independent technical result review remain open. Added-line/new-file privacy scanning passed; the fresh complete demo-path Redline report remains Gray/Elevated in shadow mode with no boundary violations.
+
+Skill-feedback trigger 2 dropped: preview-only drift and excessive handoff logging were manager execution errors, not Agent Workflow defects. The preview is now only a reference, all active state stays in the owning task/roadmap, and the retired handoff file is not read or updated.
+
+## Result review
+
+Agent technical review: independent architect result report against the immutable six-file source candidate.
+
+Reviewed revision: baseline `eb31d2541c350320fe99b2869c3e0bde42f6e985` plus source identity `41236fa5416e9d56a07ae03e13d893b27368b96c318007db2ce415993390807e`.
+
+Verification adequacy: one P2 correction remains. `simulationLimits(activeProof)` in Studio passes active evidence to a helper that derives elapsed timing from the current draft. An active elapsed-deadline rule with a no-deadline draft loses its clock-change caveat; the reverse wrongly adds one. Pass the reviewed revision's timing explicitly and use the active snapshot for current-use inspection. Add both differing-timing-presence directions to a runnable check. The existing seven-day/five-day journey does not expose this bug. No other required findings were reported in resolution, authority, privacy, accounting, replay or lifecycle handling. The review did not execute tests or qualify live-model behavior.
+
+The developer corrected the finding within the existing source/test contribution. Targeted evidence and delta review are recorded below.
+
+The developer completed the P2 root fix and handed off stable source/tests. Both `simulationLimits` callers now supply timing from the exact reviewed revision, including the active snapshot during current-use inspection. Two new real-compiler tests exercise elapsed active/no-deadline draft and the reverse. Both failed against the pre-fix bundle; the fixed eight-case active-inspection suite passed in 27.8 seconds, and build/diff checks passed. Source identity is now `1c1577932d22a707905a1831791c3ad24a9ad35d4e4f67dd9aeb9ffabbc6f15d`; contribution identity is `e81bd8972072083fba1eb480e53beb325e1be33c1bbe119ca455c48bc488f6c5`. Manager verified every source/contribution file against these manifests. Only Studio timing presentation changed after the full Node pass; server and Node-test bytes remain covered.
+
+Independent delta review is assigned against the fixed correction and red/green evidence, reusing the original result for unchanged source. Full browser regression is running against the stable handoff. An earlier compatibility run had four passes, four exact accounting failures subsequently corrected but not rerun, and nine unrun cases; these remain unverified until the full run completes. No duplicate suite, skipped meaningful assertion, further visual revision or live-provider replay is authorized by that handoff.
+
+Agent technical review: independent architect DELTA GO closes P2 with no further findings. Reviewed revision: source identity `1c1577932d22a707905a1831791c3ad24a9ad35d4e4f67dd9aeb9ffabbc6f15d`, exactly four source-expression changes from the original reviewed candidate. Verification adequacy: both timing-presence directions check active and draft views, with recorded pre-fix failures, eight post-fix passes and build PASS. Original result applies to unchanged source.
+
+Full browser regression completed: 272 cases, 239 passed and 33 failed in 18.8 minutes. Delivery remains open. The failures cluster around old split-scroller/focus destinations and status/accounting expectations, plus unresolved rename/menu reachability, restoration of management focus, delayed unread indication and historical reading position. These are not all classified as stale tests. The developer owns one consolidated root-cause correction using the complete log and retained traces; preserve semantic assertions, exact authority, reading/input/focus and meaningful uncertainty. Fix shared helpers before individual callers, and do not restore the rejected split layout or remove assertions to force green. Run the affected cases first, then reconcile any source delta with the accepted technical and rendered evidence. No publication or live-demo change has occurred.
+
+The first targeted rerun passed 28 of those 33 cases. Five remain. The developer traced return-scroll/resize failures to a shared tracker: scrolling an inline inspector to its end can re-enable transcript auto-follow, overriding restored reading position and hiding the focused input. The correction must fence that tracker. The other reported failures are an overlooked provider-call count, post-activation status copy and short-screen height from the other-active-item label. The Turn off edge discrepancy was measured as 0.328125px of border from integer scroll rounding; its check now bounds every edge to one pixel and requires keyboard focus, rather than using a loose visibility ratio. These intermediate results are not final regression acceptance.
+
+Browser corrections now have a fixed source candidate `b0bdc14807d74032e29396fb585d8cc93cc4ebe165e155e667bcd5132b4f7235` and contribution identity `98e4216e81dccfdd7957505f14a1941c7b2e8490179dad32592da2ba1ffa2163`; every manifest entry was verified. The source delta is limited to Studio scroll/focus tracking, control visibility after resize, the other-active-item label, an in-transcript sticky unread affordance and native control scroll margin. The timing fix remains intact. Test changes migrate the shared review destination, scroller, exact new call accounting and status copy while retaining meaningful authority/evidence/input assertions. Strict full-viewport checks for Turn off and rename controls are retained; historical one-pixel rounding is bounded to two pixels.
+
+The original 33-case replay reached 32 passes plus one queued close-scroll race. Restoring manual following alongside saved scroll fixed that root; its strengthened two-frame targeted check passed. This is not a single final-source 272-case pass. Manager started a fresh full browser run against the frozen candidate and requested only technical delta review of the two source files and changed assertions. No further source/test edits or duplicate suite are pending; visual composition reuses the accepted design without another designer cycle.
+
+Agent technical review: browser-correction DELTA GO, no required corrections. Reviewed revision: source `b0bdc14807d74032e29396fb585d8cc93cc4ebe165e155e667bcd5132b4f7235`, contribution `98e4216e81dccfdd7957505f14a1941c7b2e8490179dad32592da2ba1ffa2163`; reviewer verified both source files, 34 snapshot hashes and manifests. Verification adequacy: the shared fixes preserve inspection return anchors, reading position, focus and unread state; migrated tests retain exact proof/owner/input assertions, strict reachability and bounded historical-position checks. Targeted 32+1 evidence supports the corrections, not a final full-suite pass. Earlier reviews cover unchanged source and P2 remains closed. The developer confirms no edits after the manifests and no unreported known defect. Final full regression and updated control-reachability readback remain pending.
+
+Fresh full browser regression against that candidate completed in 13.9 minutes: 269 passed and three failed. All original 33 cases passed. Remaining failures: a setup helper ambiguously selects two legitimate Configure controls; nested inspector wheel/PageDown changes transcript position by 74px; and a second preparation's explicit review still displays the older read-only proof instead of enabling the new exact approval. The developer owns bounded root-cause triage of those three paths and shared callers, preserving meaningful geometry, freshness and approval assertions. These are not waived as flakes or addressed with retries, increased timeouts or loose tolerances. Build/Node acceptance remains for unchanged server code; final delivery is still pending.
+
+Agent technical review: final TEST-ONLY DELTA GO, no required corrections. Reviewed revision: unchanged source `b0bdc14807d74032e29396fb585d8cc93cc4ebe165e155e667bcd5132b4f7235` and final contribution `09a36ba73ec74df72ea4c8b61b02efdcd85efeb509e376a080318acca43794ed`. Four test/helper changes select the intended Configure control, wait for exact saved-state reload, request fresh rather than read-only proof, and measure native focus scrolling separately from strict wheel/PageDown isolation. All four hashes and their exact delta were verified. Verification adequacy: 269 full-run passes plus three corrected passes and 24 affected sibling passes adequately support this test-only repair. Fresh-proof, approval, owner, input and geometry assertions remain intact. No duplicate local full run is required; a final hosted full run must pass before updating the retained demo. The final local build and diff/privacy checks pass. No paid provider replay occurred.
+
+## Delivery
+
+Ready for authorized main delivery. Final hosted build/Node/browser verification and the fresh-backed, data-preserving demo update remain pending. A single final 272-case green run is not yet claimed. The preview is a completed design reference, not the delivered application.
