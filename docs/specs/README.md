@@ -22,10 +22,9 @@ Use these references when implementing or checking Keir behavior. For a runnable
 
 Use the [exact profile matrix](compiler-artifact.md#source-and-artifact-identity) and the host's installed package pins. A schema describes document shape; it does not establish type correctness, permission or compatibility. Existing approved artifacts retain their exact model and bytes when packages are upgraded.
 
-## Numeric qualification status
-
+<a id="numeric-qualification-status"></a>
 <a id="descriptor-and-bounded-runtime-evidence"></a>
-Numeric support is published in [Core 0.5.0](../releases/core-0.5.0.md). The [accepted feature record](../../roadmap/features/numeric-values-and-rules.md#manager-accepted-core-contribution) owns final Core and Daymark results; [descriptor comparisons and bounded runtime measurements](../../roadmap/features/numeric-values-and-rules.md#exact-descriptors-and-actual-runtime-measurements) retain their original scope. The [companion catalog](../agents/authoring-companion.md) identifies supported packets and public availability. Publication does not upgrade a host or transfer approval.
+See [installation](../installation.md) and the [companion catalog](../agents/authoring-companion.md) to select packages and an authoring guide.
 
 <a id="maintaining-a-contract"></a>
 For contribution and verification requirements, see [Contributing](../../CONTRIBUTING.md). Earlier contracts and design rationale are in [documentation history](../internal/history/README.md).

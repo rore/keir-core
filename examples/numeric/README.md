@@ -1,6 +1,6 @@
 # Exact numeric source examples
 
-These complete source examples run through the normal compiler and Java/Node teaching hosts. They are not a public release or an installed-host upgrade.
+These examples use the numeric profile available in [released Core packages](../../docs/installation.md). Run them from source with the compiler and Java/Node teaching hosts below.
 
 | Example | Business rule | Normal scenario |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ node examples/node-host/verify-scenarios.mjs stock python
 
 Replace `stock` with `quote` for the quote example. `python` selects the interpreter containing the schema dependency. The snapshot JAR name is a development coordinate, not a release version. Setup installs a locally packed Node runtime; it does not replace an application's runtime.
 
-The commands verify complete calls, arguments, outcomes, traces, receipts and consumer reports against the independent scenarios. Their decoded Java/Node reports match in [hosted source verification](https://github.com/rore/keir-core/actions/runs/43422161327).
+The commands check outputs, calls and receipts against the saved scenarios.
 
 ## Host authority stays native
 
