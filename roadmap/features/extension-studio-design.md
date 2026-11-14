@@ -1,7 +1,7 @@
 ---
 id: "extension-studio-design"
 title: "Design and prototype the Extension Studio experience"
-status: "done"
+status: "active"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -9,6 +9,8 @@ repo: "keir-demo-app"
 ---
 
 ## Summary
+
+**Reopened: application-frame regression.** Opening Studio incorrectly centers and narrows the shared shell, including its sidebar and top bar. The [shell correction](../../.agent-workflow/tasks/studio-shell-fix.md) moves the reading-width limit to Studio content and checks geometry across task/list/editor navigation. The earlier delivery and green regression did not cover this cross-route visual invariant. No new design round or authoring/lifecycle change is planned.
 
 **Actual Studio correction delivered.** [Daymark `7925fb0`](https://github.com/rore/keir-demo-app/commit/7925fb06e07057d3d4fde1392e81002945c1259a) provides the compact application layout, single Send, host-frozen discussion/preparation resolution, complete inline review and read-only current use. Independent technical, documentation and bounded rendered reviews pass. [Final hosted verification](https://github.com/rore/keir-demo-app/actions/runs/43610196394) passed build, 649 Node checks with 12 skips and all 272 browser cases in 9m31s. The retained demo serves the exact reviewed assets; fresh backup/readback verifies all 22 tables/schema, three accounts, four projects, 12 tasks and saved settings unchanged. The [production Work Record](../../.agent-workflow/tasks/studio-conversation-ui.md) records the corrections and verification. No paid provider replay or general memory was added.
 
