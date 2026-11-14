@@ -1,7 +1,7 @@
 ---
 id: "extension-studio-design"
 title: "Design and prototype the Extension Studio experience"
-status: "active"
+status: "done"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -10,7 +10,7 @@ repo: "keir-demo-app"
 
 ## Summary
 
-**Actual Studio correction is ready for delivery.** The [production Work Record](../../.agent-workflow/tasks/studio-conversation-ui.md) owns the compact application layout, single Send, host-frozen discussion/preparation resolution, complete inline review and read-only current use. Independent technical and documentation reviews pass. Build and full Node regression pass with 648 checks and 13 documented skips. Browser verification reached 269 passes; the final three test-helper corrections and 24 affected sibling cases pass without further source changes. Final hosted full regression and the backed, data-preserving demo update remain pending. No further mockup or generic design-approval round is planned.
+**Actual Studio correction delivered.** [Daymark `7925fb0`](https://github.com/rore/keir-demo-app/commit/7925fb06e07057d3d4fde1392e81002945c1259a) provides the compact application layout, single Send, host-frozen discussion/preparation resolution, complete inline review and read-only current use. Independent technical, documentation and bounded rendered reviews pass. [Final hosted verification](https://github.com/rore/keir-demo-app/actions/runs/43610196394) passed build, 649 Node checks with 12 skips and all 272 browser cases in 9m31s. The retained demo serves the exact reviewed assets; fresh backup/readback verifies all 22 tables/schema, three accounts, four projects, 12 tasks and saved settings unchanged. The [production Work Record](../../.agent-workflow/tasks/studio-conversation-ui.md) records the corrections and verification. No paid provider replay or general memory was added.
 
 **Actual-app visual readback passes.** The real-host single-Send journey passes desktop, short and mobile cases through preparation, exact review, separate approval/activation, a later draft and discussion/read-only inspection. Native 200% zoom was verified. The designer inspected fixed actual-app populated short-desktop/mobile and expanded-review renders and requested no additional visual corrections. A Go to approval link within that same long inline review is a useful anchor, not a second review mode. Scripted intent decisions do not qualify live-model interpretation. Semantic inference remains fallible; owner/target, task-write exclusion and separate exact approval/activation are independently enforced.
 
@@ -100,6 +100,8 @@ A generic agent builder, a second host-design chat, implementation of the comple
 - [x] Handoff and delivery: connect the views to host-owned authoring/lifecycle evidence, pass independent technical/rendered review and complete hosted regression, publish current guides and update the existing running demo with backup and saved-work/settings readback. Live-provider and reusable-Studio packaging qualification retain their separately recorded scope.
 
 ## Notes
+
+Earlier implementation directives below retain historical context only. The delivered correction and completed status above govern current work; provider qualification belongs to its separately recorded feature.
 
 **Small copy follow-up:** Simplify the saved-progress recovery message: replace technical wording such as “request size boundary” and “Explicitly continue” with a plain explanation that progress is saved and the user can continue here to finish the request. Preserve explicit continuation and no automatic send. This is a nonblocking refinement for the next recovery-copy pass, not a release or redesign gate.
 
