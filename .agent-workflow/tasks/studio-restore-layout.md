@@ -56,7 +56,7 @@ The visual rollback, retention of single Send/saved work and subsequent spacing-
 **Exceptions:**
 —
 
-**State:** Ready to implement
+**State:** Ready for review
 <!-- agent-workflow:end -->
 
 ## Implementation
@@ -64,3 +64,40 @@ The visual rollback, retention of single Send/saved work and subsequent spacing-
 The earlier redesign is rejected. Passing tests did not validate the requested interaction. Restoration is the deliverable; spacing is a later CSS-only step within the restored structure. No additional design or generic permission round is planned.
 
 The developer accepted source/test ownership and traced the old/current flows read-only while the architect reviewed the narrow plan. Plan GO clears implementation. Parent owns the three affected existing human-guide updates and all core records; no concurrent source edits are planned.
+
+Documentation-role review accepted the three prose deltas with one mechanical correction: retain the existing Go to approval instruction before Approve this change in the walkthrough. That correction is applied. Other guides remain valid because single Send, model data/cost, recovery and authority contracts are unchanged. This prose review does not certify source, tests or delivery.
+
+The first restored More journey established pre-density real-host evidence at desktop, mobile and short sizes. Parent inspected actual desktop/mobile captures and the regression assertions: management is outside the log, chat/divider/inspection are siblings, the desktop resizer remains visible, mobile switches panes, and closing restores exact reading position, focus and unsent text without changing shell geometry or saved customization state. The restored CSS and source hashes were preserved before density changes. Final verification and delivery below supersede this early checkpoint.
+
+The density diff is exactly four CSS spacing rules: header padding, message bottom margin, inspection-sheet padding and inline decision-card padding. The other four changed source files match the pre-density hashes. The focused run passes 21 browser checks, including active/draft timing in both directions, stale/owner proof fences, the three single-Send journeys, More return behavior and full-width shell geometry. The focused Node run passes 60 checks. These scripted results do not qualify live-model interpretation.
+
+Independent architect RESULT GO found no source blockers. All five source hashes matched the result manifest at review start and end. The review confirms restoration against the previous layout, retained recovery/proof/timing fences and exactly four spacing-only rules. Parent subsequently closed the identified combined internal-inspection return-state coverage gap. The initial compatibility run passed 51 of 52 cases; its failed-review navigation test was corrected without weakening mismatch assertions. The corrected group and final hosted suite pass.
+
+## Evidence
+
+- Fixed production source identity: `522c4d95ed283104bf4f1b0324e6ed194983f0e8fbcd1c175777fd7c08e064ae`, based on Daymark `8a2dc5e`. All five reviewed source-file hashes remain unchanged.
+- Parent rebuilt successfully: TypeScript and Vite pass, producing `index-CWuwDG5l.js` and `index-PpDPp7LF.css`.
+- Full local Node run: 648 passed, 13 skipped, zero failures. Skips are explicit platform/slow qualification exclusions, not removed checks.
+- Full local browser run: 278 passed and one test failed because it still opened More and attempted to scroll the now-hidden mobile conversation. The test now uses the restored status-strip disable action and actual mobile page scroller. Its complete five-test exact-review group passes afterward. Production source did not change. This is full-run-plus-targeted-correction evidence, not a claimed single green 279-case run.
+- The internal-inspection coverage limit is closed by extending the existing scroll/splitter journey through More, saved source and saved results, then asserting exact nonzero reading position, original focus, unsent text and unchanged saved state. The focused run and full-run instance both pass.
+- The developer's focused batches also cover native 200% browser zoom, one Send/Enter/legacy recovery, all supported triggers, current-use isolation, rename/history and separate exact approval/activation. No paid provider qualification occurred.
+- Final hosted verification passes on Daymark `4f74a4a`: build, 649 Node checks with 12 explicit skips, and all 279 browser cases in one run. The local-only extra skip concerns POSIX file modes and makes no Windows ACL claim.
+- Fresh preservation backup and read-only checks pass: 22 tables, valid integrity/foreign keys, no active authoring or pending native work, exact current database/settings bytes captured. The user approved restarting the existing demo after confirming transient edits were saved.
+
+## Result review
+
+Agent technical review: independent architect RESULT GO, reviewing the fixed five-source-file manifest against the previous layout and the recorded plan. No source blockers or concrete sibling-scroll ownership defect were found.
+
+Reviewed revision: Daymark `4f74a4a`, with production source identity `522c4d95ed283104bf4f1b0324e6ed194983f0e8fbcd1c175777fd7c08e064ae` unchanged from the reviewed `8a2dc5e`-based contribution.
+
+Verification adequacy: the restored navigation, controls, single Send and authority/proof/timing contracts have real-host regression coverage. Parent closed the identified combined internal-navigation return-state gap and corrected the remaining test-only mobile-navigation assumption without changing source. Prose review is accepted with its walkthrough correction. Passing tests and rendered inspection are bounded technical evidence, not general human usability acceptance.
+
+Trigger 2 dropped: scope/progress misjudgments were agent execution errors, not Agent Workflow defects.
+
+## Delivery
+
+[Daymark `4f74a4a`](https://github.com/rore/keir-demo-app/commit/4f74a4ac7b7346859ee02d73316642edda4c85ff) is published on main and running at the existing demo URL after the approved backed restart. Served HTML/JavaScript/CSS match the tested build; the five installed source files match the reviewed manifest. The unchanged database and settings bytes, all 22 table snapshots, schema, integrity and foreign keys were verified again after restart.
+
+Actual saved-conversation readback passes at desktop and mobile: More opens outside the log, the desktop divider and mobile pane switch work, closing restores input/reading/focus, and the application frame is unchanged. Only local demo sign-in was posted; zero authoring turns or domain writes occurred. Parent inspected the actual saved-conversation and More renders. This is bounded restoration acceptance, not a general human usability study.
+
+[Hosted verification](https://github.com/rore/keir-demo-app/actions/runs/43626858751) passed build, 649 Node checks with 12 skips, and all 279 browser cases. The live stage's Git revision is current and its reviewed source bytes and tested assets remain exact. Compact private preservation/verification evidence is retained outside the task checkouts. Only normal task-checkout retirement follows publication of this final record; no product redesign, implementation or approval step remains.
