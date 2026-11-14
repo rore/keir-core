@@ -1,6 +1,6 @@
 # Numeric values and rules
 
-**Status: delivered and manager-accepted Core 0.5 candidate.** Compiler, Java/Node runtimes, installed packages, exact helpers, runnable examples, measurements, corrected companion and the tested Daymark journey are complete. Core 0.5 remains unpublished; deployment, live-provider qualification and automatic host upgrades are not implied.
+**Status: delivered, manager-accepted and published in [Core 0.5.0](../releases/core-0.5.0.md).** Compiler, Java/Node runtimes, installed packages, exact helpers, runnable examples, measurements, corrected companion and the tested Daymark journey are complete. Publication preserves the qualified bytes; deployment, live-provider qualification and automatic host upgrades are not implied. Candidate-status checkpoints later in this design retain their original scope.
 
 Owning feature: [Numeric values and rules](../../roadmap/features/numeric-values-and-rules.md). Final evidence is the [Core full run](https://github.com/rore/keir-core/actions/runs/43449029316), [corrected companion run](https://github.com/rore/keir-core/actions/runs/43451868303), [Daymark journey run](https://github.com/rore/keir-demo-app/actions/runs/43474838743) and [combined acceptance record](https://github.com/rore/keir-core/blob/348fcdf3536baa501979355ffc8e75a7cd27e7f0/.agent-workflow/tasks/daymark-core-050.md). Current normative behavior lives in [the specifications](../specs/README.md); runnable programs live in [the numeric examples](../../examples/numeric/README.md).
 

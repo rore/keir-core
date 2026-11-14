@@ -7,7 +7,7 @@ Use the packet matching the host's actual compiler, runtime and model. The packe
 
 | Host packages/profile | Guide | Availability |
 | --- | --- | --- |
-| Staged Core 0.5.0, numeric source/model `3/4` or retained `2/3` | [Edition 9](customer-authoring-guide-v9.md) | Corrected packet qualified and adopted by the tested Daymark candidate; **not a public Core release**. [Exact packet/source record](../releases/source-provenance.md#authoring-companion-reproduction). |
+| Core 0.5.0, numeric source/model `3/4` or retained `2/3` | [Edition 9](customer-authoring-guide-v9.md) | Corrected packet published with [Core 0.5.0](https://github.com/rore/keir-core/releases/tag/v0.5.0). [Exact packet/source record](../releases/core-0.5.0.md). |
 | <a id="development-edition-8"></a> <a id="edition-8"></a> <a id="qualified-candidate-edition-8"></a> Core 0.4.0 | [Edition 8](customer-authoring-guide-v8.md) | Archive published with [Core 0.4.0](https://github.com/rore/keir-core/releases/tag/v0.4.0). |
 | <a id="licensed-candidate-edition-7"></a> Core 0.3.1 | [Edition 7](customer-authoring-guide-v7.md) | Archive published with [Core 0.3.1](https://github.com/rore/keir-core/releases/tag/v0.3.1). |
 | Core 0.3.0 | [Edition 5](customer-authoring-guide-v5.md) | Published with [Core 0.3.0](https://github.com/rore/keir-core/releases/tag/v0.3.0). <a id="licensed-candidate-edition-6"></a> Edition 6 is a separate unpublished licensed source candidate. |
@@ -17,7 +17,7 @@ Use the packet matching the host's actual compiler, runtime and model. The packe
 Editions 1–2 describe earlier preview contracts. Use the [exact compatibility matrix](../specs/compiler-artifact.md#source-and-artifact-identity), not an edition number alone. Archive names and manifest statuses can retain preparation-time `candidate` or `release` wording; neither determines public publication. Frozen guides and archive bytes stay unchanged.
 
 <a id="qualified-candidate-edition-9"></a>
-The staged edition-9 packet has passed qualification. Its frozen guide retains preparation-time status; use this catalog and the exact [provenance record](../releases/source-provenance.md#authoring-companion-reproduction) for current selection.
+The published edition-9 packet retains its qualified bytes and hashes. Its frozen guide retains preparation-time status; use this catalog and the exact [provenance record](../releases/source-provenance.md#authoring-companion-reproduction) for current selection.
 
 ## Verify before loading
 

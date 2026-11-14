@@ -4,7 +4,7 @@ An extension is a custom rule in an application. Keir's language lets it combine
 
 These are **logic sketches, not Keir syntax**. Booking, support and expense apps below are illustrative hosts, not implemented integrations. Daymark is an implemented **task-management demo app**; its tasks belong to Daymark.
 
-Examples 1–4 work with [released packages](installation.md); example 5 needs the unpublished numeric candidate. Each host must expose the necessary data and operations.
+These examples work with [released packages](installation.md); example 5 needs Core 0.5.0 or a later explicitly compatible release. Each host must expose the necessary data and operations.
 
 ## 1. Choose an answer from input
 
@@ -77,7 +77,7 @@ Decision:
 
 When `needsCheck` is false, no lookup happens and no result is read. If the lookup runs but fails, execution fails and the app blocks continuation; it does not take the skipped-lookup ALLOW path.
 
-## 5. Apply a percentage with explicit rounding — candidate
+## 5. Apply a percentage with explicit rounding
 
 An illustrative quoting app supplies an amount and a discount rate. With the qualified Core 0.5 numeric profile:
 
@@ -89,7 +89,7 @@ amount ← round to two decimal places, ties to even
 Result: 184.95
 ```
 
-**Shows:** exact Decimal arithmetic and a chosen rounding rule, not binary floating-point or silent rounding. Integer quantities can also drive thresholds, such as requesting 3 items when stock is 7 and the target is 10. The [runnable stock and quote examples](../examples/numeric/README.md) include complete models, source, scenarios and Java/Node commands. Core does not enforce currencies, units or accounting policy; those belong to the host. These numeric capabilities are [qualified but unpublished](specs/README.md#numeric-qualification-status).
+**Shows:** exact Decimal arithmetic and a chosen rounding rule, not binary floating-point or silent rounding. Integer quantities can also drive thresholds, such as requesting 3 items when stock is 7 and the target is 10. The [runnable stock and quote examples](../examples/numeric/README.md) include complete models, source, scenarios and Java/Node commands. Core does not enforce currencies, units or accounting policy; those belong to the host. See [Core 0.5.0](releases/core-0.5.0.md) for supported profiles and release qualification.
 
 ## From a sketch to a running extension
 

@@ -12,14 +12,14 @@ Compiler identity, document formats and runtime compatibility version independen
 | Compiler | Source | DCM | Artifact | Scenario | Descriptor recipe | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | `keir-compiler-java/0.4.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/3` | `keir-scenario/3` | `keir-record-descriptors/2` | Published; no numeric types or size |
-| `keir-compiler-java/0.5.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/2` | Qualified unpublished candidate; retained authoring, no numeric types or size |
-| `keir-compiler-java/0.5.0` | `keir/3` | `keir-dcm/4` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/3` | Qualified unpublished candidate; numeric authoring |
+| `keir-compiler-java/0.5.0` | `keir/2` | `keir-dcm/3` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/2` | Published; retained authoring, no numeric types or size |
+| `keir-compiler-java/0.5.0` | `keir/3` | `keir-dcm/4` | `keir-artifact/4` | `keir-scenario/4` | `keir-record-descriptors/3` | Published; numeric authoring |
 
 Structural schemas: retained [source `/2`](../../schemas/source-2/source.schema.json), [model `/3`](../../schemas/dcm-3/dcm.schema.json), [artifact `/3`](../../schemas/artifact-3/artifact.schema.json) and [scenario `/3`](../../schemas/scenario-3/scenario.schema.json); new [source `/3`](../../schemas/source-3/source.schema.json), [model `/4`](../../schemas/dcm-4/dcm.schema.json), [artifact `/4`](../../schemas/artifact-4/artifact.schema.json) and [scenario `/4`](../../schemas/scenario-4/scenario.schema.json). Semantic and cross-document checks remain required. Scenario `/4` covers both new artifact tuples without rewriting old scenarios or their identities. Its consumers require matching support; schemas alone do not qualify a runner.
 
 The new compiler accepts exactly its two source/DCM pairs and always emits producer 0.5.0/artifact `/4`, even for nonnumeric programs. It rejects cross-pairs and DCM `/2` authoring. Retained `/2` source with DCM `/3` preserves model digest, recipe `/2` bytes, enum/nominal rules, default grants and 0.4 guard semantics, but the new artifact needs fresh pins and approval. Nominal String types named Integer/Decimal keep that meaning in `/3`. Original compiler packages remain the way to reproduce historical authoring behavior. Core 0.2.0's pair remains in the [historical matrix](workflow-expressions.md#version-matrix).
 
-Runtime 0.4.0 admits the first four exact tuples below with the same environment pins. Runtime 0.3.1 admits only the first three, and runtime 0.3.0 only the first two. Development 0.5 runtimes add the last two; older runtimes reject artifact `/4`.
+Runtime 0.4.0 admits the first four exact tuples below with the same environment pins. Runtime 0.3.1 admits only the first three, and runtime 0.3.0 only the first two. Runtime 0.5.0 adds the last two; older runtimes reject artifact `/4`.
 
 | Artifact | Bound model | Producer | Descriptor recipe |
 | --- | --- | --- | --- |

@@ -25,7 +25,7 @@ Use the [exact profile matrix](compiler-artifact.md#source-and-artifact-identity
 ## Numeric qualification status
 
 <a id="descriptor-and-bounded-runtime-evidence"></a>
-The numeric candidate is qualified and unpublished. The [accepted feature record](../../roadmap/features/numeric-values-and-rules.md#manager-accepted-core-contribution) owns final Core and Daymark results; [descriptor comparisons and bounded runtime measurements](../../roadmap/features/numeric-values-and-rules.md#exact-descriptors-and-actual-runtime-measurements) retain their original scope. The [companion catalog](../agents/authoring-companion.md) identifies supported packets and public availability. Qualification does not upgrade a host or transfer approval.
+Numeric support is published in [Core 0.5.0](../releases/core-0.5.0.md). The [accepted feature record](../../roadmap/features/numeric-values-and-rules.md#manager-accepted-core-contribution) owns final Core and Daymark results; [descriptor comparisons and bounded runtime measurements](../../roadmap/features/numeric-values-and-rules.md#exact-descriptors-and-actual-runtime-measurements) retain their original scope. The [companion catalog](../agents/authoring-companion.md) identifies supported packets and public availability. Publication does not upgrade a host or transfer approval.
 
 <a id="maintaining-a-contract"></a>
 For contribution and verification requirements, see [Contributing](../../CONTRIBUTING.md). Earlier contracts and design rationale are in [documentation history](../internal/history/README.md).

@@ -6,6 +6,8 @@ Install the runtime your application uses and the compiler if you need to compil
 
 ## Choose a release
 
+[Core 0.5.0](releases/core-0.5.0.md) includes Integer/Decimal support and companion edition 9. Its release record identifies exact assets, prerequisites, supported profiles and dependency-advisory limits. Older releases remain available for hosts that retain their original contracts.
+
 Read the selected release's notes before installing. Use its required Java, Node.js and build tools, and check the [contract matrix](specs/compiler-artifact.md#source-and-artifact-identity) against your application's model. Record the release tag, exact asset names and checksums with your dependency configuration. Update these pins deliberately when adopting another release.
 
 A published capability does not upgrade an installed host. Existing artifact/model approvals stay tied to their bytes; adopting packages does not automatically recompile, migrate or approve extensions.

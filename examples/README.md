@@ -2,7 +2,7 @@
 <a id="run-the-java-and-nodejs-host-examples"></a>
 # Keir examples
 
-The Java and Node.js hosts run the same compiled bytes with simulated services. Follow-up and decision examples retain source `/2` and model/artifact `/3`. Numeric stock/quote examples use source `/3` and model/artifact `/4`; build their packages from the same checkout. Numeric support has [qualified unpublished-candidate evidence](../docs/specs/README.md#numeric-qualification-status), not a public Core 0.5 release or authority to upgrade a host.
+The Java and Node.js hosts run the same compiled bytes with simulated services. Follow-up and decision examples retain source `/2` and model/artifact `/3`. Numeric stock/quote examples use source `/3` and model/artifact `/4`; build their packages from the same checkout. Numeric support is [published in Core 0.5.0](../docs/releases/core-0.5.0.md); publication is not authority to upgrade a host or transfer existing approvals.
 
 | Example | What it demonstrates |
 | --- | --- |
