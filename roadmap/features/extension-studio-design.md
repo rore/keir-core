@@ -1,7 +1,7 @@
 ---
 id: "extension-studio-design"
 title: "Design and prototype the Extension Studio experience"
-status: "active"
+status: "done"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -10,7 +10,7 @@ repo: "keir-demo-app"
 
 ## Summary
 
-**Reopened: application-frame regression.** Opening Studio incorrectly centers and narrows the shared shell, including its sidebar and top bar. The [shell correction](../../.agent-workflow/tasks/studio-shell-fix.md) moves the reading-width limit to Studio content and checks geometry across task/list/editor navigation. The earlier delivery and green regression did not cover this cross-route visual invariant. No new design round or authoring/lifecycle change is planned.
+**Application-frame regression corrected.** [Daymark `8a2dc5e`](https://github.com/rore/keir-demo-app/commit/8a2dc5ea01007996a44fa4ffc236c1e4237a6cb0) removes the Studio-only width limit from the shared application shell and applies it to Studio content. The sidebar/top bar now stay fixed across task/list/editor navigation. The [shell record](../../.agent-workflow/tasks/studio-shell-fix.md) contains the failing-old/passing-new geometry check, 37 affected browser passes, independent technical/docs review and paired live readback of the actual saved conversation. Exact tested assets are live; fresh backup and unchanged-data/settings checks pass without a server restart. [Normal hosted CI](https://github.com/rore/keir-demo-app/actions/runs/43615521351) is running, not yet certified green. The earlier whole-UI completion claim missed this cross-route invariant; its correction does not assert general human usability acceptance.
 
 **Actual Studio correction delivered.** [Daymark `7925fb0`](https://github.com/rore/keir-demo-app/commit/7925fb06e07057d3d4fde1392e81002945c1259a) provides the compact application layout, single Send, host-frozen discussion/preparation resolution, complete inline review and read-only current use. Independent technical, documentation and bounded rendered reviews pass. [Final hosted verification](https://github.com/rore/keir-demo-app/actions/runs/43610196394) passed build, 649 Node checks with 12 skips and all 272 browser cases in 9m31s. The retained demo serves the exact reviewed assets; fresh backup/readback verifies all 22 tables/schema, three accounts, four projects, 12 tasks and saved settings unchanged. The [production Work Record](../../.agent-workflow/tasks/studio-conversation-ui.md) records the corrections and verification. No paid provider replay or general memory was added.
 

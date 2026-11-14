@@ -74,3 +74,11 @@ Agent technical review: independent architect RESULT GO, no required corrections
 Reviewed revision: baseline `7925fb06e07057d3d4fde1392e81002945c1259a` plus the exact one-rule CSS replacement, regression and guide paragraph; stylesheet SHA-256 `e42cd6a86506a22ccfc859179ba2695a82c844bb598f2e74d404ddecf3512f78`.
 
 Verification adequacy: reviewer inspected the complete delta, red/green and affected logs, and paired wide renders. Strict cross-route frame geometry, local width, unsent input, one Send and zero provider requests are covered. The 37 affected passes adequately qualify this CSS-only repair; unchanged semantic/authority/Node evidence is reused. Normal hosted CI will run but is not yet certified green. No additional full-suite waiting gate is required before the already-authorized data-preserving demo correction.
+
+## Delivery
+
+Published as [Daymark `8a2dc5e`](https://github.com/rore/keir-demo-app/commit/8a2dc5ea01007996a44fa4ffc236c1e4237a6cb0). The retained demo serves the exact tested static assets without restarting the server or changing active sessions. A fresh database/settings/lock and prior-asset snapshot was taken before the update. All 22 tables/schema, database bytes, settings and 12 tasks remain unchanged after live browser readback. No authoring/provider request occurred.
+
+Live paired collection/existing-customization checks at 2000×1040 and 390×844 confirm identical workspace/sidebar/top-bar rectangles, with the workspace at the left edge and full viewport width. Manager inspected the actual saved conversation in the corrected frame. [Normal hosted CI](https://github.com/rore/keir-demo-app/actions/runs/43615521351) is running; its outcome is not yet claimed. Only this layout regression is resolved; the earlier whole-UI completion claim did not cover this invariant.
+
+Workflow validation has no blocking findings. Its single-checkout commit-order advisory counts the owning feature documentation as code; the core Work Record commit `353b5d3` actually preceded application code commit `8a2dc5e` in the separate repository.
