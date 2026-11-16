@@ -14,6 +14,7 @@
 - task-create-guard
 - task-organization
 - extension-studio-design
+- daymark-visual-polish
 - machine-readable-contracts
 - reusable-simulation
 - extension-approval-lifecycle
