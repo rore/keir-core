@@ -1,7 +1,7 @@
 ---
 id: "daymark-visual-polish"
 title: "Make Daymark consistently compact and polished"
-status: "active"
+status: "done"
 priority: "high"
 commitment: "committed"
 milestone: "Author and activate customizations through AI"
@@ -33,10 +33,10 @@ A new product workflow/wizard, removing supported controls or required explanati
 - [x] Shared styling is implemented consistently without changing domain behavior or saved work.
 - [x] Navigation, Tasks, collection, Studio, forms and dialogs are reviewed together for one coherent visual language, including the pitch-deck feedback.
 - [x] Desktop, narrow and short layouts retain keyboard/focus, scrolling, reading/input, complete explanations and separate approval/activation.
-- [ ] Build, focused and adequate combined regression, independent rendered review and backed approved delivery pass.
+- [x] Build, focused and adequate combined regression, independent rendered review and backed approved delivery pass.
 
 ## Notes
 
-The [Work Record](../../.agent-workflow/tasks/daymark-visual-polish.md) owns scope and verification. The earlier tested candidate was visually rejected. The accepted working-document composition is now implemented across the application. Independent code and rendered reviews cover the shared result, with a final bounded scroll/focus delta under review. The user authorizes publication and a backed local update after acceptance.
+The [Work Record](../../.agent-workflow/tasks/daymark-visual-polish.md) owns scope and verification. The earlier tested candidate was visually rejected. The accepted working-document composition is implemented and published in [Daymark `c4d503a`](https://github.com/rore/keir-demo-app/commit/c4d503a4c3f3c4898f1df30cdecb05fd7f3b2d25). Final independent code/coverage and visual/interaction reviews approve the exact delivered build. The existing local app is updated with preserved data/settings.
 
-Qualification reconciles all 298 original browser cases plus one new short-screen case, with zero unresolved failures. This is cumulative evidence, not one all-green run. The final affected checks pass 40/40 and the last navigation/reading cases pass 2/2 on identical frozen source. Node regression passes 678 with 13 existing skips. Final acceptance, publication and preservation-verified delivery remain; the retained app is unchanged and freshly backed up.
+Local qualification reconciled all 298 original browser cases plus one new short-screen case. The final affected checks pass 40/40 and the last navigation/reading cases pass 2/2 on identical frozen source. Subsequent [hosted CI](https://github.com/rore/keir-demo-app/actions/runs/43939613525) passes the full **299/299 browser suite** and **679 Node tests with 12 skips**, zero failures, in a 13m38s job. Fresh backup, exact served-asset checks and actual saved-work desktop/mobile readback verify all 22 tables, schema and settings unchanged. Task previews and the completed app task checkout are removed after compact evidence preservation; the retained live checkout remains.

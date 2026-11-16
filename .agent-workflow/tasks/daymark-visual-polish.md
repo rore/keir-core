@@ -501,3 +501,13 @@ The retained app was updated through its existing checkout and launch command, w
 Actual served HTML, JavaScript and CSS match the reviewed hashes. Manager's saved-work readback passes for Tasks, collection, Studio, full Summary → conversation return, single Send and retained unsent input at desktop and 390px. It makes zero authoring, domain or provider writes. All **22 tables, schema and settings remain unchanged** before/after restart and readback.
 
 A compact private recovery archive preserves 359 qualified source/test/evidence/reference files, about 9.86MB, with every archived byte reverified. Hosted [application CI](https://github.com/rore/keir-demo-app/actions/runs/43939613525) has passed build and Node stages and is running its fresh browser matrix. Its completion watch is active. Task checkouts are retained only until this final hosted result and safe cleanup; the live instance does not depend on either task checkout.
+
+## Hosted verification and completion
+
+The hosted run completed successfully for published app commit `c4d503a4c3f3c4898f1df30cdecb05fd7f3b2d25`: **299/299 browser tests pass** in 10.6 minutes; **679 Node tests pass with 12 skips**, zero failures. Build and the complete job pass in **13m38s**, below its existing 25-minute ceiling. These are fresh hosted results, distinct from the earlier cumulative local ledger and platform-specific skips. Existing action-runtime/runner-image migration annotations are advisory and were not changed in this task.
+
+Final live readback remains HTTP 200 with the reviewed assets. All 22 database tables, schema and settings still match the fresh backup. No paid calls, new dependencies, global tool/configuration changes or unrelated runtime actions were needed.
+
+The developer and independent reviewers completed their assignments and detached supported feature participation. Only the three verified task-owned previews were stopped. After checking the clean published app checkout and compact archive hashes, manager removed its ignored tooling/build/dependencies and its Git worktree registration without force. The retained live checkout/data and unrelated canonical work remain intact. The core task checkout is cleanable after this final record is published and compactly preserved; its final removal is checked in private delivery metadata.
+
+The owning feature is done. The prior Studio-design feature now links the separately authorized shipped composition instead of leaving a stale prohibition as current guidance. No unfinished product scope or routine approval remains.
