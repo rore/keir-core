@@ -2,6 +2,8 @@
 
 Keir is a language, compiler and runtime for AI-assisted application customization. Business users describe the behavior they want, and an AI assistant turns their requests into extensions using the data and operations the application exposes.
 
+[Short video overview (1.5 min)](https://youtu.be/1gO92NGgxmo)
+
 <a id="customizing-an-application"></a>
 The compiler checks each extension against the application's declared capabilities. At runtime, the application still controls permissions and carries out operations through its own services. Activated extensions run without further AI requests.
 
