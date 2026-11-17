@@ -17,6 +17,8 @@ Start with [Keir rules by example](docs/customizations.md): compact logic sketch
 
 The [Daymark task-management demo walkthrough](docs/guided-tour.md) follows a request to create a follow-up task through simulated checks, approval, activation and a saved result. Its tasks and task services are part of the demo application, not built-in Keir features.
 
+Get the code and run the demo from the [Daymark demo repository](https://github.com/rore/keir-demo-app).
+
 <a id="how-it-fits-your-application"></a>
 ## What you embed
 
