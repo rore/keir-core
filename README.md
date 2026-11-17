@@ -1,6 +1,6 @@
 # Keir
 
-Keir is a language, compiler and runtime for AI-assisted application customization. Business users describe the behavior they want, and an AI assistant turns their requests into extensions using the data and operations the application exposes.
+Keir is a language, compiler and runtime for AI-assisted application customization. Business users describe the behavior they want, and an AI assistant turns their requests into extensions using the data and operations the application exposes. The application then runs the compiled extension through the Keir runtime within declared limits. The app's own services enforce permissions. Execution needs no further AI requests.
 
 ![Keir bridges fixed configuration and custom code: business users describe new behavior, AI composes the app's building blocks, and the application retains authority.](docs/images/missing-middle.svg)
 
