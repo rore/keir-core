@@ -1,10 +1,20 @@
 # Keir
 
-Keir lets business users customize application behavior in plain language. An AI assistant turns their requests into extensions using the data and operations the application exposes.
+Keir is a language, compiler and runtime for AI-assisted application customization. Business users describe the behavior they want, and an AI assistant turns their requests into extensions using the data and operations the application exposes.
+
+<a id="customizing-an-application"></a>
+The compiler checks each extension against the application's declared capabilities. At runtime, the application still controls permissions and carries out operations through its own services. Activated extensions run without further AI requests.
+
+<a id="supported-contract"></a>
+<a id="current-scope"></a>
+<a id="what-you-can-build-today"></a>
+Start with [Keir rules by example](docs/customizations.md): compact logic sketches showing input checks, returned values, conditional actions and conditional lookup results.
+
+![An AI assistant drafts a Keir extension from a customer request and the app’s model. Keir compiles it. At execution, the app checks permissions and performs the operation.](docs/images/extension-flow.svg)
 
 ## How it works
 
-<a id="customizing-an-application"></a>Keir has three parts: a **language**, a **compiler** and a **runtime**. Your application keeps everything else.
+Keir has three parts: a **language**, a **compiler** and a **runtime**. Your application keeps everything else.
 
 ![Before it runs: the app publishes its model, AI writes an extension in the Keir language, and the Keir compiler checks it against the model. The app tests and approves the compiled extension. When it runs, inside the app: a hook fires, the Keir runtime runs the activated extension, and the app's operations and services perform every effect.](docs/images/how-it-works.svg)
 
@@ -14,8 +24,6 @@ Keir lets business users customize application behavior in plain language. An AI
 4. **The Keir runtime runs it inside the app.** When a hook fires, the runtime runs the activated extension within a budget and deadline and calls the app's operations. The app checks permissions and performs every effect through its own services. The Keir runtime makes no AI requests.
 
 Your application also provides the authoring assistant, simulation, review and activation flow, and storage.
-
-<a id="supported-contract"></a><a id="current-scope"></a><a id="what-you-can-build-today"></a>See [Keir rules by example](docs/customizations.md) for input checks, returned values, conditional actions and conditional lookup results.
 
 ## See it in action
 
