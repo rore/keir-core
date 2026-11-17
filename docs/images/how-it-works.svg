@@ -10,8 +10,8 @@
 <g fill="none" stroke="#6FD0B0" stroke-width="1.6"><rect x="66" y="78" width="18" height="5" rx="1.5"/><rect x="66" y="85" width="18" height="5" rx="1.5"/><rect x="66" y="92" width="18" height="5" rx="1.5"/></g>
 <text x="92" y="92" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="10.5" font-weight="800" fill="#6FD0B0" letter-spacing="1.4">THE APP</text>
 <text x="66" y="126" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="700" fill="#F3F3EC">App model</text>
-<text x="66" y="152" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">Hooks, operations,</text>
-<text x="66" y="170" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">permissions, limits</text>
+<text x="66" y="152" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">Hooks, data,</text>
+<text x="66" y="170" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">operations, limits</text>
 <rect x="266" y="62" width="192" height="132" rx="14" fill="#14252B" stroke="#F48B6C" stroke-opacity="0.6" stroke-width="1.5"/>
 <path d="M285 79 h13 a3 3 0 0 1 3 3 v8 a3 3 0 0 1 -3 3 h-8 l-4.5 4 v-4 h-0.5 a3 3 0 0 1 -3 -3 v-8 a3 3 0 0 1 3 -3z" fill="none" stroke="#F48B6C" stroke-width="1.6" stroke-linejoin="round"/>
 <text x="308" y="92" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="10.5" font-weight="800" fill="#F48B6C" letter-spacing="1.4">CUSTOMER + AI</text>
