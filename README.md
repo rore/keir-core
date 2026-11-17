@@ -10,7 +10,7 @@ The compiler checks each extension against the application's declared capabiliti
 <a id="what-you-can-build-today"></a>
 Start with [Keir rules by example](docs/customizations.md): compact logic sketches showing input checks, returned values, conditional actions and conditional lookup results.
 
-![An AI assistant drafts a Keir extension from a customer request and the app’s model. Keir compiles it. At execution, the app checks permissions and performs the operation.](docs/images/extension-flow.svg)
+![Keir bridges fixed configuration and custom code: business users describe new behavior, AI composes the app's building blocks, and the application retains authority.](docs/images/missing-middle.svg)
 
 ## How it works
 
