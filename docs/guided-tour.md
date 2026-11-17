@@ -5,7 +5,7 @@
 
 Follow a request through a proposed change, simulated checks, approval, activation and a saved result. The screens below show Daymark, an example application built around Keir. Daymark supplies the assistant, screens, review and activation flow, and task services. Keir supplies the compiler and runtimes that check and execute the extension.
 
-These are real application screenshots with fictional, disposable data. The assistant's replies were scripted by an offline test fixture; compilation, simulation, approval, activation and task saves were real. See [image provenance and license](images/daymark-walkthrough/README.md).
+These screenshots show Daymark's working-document design with its usability correction and fictional, disposable data. The assistant's replies were scripted by an offline test fixture; compilation, simulation, approval, activation and task saves were real. See [image provenance and license](images/daymark-walkthrough/README.md).
 
 <a id="customer-extension-design"></a>
 <a id="what-the-extension-chooses"></a>
@@ -16,7 +16,7 @@ A user asks:
 
 > When a task in this project is completed, create a follow-up.
 
-The assistant turns the request into a proposed extension using the operations the application exposes. Keir's compiler checks it against the application's model. Daymark's **Summary** separates **When**, **Only when** and **Then**, so the user can review the proposed behavior and ask for a change before continuing. The full explanation remains available under **Rule details**.
+The assistant turns the request into a proposed extension using the operations the application exposes. Keir's compiler checks it against the application's model. The user chooses **Proposed behavior** to open Daymark's full **Summary**, which separates **When**, **Only when** and **Then**. The full explanation remains available under **Rule details**. **Chat** returns to the conversation without approving the proposal.
 
 ![Daymark's proposed Summary separates When, Only when and Then, while the customization is marked Not on.](images/daymark-walkthrough/02-summary.png)
 
@@ -49,7 +49,7 @@ After the application saves a matching task completion, it invokes Keir's runtim
 
 Daymark shows the customization's outcome separately from the original completion. The user can open the created task in the ordinary task editor and inspect the saved result.
 
-![The follow-up is open in Daymark's normal Task details form, with the creation outcome visible behind it.](images/daymark-walkthrough/06-saved-task.png)
+![The follow-up is open in Daymark's normal Task details form.](images/daymark-walkthrough/06-saved-task.png)
 
 *In this run, the follow-up is saved application data that the user can open and edit. It is no longer just a simulated result.*
 
