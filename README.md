@@ -16,14 +16,14 @@ Start with [Keir rules by example](docs/customizations.md): compact logic sketch
 
 Keir has three parts: a **language**, a **compiler** and a **runtime**. Your application keeps everything else.
 
-![Before it runs: the app publishes its model, AI writes an extension in the Keir language, and the Keir compiler checks it against the model. The app tests and approves the compiled extension. When it runs, inside the app: a hook fires, the Keir runtime runs the activated extension, and the app's operations and services perform every effect.](docs/images/how-it-works.svg)
-
 1. **The app publishes its model.** It defines the hooks where extensions can run, the input data and operations they can use, and the limits that apply.
 2. **AI writes an extension in the Keir language.** The language combines declared data, supported expressions and operations from the model. There are no imports, loops, arbitrary code execution or direct network calls.
 3. **The Keir compiler checks it against the model.** Operations must exist, types and data flow must match, and the extension must stay within the declared limits. Only a successfully compiled extension can run. Your app tests and approves the exact compiled extension that it later runs, with activation as a separate decision.
 4. **The Keir runtime runs it inside the app.** When a hook fires, the runtime runs the activated extension within a budget and deadline and calls the app's operations. The app checks permissions and performs every effect through its own services. The Keir runtime makes no AI requests.
 
 Your application also provides the authoring assistant, simulation, review and activation flow, and storage.
+
+![Before it runs: the app publishes its model, AI writes an extension in the Keir language, and the Keir compiler checks it against the model. The app tests and approves the compiled extension. When it runs, inside the app: a hook fires, the Keir runtime runs the activated extension, and the app's operations and services perform every effect.](docs/images/how-it-works.svg)
 
 ## See it in action
 
