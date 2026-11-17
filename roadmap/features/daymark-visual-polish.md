@@ -55,14 +55,19 @@ The first refresh captured the same follow-up journey on published app `c4d503a`
 
 Later owner feedback identifies nested person selection, an untreated scrollbar scrolling the whole Tasks page, and reduced useful chat space. The [usability correction Work Record](../../.agent-workflow/tasks/daymark-usability-followup.md) owns this bounded mixed task. Keep the accepted visual direction, but make task content scroll independently of heading/tools/quick-add/search and verify chat against the pre-redesign build with identical content, window and reading position.
 
-This correction initially allowed only repository edits and isolated tests. The owner later authorized committing and pushing both repositories, but not a live change. Original delivery and its CI evidence above remain historical completion evidence, not acceptance of this follow-up.
+This correction initially allowed only repository edits and isolated tests. The owner later authorized publication in both repositories, then corrected release completion to include the backed existing local demo update. Original delivery and its CI evidence above remain historical evidence; the follow-through below verifies this correction's local delivery.
 
 - [x] Correct direct person selection, task-only scrolling and scrollbar treatment.
 - [x] Demonstrate useful chat space with matched before/after measurements and rendered review.
 - [x] Pass focused behavior/focus/input/reading regression and refresh affected documentation.
+- [x] Update the existing local demo and verify served assets and preserved saved work/settings.
 
 The correction is complete and published in [Daymark `79a4b88`](https://github.com/rore/keir-demo-app/commit/79a4b885a2c657e5b17aaddf8fd32077f523fa53), with synchronized Core documentation. At 1440×1000 the centered transcript grows from the earlier published 678×610px to 958×724px; full Summary remains directly available without a permanent duplicate sidebar. Native project tools and task content retain usable independent scrolling at desktop, narrow and short sizes.
 
 Independent technical, rendered and documentation reviews accept the bounded outcome. Browser qualification reconciles all 314 current cases: 263 unaffected broad passes plus 51 final affected passes, after fixing the complete run's one remaining narrow-menu failure. Node checks pass 678 with 13 skips and zero failures. Build, real follow-up capture/readback, all six app screenshots and four exact Core copies, 98 local links, 15 fragments and desktop/390px image rendering pass. The Work Record preserves exact review/build identities, failure reconciliation and qualification limits.
 
-Publication follows the owner's explicit commit/push authorization. Core's four image copies pin the exact app commit. Task checkouts are retained through hosted CI reconciliation, then can be cleaned after compact evidence preservation. No live update or unrelated environment change was made.
+Publication follows the owner's explicit commit/push authorization. Core's four image copies pin the exact app commit. Hosted [Demo CI](https://github.com/rore/keir-demo-app/actions/runs/44057758799), [Core CI](https://github.com/rore/keir-core/actions/runs/44058190265) and [Core workflow](https://github.com/rore/keir-core/actions/runs/44058190465) passed.
+
+The existing local demo now runs `79a4b88` at its unchanged URL with the same data/settings/dependencies. A fresh verified backup precedes the scoped restart. All three served asset hashes match the qualified build. Actual saved-work desktop/390px Tasks/collection/Studio, Summary-return and retained unsent-input readback passes with zero page errors or domain/authoring/provider writes. All 22 tables, schema and settings matched the backup immediately after restart/readback. Later live task-completion activity is preserved separately, as recorded in the Work Record. No unrelated environment change occurred.
+
+The clean completed Demo task worktree was removed without force after compact evidence preservation. Core's task checkout remains through publication and hosted-check reconciliation for the manager-role improvement and these local-delivery notes. The manager role now makes verified authorized local rollout, or a specific reported blocker, part of release finish.
