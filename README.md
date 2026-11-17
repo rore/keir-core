@@ -1,48 +1,45 @@
 # Keir
 
-Keir is a language, compiler and runtime for AI-assisted application customization. Business users describe the behavior they want, and an AI assistant turns their requests into extensions using the data and operations the application exposes.
+Keir lets business users customize application behavior in plain language. An AI assistant turns their requests into extensions using the data and operations the application exposes.
 
-[Short video overview (1.5 min)](https://youtu.be/1gO92NGgxmo)
+## How it works
 
-<a id="customizing-an-application"></a>
-The compiler checks each extension against the application's declared capabilities. At runtime, the application still controls permissions and carries out operations through its own services. Activated extensions run without further AI requests.
+<a id="customizing-an-application"></a>Keir has three parts: a **language**, a **compiler** and a **runtime**. Your application keeps everything else.
 
-<a id="supported-contract"></a>
-<a id="current-scope"></a>
-<a id="what-you-can-build-today"></a>
-Start with [Keir rules by example](docs/customizations.md): compact logic sketches showing input checks, returned values, conditional actions and conditional lookup results.
+![Before it runs: the app publishes its model, AI writes an extension in the Keir language, and the Keir compiler checks it against the model. The app tests and approves the compiled extension. When it runs, inside the app: a hook fires, the Keir runtime runs the activated extension, and the app's operations and services perform every effect.](docs/images/how-it-works.svg)
 
-![An AI assistant drafts a Keir extension from a customer request and the app’s model. Keir compiles it. At execution, the app checks permissions and performs the operation.](docs/images/extension-flow.svg)
+1. **The app publishes its model.** It defines the hooks where extensions can run, the input data and operations they can use, and the limits that apply.
+2. **AI writes an extension in the Keir language.** The language combines declared data, supported expressions and operations from the model. There are no imports, loops, arbitrary code execution or direct network calls.
+3. **The Keir compiler checks it against the model.** Operations must exist, types and data flow must match, and the extension must stay within the declared limits. Only a successfully compiled extension can run. Your app tests and approves the exact compiled extension that it later runs, with activation as a separate decision.
+4. **The Keir runtime runs it inside the app.** When a hook fires, the runtime runs the activated extension within a budget and deadline and calls the app's operations. The app checks permissions and performs every effect through its own services. The Keir runtime makes no AI requests.
 
-<a id="from-a-request-to-a-running-extension"></a>
-## See it in an application
+Your application also provides the authoring assistant, simulation, review and activation flow, and storage.
 
-The [Daymark task-management demo walkthrough](docs/guided-tour.md) follows a request to create a follow-up task through simulated checks, approval, activation and a saved result. Its tasks and task services are part of the demo application, not built-in Keir features.
+<a id="supported-contract"></a><a id="current-scope"></a><a id="what-you-can-build-today"></a>See [Keir rules by example](docs/customizations.md) for input checks, returned values, conditional actions and conditional lookup results.
 
-Get the code and run the demo from the [Daymark demo repository](https://github.com/rore/keir-demo-app).
+## See it in action
 
-<a id="how-it-fits-your-application"></a>
-## What you embed
+<a id="from-a-request-to-a-running-extension"></a><a id="see-it-in-an-application"></a>Daymark is a task-management demo built with Keir. Its tasks and task services belong to the demo application, not to Keir.
 
-Embed the Java or Node.js runtime in your application. Both run the same compiled extension format. Use the compiler when creating or changing an extension.
+- [Short video overview (1.5 min)](https://youtu.be/1gO92NGgxmo).
+- [Follow the Daymark walkthrough](docs/guided-tour.md): take a request through simulated checks, approval, activation and a saved result.
+- [Run the Daymark demo](https://github.com/rore/keir-demo-app): get the code and local setup instructions.
 
-The application model defines where extensions can run, what input data they receive, and which operations they can call. Your application implements those operations through its own services. It also provides the authoring assistant, simulation, review and activation flow, and storage.
-
-<a id="start-here"></a>
 ## Build with Keir
+
+<a id="how-it-fits-your-application"></a><a id="what-you-embed"></a><a id="start-here"></a>Embed the Java or Node.js runtime in your application. Both run the same compiled extension format. Use the compiler when creating or changing an extension.
 
 Start with [Getting started](docs/quickstart.md) to run and change one extension.
 
 - [Install released packages](docs/installation.md) when embedding Keir without building this repository.
-- [Understand the flow](docs/guided-tour.md): follow a request through review and execution, then explore the code.
 - [Integrate Keir](docs/embedding.md): expose application operations and call the compiler and runtime from your code.
+- [Use a coding assistant for integration](docs/agents/host-integration-assistant.md).
 - [Build an authoring assistant](docs/agents/extension-assistant.md): connect a customer conversation to compilation, simulation and review.
 
 ## Documentation
 
 The [documentation index](docs/README.md) links the guides and references.
 
-- [Use a coding assistant for integration](docs/agents/host-integration-assistant.md).
 - [Keir specification](docs/specs/README.md): language, application model, compiler and runtime contracts. Use the [compatibility matrix](docs/specs/compiler-artifact.md#source-and-artifact-identity) when selecting packages.
 - [Verification and testing](CONTRIBUTING.md#testing-principles): tested behavior and its evidence.
 - [Contributing](CONTRIBUTING.md) and [roadmap](roadmap/scope.md).

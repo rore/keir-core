@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 556" width="940" height="556" role="img" aria-labelledby="t d">
+<title id="t">How Keir works</title>
+<desc id="d">Before it runs: the app publishes its model; AI writes an extension in the Keir language using only the app's building blocks; the Keir compiler checks it against the model; the app tests and approves the checked extension. When it runs, inside the app: a hook fires, the Keir runtime runs the activated extension within a budget and deadline and calls the app's operations, and the app's services perform every effect under the app's own permissions.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#101C21"/><stop offset="1" stop-color="#0C1519"/></linearGradient><radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#CFFD71" stop-opacity=".15"/><stop offset="1" stop-color="#CFFD71" stop-opacity="0"/></radialGradient></defs>
+<rect width="940" height="556" rx="20" fill="url(#bg)"/>
+<ellipse cx="578" cy="128.0" rx="180" ry="105" fill="url(#glow)"/>
+<ellipse cx="362" cy="410.0" rx="180" ry="105" fill="url(#glow)"/>
+<text x="50" y="46" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="11.5" font-weight="700" fill="#7E9396" letter-spacing="1.8">BEFORE IT RUNS</text>
+<rect x="50" y="62" width="192" height="132" rx="14" fill="#14252B" stroke="#6FD0B0" stroke-opacity="0.55" stroke-width="1.5"/>
+<g fill="none" stroke="#6FD0B0" stroke-width="1.6"><rect x="66" y="78" width="18" height="5" rx="1.5"/><rect x="66" y="85" width="18" height="5" rx="1.5"/><rect x="66" y="92" width="18" height="5" rx="1.5"/></g>
+<text x="92" y="92" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="10.5" font-weight="800" fill="#6FD0B0" letter-spacing="1.4">THE APP</text>
+<text x="66" y="126" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="700" fill="#F3F3EC">App model</text>
+<text x="66" y="152" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">Hooks, operations,</text>
+<text x="66" y="170" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">permissions, limits</text>
+<rect x="266" y="62" width="192" height="132" rx="14" fill="#14252B" stroke="#F48B6C" stroke-opacity="0.6" stroke-width="1.5"/>
+<path d="M285 79 h13 a3 3 0 0 1 3 3 v8 a3 3 0 0 1 -3 3 h-8 l-4.5 4 v-4 h-0.5 a3 3 0 0 1 -3 -3 v-8 a3 3 0 0 1 3 -3z" fill="none" stroke="#F48B6C" stroke-width="1.6" stroke-linejoin="round"/>
+<text x="308" y="92" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="10.5" font-weight="800" fill="#F48B6C" letter-spacing="1.4">CUSTOMER + AI</text>
+<text x="282" y="126" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="700" fill="#F3F3EC">Writes an extension</text>
+<rect x="282" y="138" width="132" height="22" rx="6" fill="#CFFD71"/>
+<g transform="translate(289,143) scale(0.12)"><rect x="8" y="8" width="84" height="84" rx="24" fill="none" stroke="#0E181D" stroke-width="11"/><circle cx="50" cy="50" r="14" fill="#0E181D"/></g>
+<text x="307" y="153" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="10" font-weight="800" fill="#0E181D" letter-spacing="1.2">KEIR LANGUAGE</text>
+<rect x="282" y="168" width="34" height="10" rx="3.5" fill="#6FD0B0" fill-opacity=".22" stroke="#6FD0B0" stroke-opacity=".85" stroke-width="1"/>
+<rect x="322" y="168" width="34" height="10" rx="3.5" fill="#F48B6C" fill-opacity=".22" stroke="#F48B6C" stroke-opacity=".85" stroke-width="1"/>
+<rect x="362" y="168" width="34" height="10" rx="3.5" fill="#6FD0B0" fill-opacity=".22" stroke="#6FD0B0" stroke-opacity=".85" stroke-width="1"/>
+<rect x="402" y="168" width="34" height="10" rx="3.5" fill="#6FD0B0" fill-opacity=".22" stroke="#6FD0B0" stroke-opacity=".85" stroke-width="1"/>
+<rect x="482" y="62" width="192" height="132" rx="14" fill="#CFFD71"/>
+<g transform="translate(498,77) scale(0.2)"><rect x="8" y="8" width="84" height="84" rx="24" fill="none" stroke="#0E181D" stroke-width="11"/><circle cx="50" cy="50" r="14" fill="#0E181D"/></g>
+<text x="526" y="93" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16.5" font-weight="800" fill="#0E181D">Keir compiler</text>
+<text x="498" y="122" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="600" fill="#1F2E26">Checks it against</text>
+<text x="498" y="139" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="600" fill="#1F2E26">the app's model.</text>
+<text x="498" y="161" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="800" fill="#1F2E26">Nothing runs until</text>
+<text x="498" y="178" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="800" fill="#1F2E26">it fits.</text>
+<rect x="698" y="62" width="192" height="132" rx="14" fill="#14252B" stroke="#CFFD71" stroke-opacity="1" stroke-width="2"/>
+<g fill="none" stroke="#CFFD71" stroke-width="1.6" stroke-linejoin="round"><path d="M714 78 a2 2 0 0 1 2 -2 h10 l5 5 v15 a2 2 0 0 1 -2 2 h-13 a2 2 0 0 1 -2 -2z"/><path d="M718 88 l3 3 l6 -6"/></g>
+<text x="740" y="92" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="10.5" font-weight="800" fill="#CFFD71" letter-spacing="1.4">COMPILED</text>
+<text x="714" y="126" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="700" fill="#F3F3EC">Checked extension</text>
+<text x="714" y="152" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">The app tests</text>
+<text x="714" y="170" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">and approves it</text>
+<path d="M247 128 H254" stroke="#6F8C93" stroke-width="2" fill="none"/>
+<path d="M253 123.5 L261 128 L253 132.5z" fill="#6F8C93"/>
+<path d="M463 128 H470" stroke="#6F8C93" stroke-width="2" fill="none"/>
+<path d="M469 123.5 L477 128 L469 132.5z" fill="#6F8C93"/>
+<path d="M679 128 H686" stroke="#6F8C93" stroke-width="2" fill="none"/>
+<path d="M685 123.5 L693 128 L685 132.5z" fill="#6F8C93"/>
+<g fill="none" stroke="#6FD0B0" stroke-opacity=".8" stroke-width="1.6" stroke-dasharray="4 4"><path d="M146 198 V210 Q146 216 152 216 H300"/><path d="M452 216 H572 Q578 216 578 210 V206"/></g>
+<path d="M573.5 206 L578 198 L582.5 206z" fill="#6FD0B0"/>
+<text x="376.0" y="220" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="12" font-weight="400" fill="#6FD0B0" text-anchor="middle">the model is the contract</text>
+<g fill="none" stroke="#CFFD71" stroke-width="1.7" stroke-dasharray="5 4"><path d="M794 198 V244 Q794 250 788 250 H726"/><path d="M618 250 H368 Q362 250 362 256 V332"/></g>
+<path d="M357.5 332 L362 340 L366.5 332z" fill="#CFFD71"/>
+<text x="672.0" y="254" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="12" font-weight="400" fill="#CFFD71" text-anchor="middle">once activated</text>
+<text x="50" y="286" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="11.5" font-weight="700" fill="#7E9396" letter-spacing="1.8">WHEN IT RUNS</text>
+<rect x="34" y="298" width="872" height="196" rx="18" fill="#6FD0B0" fill-opacity=".045" stroke="#6FD0B0" stroke-opacity=".55" stroke-width="1.6"/>
+<text x="50" y="322" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="10.5" font-weight="800" fill="#6FD0B0" letter-spacing="1.4">INSIDE THE APP</text>
+<rect x="50" y="344" width="192" height="132" rx="14" fill="#14252B" stroke="#6FD0B0" stroke-opacity="0.45" stroke-width="1.5"/>
+<path d="M77 358 l-7 12 h6 l-3 10 l9 -14 h-6 l4 -8z" fill="none" stroke="#6FD0B0" stroke-width="1.6" stroke-linejoin="round"/>
+<text x="92" y="374" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="10.5" font-weight="800" fill="#6FD0B0" letter-spacing="1.4">APP HOOK</text>
+<text x="66" y="408" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="700" fill="#F3F3EC">An event fires</text>
+<text x="66" y="434" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">e.g. an order</text>
+<text x="66" y="452" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">is confirmed</text>
+<rect x="266" y="344" width="192" height="132" rx="14" fill="#CFFD71"/>
+<g transform="translate(282,359) scale(0.2)"><rect x="8" y="8" width="84" height="84" rx="24" fill="none" stroke="#0E181D" stroke-width="11"/><circle cx="50" cy="50" r="14" fill="#0E181D"/></g>
+<text x="310" y="375" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16.5" font-weight="800" fill="#0E181D">Keir runtime</text>
+<text x="282" y="404" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="600" fill="#1F2E26">Runs the extension</text>
+<text x="282" y="421" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="600" fill="#1F2E26">within a budget and</text>
+<text x="282" y="438" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="600" fill="#1F2E26">deadline.</text>
+<text x="282" y="460" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="800" fill="#1F2E26">No AI involved.</text>
+<rect x="482" y="344" width="192" height="132" rx="14" fill="#14252B" stroke="#6FD0B0" stroke-opacity="0.45" stroke-width="1.5"/>
+<g fill="none" stroke="#6FD0B0" stroke-width="1.6"><rect x="498" y="361" width="16" height="16" rx="3"/><path d="M503 366 h6 M503 369 h6 M503 372 h4"/></g>
+<text x="524" y="374" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="10.5" font-weight="800" fill="#6FD0B0" letter-spacing="1.4">APP OPERATIONS</text>
+<rect x="498" y="394" width="104" height="26" rx="6.5" fill="#6FD0B0" fill-opacity=".14" stroke="#6FD0B0" stroke-opacity=".7"/>
+<text x="508" y="411.5" font-family='"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace' font-size="12" font-weight="400" fill="#DDF5EC">orders.hold</text>
+<rect x="498" y="428" width="112" height="26" rx="6.5" fill="#6FD0B0" fill-opacity=".14" stroke="#6FD0B0" stroke-opacity=".7"/>
+<text x="508" y="445.5" font-family='"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace' font-size="12" font-weight="400" fill="#DDF5EC">tasks.create</text>
+<rect x="698" y="344" width="192" height="132" rx="14" fill="#14252B" stroke="#6FD0B0" stroke-opacity="0.45" stroke-width="1.5"/>
+<g fill="none" stroke="#6FD0B0" stroke-width="1.6"><circle cx="723" cy="369" r="8.5"/><path d="M719 369 l3 3 l5 -6"/></g>
+<text x="740" y="374" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="10.5" font-weight="800" fill="#6FD0B0" letter-spacing="1.4">APP SERVICES</text>
+<text x="714" y="408" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="700" fill="#F3F3EC">Every effect</text>
+<text x="714" y="434" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">under the app's</text>
+<text x="714" y="452" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="13" font-weight="400" fill="#A3B5B8">own permissions</text>
+<path d="M247 410 H254" stroke="#6FD0B0" stroke-width="2" fill="none"/>
+<path d="M253 405.5 L261 410 L253 414.5z" fill="#6FD0B0"/>
+<path d="M463 410 H470" stroke="#6FD0B0" stroke-width="2" fill="none"/>
+<path d="M469 405.5 L477 410 L469 414.5z" fill="#6FD0B0"/>
+<path d="M679 410 H686" stroke="#6FD0B0" stroke-width="2" fill="none"/>
+<path d="M685 405.5 L693 410 L685 414.5z" fill="#6FD0B0"/>
+<rect x="50" y="510" width="12" height="12" rx="3" fill="#CFFD71" fill-opacity="1.0"/>
+<text x="70" y="520" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="12" font-weight="400" fill="#A3B5B8">Keir</text>
+<rect x="122" y="510" width="12" height="12" rx="3" fill="#6FD0B0" fill-opacity="0.35" stroke="#6FD0B0"/>
+<text x="142" y="520" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="12" font-weight="400" fill="#A3B5B8">Your application</text>
+<rect x="262" y="510" width="12" height="12" rx="3" fill="#F48B6C" fill-opacity="0.35" stroke="#F48B6C"/>
+<text x="282" y="520" font-family='Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif' font-size="12" font-weight="400" fill="#A3B5B8">Customer request and logic</text>
+</svg>
