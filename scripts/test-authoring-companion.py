@@ -574,7 +574,10 @@ class AuthoringCompanionV9Test(unittest.TestCase):
                 if path and not re.match(r"[a-zA-Z][a-zA-Z0-9+.-]*:", path):
                     member = posixpath.normpath(posixpath.join(posixpath.dirname(module["V9_GUIDE"]), path))
                     self.assertIn(member, archive.namelist(), target)
-            self.assertIn("## Numeric qualification status", archive.read("docs/specs/README.md").decode("utf-8"))
+            # Preserve the guide's fragment target without coupling it to heading wording.
+            self.assertIn("](../specs/README.md#numeric-qualification-status)", guide)
+            self.assertIn('<a id="numeric-qualification-status"></a>',
+                          archive.read("docs/specs/README.md").decode("utf-8"))
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "candidate.zip"; path.write_bytes(data)
             with patch("subprocess.check_output", side_effect=AssertionError("Offline verification must not read Git or network")):
