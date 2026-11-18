@@ -30,6 +30,7 @@
 - proposed-task-patches
 - multi-binding-composition
 - tenant-capability-overlays
+- capability-combination-policy
 - multi-effect-composition
 - runtime-resource-qualification
 - runtime-scale-observability

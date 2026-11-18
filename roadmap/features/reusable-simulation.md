@@ -28,6 +28,7 @@ A production adapter certification service or a mandatory replacement for the al
 - [x] Delivered Daymark integration: current task simulation and native execution use the same compiled artifact and dependency identities, with independent expectations and honest created/no-op/unknown outcomes. This is host integration evidence, not a generic conformance kit.
 - [ ] Current reusable seam: establish the remaining effect/decision adapter, consumer and report tooling against the current scenario contract, retaining explicit authority/redaction boundaries. Daymark-only tooling and historical read-only APIs do not by themselves close this obligation.
 - [ ] Broader proof and kit: run task and non-task examples through reusable Java/Node tooling and provide native-context/consumer conformance checks. Verify same-artifact parity, missing/extra/out-of-order stubs, invalid authority, typed consumer failures and redacted reports for that current seam; real service/database guarantees stay host-owned.
+- [ ] Capability-composition host case: exercise the [customer-read/notification scenario](../../docs/agents/host-integration-assistant.md#capability-composition) with both an unauthorized destination and a permitted-recipient control. Verify destination authorization before native notification dispatch and honest effect evidence; distinguish simulated results from actual native-adapter enforcement. The documented illustration does not close this executable host-conformance obligation.
 
 ## Notes
 
