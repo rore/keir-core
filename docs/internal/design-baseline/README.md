@@ -30,6 +30,10 @@ Added 29 October 2026. These proposals extend the v0.4 package and are preserved
 - The bounded multi-effect proposal changes the earlier single-mutation restriction only under explicit host admission and compatible certified contracts. It does not establish atomicity, automatic replay or actual adapter certification.
 - YAML and SDK examples remain illustrative proposals. Importing the documents does not adopt final schemas, change the roadmap, or establish implementation evidence. Reconcile affected contracts and conformance fixtures when implementing them.
 
+## Later feature drafts
+
+- [Daymark Team Processes (23 November 2026)](public/keir_daymark_team_process_feature_spec.md): original proposal for composing bounded programs into a team-level business capability. See the [roadmap feature](../../../roadmap/features/daymark-composed-business-capabilities.md#notes) for current scope and decisions that supersede the draft.
+
 ## Included runnable-design fixtures
 
 - `public/examples/task-domain.yaml`: fictional typed DCM with **pending** host certifications.

@@ -25,6 +25,7 @@
 - guarded-result-dataflow
 - numeric-values-and-rules
 - rich-task-customizations
+- daymark-composed-business-capabilities
 - broader-language-types
 - response-projection-consumer
 - proposed-task-patches
