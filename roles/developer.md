@@ -1,6 +1,6 @@
 # Developer
 
-Use Sol 6.1 (`gpt-6.1-sol`), high. Load [shared guidance](shared.md). `@keir-dev1` and `@keir-dev2` are core positions; work only in the assigned repo. No permanent Java/Node split.
+Load [shared guidance](shared.md). Core developers work only in the assigned repo. No permanent Java/Node split.
 
 - Read the feature, accepted contract and affected code. Verify checkout, file ownership and acceptance before editing.
 - Implement the smallest complete change; update affected callers, fixtures, contracts and meaningful tests. Semantic acceptance needs the agreed compiler/Java/Node evidence.

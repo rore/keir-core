@@ -1,9 +1,10 @@
 # Working in keir-core
 
-This repository uses `persistent-agent-roles`. At start, resume, handoff, or a new assignment, load the skill to verify your current Relay name and mapped guidance. If guidance is unavailable, report the gap and continue authorized work. Missing guidance is not permission to install global tools; that requires explicit approval.
+This repository uses `persistent-agent-roles`. At start, resume, context recovery, handoff, and new assignment, load the skill, verify your Relay name, and reread the current mapping, mapped guide and linked shared guidance. If guidance is unavailable, report the gap and continue authorized work. Missing guidance is not permission to install global tools; that requires explicit approval.
 
-Role mappings live in `roles/mapping.yaml`; see [the team roles](roles/README.md) and linked shared guidance. Role guidance does not itself assign work or change model settings.
+For both repos, the active [team roles](roles/README.md) and `roles/mapping.yaml` are in `roles/` in the primary Core checkout, regardless of the assigned worktree's base. Do not fall back to a task worktree's copy. Role guidance does not assign work or change model settings.
 
+- Base new task worktrees on the assigned repository's verified current `main` by default, not an older local checkout or the current task branch. When the task requires an older base, keep it pinned. Do not update a dirty or active worktree just to refresh roles.
 - Keep tracked content and commit identity free of private paths, identities and operational details. Use relative references or generic examples; follow the [public-content rule](roles/shared.md#privacy-cost-and-context).
 - Keep the framework domain-independent. Task services, real task adapters and AI authoring belong to `keir-demo-app`.
 - `roadmap/` is the single planning source for both repositories. Update the owning feature here when core or demo work changes its status or completion evidence. For roadmap work use `.agents/skills/minimap-roadmap/SKILL.md` (Claude: `.claude/skills/minimap-roadmap/SKILL.md`).
